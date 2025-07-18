@@ -87,8 +87,6 @@ As of today, this app is managing the gong planning for :
 - Dhamma Mahi (mahi.db)
 - Dhamma Pajjota (pajjota.db)
 
-
-
 ### Database setup
 
 ``` {.python #setup-database}
