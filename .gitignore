@@ -1,0 +1,11 @@
+# Ignore everything
+/*
+
+# Except these folders
+!calendar-project/
+!data/
+!docs/
+!src/
+
+# Except root files
+!/*
