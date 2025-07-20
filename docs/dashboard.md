@@ -2,7 +2,7 @@
 
 Will only be reachable for users who are signed in.
 
-``` {.python #starting-page}
+``` {.python #start-admin-md}
 
 @rt('/dashboard')
 def get(session): 
@@ -117,5 +117,7 @@ def admin(session):
         cls="container",
         
     )
+
 ```
+
 

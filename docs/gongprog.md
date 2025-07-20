@@ -17,8 +17,8 @@ css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursi
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
 
 <<setup-database>>
-<<authenticate>>
-<<starting-page>>
+<<authenticate-md>>
+<<start-admin-md>>
 
 <<logout>>
 # client = TestClient(app)
@@ -45,6 +45,8 @@ PLANNERS:
 - indicates which user(s) can modify the gong planning of which center 
 
 #### Schema
+
+TODO suppress user_id and use email instead EVERYWHERE !!!
 
 ```mermaid
 erDiagram
@@ -83,6 +85,8 @@ erDiagram
 One gong database is used to store the gong planning data for one center. Each gong database name is referenced in the CENTERS table above.
 All gong databases have the same structure detailed here below, but their content will vary from center to center.
 
+TODO describe gong database schema
+
 As of today, this app is managing the gong planning for :
 - Dhamma Mahi (mahi.db)
 - Dhamma Pajjota (pajjota.db)
@@ -106,7 +110,7 @@ CREATE TABLE IF NOT EXISTS centers (
     gong_db_name TEXT
 );
 """
-# TODO suppress user id and use email instead EVERYWHERE !!!
+# TODO suppress user_id and use email instead EVERYWHERE !!!
 SQL_CREATE_USERS = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

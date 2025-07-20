@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS centers (
     gong_db_name TEXT
 );
 """
-# TODO suppress user id and use email instead EVERYWHERE !!!
+# TODO suppress user_id and use email instead EVERYWHERE !!!
 SQL_CREATE_USERS = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,7 +98,7 @@ if not planners():
     planners.insert(userid= sp1id, center_name="Mahi")
     planners.insert(userid= sp2id, center_name="Pajjota")
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#authenticate>>[init]
+# ~/~ begin <<docs/authenticate.md#authenticate-md>>[init]
 
 # ~/~ begin <<docs/authenticate.md#build-serve-login-form>>[init]
 def MyForm(btn_text: str, target: str):
@@ -177,7 +177,7 @@ def get(session, token: str):
        return "Invalid or expired magic link"
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/dashboard.md#starting-page>>[init]
+# ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
 
 @rt('/dashboard')
 def get(session): 

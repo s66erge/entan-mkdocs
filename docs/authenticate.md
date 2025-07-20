@@ -7,7 +7,7 @@
 - The website looks for a record in the users database table with the token from the link
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
-``` {.python #authenticate}
+``` {.python #authenticate-md}
 
 <<build-serve-login-form>>
 <<handling-form>>
