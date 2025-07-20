@@ -50,31 +50,31 @@ PLANNERS:
 erDiagram
 
     ROLES {
-        string role-name PK
+        string role_name PK
         text description
     }
 
     USERS  }o--|| ROLES : "has role"
     USERS {
-        int user-id PK
+        int user_id PK
         string email
         string name
-        string role-name FK
+        string role_name FK
         string magic_link_token
         timestamp magic_link_expiry
         boolean is_active
     }
 
     CENTERS {
-        string center-name PK
-        string gong-db-name
+        string center_name PK
+        string gong_db_name
     }
 
     USERS ||--o{ PLANNERS : creates
     PLANNERS }o--|| CENTERS : for
     PLANNERS {
-        int user-id PK, FK
-        string center-name PK, FK
+        int user_id PK, FK
+        string center_name PK, FK
     }
 ```
 
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS centers (
     gong_db_name TEXT
 );
 """
-
+# TODO suppress user id and use email instead EVERYWHERE !!!
 SQL_CREATE_USERS = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -9,28 +9,28 @@
     },
     {
       "deps": null,
-      "hexdigest": "7ad0e91d8b20ca136d2b214ec1b4805f333def5c85da095c8eaddfa26e572cd2",
-      "modified": "2025-07-19T19:18:34.875253",
+      "hexdigest": "0631f20c9e36989bca56ab69933288c536eee4cd3b7637203023719dcffff66d",
+      "modified": "2025-07-20T11:04:05.811254",
       "path": "docs\\dashboard.md",
-      "size": 4002
+      "size": 4099
     },
     {
       "deps": null,
-      "hexdigest": "083497bdd0387bdb0218aaa254c8a7eff43f36bc4a067857b65c51bfa9b9e3d8",
-      "modified": "2025-07-19T18:36:25.818239",
+      "hexdigest": "c90c39cddbff67c10ccf8f8742464cdf533efca746b8f661649be95df53aab2f",
+      "modified": "2025-07-20T11:11:44.552294",
       "path": "docs\\gongprog.md",
-      "size": 4332
+      "size": 4392
     },
     {
       "deps": [
-        "docs\\dashboard.md",
         "docs\\gongprog.md",
-        "docs\\authenticate.md"
+        "docs\\authenticate.md",
+        "docs\\dashboard.md"
       ],
-      "hexdigest": "51ebadc3a0f1b8fd9e04c2e3cbfccace8c0bb3a226420981fe46e42205e1210d",
-      "modified": "2025-07-19T19:18:49.981234",
+      "hexdigest": "4732941fce8a7a8debd0015af16f41910ee0e63a984c466f7fe95186f69985a4",
+      "modified": "2025-07-20T11:11:50.226506",
       "path": "src\\gongUsers.py",
-      "size": 9962
+      "size": 10119
     }
   ],
   "source": [],

@@ -67,7 +67,7 @@ def admin(session):
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(c.center_name), Td(c.gong-db-name), Td(A("Edit", href=f"/edit_center/{c.center_name}"))) for c in centers()]
+                    *[Tr(Td(c.center_name), Td(c.gong_db_name), Td(A("Edit", href=f"/edit_center/{c.center_name}"))) for c in centers()]
                 )
             )
         ),
@@ -90,7 +90,10 @@ def admin(session):
             H2("Add New User"),
             Form(
                 Input(type="email", placeholder="User Email", id="new_user_email"),
-                Select(id="new_user_role", options=[("admin", "Admin"), ("user", "User")]),
+                Select( 
+                    Option("Admin", value="admin"),
+                    Option("User", value="user"),
+                    id="new_user_role", name="role_name"),
                 Button("Add User", hx_post="/add_user")
             )
         ),
