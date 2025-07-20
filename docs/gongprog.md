@@ -46,8 +46,6 @@ PLANNERS:
 
 #### Schema
 
-TODO suppress user_id and use email instead EVERYWHERE !!!
-
 ```mermaid
 erDiagram
 
@@ -58,8 +56,7 @@ erDiagram
 
     USERS  }o--|| ROLES : "has role"
     USERS {
-        int user_id PK
-        string email
+        string email PK
         string name
         string role_name FK
         string magic_link_token
@@ -75,7 +72,7 @@ erDiagram
     USERS ||--o{ PLANNERS : creates
     PLANNERS }o--|| CENTERS : for
     PLANNERS {
-        int user_id PK, FK
+        string user_email PK, FK
         string center_name PK, FK
     }
 ```
@@ -110,11 +107,10 @@ CREATE TABLE IF NOT EXISTS centers (
     gong_db_name TEXT
 );
 """
-# TODO suppress user_id and use email instead EVERYWHERE !!!
+
 SQL_CREATE_USERS = """
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
+    email TEXT PRIMARY KEY,
     name TEXT,
     role_name TEXT,
     magic_link_token TEXT,
@@ -127,10 +123,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 SQL_CREATE_PLANNERS = """
 CREATE TABLE IF NOT EXISTS planners (
-    userid INTEGER,
+    user_email TEXT,
     center_name TEXT,
-    PRIMARY KEY (userid, center_name),
-    FOREIGN KEY (userid) REFERENCES users(id),
+    PRIMARY KEY (user_email, center_name),
+    FOREIGN KEY (user_email) REFERENCES users(email),
     FOREIGN KEY (center_name) REFERENCES centers(center_name)
 );
 """
@@ -164,9 +160,6 @@ if not users():
     users.insert(email="spegoff@gmail.com", name="sp2", role_name="user", is_active=True)
 
 if not planners():
-    sp1id = users("name='sp1'")[0].id
-    sp2id = users("name='sp2'")[0].id
-    print(sp1id, " ", sp2id)
-    planners.insert(userid= sp1id, center_name="Mahi")
-    planners.insert(userid= sp2id, center_name="Pajjota")
+    planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
+    planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 ```

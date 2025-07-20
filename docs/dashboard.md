@@ -7,8 +7,8 @@ Will only be reachable for users who are signed in.
 @rt('/dashboard')
 def get(session): 
     sessemail = session['auth']
-    u = users("email = ?", (sessemail,))[0]
-    centers = planners("userid = ?", (u.id,))
+    u = users[sessemail]
+    centers = planners("user_email = ?", (u.email,))
     center_names = ", ".join(c.center_name for c in centers)
     return Main(
         Nav(
@@ -26,7 +26,7 @@ def get(session):
 @rt('/admin')
 def admin(session):
     sessemail = session['auth']
-    u = users("email = ?", (sessemail,))[0]
+    u = users[sessemail]
     if u.role_name != "admin":
         return Main(Div(H1("Access Denied"), P("You do not have permission to access this page.")), cls="container")
     
@@ -44,15 +44,14 @@ def admin(session):
             H2("Users"),
             Table(
                 Thead(
-                    Tr(
-                        Th("User ID"), 
+                    Tr( 
                         Th("Email"), 
                         Th("Role"), 
                         Th("Actions")
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(u.id), Td(u.email), Td(u.role_name), Td(A("Edit", href=f"/edit_user/{u.id}"))) for u in users()]
+                    *[Tr(Td(u.email), Td(u.role_name), Td(A("Edit", href=f"/edit_user/{u.email}"))) for u in users()]
                 )
             )
         ),
@@ -76,13 +75,13 @@ def admin(session):
             Table(
                 Thead(
                     Tr(
-                        Th("User ID"), 
+                        Th("User email"), 
                         Th("Center Name"), 
                         Th("Actions")
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(p.userid), Td(p.center_name), Td(A("Edit", href=f"/edit_planner/{p.userid}/{p.center_name}"))) for p in planners()]
+                    *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Edit", href=f"/edit_planner/{p.user_email}/{p.center_name}"))) for p in planners()]
                 )
             )
         ),
@@ -108,7 +107,7 @@ def admin(session):
         Div(
             H2("Add New Planner"),
             Form(
-                Input(type="number", placeholder="User ID", id="new_planner_userid"),
+                Input(type="text", placeholder="User email", id="new_planner_user_email"),
                 Input(type="text", placeholder="Center Name", id="new_planner_center_name"),
                 Button("Add Planner", hx_post="/add_planner")
             )

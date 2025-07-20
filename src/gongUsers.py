@@ -38,11 +38,10 @@ CREATE TABLE IF NOT EXISTS centers (
     gong_db_name TEXT
 );
 """
-# TODO suppress user_id and use email instead EVERYWHERE !!!
+
 SQL_CREATE_USERS = """
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
+    email TEXT PRIMARY KEY,
     name TEXT,
     role_name TEXT,
     magic_link_token TEXT,
@@ -55,10 +54,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 SQL_CREATE_PLANNERS = """
 CREATE TABLE IF NOT EXISTS planners (
-    userid INTEGER,
+    user_email TEXT,
     center_name TEXT,
-    PRIMARY KEY (userid, center_name),
-    FOREIGN KEY (userid) REFERENCES users(id),
+    PRIMARY KEY (user_email, center_name),
+    FOREIGN KEY (user_email) REFERENCES users(email),
     FOREIGN KEY (center_name) REFERENCES centers(center_name)
 );
 """
@@ -92,11 +91,8 @@ if not users():
     users.insert(email="spegoff@gmail.com", name="sp2", role_name="user", is_active=True)
 
 if not planners():
-    sp1id = users("name='sp1'")[0].id
-    sp2id = users("name='sp2'")[0].id
-    print(sp1id, " ", sp2id)
-    planners.insert(userid= sp1id, center_name="Mahi")
-    planners.insert(userid= sp2id, center_name="Pajjota")
+    planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
+    planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#authenticate-md>>[init]
 
@@ -126,6 +122,7 @@ def get():
    )
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#handling-form>>[init]
+
 @rt('/send_magic_link')
 def post(email: str):
    if not email:
@@ -134,9 +131,9 @@ def post(email: str):
    magic_link_token = secrets.token_urlsafe(32)
    magic_link_expiry = datetime.now() + timedelta(minutes=15)
    try:
-       user = users("email = ?",(email,))[0]
-       users.update(id= user.id, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
-   except IndexError:
+       user = users[email]
+       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
+   except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
    magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
@@ -165,13 +162,14 @@ def send_magic_link_email(email: str, magic_link: str):
    print(email_content)
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#verify-token>>[init]
+
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
    nowstr = f"'{datetime.now()}'"
    try:
        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
        session['auth'] = user.email
-       users.update(id= user.id, magic_link_token= None, magic_link_expiry= None, is_active= True)
+       users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
@@ -182,8 +180,8 @@ def get(session, token: str):
 @rt('/dashboard')
 def get(session): 
     sessemail = session['auth']
-    u = users("email = ?", (sessemail,))[0]
-    centers = planners("userid = ?", (u.id,))
+    u = users[sessemail]
+    centers = planners("user_email = ?", (u.email,))
     center_names = ", ".join(c.center_name for c in centers)
     return Main(
         Nav(
@@ -201,7 +199,7 @@ def get(session):
 @rt('/admin')
 def admin(session):
     sessemail = session['auth']
-    u = users("email = ?", (sessemail,))[0]
+    u = users[sessemail]
     if u.role_name != "admin":
         return Main(Div(H1("Access Denied"), P("You do not have permission to access this page.")), cls="container")
     
@@ -219,15 +217,14 @@ def admin(session):
             H2("Users"),
             Table(
                 Thead(
-                    Tr(
-                        Th("User ID"), 
+                    Tr( 
                         Th("Email"), 
                         Th("Role"), 
                         Th("Actions")
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(u.id), Td(u.email), Td(u.role_name), Td(A("Edit", href=f"/edit_user/{u.id}"))) for u in users()]
+                    *[Tr(Td(u.email), Td(u.role_name), Td(A("Edit", href=f"/edit_user/{u.email}"))) for u in users()]
                 )
             )
         ),
@@ -251,13 +248,13 @@ def admin(session):
             Table(
                 Thead(
                     Tr(
-                        Th("User ID"), 
+                        Th("User email"), 
                         Th("Center Name"), 
                         Th("Actions")
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(p.userid), Td(p.center_name), Td(A("Edit", href=f"/edit_planner/{p.userid}/{p.center_name}"))) for p in planners()]
+                    *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Edit", href=f"/edit_planner/{p.user_email}/{p.center_name}"))) for p in planners()]
                 )
             )
         ),
@@ -283,7 +280,7 @@ def admin(session):
         Div(
             H2("Add New Planner"),
             Form(
-                Input(type="number", placeholder="User ID", id="new_planner_userid"),
+                Input(type="text", placeholder="User email", id="new_planner_user_email"),
                 Input(type="text", placeholder="Center Name", id="new_planner_center_name"),
                 Button("Add Planner", hx_post="/add_planner")
             )

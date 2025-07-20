@@ -77,6 +77,7 @@ If everything went well, we return a success message to the user. Remember, the 
 Also I want to disable the submit button and show a message that the magic link has been sent. To do this, we use one of the most powerful features of HTMX, out-of-band swaps. In HTMX you can update more than one piece of UI by setting the hx-swap-oob attribute to true on an element. HTMX will then swap in the returned element at the location of the element with the same id (#submit-btn in this case). You can read more about HTMX's out-of-band swaps [here](https://htmx.org/docs/#oob_swaps).
 
 ``` {.python #handling-form}
+
 @rt('/send_magic_link')
 def post(email: str):
    if not email:
@@ -85,9 +86,9 @@ def post(email: str):
    magic_link_token = secrets.token_urlsafe(32)
    magic_link_expiry = datetime.now() + timedelta(minutes=15)
    try:
-       user = users("email = ?",(email,))[0]
-       users.update(id= user.id, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
-   except IndexError:
+       user = users[email]
+       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
+   except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
    magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
@@ -134,13 +135,14 @@ If a user has been found using this query, we will save his or hers email in the
 We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.
 
 ``` {.python #verify-token}
+
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
    nowstr = f"'{datetime.now()}'"
    try:
        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
        session['auth'] = user.email
-       users.update(id= user.id, magic_link_token= None, magic_link_expiry= None, is_active= True)
+       users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
