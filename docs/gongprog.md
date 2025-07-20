@@ -18,7 +18,7 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
 
 <<setup-database>>
 <<authenticate>>
-<<dashboard>>
+<<starting-page>>
 
 <<logout>>
 # client = TestClient(app)

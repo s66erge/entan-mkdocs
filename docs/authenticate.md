@@ -1,4 +1,4 @@
-# Passwordless Authentication - pico no class
+# Passwordless Authentication
 
 - The user enters their email on a website
 - The website generates a random string (a "token") and saves it together with the user's email into a database
@@ -14,7 +14,6 @@
 <<send-link>>
 <<verify-token>>
 ```
-
 
 ### Login form
 
@@ -57,15 +56,20 @@ The token should only be valid for a certain amount of time to increase the secu
 Then it tries to find a user with the given email and if there is no user with this email, the IndexError is raised and it returns an error like above.
 
 Another option would be to create a new user now by replacing:
+
 ```
 return "Email is not registered ..."
-``` 
+```
+
 with:
+
 ```
 user = User(email=email, is_active=False, magic_link_token=magic_link_token, magic_link_expiry=magic_link_expiry)
 users.insert(user)
 ```
+
 Then we update the user row in the database with the expiration date and the token itself.
+
 Then we create the login link by putting the token into the url.
 
 If everything went well, we return a success message to the user. Remember, the form has been defined to swap the content of the #error paragraph. Since I want to change the appearance of the text we send back, I also send back a HX-Reswap header with the value outerHTML. This tells HTMX to swap the outer HTML of the #error html element with the content we send back, a paragraph tag with the success message.
