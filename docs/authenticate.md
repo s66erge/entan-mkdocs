@@ -40,7 +40,7 @@ def get():
        Div(
            H1("Sign In"),
            P("Enter your email to sign in to The App."),
-           MyForm("Sign In with Email", "/send_magic_link")
+           MyForm("Sign In with Email", "/create_magic_link")
        ), cls="container"
    )
 ```
@@ -70,7 +70,10 @@ users.insert(user)
 
 Then we update the user row in the database with the expiration date and the token itself.
 
-Then we create the login link by putting the token into the url.
+Then we create the login link by adding the token to the base url:
+- the base URL in Railway production was previously saved in the Railway variable BASE_URL
+- we check if the RAILWAY_ENV OS variable has the value "production" to determine if we are running in Railway or locally.
+- If we are running locally, we use the default URL http://localhost:5001. 
 
 If everything went well, we return a success message to the user. Remember, the form has been defined to swap the content of the #error paragraph. Since I want to change the appearance of the text we send back, I also send back a HX-Reswap header with the value outerHTML. This tells HTMX to swap the outer HTML of the #error html element with the content we send back, a paragraph tag with the success message.
 
@@ -78,23 +81,51 @@ Also I want to disable the submit button and show a message that the magic link 
 
 ``` {.python #handling-form}
 
-@rt('/send_magic_link')
+@rt('/create_magic_link')
 def post(email: str):
-   if not email:
+    if not email:
        return "Email is required"
 
-   magic_link_token = secrets.token_urlsafe(32)
-   magic_link_expiry = datetime.now() + timedelta(minutes=15)
-   try:
+# TODO authenticate now the testing email in Railway secrets
+
+    magic_link_token = secrets.token_urlsafe(32)
+    magic_link_expiry = datetime.now() + timedelta(minutes=15)
+    try:
        user = users[email]
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
-   except NotFoundError:
+    except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
-   send_magic_link_email(email, magic_link)
+    if os.environ.get('RAILWAY_ENV') == 'production':
+        base_url = os.environ.get('BASE_URL')
+    else:
+        base_url = 'http://localhost:5001'
 
-   return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+#   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
+    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
+    send_magic_link_email(email, magic_link)
+
+    return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+```
+
+### Get the current URL : local or Railway
+
+To dynamically create a link in your Python app that points to either the local or Railway (cloud) URL depending on where the code is running, you typically use environment variables that distinguish between development and production.
+
+Detect environment variable RAILWAY_ENV and build URL by using Python’s os.environ to check if your code is running on Railway or locally.
+
+``` {.python #get-base-url}
+
+import os
+
+def get_base_url():
+    # Railway deployment sets RAILWAY_ENV to 'production'
+    if os.environ.get('RAILWAY_ENV') == 'production':
+        return os.environ.get('RAILWAY_STATIC_URL', 'https://your-railway-app.up.railway.app')
+    else:
+        # Default to localhost for local dev
+        return 'http://localhost:8000'  # Adjust the port as needed
+
 ```
 
 ### Send the magic link
@@ -105,6 +136,8 @@ The link then sends a get request to the /verify_magic_link/{token} endpoint.
 
 ``` {.python #send-link}
 def send_magic_link_email(email: str, magic_link: str):
+
+# TODO really send by email 
 
    email_content = f"""
    To: {email}
@@ -168,7 +201,7 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return login_redir
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/send_magic_link', r'/verify_magic_link/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/create_magic_link', r'/verify_magic_link/.*'])
 ```
 
 ``` {.python #logout}
