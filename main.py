@@ -1,9 +1,11 @@
 # ~/~ begin <<docs/gongprog.md#src\gongUsers.py>>[init]
 
+import secrets
+import os
+from datetime import datetime, timedelta
+
 from fasthtml.common import *
 # from starlette.testclient import TestClient
-import secrets
-from datetime import datetime, timedelta
 
 css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursive;}')
 
@@ -15,7 +17,7 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return login_redir
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/send_magic_link', r'/verify_magic_link/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
 #app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink, css))
@@ -76,8 +78,9 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
+# ~/~ end
+# ~/~ begin <<docs/gongprog.md#initialize-database>>[init]
 
-# Check if any table(s) is(are) empty and insert default values if needed
 if not roles():
     roles.insert(role_name="admin", description="administrator")
     roles.insert(role_name="user", description="regular user")
@@ -117,32 +120,42 @@ def get():
        Div(
            H1("Sign In"),
            P("Enter your email to sign in to The App."),
-           MyForm("Sign In with Email", "/send_magic_link")
+           MyForm("Sign In with Email", "/create_magic_link")
        ), cls="container"
    )
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#handling-form>>[init]
 
-@rt('/send_magic_link')
+@rt('/create_magic_link')
 def post(email: str):
-   if not email:
+    if not email:
        return "Email is required"
 
-   magic_link_token = secrets.token_urlsafe(32)
-   magic_link_expiry = datetime.now() + timedelta(minutes=15)
-   try:
+# TODO authenticate now the testing email in Railway secrets
+
+    magic_link_token = secrets.token_urlsafe(32)
+    magic_link_expiry = datetime.now() + timedelta(minutes=15)
+    try:
        user = users[email]
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
-   except NotFoundError:
+    except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
-   send_magic_link_email(email, magic_link)
+    if os.environ.get('RAILWAY_ENV') == 'production':
+        base_url = os.environ.get('BASE_URL')
+    else:
+        base_url = 'http://localhost:5001'
 
-   return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+#   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
+    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
+    send_magic_link_email(email, magic_link)
+
+    return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#send-link>>[init]
 def send_magic_link_email(email: str, magic_link: str):
+
+# TODO really send by email 
 
    email_content = f"""
    To: {email}
@@ -177,6 +190,8 @@ def get(session, token: str):
 # ~/~ end
 # ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
 
+# ~/~ begin <<docs/dashboard.md#dashboard>>[init]
+
 @rt('/dashboard')
 def get(session): 
     sessemail = session['auth']
@@ -195,14 +210,19 @@ def get(session):
         Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
         cls="container",
     )
+# ~/~ end
+# ~/~ begin <<docs/dashboard.md#admin-page>>[init]
 
 @rt('/admin')
 def admin(session):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
-        return Main(Div(H1("Access Denied"), P("You do not have permission to access this page.")), cls="container")
-    
+        return Main(
+            Nav(Li(A("Dashboard", href="/dashboard"))),
+            Div(H1("Access Denied"),
+                P("You do not have permission to access this page.")),
+            cls="container")
     return Main(
         Nav(
             Ul(
@@ -220,11 +240,11 @@ def admin(session):
                     Tr( 
                         Th("Email"), 
                         Th("Role"), 
-                        Th("Actions")
+                        Th("Action")
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(u.email), Td(u.role_name), Td(A("Edit", href=f"/edit_user/{u.email}"))) for u in users()]
+                    *[Tr(Td(u.email), Td(u.role_name), Td(A("Delete", href=f"/delete_user/{u.email}"))) for u in users()]
                 )
             )
         ),
@@ -239,7 +259,7 @@ def admin(session):
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(c.center_name), Td(c.gong_db_name), Td(A("Edit", href=f"/edit_center/{c.center_name}"))) for c in centers()]
+                    *[Tr(Td(c.center_name), Td(c.gong_db_name), Td(A("Delete", href=f"/delete_center/{c.center_name}"))) for c in centers()]
                 )
             )
         ),
@@ -254,7 +274,7 @@ def admin(session):
                     )
                 ),
                 Tbody(
-                    *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Edit", href=f"/edit_planner/{p.user_email}/{p.center_name}"))) for p in planners()]
+                    *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}"))) for p in planners()]
                 )
             )
         ),
@@ -287,8 +307,45 @@ def admin(session):
         ),
 
         cls="container",
-        
+
     )
+# ~/~ end
+# ~/~ begin <<docs/dashboard.md#delete-routes>>[init]
+
+@rt('/unfinished')
+def unfinished():
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
+
+@rt('/delete_user/{email}')
+def delete_user(email:str):
+    return unfinished()
+
+@rt('/delete_center/{center_name}')
+def delete_center(center_name:str):
+    return unfinished()
+
+@rt('/delete_planner/{user_email}/{center_name}')
+def delete_planner(user_email:str, center_name:str):
+    return unfinished()
+# ~/~ end
+# ~/~ begin <<docs/dashboard.md#insert-routes>>[init]
+
+@rt('/add_user')
+def add_user():
+    return HttpHeader('HX-Redirect', '/unfinished')
+
+@rt('/add_center')
+def add_center():   
+    return HttpHeader('HX-Redirect', '/unfinished')
+
+@rt('/add_planner')
+def add_planner():  
+    return HttpHeader('HX-Redirect', '/unfinished')          
+# ~/~ end
 # ~/~ end
 
 # ~/~ begin <<docs/authenticate.md#logout>>[init]

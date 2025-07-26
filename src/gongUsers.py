@@ -78,8 +78,9 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
+# ~/~ end
+# ~/~ begin <<docs/gongprog.md#initialize-database>>[init]
 
-# Check if any table(s) is(are) empty and insert default values if needed
 if not roles():
     roles.insert(role_name="admin", description="administrator")
     roles.insert(role_name="user", description="regular user")
@@ -140,7 +141,8 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    if os.environ.get('RAILWAY_ENV') == 'production':
+    print("ENV " + os.environ.get('RAILWAY_ENV','None') + ", BASE " + os.environ.get('BASE_URL'))
+    if os.environ.get('RAILWAY_ENV',"None") == 'production':
         base_url = os.environ.get('BASE_URL')
     else:
         base_url = 'http://localhost:5001'
@@ -154,7 +156,7 @@ def post(email: str):
 # ~/~ begin <<docs/authenticate.md#send-link>>[init]
 def send_magic_link_email(email: str, magic_link: str):
 
-# TODO really senf by email 
+# TODO really send by email 
 
    email_content = f"""
    To: {email}

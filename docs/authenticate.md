@@ -96,7 +96,8 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    if os.environ.get('RAILWAY_ENV') == 'production':
+    print("ENV " + os.environ.get('RAILWAY_ENV','None') + ", BASE " + os.environ.get('BASE_URL'))
+    if os.environ.get('RAILWAY_ENV',"None") == 'production':
         base_url = os.environ.get('BASE_URL')
     else:
         base_url = 'http://localhost:5001'
@@ -108,25 +109,6 @@ def post(email: str):
     return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 ```
 
-### Get the current URL : local or Railway
-
-To dynamically create a link in your Python app that points to either the local or Railway (cloud) URL depending on where the code is running, you typically use environment variables that distinguish between development and production.
-
-Detect environment variable RAILWAY_ENV and build URL by using Python’s os.environ to check if your code is running on Railway or locally.
-
-``` {.python #get-base-url}
-
-import os
-
-def get_base_url():
-    # Railway deployment sets RAILWAY_ENV to 'production'
-    if os.environ.get('RAILWAY_ENV') == 'production':
-        return os.environ.get('RAILWAY_STATIC_URL', 'https://your-railway-app.up.railway.app')
-    else:
-        # Default to localhost for local dev
-        return 'http://localhost:8000'  # Adjust the port as needed
-
-```
 
 ### Send the magic link
 

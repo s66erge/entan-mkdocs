@@ -3,14 +3,25 @@ site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
 
 plugins:
+  - search
   - entangled
+  - mermaid2:
+      arguments:
+         securityLevel: 'loose' 
+
+extra_javascript:
+    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
 markdown_extensions:
-  - pymdownx.superfences
-
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+ 
 theme:
   name: readthedocs
-  # name: material
+  name: material
   palette: 
     # Palette toggle for light mode
     - scheme: default
@@ -26,4 +37,3 @@ theme:
 
   watch:
   - docs
-  - src

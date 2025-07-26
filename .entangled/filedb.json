@@ -2,10 +2,10 @@
   "files": [
     {
       "deps": null,
-      "hexdigest": "0e81332cbd0986dd2ea61fd124eec1831698c548fec9f648010667b9995f01f6",
-      "modified": "2025-07-26T14:38:50.405836",
+      "hexdigest": "0e645ffb635d31976266b917bc7ab57008ecbd31ef2c2bb0a84b273329ac83fa",
+      "modified": "2025-07-26T20:42:29.222109",
       "path": "docs\\authenticate.md",
-      "size": 9609
+      "size": 8880
     },
     {
       "deps": null,
@@ -16,21 +16,21 @@
     },
     {
       "deps": null,
-      "hexdigest": "5a5143fa9abc2ae11dc8c89842c77d2083378beb622c4c7aff9bed0ddb018a8f",
-      "modified": "2025-07-26T14:19:21.403183",
+      "hexdigest": "37c3c1c24a81984678fc4e6d24f7d1b733d877b2070ec5c84f82080c2f0f4023",
+      "modified": "2025-07-26T20:35:44.013677",
       "path": "docs\\gongprog.md",
-      "size": 5157
+      "size": 5253
     },
     {
       "deps": [
         "docs\\dashboard.md",
-        "docs\\gongprog.md",
-        "docs\\authenticate.md"
+        "docs\\authenticate.md",
+        "docs\\gongprog.md"
       ],
-      "hexdigest": "3cd120a23bfa3235a41a6de699dfd41fde0e8ce4dec871c2bf167a7d979a6b60",
-      "modified": "2025-07-26T14:39:10.783206",
+      "hexdigest": "08227404fd38d0ca3f95d2e0b28c9efa42f080597bdcf103b94eb5d7f09b9456",
+      "modified": "2025-07-26T20:42:35.762243",
       "path": "src\\gongUsers.py",
-      "size": 11426
+      "size": 11528
     }
   ],
   "source": [],

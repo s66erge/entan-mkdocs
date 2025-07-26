@@ -19,6 +19,7 @@ css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursi
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
 
 <<setup-database>>
+<<initialize-database>>
 <<authenticate-md>>
 <<start-admin-md>>
 
@@ -45,8 +46,6 @@ CENTERS:
 
 PLANNERS:
 - indicates which user(s) can modify the gong planning of which center 
-
-
 
 ```mermaid
 erDiagram
@@ -84,7 +83,8 @@ erDiagram
 One gong database is used to store the gong planning data for each center. Each gong database name is referenced in the CENTERS table above.
 All gong databases have the same structure detailed here below, but their content will vary from center to center.
 
-As of today, this app is managing the gong planning for :
+As of today, this app is managing the gong planning for:
+
 - Dhamma Mahi (mahi.db)
 - Dhamma Pajjota (pajjota.db)
 
@@ -112,7 +112,8 @@ erDiagram
         string day_type FK "'day 0', 'course day', 'last day'"
         }
 
-    PERIOD_TYPES ||--|| TIMINGS : "has timings in this table"    STRUCTURE  }o--o{ TIMINGS : "day type has these timings"
+    PERIOD_TYPES ||--|| TIMINGS : "has timings in this table"
+    STRUCTURE  }o--o{ TIMINGS : "day type has these timings"
     TIMINGS {
         string day_type FK
         time gong_time
@@ -180,8 +181,13 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
+```
+### Database initialization
 
-# Check if any table(s) is(are) empty and insert default values if needed
+Check if any table(s) is(are) empty and insert default values if needed
+
+``` {.python #initialize-database}
+
 if not roles():
     roles.insert(role_name="admin", description="administrator")
     roles.insert(role_name="user", description="regular user")
