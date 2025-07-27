@@ -96,7 +96,9 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("ENV " + os.environ.get('RAILWAY_ENVIRONMENT_NAME','None') + ", BASE " + os.environ.get('RAILWAY_PUBLIC_DOMAIN','None'))
+    print("RAIL.ENV " + os.environ.get('RAILWAY_ENVIRONMENT_NAME','None') + \
+        ", DOMAIN " + os.environ.get('RAILWAY_PUBLIC_DOMAIN','None') + \
+        ", OS " + os.name)
     if os.environ.get('RAILWAY_ENVIRONMENT_NAME',"None") == 'production':
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else:
