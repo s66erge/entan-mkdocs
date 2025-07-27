@@ -1,5 +1,7 @@
 # Ignore everything
 /*
+# Ignore hidden directories
+/.* /
 
 # Except these folders
 !calendar-project/

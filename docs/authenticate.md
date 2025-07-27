@@ -13,6 +13,7 @@
 <<handling-form>>
 <<send-link>>
 <<verify-token>>
+<<logout>>
 ```
 
 ### Login form
@@ -111,17 +112,43 @@ def post(email: str):
 
 ### Send the magic link
 
-Now we only need to send an email to the user with the link : lets just mock sending the email by printing the email content to the console.
+Now we only need to send an email to the user with the link.
+
+In dev mode, lets just mock sending the email by printing the email content to the console.
+
+In production mode - remote or within railway CLI -, we can use the smtplib library to send an email using Gmail's SMTP server. You will need to create an App Password in your Google Account settings if you have 2-Step Verification enabled. This password is used instead of your regular account password.
 
 The link then sends a get request to the /verify_magic_link/{token} endpoint.
 
+#### Example send_mail usage
+
+subject = "Hello from Python"
+body = "This is a test email sent from Python using Gmail SMTP."
+sender = "your_email@gmail.com"
+recipients = ["recipient1@gmail.com"]  : list of recipients
+password = "your_app_password" 
+
+send_email(subject, body, sender, recipients, password)
+
 ``` {.python #send-link}
-def send_magic_link_email(email: str, magic_link: str):
 
-# TODO really send by email 
+def send_email(subject, body, sender, recipients, password):
+    # Create MIMEText email object with the email body
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
 
-   email_content = f"""
-   To: {email}
+def send_magic_link_email(email_address: str, magic_link: str):
+
+   email_sender = 'spegoff@authentica.eu'
+   email_subject = "Sign in to The App"
+   email_text = f"""
    Subject: Sign in to The App
    ============================
 
@@ -134,8 +161,14 @@ def send_magic_link_email(email: str, magic_link: str):
    Cheers,
    The App Team
    """
-   # Mock email sending by printing to console
-   print(email_content)
+   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')  # App Password for Google Account
+   print('PASS: ' + email_password)
+   if email_password == 'None':
+       # Mock email sending by printing to console
+       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
+   else:
+       # Send the email using Gmail's SMTP server
+       send_email(email_subject, email_text, email_sender, [email_address], email_password)
 ```
 
 ### Authenticate the user
@@ -182,7 +215,7 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return login_redir
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/create_magic_link', r'/verify_magic_link/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 ```
 
 ``` {.python #logout}

@@ -6,28 +6,41 @@
 
 import secrets
 import os
+import markdown2
+import smtplib
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
 
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 <<auth-beforeware>>
 
-#app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink, css))
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
+app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
 <<setup-database>>
 <<initialize-database>>
 <<authenticate-md>>
 <<start-admin-md>>
-
-<<logout>>
+<<home-page>>
 # client = TestClient(app)
 # print(client.get("/login").text)
 
 serve()
+```
+### Home page   
+
+``` {.python #home-page}
+@rt('/')
+def home():
+    with open(r"md-text/home.md", "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return Main(
+        Div(NotStr(html_content)),
+        A("Login",href="/login", class_="button"),
+        cls="container")
 ```
 
 ### Admin database

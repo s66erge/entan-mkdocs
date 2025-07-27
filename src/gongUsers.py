@@ -2,12 +2,15 @@
 
 import secrets
 import os
+import markdown2
+import smtplib
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
 
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 # ~/~ begin <<docs/authenticate.md#auth-beforeware>>[init]
 
@@ -17,11 +20,10 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return login_redir
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/create_magic_link', r'/verify_magic_link/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
-#app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink, css))
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
+app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
 # ~/~ begin <<docs/gongprog.md#setup-database>>[init]
 
@@ -154,12 +156,24 @@ def post(email: str):
     return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#send-link>>[init]
-def send_magic_link_email(email: str, magic_link: str):
 
-# TODO really send by email 
+def send_email(subject, body, sender, recipients, password):
+    # Create MIMEText email object with the email body
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
 
-   email_content = f"""
-   To: {email}
+def send_magic_link_email(email_address: str, magic_link: str):
+
+   email_sender = 'spegoff@authentica.eu'
+   email_subject = "Sign in to The App"
+   email_text = f"""
    Subject: Sign in to The App
    ============================
 
@@ -172,8 +186,14 @@ def send_magic_link_email(email: str, magic_link: str):
    Cheers,
    The App Team
    """
-   # Mock email sending by printing to console
-   print(email_content)
+   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')  # App Password for Google Account
+   print('PASS: ' + email_password)
+   if email_password == 'None':
+       # Mock email sending by printing to console
+       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
+   else:
+       # Send the email using Gmail's SMTP server
+       send_email(email_subject, email_text, email_sender, [email_address], email_password)
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#verify-token>>[init]
 
@@ -187,6 +207,12 @@ def get(session, token: str):
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
+# ~/~ end
+# ~/~ begin <<docs/authenticate.md#logout>>[init]
+@rt('/logout')
+def post(session):
+    del session['auth']
+    return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
 # ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
@@ -348,12 +374,15 @@ def add_planner():
     return HttpHeader('HX-Redirect', '/unfinished')          
 # ~/~ end
 # ~/~ end
-
-# ~/~ begin <<docs/authenticate.md#logout>>[init]
-@rt('/logout')
-def post(session):
-    del session['auth']
-    return HttpHeader('HX-Redirect', '/login')
+# ~/~ begin <<docs/gongprog.md#home-page>>[init]
+@rt('/')
+def home():
+    with open(r"md-text/home.md", "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return Main(
+        Div(NotStr(html_content)),
+        A("Login",href="/login", class_="button"),
+        cls="container")
 # ~/~ end
 # client = TestClient(app)
 # print(client.get("/login").text)

@@ -2,12 +2,13 @@
 
 import secrets
 import os
+import markdown2
 from datetime import datetime, timedelta
 
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-css = Style(':root { --pico-font-size: 90% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 # ~/~ begin <<docs/authenticate.md#auth-beforeware>>[init]
 
@@ -17,11 +18,10 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return login_redir
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login', '/create_magic_link', r'/verify_magic_link/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
-#app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink, css))
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css))
+app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
 # ~/~ begin <<docs/gongprog.md#setup-database>>[init]
 
@@ -188,6 +188,12 @@ def get(session, token: str):
    except IndexError:
        return "Invalid or expired magic link"
 # ~/~ end
+# ~/~ begin <<docs/authenticate.md#logout>>[init]
+@rt('/logout')
+def post(session):
+    del session['auth']
+    return HttpHeader('HX-Redirect', '/login')
+# ~/~ end
 # ~/~ end
 # ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
 
@@ -348,12 +354,15 @@ def add_planner():
     return HttpHeader('HX-Redirect', '/unfinished')          
 # ~/~ end
 # ~/~ end
-
-# ~/~ begin <<docs/authenticate.md#logout>>[init]
-@rt('/logout')
-def post(session):
-    del session['auth']
-    return HttpHeader('HX-Redirect', '/login')
+# ~/~ begin <<docs/gongprog.md#home-page>>[init]
+@rt('/')
+def home():
+    with open(r"md-text/home.md", "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return Main(
+        Div(NotStr(html_content)),
+        A("Login",href="/login", class_="button"),
+        cls="container")
 # ~/~ end
 # client = TestClient(app)
 # print(client.get("/login").text)
