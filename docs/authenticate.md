@@ -113,21 +113,21 @@ def post(email: str):
 
 Now we only need to send an email to the user with the link.
 
-In dev mode, lets just mock sending the email by printing the email content to the console.
-
-In production mode - remote or within railway CLI -, we can use the smtplib library to send an email using Gmail's SMTP server. You will need to create an App Password in your Google Account settings if you have 2-Step Verification enabled. This password is used instead of your regular account password.
-
 The link then sends a get request to the /verify_magic_link/{token} endpoint.
 
-#### Example send_mail usage
+#### Send email via Google smtp
 
-subject = "Hello from Python"
-body = "This is a test email sent from Python using Gmail SMTP."
-sender = "your_email@gmail.com"
-recipients = ["recipient1@gmail.com"]  : list of recipients
-password = "your_app_password" 
+In production mode - remote or local within railway CLI -, we can use the smtplib library to send an email using Gmail's SMTP server. We will need to create an App Password in your Google Account settings as we have 2-Step Verification enabled.
 
-send_email(subject, body, sender, recipients, password)
+Example for using: *send_email(subject, body, sender, recipients, password)*
+
+- subject = "Hello from Python"
+- body = "This is a test email sent from Python using Gmail SMTP."
+- sender = "your_email@gmail.com"
+- recipients = ["recipient1@gmail.com"]  : list of recipients
+- password = "your_app_password" : in production in "GOOGLE_SMTP_PASS" environment variable 
+
+In dev mode, lets just mock sending the email by printing the email content to the console.
 
 ``` {.python #send-link}
 
@@ -161,11 +161,9 @@ def send_magic_link_email(email_address: str, magic_link: str):
    The App Team
    """
    email_password = os.environ.get('GOOGLE_SMTP_PASS','None')
-   print('PASS: ' + email_password)
    if email_password == 'None':
        # Mock email sending by printing to console
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
-       # send_email(email_subject, email_text, email_sender, [email_address], email_password)
    else:
        # Send the email using Gmail's SMTP server
        send_email(email_subject, email_text, email_sender, [email_address], email_password)
