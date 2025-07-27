@@ -185,11 +185,12 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')  # App Password for Google Account
+   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')
    print('PASS: ' + email_password)
    if email_password == 'None':
        # Mock email sending by printing to console
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
+       # send_email(email_subject, email_text, email_sender, [email_address], email_password)
    else:
        # Send the email using Gmail's SMTP server
        send_email(email_subject, email_text, email_sender, [email_address], email_password)

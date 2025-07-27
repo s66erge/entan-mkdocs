@@ -3,7 +3,9 @@
 import secrets
 import os
 import markdown2
+import smtplib
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
 
 from fasthtml.common import *
 # from starlette.testclient import TestClient
@@ -147,19 +149,30 @@ def post(email: str):
     else: # os.name == 'nt'
         base_url = 'http://localhost:5001'
 
-#   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
     return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#send-link>>[init]
-def send_magic_link_email(email: str, magic_link: str):
 
-# TODO really send by email 
+def send_email(subject, body, sender, recipients, password):
+    # Create MIMEText email object with the email body
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
 
-   email_content = f"""
-   To: {email}
+def send_magic_link_email(email_address: str, magic_link: str):
+
+   email_sender = 'spegoff@authentica.eu'
+   email_subject = "Sign in to The App"
+   email_text = f"""
    Subject: Sign in to The App
    ============================
 
@@ -172,8 +185,15 @@ def send_magic_link_email(email: str, magic_link: str):
    Cheers,
    The App Team
    """
-   # Mock email sending by printing to console
-   print(email_content)
+   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')
+   print('PASS: ' + email_password)
+   if email_password == 'None':
+       # Mock email sending by printing to console
+       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
+       # send_email(email_subject, email_text, email_sender, [email_address], email_password)
+   else:
+       # Send the email using Gmail's SMTP server
+       send_email(email_subject, email_text, email_sender, [email_address], email_password)
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#verify-token>>[init]
 
