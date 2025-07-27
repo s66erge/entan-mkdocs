@@ -149,7 +149,6 @@ def post(email: str):
     else: # os.name == 'nt'
         base_url = 'http://localhost:5001'
 
-#   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
