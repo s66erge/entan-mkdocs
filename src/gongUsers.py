@@ -141,12 +141,10 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("RAIL.ENV " + os.environ.get('RAILWAY_ENVIRONMENT_NAME','None') + \
-        ", DOMAIN " + os.environ.get('RAILWAY_PUBLIC_DOMAIN','None') + \
-        ", OS " + os.name)
-    if os.environ.get('RAILWAY_ENVIRONMENT_NAME',"None") == 'production':
+    print("OS " + os.name)
+    if os.name == 'posix':
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else:
+    else: # os.name == 'nt'
         base_url = 'http://localhost:5001'
 
 #   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"

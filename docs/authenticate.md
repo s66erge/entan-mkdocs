@@ -70,10 +70,9 @@ users.insert(user)
 
 Then we update the user row in the database with the expiration date and the token itself.
 
-Then we create the login link by adding the token to the base url:
-- the base URL in Railway production is saved in the Railway variable RAILWAY_PUBLIC_DOMAIN
-- we check if the RAILWAY_ENVIRONMENT_NAME variable has the value "production" to determine if we are running in Railway or locally.
-- If we are running locally, we use the default URL http://localhost:5001. 
+Then we create the login link by adding the token to the base url.
+If we are from Railway production, os.name == 'posix' and the base URL is saved in the RAILWAY_PUBLIC_DOMAIN environment variable.
+If we are running locally (os.name == 'nt'), directly or within railway CLI, the base URL is http://localhost:5001.
 
 If everything went well, we return a success message to the user. Remember, the form has been defined to swap the content of the #error paragraph. Since I want to change the appearance of the text we send back, I also send back a HX-Reswap header with the value outerHTML. This tells HTMX to swap the outer HTML of the #error html element with the content we send back, a paragraph tag with the success message.
 
@@ -96,12 +95,10 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("RAIL.ENV " + os.environ.get('RAILWAY_ENVIRONMENT_NAME','None') + \
-        ", DOMAIN " + os.environ.get('RAILWAY_PUBLIC_DOMAIN','None') + \
-        ", OS " + os.name)
-    if os.environ.get('RAILWAY_ENVIRONMENT_NAME',"None") == 'production':
+    print("OS " + os.name)
+    if os.name == 'posix':
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else:
+    else: # os.name == 'nt'
         base_url = 'http://localhost:5001'
 
 #   magic_link = f"http://localhost:5001/verify_magic_link/{magic_link_token}"
