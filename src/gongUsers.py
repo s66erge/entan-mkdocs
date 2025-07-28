@@ -99,6 +99,32 @@ if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
+# ~/~ begin <<docs/utilities.md#utilities-md>>[init]
+
+# ~/~ begin <<docs/utilities.md#send-email>>[init]
+
+def send_email(subject, body, recipients, password):
+    # Create MIMEText email object with the email body
+    sender = "spegoff@authentica.eu" 
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
+# ~/~ end
+# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
+
+def display_markdown(file_path):
+    with open(file_path, "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return NotStr(html_content)
+# ~/~ end
+# ~/~ end
 # ~/~ begin <<docs/authenticate.md#authenticate-md>>[init]
 
 # ~/~ begin <<docs/authenticate.md#build-serve-login-form>>[init]
@@ -156,26 +182,10 @@ def post(email: str):
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#send-link>>[init]
 
-def send_email(subject, body, sender, recipients, password):
-    # Create MIMEText email object with the email body
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
-
 def send_magic_link_email(email_address: str, magic_link: str):
 
-   email_sender = 'spegoff@authentica.eu'
    email_subject = "Sign in to The App"
    email_text = f"""
-   Subject: Sign in to The App
-   ============================
-
    Hey there,
 
    Click this link to sign in to The App: {magic_link}
@@ -191,7 +201,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        # Send the email using Gmail's SMTP server
-       send_email(email_subject, email_text, email_sender, [email_address], email_password)
+       send_email(email_subject, email_text, [email_address], email_password)
 # ~/~ end
 # ~/~ begin <<docs/authenticate.md#verify-token>>[init]
 
@@ -212,6 +222,14 @@ def post(session):
     del session['auth']
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
+# ~/~ end
+# ~/~ begin <<docs/gongprog.md#home-page>>[init]
+@rt('/')
+def home():
+    return Main(
+        Div(display_markdown("md-text/home.md")),
+        A("Login",href="/login", class_="button"),
+        cls="container")
 # ~/~ end
 # ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
 
@@ -262,11 +280,7 @@ def admin(session):
             H2("Users"),
             Table(
                 Thead(
-                    Tr( 
-                        Th("Email"), 
-                        Th("Role"), 
-                        Th("Action")
-                    )
+                    Tr(Th("Email"), Th("Role"), Th("Action"))
                 ),
                 Tbody(
                     *[Tr(Td(u.email), Td(u.role_name), Td(A("Delete", href=f"/delete_user/{u.email}"))) for u in users()]
@@ -277,11 +291,7 @@ def admin(session):
             H2("Centers"),
             Table(
                 Thead(
-                    Tr(
-                        Th("Center Name"), 
-                        Th("Gong DB Name"), 
-                        Th("Actions")
-                    )
+                    Tr(Th("Center Name"), Th("Gong DB Name"), Th("Actions"))
                 ),
                 Tbody(
                     *[Tr(Td(c.center_name), Td(c.gong_db_name), Td(A("Delete", href=f"/delete_center/{c.center_name}"))) for c in centers()]
@@ -292,11 +302,7 @@ def admin(session):
             H2("Planners"),
             Table(
                 Thead(
-                    Tr(
-                        Th("User email"), 
-                        Th("Center Name"), 
-                        Th("Actions")
-                    )
+                    Tr(Th("User email"), Th("Center Name"), Th("Actions"))
                 ),
                 Tbody(
                     *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}"))) for p in planners()]
@@ -371,16 +377,6 @@ def add_center():
 def add_planner():  
     return HttpHeader('HX-Redirect', '/unfinished')          
 # ~/~ end
-# ~/~ end
-# ~/~ begin <<docs/gongprog.md#home-page>>[init]
-@rt('/')
-def home():
-    with open(r"md-text/home.md", "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return Main(
-        Div(NotStr(html_content)),
-        A("Login",href="/login", class_="button"),
-        cls="container")
 # ~/~ end
 # client = TestClient(app)
 # print(client.get("/login").text)

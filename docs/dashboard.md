@@ -60,11 +60,7 @@ def admin(session):
             H2("Users"),
             Table(
                 Thead(
-                    Tr( 
-                        Th("Email"), 
-                        Th("Role"), 
-                        Th("Action")
-                    )
+                    Tr(Th("Email"), Th("Role"), Th("Action"))
                 ),
                 Tbody(
                     *[Tr(Td(u.email), Td(u.role_name), Td(A("Delete", href=f"/delete_user/{u.email}"))) for u in users()]
@@ -75,11 +71,7 @@ def admin(session):
             H2("Centers"),
             Table(
                 Thead(
-                    Tr(
-                        Th("Center Name"), 
-                        Th("Gong DB Name"), 
-                        Th("Actions")
-                    )
+                    Tr(Th("Center Name"), Th("Gong DB Name"), Th("Actions"))
                 ),
                 Tbody(
                     *[Tr(Td(c.center_name), Td(c.gong_db_name), Td(A("Delete", href=f"/delete_center/{c.center_name}"))) for c in centers()]
@@ -90,11 +82,7 @@ def admin(session):
             H2("Planners"),
             Table(
                 Thead(
-                    Tr(
-                        Th("User email"), 
-                        Th("Center Name"), 
-                        Th("Actions")
-                    )
+                    Tr(Th("User email"), Th("Center Name"), Th("Actions"))
                 ),
                 Tbody(
                     *[Tr(Td(p.user_email), Td(p.center_name), Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}"))) for p in planners()]

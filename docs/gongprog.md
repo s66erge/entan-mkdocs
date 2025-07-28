@@ -22,9 +22,10 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 
 <<setup-database>>
 <<initialize-database>>
+<<utilities-md>>
 <<authenticate-md>>
-<<start-admin-md>>
 <<home-page>>
+<<start-admin-md>>
 # client = TestClient(app)
 # print(client.get("/login").text)
 
@@ -35,10 +36,8 @@ serve()
 ``` {.python #home-page}
 @rt('/')
 def home():
-    with open(r"md-text/home.md", "r") as f:
-        html_content = markdown2.markdown(f.read())
     return Main(
-        Div(NotStr(html_content)),
+        Div(display_markdown("md-text/home.md")),
         A("Login",href="/login", class_="button"),
         cls="container")
 ```
