@@ -37,7 +37,7 @@ serve()
 @rt('/')
 def home():
     return Main(
-        Div(display_markdown("md-text/home.md")),
+        Div(display_markdown("home")),
         A("Login",href="/login", class_="button"),
         cls="container")
 ```

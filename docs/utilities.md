@@ -41,10 +41,12 @@ def send_email(subject, body, recipients, password):
 
 ### Displaying the content of a markdown file
 
+This function reads a markdown file name, without the extension '.md', then finds the file in the 'md-text' directory and converts it to HTML using the `markdown2` library, which is then returned as a NotStr object for rendering in the app.
+
 ``` {.python #display-markdown}
 
-def display_markdown(file_path):
-    with open(file_path, "r") as f:
+def display_markdown(file_name:str):
+    with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 

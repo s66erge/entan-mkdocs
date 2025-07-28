@@ -3,11 +3,14 @@
 # Ignore hidden directories
 /.* /
 
+# Except root files
+!/*
 # Except these folders
 !calendar-project/
 !data/
 !docs/
 !src/
+!md-text/
 
-# Except root files
-!/*
+# Ignore these in the exceptions
+src/__pycache__/*

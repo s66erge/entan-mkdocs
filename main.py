@@ -120,7 +120,7 @@ def send_email(subject, body, recipients, password):
 # ~/~ begin <<docs/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_path):
-    with open(file_path, "r") as f:
+    with open(f'md-text/{file_path}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 # ~/~ end
@@ -227,7 +227,7 @@ def post(session):
 @rt('/')
 def home():
     return Main(
-        Div(display_markdown("md-text/home.md")),
+        Div(display_markdown("home")),
         A("Login",href="/login", class_="button"),
         cls="container")
 # ~/~ end
