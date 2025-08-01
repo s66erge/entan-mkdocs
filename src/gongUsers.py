@@ -116,7 +116,6 @@ def send_email(subject, body, recipients, password):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-    
 # ~/~ end
 # ~/~ begin <<docs/utilities.md#display-markdown>>[init]
 

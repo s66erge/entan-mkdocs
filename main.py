@@ -119,8 +119,8 @@ def send_email(subject, body, recipients, password):
 # ~/~ end
 # ~/~ begin <<docs/utilities.md#display-markdown>>[init]
 
-def display_markdown(file_path):
-    with open(f'md-text/{file_path}.md', "r") as f:
+def display_markdown(file_name:str):
+    with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 # ~/~ end
