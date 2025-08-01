@@ -1,5 +1,5 @@
 # Ignore everything
-.entangled/
+.entangled/filedb.json
 /*
 # Ignore hidden directories
 /.* /
