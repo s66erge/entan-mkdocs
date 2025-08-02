@@ -9,25 +9,27 @@ plugins:
       arguments:
          securityLevel: 'loose' 
 
-extra_javascript:
-    - https://unpkg.com/mermaid/dist/mermaid.min.js
+#extra_javascript:
+#    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
 markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:mermaid2.fence_mermaid
- 
+          format: !!python/name:pymdownx.superfences.fence_code_format
+#         format: !!python/name:mermaid2.fence_mermaid
+  
+
 theme:
   name: readthedocs
   name: material
   palette: 
     # Palette toggle for light mode
-    - scheme: default
-      toggle:
-        icon: material/brightness-7 
-        name: Switch to dark mode
+    #- scheme: default
+    #  toggle:
+    #    icon: material/brightness-7 
+    #    name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: slate

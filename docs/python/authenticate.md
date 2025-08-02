@@ -1,4 +1,6 @@
-# Passwordless Authentication
+# Authentication
+
+This is a passwordless authentication:
 
 - The user enters their email on a website
 - The website generates a random string (a "token") and saves it together with the user's email into a database

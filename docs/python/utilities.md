@@ -48,6 +48,6 @@ def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
-
+    
 ```
 

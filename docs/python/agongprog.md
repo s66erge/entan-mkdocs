@@ -1,4 +1,4 @@
-# virtual OW
+# Main gong program
 
 ### Main program
 
