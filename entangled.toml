@@ -1,3 +1,11 @@
 version = "2.0"
 watch_list = ["docs/**/*.md"]
 hooks = ["build"]
+[[languages]]
+name = "Powershell"
+identifiers =  ["powershell", "pwsh"]
+comment = { open = "#" }
+[[languages]]
+name = "XML"
+identifiers = ["xml", "html", "svg"]
+comment = { open = "<!--", close = "-->" }

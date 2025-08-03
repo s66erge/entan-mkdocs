@@ -1,3 +1,9 @@
+## New instruction for this repo
+
+Railway connected to Github : all changes pushed to Github repo are deployed immediately (+/-) to Railway "entan-mkdocs
+
+## Previous instructions
+
 ### Setup
 Run the commands below on your local machine.
 ```commandline
@@ -16,7 +22,7 @@ python main.py
 - run `railway login` to log in to your Railway account.
 - run `fh_railway_deploy YOUR_APP_NAME`.
 
-⚠️ Your app's entry point must be located in a `main.py` file for this to work.
+ Your app's entry point must be located in a `main.py` file for this to work.
 
 ### Supplementary Info.
 

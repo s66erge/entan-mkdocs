@@ -2,6 +2,15 @@
 
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
+## Installation
+
+``` {.pwsh file=.\install-mkdocs.ps1}
+uv pip install mkdocs
+uv pip install mkdocs-mermaid2-plugin
+uv pip install mkdocs-material
+uv pip install mkdocs-entangled-plugin
+```
+
 ## Commands
 
 * `mkdocs new [dir-name]` - Create a new project.

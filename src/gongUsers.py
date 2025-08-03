@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gongprog.md#src\gongUsers.py>>[init]
+# ~/~ begin <<docs/python/gongprog.md#src\gongUsers.py>>[init]
 
 import secrets
 import os
@@ -12,7 +12,7 @@ from fasthtml.common import *
 
 css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
-# ~/~ begin <<docs/authenticate.md#auth-beforeware>>[init]
+# ~/~ begin <<docs/python/authenticate.md#auth-beforeware>>[init]
 
 login_redir = RedirectResponse('/login', status_code=303)
 
@@ -25,7 +25,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# ~/~ begin <<docs/gongprog.md#setup-database>>[init]
+# ~/~ begin <<docs/python/gongprog.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -81,7 +81,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/gongprog.md#initialize-database>>[init]
+# ~/~ begin <<docs/python/gongprog.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -99,9 +99,9 @@ if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
-# ~/~ begin <<docs/utilities.md#utilities-md>>[init]
+# ~/~ begin <<docs/python/utilities.md#utilities-md>>[init]
 
-# ~/~ begin <<docs/utilities.md#send-email>>[init]
+# ~/~ begin <<docs/python/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients, password):
     # Create MIMEText email object with the email body
@@ -116,19 +116,19 @@ def send_email(subject, body, recipients, password):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-    
 # ~/~ end
-# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
+# ~/~ begin <<docs/python/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
+    
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#authenticate-md>>[init]
+# ~/~ begin <<docs/python/authenticate.md#authenticate-md>>[init]
 
-# ~/~ begin <<docs/authenticate.md#build-serve-login-form>>[init]
+# ~/~ begin <<docs/python/authenticate.md#build-serve-login-form>>[init]
 def MyForm(btn_text: str, target: str):
    return Form(
        Div(
@@ -153,7 +153,7 @@ def get():
        ), cls="container"
    )
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#handling-form>>[init]
+# ~/~ begin <<docs/python/authenticate.md#handling-form>>[init]
 
 @rt('/create_magic_link')
 def post(email: str):
@@ -181,7 +181,7 @@ def post(email: str):
 
     return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#send-link>>[init]
+# ~/~ begin <<docs/python/authenticate.md#send-link>>[init]
 
 def send_magic_link_email(email_address: str, magic_link: str):
 
@@ -204,7 +204,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
        # Send the email using Gmail's SMTP server
        send_email(email_subject, email_text, [email_address], email_password)
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#verify-token>>[init]
+# ~/~ begin <<docs/python/authenticate.md#verify-token>>[init]
 
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
@@ -217,14 +217,14 @@ def get(session, token: str):
    except IndexError:
        return "Invalid or expired magic link"
 # ~/~ end
-# ~/~ begin <<docs/authenticate.md#logout>>[init]
+# ~/~ begin <<docs/python/authenticate.md#logout>>[init]
 @rt('/logout')
 def post(session):
     del session['auth']
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gongprog.md#home-page>>[init]
+# ~/~ begin <<docs/python/gongprog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
@@ -232,9 +232,9 @@ def home():
         A("Login",href="/login", class_="button"),
         cls="container")
 # ~/~ end
-# ~/~ begin <<docs/dashboard.md#start-admin-md>>[init]
+# ~/~ begin <<docs/python/dashboard.md#start-admin-md>>[init]
 
-# ~/~ begin <<docs/dashboard.md#dashboard>>[init]
+# ~/~ begin <<docs/python/dashboard.md#dashboard>>[init]
 
 @rt('/dashboard')
 def get(session): 
@@ -255,7 +255,7 @@ def get(session):
         cls="container",
     )
 # ~/~ end
-# ~/~ begin <<docs/dashboard.md#admin-page>>[init]
+# ~/~ begin <<docs/python/dashboard.md#admin-page>>[init]
 
 @rt('/admin')
 def admin(session):
@@ -342,7 +342,7 @@ def admin(session):
 
     )
 # ~/~ end
-# ~/~ begin <<docs/dashboard.md#delete-routes>>[init]
+# ~/~ begin <<docs/python/dashboard.md#delete-routes>>[init]
 
 @rt('/unfinished')
 def unfinished():
@@ -364,7 +364,7 @@ def delete_center(center_name:str):
 def delete_planner(user_email:str, center_name:str):
     return unfinished()
 # ~/~ end
-# ~/~ begin <<docs/dashboard.md#insert-routes>>[init]
+# ~/~ begin <<docs/python/dashboard.md#insert-routes>>[init]
 
 @rt('/add_user')
 def add_user():

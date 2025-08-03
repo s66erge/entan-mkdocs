@@ -1,4 +1,4 @@
-# Starting page
+# User pages
 
 Will only be reachable for users who are signed in.
 
