@@ -1,7 +1,8 @@
-# ~/~ begin <<docs/python/gongprog.md#src\gongUsers.py>>[init]
+# ~/~ begin <<docs/python/agongprog.md#src\gongUsers.py>>[init]
 
 import secrets
 import os
+import socket
 import markdown2
 import smtplib
 from datetime import datetime, timedelta
@@ -25,7 +26,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# ~/~ begin <<docs/python/gongprog.md#setup-database>>[init]
+# ~/~ begin <<docs/python/agongprog.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -81,7 +82,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/python/gongprog.md#initialize-database>>[init]
+# ~/~ begin <<docs/python/agongprog.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -99,9 +100,26 @@ if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
-# ~/~ begin <<docs/python/utilities.md#utilities-md>>[init]
+# ~/~ begin <<docs/utilities.md#utilities-md>>[init]
 
-# ~/~ begin <<docs/python/utilities.md#send-email>>[init]
+# ~/~ begin <<docs/utilities.md#send-email>>[init]
+
+def send_email(subject, body, recipients, password):
+    # Create MIMEText email object with the email body
+    sender = "spegoff@authentica.eu" 
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
+    
+# ~/~ end
+# ~/~ begin <<docs/python/utilities.md#send-email>>[0]
 
 def send_email(subject, body, recipients, password):
     # Create MIMEText email object with the email body
@@ -117,7 +135,73 @@ def send_email(subject, body, recipients, password):
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
 # ~/~ end
-# ~/~ begin <<docs/python/utilities.md#display-markdown>>[init]
+# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
+
+def display_markdown(file_name:str):
+    with open(f'md-text/{file_name}.md', "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return NotStr(html_content)
+# ~/~ end
+# ~/~ begin <<docs/python/utilities.md#display-markdown>>[0]
+
+def display_markdown(file_name:str):
+    with open(f'md-text/{file_name}.md', "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return NotStr(html_content)
+    
+# ~/~ end
+# ~/~ begin <<docs/utilities.md#isa-dev-computer>>[init]
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2"]
+
+def isa_dev_computer():
+    # Check if the current computer is in the above lista development machine
+    hostname = socket.gethostname()
+    return hostname in DEV_COMPUTERS
+# ~/~ end
+# ~/~ end
+# ~/~ begin <<docs/python/utilities.md#utilities-md>>[0]
+
+# ~/~ begin <<docs/utilities.md#send-email>>[init]
+
+def send_email(subject, body, recipients, password):
+    # Create MIMEText email object with the email body
+    sender = "spegoff@authentica.eu" 
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
+    
+# ~/~ end
+# ~/~ begin <<docs/python/utilities.md#send-email>>[0]
+
+def send_email(subject, body, recipients, password):
+    # Create MIMEText email object with the email body
+    sender = "spegoff@authentica.eu" 
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    # Connect securely to Gmail SMTP server and login
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender, password)
+        smtp_server.sendmail(sender, recipients, msg.as_string())
+    print("Message sent!")
+# ~/~ end
+# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
+
+def display_markdown(file_name:str):
+    with open(f'md-text/{file_name}.md', "r") as f:
+        html_content = markdown2.markdown(f.read())
+    return NotStr(html_content)
+# ~/~ end
+# ~/~ begin <<docs/python/utilities.md#display-markdown>>[0]
 
 def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
@@ -224,7 +308,7 @@ def post(session):
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/python/gongprog.md#home-page>>[init]
+# ~/~ begin <<docs/python/agongprog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
