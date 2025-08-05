@@ -98,10 +98,10 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("OS " + os.name)
-    if os.name == 'posix':
+    print("name " + socket.gethostname())
+    if not isa_dev_computer():
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else: # os.name == 'nt'
+    else: 
         base_url = 'http://localhost:5001'
 
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
@@ -114,10 +114,9 @@ def post(email: str):
 ### Send the magic link
 
 Now we only need to send an email to the user with the link.
-
 The link then sends a get request to the /verify_magic_link/{token} endpoint.
 
-In production mode - remote or local within railway CLI -, we can use the smtplib via send_email (in utilities.md)library to send an email using Gmail's SMTP server. 
+In production mode - remote or local within railway CLI -, we can use the smtplib via send_email (in utilities.md) to send an email using Gmail's SMTP server. 
 
 In dev mode, lets just mock sending the email by printing the email content to the console.
 
@@ -136,13 +135,11 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')
-   if email_password == 'None':
-       # Mock email sending by printing to console
+   email_sender = os.environ.get('GOOGLE_SMTP_USER','None')
+   if email_sender == 'None':
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
-       # Send the email using Gmail's SMTP server
-       send_email(email_subject, email_text, [email_address], email_password)
+       send_email(email_subject, email_text, [email_address])
 ```
 
 ### Authenticate the user

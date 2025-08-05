@@ -6,14 +6,14 @@ Railway connected to Github : all changes pushed to Github repo are deployed imm
 
 ### Setup
 Run the commands below on your local machine.
-```commandline
+```pwsh
 git clone https://github.com/AnswerDotAI/fh-deploy.git
 cd railway
 pip install -r requirements.txt
 ```
 
 ### Run the app locally
-```commandline
+```pwsh
 python main.py
 ```
 ### Deploying to Railway

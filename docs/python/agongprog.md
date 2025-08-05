@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 <<auth-beforeware>>
 

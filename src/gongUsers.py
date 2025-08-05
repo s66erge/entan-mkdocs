@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-css = Style(':root { --pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 # ~/~ begin <<docs/python/authenticate.md#auth-beforeware>>[init]
 
@@ -100,13 +100,14 @@ if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
-# ~/~ begin <<docs/utilities.md#utilities-md>>[init]
+# ~/~ begin <<docs/python/utilities.md#utilities-md>>[init]
 
-# ~/~ begin <<docs/utilities.md#send-email>>[init]
+# ~/~ begin <<docs/python/utilities.md#send-email>>[init]
 
-def send_email(subject, body, recipients, password):
+def send_email(subject, body, recipients):
     # Create MIMEText email object with the email body
-    sender = "spegoff@authentica.eu" 
+    sender = os.environ.get('GOOGLE_SMTP_USER') 
+    password = os.environ.get('GOOGLE_SMTP_PASS')
 
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -119,95 +120,19 @@ def send_email(subject, body, recipients, password):
     print("Message sent!")
     
 # ~/~ end
-# ~/~ begin <<docs/python/utilities.md#send-email>>[0]
-
-def send_email(subject, body, recipients, password):
-    # Create MIMEText email object with the email body
-    sender = "spegoff@authentica.eu" 
-
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
-# ~/~ end
-# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
+# ~/~ begin <<docs/python/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 # ~/~ end
-# ~/~ begin <<docs/python/utilities.md#display-markdown>>[0]
+# ~/~ begin <<docs/python/utilities.md#isa-dev-computer>>[init]
 
-def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
-    
-# ~/~ end
-# ~/~ begin <<docs/utilities.md#isa-dev-computer>>[init]
 DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2"]
-
 def isa_dev_computer():
-    # Check if the current computer is in the above lista development machine
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
-# ~/~ end
-# ~/~ end
-# ~/~ begin <<docs/python/utilities.md#utilities-md>>[0]
-
-# ~/~ begin <<docs/utilities.md#send-email>>[init]
-
-def send_email(subject, body, recipients, password):
-    # Create MIMEText email object with the email body
-    sender = "spegoff@authentica.eu" 
-
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
-    
-# ~/~ end
-# ~/~ begin <<docs/python/utilities.md#send-email>>[0]
-
-def send_email(subject, body, recipients, password):
-    # Create MIMEText email object with the email body
-    sender = "spegoff@authentica.eu" 
-
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
-# ~/~ end
-# ~/~ begin <<docs/utilities.md#display-markdown>>[init]
-
-def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
-# ~/~ end
-# ~/~ begin <<docs/python/utilities.md#display-markdown>>[0]
-
-def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
-    
 # ~/~ end
 # ~/~ end
 # ~/~ begin <<docs/python/authenticate.md#authenticate-md>>[init]
@@ -254,10 +179,10 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("OS " + os.name)
-    if os.name == 'posix':
+    print("name " + socket.gethostname())
+    if not isa_dev_computer():
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else: # os.name == 'nt'
+    else: 
         base_url = 'http://localhost:5001'
 
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
@@ -280,13 +205,11 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   email_password = os.environ.get('GOOGLE_SMTP_PASS','None')
-   if email_password == 'None':
-       # Mock email sending by printing to console
+   email_sender = os.environ.get('GOOGLE_SMTP_USER','None')
+   if email_sender == 'None':
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
-       # Send the email using Gmail's SMTP server
-       send_email(email_subject, email_text, [email_address], email_password)
+       send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/python/authenticate.md#verify-token>>[init]
 

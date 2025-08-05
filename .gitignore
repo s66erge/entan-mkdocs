@@ -10,8 +10,9 @@
 !calendar-project/
 !data/
 !docs/
-!src/
 !md-text/
+!setup/
+!src/
 
 # Ignore these in the exceptions
 src/__pycache__/*

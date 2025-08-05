@@ -7,6 +7,7 @@
 
 <<send-email>>
 <<display-markdown>>
+<<isa-dev-computer>>
 
 ```
 
@@ -14,19 +15,18 @@
 
 We will need to create an App Password in your Google Account settings as we have 2-Step Verification enabled.
 
-Example for using: *send_email(subject, body, recipients, password)*
+Example for using: *send_email(subject, body, recipients)*
 
 - subject = "Hello from Python"
 - body = "This is a test email sent from Python using Gmail SMTP."
-- recipients = ["recipient1@gmail.com"]  : list of recipients
-- password = "your_app_password" : in production in "GOOGLE_SMTP_PASS" environment variable 
+- recipients = ["recipient1@gmail.com"]  : list of recipients 
 
 ``` {.python #send-email}
 
-def send_email(subject, body, recipients, password):
+def send_email(subject, body, recipients):
+    sender = os.environ.get('GOOGLE_SMTP_USER') 
+    password = os.environ.get('GOOGLE_SMTP_PASS')
     # Create MIMEText email object with the email body
-    sender = "spegoff@authentica.eu" 
-
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender
@@ -36,6 +36,7 @@ def send_email(subject, body, recipients, password):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
+    
 ```
 
 ### Displaying the content of a markdown file
@@ -48,6 +49,17 @@ def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
-    
+
 ```
 
+### Check if the current computer is a development machine
+This function checks if the current computer's hostname is in a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for sending emails or a mockup email on the console that depend on the environment.
+
+``` {.python #isa-dev-computer}
+
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2"]
+def isa_dev_computer():
+    hostname = socket.gethostname()
+    return hostname in DEV_COMPUTERS
+
+```

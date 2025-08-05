@@ -1,11 +1,33 @@
 version = "2.0"
 watch_list = ["docs/**/*.md"]
 hooks = ["build"]
+
+#[markers]
+#open="^(?P<indent>\\s*)```(?P<properties>.*)$"
+#close="^(?P<indent>\\s*)```\\s*$"
+
 [[languages]]
 name = "Powershell"
 identifiers =  ["powershell", "pwsh"]
 comment = { open = "#" }
+
 [[languages]]
 name = "XML"
 identifiers = ["xml", "html", "svg"]
 comment = { open = "<!--", close = "-->" }
+
+[[languages]]
+name = "mermaid"
+identifiers =  ["mermaid"]
+comment = { open = "%%" }
+
+[[languages]]
+name = "yaml"
+identifiers =  ["yaml"]
+comment = { open = "#" }
+
+[[languages]]
+name = "toml"
+identifiers =  ["toml"]
+comment = { open = "#" }
+
