@@ -127,7 +127,7 @@ def display_markdown(file_name:str):
 # ~/~ end
 # ~/~ begin <<docs/python/utilities.md#isa-dev-computer>>[init]
 
-DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2"]
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
 def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS

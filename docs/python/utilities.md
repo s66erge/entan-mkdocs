@@ -57,7 +57,7 @@ This function checks if the current computer's hostname is in a predefined list 
 
 ``` {.python #isa-dev-computer}
 
-DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2"]
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
 def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
