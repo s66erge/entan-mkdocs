@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/python/agongprog.md#src\gongUsers.py>>[init]
+# ~/~ begin <<docs/python/agongprog.md#src/gongUsers.py>>[init]
 
 import secrets
 import os
@@ -7,7 +7,6 @@ import markdown2
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
@@ -105,10 +104,9 @@ if not planners():
 # ~/~ begin <<docs/python/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
-    # Create MIMEText email object with the email body
     sender = os.environ.get('GOOGLE_SMTP_USER') 
     password = os.environ.get('GOOGLE_SMTP_PASS')
-
+    # Create MIMEText email object with the email body
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender

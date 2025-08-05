@@ -2,7 +2,7 @@
 
 ### Main program
 
-``` {.python file=src\gongUsers.py}
+``` {.python file= src/gongUsers.py}
 
 import secrets
 import os
@@ -11,7 +11,6 @@ import markdown2
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
