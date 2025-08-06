@@ -105,8 +105,8 @@ if not planners():
 
 def on_railway_server_production():
     avariable = os.environ.get('RAILWAY_PRODUCTION_ONLY','None')
-    print("on-railway-server-production: " + avariable)
-    return avariable == 1
+    print("on-railway-server-production: " + avariable + (avariable == 'yes'))
+    return avariable == 'yes'
 # ~/~ end
 # ~/~ begin <<docs/python/utilities.md#send-email>>[init]
 

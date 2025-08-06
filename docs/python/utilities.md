@@ -18,8 +18,8 @@ This function checks if the program runs in railway server production environmen
 
 def on_railway_server_production():
     avariable = os.environ.get('RAILWAY_PRODUCTION_ONLY','None')
-    print("on-railway-server-production: " + avariable)
-    return avariable == 1
+    print("on-railway-server-production: " + avariable + (avariable == 'yes'))
+    return avariable == 'yes'
 
 ```
 
