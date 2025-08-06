@@ -1,13 +1,27 @@
 # Utilities
 
+- checking if the program runs on a development machine
 - sending an email
 - displaying the content of a markdown file
 
 ``` {.python #utilities-md}
 
+<<isa-dev-computer>>
 <<send-email>>
 <<display-markdown>>
-<<isa-dev-computer>>
+
+```
+
+### Check if the current computer is a development machine
+
+This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.
+
+``` {.python #isa-dev-computer}
+
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
+def isa_dev_computer():
+    hostname = socket.gethostname()
+    return hostname in DEV_COMPUTERS
 
 ```
 
@@ -52,14 +66,3 @@ def display_markdown(file_name:str):
 
 ```
 
-### Check if the current computer is a development machine
-This function checks if the current computer's hostname is in a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for sending emails or a mockup email on the console that depend on the environment.
-
-``` {.python #isa-dev-computer}
-
-DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
-def isa_dev_computer():
-    hostname = socket.gethostname()
-    return hostname in DEV_COMPUTERS
-
-```
