@@ -5,21 +5,21 @@
 
 ``` {.python #utilities-md}
 
+<<check_on_railway_production>>
 <<send-email>>
 <<display-markdown>>
-<<on-railway-server-production>>
 
 ```
 
 ### Check if the program is running in railway production
 This function checks if the program runs in railway server production environment, where the variable 'RAILWAY_PRODUCTION_ONLY' = 1. This is useful to determine whether to use a local or remote base URLthe connection link to a registered user.
 
-``` {.python #on-railway-server-production}
+``` {.python #check_on_railway_production}
 
-def on-railway-server-production():
-    variable = os.environ.get('RAILWAY_PRODUCTION_ONLY','None')
-    print("on-railway-server-production: " + variable)
-    return variable = 1
+def on_railway_server_production():
+    avariable = os.environ.get('RAILWAY_PRODUCTION_ONLY','None')
+    print("on-railway-server-production: " + avariable)
+    return avariable == 1
 
 ```
 

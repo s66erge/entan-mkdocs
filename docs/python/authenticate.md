@@ -98,8 +98,7 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("name " + socket.gethostname())
-    if on-railway-server-production():
+    if on_railway_server_production():
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
         base_url = 'http://localhost:5001'
