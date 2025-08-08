@@ -24,6 +24,8 @@ markdown_extensions:
 theme:
   name: readthedocs
   name: material
+  features:
+    - content.code.copy
   palette: 
     # Palette toggle for light mode
     #- scheme: default

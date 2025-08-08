@@ -1,5 +1,6 @@
-# Welcome to MkDocs
+# MkDocs
 
+MkDocs is a static site generator that's geared towards project documentation. It takes Markdown files and builds them into a static website.
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
 ## Installation
@@ -41,6 +42,8 @@ markdown_extensions:
 theme:
   name: readthedocs
   name: material
+  features:
+    - content.code.copy
   palette: 
     # Palette toggle for light mode
     #- scheme: default

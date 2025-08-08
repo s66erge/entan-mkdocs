@@ -2,7 +2,7 @@
 
 ### Main program
 
-``` {.python file= src/gongUsers.py}
+``` {.python file= main.py}
 
 import secrets
 import os
