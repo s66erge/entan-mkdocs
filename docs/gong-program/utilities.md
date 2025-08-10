@@ -9,7 +9,6 @@
 <<isa-dev-computer>>
 <<send-email>>
 <<display-markdown>>
-
 ```
 
 ### Check if the current computer is a development machine
@@ -22,7 +21,6 @@ DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
 def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
-
 ```
 
 ### Send email via Google smtp
@@ -50,7 +48,7 @@ def send_email(subject, body, recipients):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-    
+
 ```
 
 ### Displaying the content of a markdown file
@@ -63,6 +61,5 @@ def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
-
 ```
 

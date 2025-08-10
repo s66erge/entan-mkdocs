@@ -123,7 +123,6 @@ def send_email(subject, body, recipients):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-    
 # ~/~ end
 # ~/~ begin <<docs/gong-program/utilities.md#display-markdown>>[init]
 

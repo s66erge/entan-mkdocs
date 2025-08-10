@@ -54,7 +54,7 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 #         format: !!python/name:mermaid2.fence_mermaid
-  
+
 theme:
   name: readthedocs
   name: material
@@ -75,7 +75,6 @@ theme:
 
   watch:
   - docs
-
 ```
 
 ## Project layout

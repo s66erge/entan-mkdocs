@@ -2,8 +2,7 @@
 $Path = '.\'
 
 # specify which files you want to monitor
-$FileFilter1 = "*.*" # '*.[mp][dy]'  matches *.md, *.py  (and also my and pd)
-
+$FileFilter1 = "*.*"  # the filter is done on the CHANGED files below
 
 # specify whether you want to monitor subfolders as well:
 $IncludeSubfolders = $true
@@ -15,7 +14,7 @@ $AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite
 $ChangeTypes = [System.IO.WatcherChangeTypes]::All, [System.IO.WatcherChangeTypes]::Deleted
 
 # specify the maximum time (in milliseconds) you want to wait for changes:
-$Timeout = 1000
+$Timeout = 500
 
 # define a function that gets called for every change:
 function Invoke-SomeAction
@@ -29,8 +28,8 @@ function Invoke-SomeAction
 
 # Check if the file name either :
 # - starts with 'docs\' and ends with .md
-# - starts with 'src\' and ends with .py
-  if ($ChangeInformation.Name -match '^(docs\\.*\.md|src\\.*\.py)$') {
+# - is the main.py file
+  if ($ChangeInformation.Name -match '^(docs\\.*\.md|main\.py)$') {
 
     Write-Warning 'Change detected:' 
     $ChangeInformation.Name | Out-String | Write-Host -ForegroundColor DarkYellow

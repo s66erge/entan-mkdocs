@@ -55,6 +55,10 @@ sync : Be smart wether to tangle or stich
 watch : Keep a loop running, watching for changes.
 
 - ! does not work on windows !
+- replaced by 'winwatch.ps1':
+  * watches changes on markdown file in \doc + main.py
+  * triggers a 'entangled sync' on these files change
+  * documented inside the file 
 
 status
 
@@ -100,5 +104,4 @@ comment = { open = "#" }
 name = "toml"
 identifiers =  ["toml"]
 comment = { open = "#" }
-
 ```
