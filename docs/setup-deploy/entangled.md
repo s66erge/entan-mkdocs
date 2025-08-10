@@ -6,15 +6,63 @@ For full documentation visit:
 - [user documentation](https://entangled.github.io/#about)
 - [installation / configuration](https://github.com/entangled/entangled.py).
 
-## Installation
+Pandoc needs to be installed for Entangled.
+
+VSCode extensions:
+
+- Markdown All in One
+- Markdown Preview Enhanced
+- Entangled VSCode : helps for editing the entangled files.
+
+
+## Initial Installation
+
+### Windows
 
 ``` {.pwsh file= setup/entangled.ps1}
 scoop install pandoc
 uv pip install entangled-cli
 ```
 
-And the vscode extension 'Entangled VSCode' for editing the entangled files.
-It requires Pandoc to be installed.
+### Linux Mint
+
+``` {.bash file= setup/entangled.sh}
+sudo apt install pandoc
+uv pip install entangled-cli
+```
+
+## Commands
+
+see: entangled --help
+
+usage: **entangled [-h] [-d] [-v] {tangle,stitch,sync,watch,status} ...**
+
+positional arguments: {tangle,stitch,sync,watch,status}
+
+tangle
+
+- Tangle codes from Markdown
+- [-h], [-s] only show, [--force] force tangle
+- **[-r] rebuild file data base**  
+  
+stitch
+    
+- Stitch code changes back into the Markdown
+- [-h], [--force] force stitch, [-s] 
+  
+sync : Be smart wether to tangle or stich
+  
+watch : Keep a loop running, watching for changes.
+
+- ! does not work on windows !
+
+status
+
+options:
+
+- h, --help            show this help message and exit
+- d, --debug           enable debug messages
+- v, --version         show version number
 
 ## Configuration
 
@@ -54,38 +102,3 @@ identifiers =  ["toml"]
 comment = { open = "#" }
 
 ```
-
-## Commands
-
-see: entangled --help
-
-usage: **entangled [-h] [-d] [-v] {tangle,stitch,sync,watch,status} ...**
-
-positional arguments: {tangle,stitch,sync,watch,status}
-
-    tangle              Tangle codes from Markdown
-                        [-h], [-s] only show, [--force] force tangle  
-  
-    stitch              Stitch code changes back into the Markdown
-                        [-h], [--force] force stitch, [-s] 
-  
-    sync                Be smart wether to tangle or stich
-  
-    watch               Keep a loop running, watching for changes.
-                        !!! does not work on windows !!!  
-    status
-
-options:
-
-  -h, --help            show this help message and exit
-
-  -d, --debug           enable debug messages
-  
-  -v, --version         show version number
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.

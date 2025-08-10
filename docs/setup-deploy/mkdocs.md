@@ -3,18 +3,34 @@
 MkDocs is a static site generator that's geared towards project documentation. It takes Markdown files and builds them into a static website.
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
-## Installation
+## Initial Installation
+
+### Windows
 
 ``` {.pwsh file= setup/mkdocs.ps1}
 uv pip install mkdocs
 uv pip install mkdocs-mermaid2-plugin
 uv pip install mkdocs-material
 uv pip install mkdocs-entangled-plugin
-
 ```
 
-## Configuration
+### Linux Mint
 
+``` {.bash file= setup/mkdocs.sh}
+uv pip install mkdocs
+uv pip install mkdocs-mermaid2-plugin
+uv pip install mkdocs-material
+uv pip install mkdocs-entangled-plugin
+```
+
+## Commands
+
+* `mkdocs new [dir-name]` - Create a new project.
+* `mkdocs serve` - Start the live-reloading docs server at http://127.0.0.1:8000/
+* `mkdocs build` - Build the documentation site.
+* `mkdocs -h` - Print help message and exit.
+
+## Configuration
 
 ``` {.yaml file= mkdocs.yml}
 site_name: My Docs
@@ -61,13 +77,6 @@ theme:
   - docs
 
 ```
-
-## Commands
-
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server at http://127.0.0.1:8000/
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
 
 ## Project layout
 
