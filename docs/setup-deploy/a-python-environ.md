@@ -35,7 +35,7 @@ uv pip install -r requirements.txt
 ```
 ### VSCode startup
 
-``` {.bash file= setup/startup.sh}
+``` bash
 source .venv/bin/activate
 ```
 
