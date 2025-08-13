@@ -48,7 +48,6 @@ def send_email(subject, body, recipients):
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-
 ```
 
 ### Displaying the content of a markdown file

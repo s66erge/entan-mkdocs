@@ -88,8 +88,6 @@ def post(email: str):
     if not email:
        return "Email is required"
 
-# TODO authenticate now the testing email in Railway secrets
-
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
     try:

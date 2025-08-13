@@ -9,6 +9,7 @@ import os
 import socket
 import markdown2
 import smtplib
+import shutil
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from fasthtml.common import *
