@@ -26,7 +26,9 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 <<utilities-md>>
 <<authenticate-md>>
 <<home-page>>
-<<start-admin-md>>
+<<start-dash-md>>
+<<admin-show-md>>
+<<admin-change-md>>
 # client = TestClient(app)
 # print(client.get("/login").text)
 
