@@ -104,7 +104,7 @@ if not planners():
 
 # ~/~ begin <<docs/gong-program/utilities.md#isa-dev-computer>>[init]
 
-DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-machine"]
+DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-linuxmint"]
 def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
