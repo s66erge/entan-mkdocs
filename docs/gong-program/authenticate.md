@@ -96,10 +96,12 @@ def post(email: str):
     except NotFoundError:
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
-    print("name " + socket.gethostname())
-    if not isa_dev_computer():
+    domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
+    
+    if (not isa_dev_computer()) and (domainame is not None):
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
+        print(" machine name: " + socket.gethostname())
         base_url = 'http://localhost:5001'
 
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"

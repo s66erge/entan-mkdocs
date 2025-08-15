@@ -1,5 +1,7 @@
 # The python environment
 
+Make sure this computer will be recognized by name as a dev machine : see isa_dev_computer() in utilities.md !!!
+
 To set up and manage the virtual Python environment for this project, we use the [uv tool](https://docs.astral.sh/uv/).
 
 VSCode extensions:
@@ -19,7 +21,7 @@ uv pip install -r requirements.txt
 ```
 ### VSCode startup
 
-``` {.pwsh file= setup/startup.ps1}
+``` {.pwsh file= setup/startup.ps1}scoop install 
 .venv\Scripts\activate.ps1
 ```
 
