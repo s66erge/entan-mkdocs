@@ -4,6 +4,7 @@ Will only be reachable for users who are signed in.
 
 ``` {.python #admin-show-md}
 
+<<feedback-messages>>
 <<show-users>>
 <<show-centers>>
 <<show-planners>>
@@ -11,6 +12,7 @@ Will only be reachable for users who are signed in.
 ```
 
 TODO document admin-show
+
 
 ``` {.python #admin-page}
 
@@ -25,41 +27,6 @@ def admin(session, request):
                 P("You do not have permission to access this page.")),
             cls="container")
 
-    # Handle success and error messages
-    query_params = dict(request.query_params)
-    message_div = None
-
-    if 'success' in query_params:
-        success_messages = {
-            'user_added': 'User added successfully!',
-            'center_added': 'Center added successfully!',
-            'planner_added': 'Planner association added successfully!',
-            'user_deleted': 'User deleted successfully!',
-            'center_deleted': 'Center and associated database deleted successfully!',
-            'planner_deleted': 'Planner association deleted successfully!'
-        }
-        message = success_messages.get(query_params['success'], 'Operation completed successfully!')
-        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
-
-    elif 'error' in query_params:
-        error_messages = {
-            'missing_fields': 'Please fill in all required fields.',
-            'user_exists': 'User with this email already exists.',
-            'center_exists': 'Center with this name already exists.',
-            'planner_exists': 'This planner association already exists.',
-            'user_not_found': 'User not found.',
-            'center_not_found': 'Center not found.',
-            'invalid_role': 'Invalid role selected.',
-            'database_error': 'Database error occurred. Please try again.',
-            'db_file_exists': 'Database file with this name already exists.',
-            'template_not_found': 'Template database (mahi.db) not found.',
-            'user_has_planners': f'Cannot delete user. User is still associated with centers: {query_params.get("centers", "")}. Please remove all planner associations first.',
-            'center_has_planners': f'Cannot delete center. Center is still associated with users: {query_params.get("users", "")}. Please remove all planner associations first.',
-            'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{query_params.get("center", "")}". Each center must have at least one planner.'
-        }
-        message = error_messages.get(query_params['error'], 'An error occurred.')
-        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
-
     return Main(
         Nav(
             Ul(
@@ -69,14 +36,54 @@ def admin(session, request):
             ), 
             Button("Logout", hx_post="/logout"),
         ),
-        Div(H1("Admin Dashboard"), P("Here you can manage users, centers, and planners.")),
-        message_div,
+        Div(display_markdown("admin-show")),
+        feedback_to_user(request),
         show_users(),
         show_centers(),
         show_planners(),
         cls="container",
     )
 ```
+
+``` {.python #feedback-messages}
+
+def feedback_to_user(request):
+    query_params = dict(request.query_params)
+    # Handle success and error messages
+    success_messages = {
+        'user_added': 'User added successfully!',
+        'center_added': 'Center added successfully!',
+        'planner_added': 'Planner association added successfully!',
+        'user_deleted': 'User deleted successfully!',
+        'center_deleted': 'Center and associated database deleted successfully!',
+        'planner_deleted': 'Planner association deleted successfully!'
+    }
+    error_messages = {
+        'missing_fields': 'Please fill in all required fields.',
+        'user_exists': 'User with this email already exists.',
+        'center_exists': 'Center with this name already exists.',
+        'planner_exists': 'This planner association already exists.',
+        'user_not_found': 'User not found.',
+        'center_not_found': 'Center not found.',
+        'invalid_role': 'Invalid role selected.',
+        'database_error': 'Database error occurred. Please try again.',
+        'db_file_exists': 'Database file with this name already exists.',
+        'template_not_found': 'Template database (mahi.db) not found.',
+        'user_has_planners': f'Cannot delete user. User is still associated with centers: {query_params.get("centers", "")}. Please remove all planner associations first.',
+        'center_has_planners': f'Cannot delete center. Center is still associated with users: {query_params.get("users", "")}. Please remove all planner associations first.',
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{query_params.get("center", "")}". Each center must have at least one planner.'
+    }
+    message_div = None
+    if 'success' in query_params:
+        message = success_messages.get(query_params['success'], 'Operation completed successfully!')
+        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
+    elif 'error' in query_params:
+        message = error_messages.get(query_params['error'], 'An error occurred.')
+        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
+    return message_div
+
+```
+
 
 ``` {.python #show-users}
 def show_users():

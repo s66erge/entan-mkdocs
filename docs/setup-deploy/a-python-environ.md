@@ -17,11 +17,10 @@ scoop install main/uv
 uv python install
 uv venv
 uv pip install -r requirements.txt
-.venv\Scripts\activate.ps1
 ```
 ### VSCode startup
 
-``` {.pwsh file= setup/startup.ps1}scoop install 
+``` {.pwsh file= setup/startup.ps1}
 .venv\Scripts\activate.ps1
 ```
 
