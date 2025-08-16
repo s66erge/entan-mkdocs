@@ -38,7 +38,7 @@ def admin(session, request):
         ),
         Div(display_markdown("admin-show")),
         feedback_to_user(request),
-        show_users(),
+        Div(show_users(), id="users"),
         show_centers(),
         show_planners(),
         cls="container",
@@ -87,7 +87,7 @@ def feedback_to_user(request):
 
 ``` {.python #show-users}
 def show_users():
-    return Main( 
+    return Main(
         Div(
         Table(
         H2("Users"),

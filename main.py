@@ -310,7 +310,7 @@ def feedback_to_user(request):
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-users>>[init]
 def show_users():
-    return Main( 
+    return Main(
         Div(
         Table(
         H2("Users"),
@@ -440,7 +440,7 @@ def admin(session, request):
         ),
         Div(display_markdown("admin-show")),
         feedback_to_user(request),
-        show_users(),
+        Div(show_users(), id="users"),
         show_centers(),
         show_planners(),
         cls="container",

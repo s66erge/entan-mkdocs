@@ -1,9 +1,10 @@
 # Ignore everything
+/*
+# Ignore hidden/work directories
+/.* /
+/__pycache__/*
 .entangled/**/filedb.json
 .entangled/**/filedb.lock
-/*
-# Ignore hidden directories
-/.* /
 
 # Except root files
 !/*
