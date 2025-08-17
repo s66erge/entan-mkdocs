@@ -41,6 +41,7 @@ def delete_user(session, email: str):
 
 @rt('/add_user')
 def post(session, new_user_email: str, role_name: str):
+    print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -53,7 +54,8 @@ def post(session, new_user_email: str, role_name: str):
         # Check if user already exists
         existing_user = users("email = ?", (new_user_email,))
         if existing_user:
-            return RedirectResponse('/admin_page?error=user_exists')
+            #return RedirectResponse('/admin_page?error=user_exists')
+            return Div(feedback_to_user({"error": "user_exists"}))
 
         # Validate role
         if role_name not in ['admin', 'user']:
@@ -69,7 +71,11 @@ def post(session, new_user_email: str, role_name: str):
             magic_link_expiry=None
         )
         #return RedirectResponse('/admin_page?success=user_added')
-        return Div(show_users_table())
+        return Div(
+            Div(feedback_to_user({"success": "user_added"})),
+            Div(show_users_table(), hx_swap_oob="true", id="users-table"),
+            Div(show_users_form(), hx_swap_oob="true", id="users-form")
+        )
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 ```

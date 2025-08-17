@@ -40,10 +40,10 @@ def admin(session, request):
         feedback_to_user(params),
     
         H2("Users"),
-        #Div(feedback_to_user(params), id="users-feedback"),
+        Div(feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(), id="users-table"),
         H4("Add New User"),
-        show_users_form(),
+        Div(show_users_form(), id="users-form"),
 
         show_centers(),
         show_planners(),
@@ -124,7 +124,7 @@ def show_users_form():
                     Option("User", value="user"),
                         name="role_name", required=True),
                 #Button("Add User", type="submit"), method="post", action="/add_user"
-                Button("Add User", type="submit"), hx_post="/add_user", hx_target="#users-table"
+                Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
