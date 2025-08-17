@@ -40,7 +40,7 @@ def delete_user(session, email: str):
         )
 
 @rt('/add_user')
-def add_user(session, new_user_email: str, role_name: str):
+def post(session, new_user_email: str, role_name: str):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -68,7 +68,8 @@ def add_user(session, new_user_email: str, role_name: str):
             magic_link_token=None,
             magic_link_expiry=None
         )
-        return RedirectResponse('/admin_page?success=user_added')
+        #return RedirectResponse('/admin_page?success=user_added')
+        return Div(show_users_table())
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 ```

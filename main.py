@@ -273,8 +273,8 @@ def unfinished():
 
 # ~/~ begin <<docs/gong-program/admin-show.md#feedback-messages>>[init]
 
-def feedback_to_user(request):
-    query_params = dict(request.query_params)
+def feedback_to_user(params):
+    # query_params = dict(request.query_params)
     # Handle success and error messages
     success_messages = {
         'user_added': 'User added successfully!',
@@ -295,25 +295,24 @@ def feedback_to_user(request):
         'database_error': 'Database error occurred. Please try again.',
         'db_file_exists': 'Database file with this name already exists.',
         'template_not_found': 'Template database (mahi.db) not found.',
-        'user_has_planners': f'Cannot delete user. User is still associated with centers: {query_params.get("centers", "")}. Please remove all planner associations first.',
-        'center_has_planners': f'Cannot delete center. Center is still associated with users: {query_params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{query_params.get("center", "")}". Each center must have at least one planner.'
+        'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
+        'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{params.get("center", "")}". Each center must have at least one planner.'
     }
     message_div = None
-    if 'success' in query_params:
-        message = success_messages.get(query_params['success'], 'Operation completed successfully!')
+    if 'success' in params:
+        message = success_messages.get(params['success'], 'Operation completed successfully!')
         message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
-    elif 'error' in query_params:
-        message = error_messages.get(query_params['error'], 'An error occurred.')
+    elif 'error' in params:
+        message = error_messages.get(params['error'], 'An error occurred.')
         message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
     return message_div
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-users>>[init]
-def show_users():
+
+def show_users_table():
     return Main(
-        Div(
         Table(
-        H2("Users"),
             Thead(
                 Tr(Th("Email"), Th("Name"), Th("Role"), Th("Active"), Th("Action"))
             ),
@@ -328,22 +327,25 @@ def show_users():
                 ) for u in users()]
             )
         )
-    ),
-    Div(
-        H4("Add New User"),
-        Form(
-            Input(type="email", placeholder="User Email", name="new_user_email", required=True),
-            Select( 
-                Option("Select Role", value="", selected=True, disabled=True),
-                Option("Admin", value="admin"),
-                Option("User", value="user"),
-                    name="role_name", required=True),
-            Button("Add User", type="submit"),
-            method="post",
-            action="/add_user"
+    )
+
+  
+def show_users_form():
+    return Main(
+       Div(
+            Form(
+                Input(type="email", placeholder="User Email", name="new_user_email", required=True),
+                Select( 
+                    Option("Select Role", value="", selected=True, disabled=True),
+                    Option("Admin", value="admin"),
+                    Option("User", value="user"),
+                        name="role_name", required=True),
+                #Button("Add User", type="submit"), method="post", action="/add_user"
+                Button("Add User", type="submit"), hx_post="/add_user", hx_target="#users-table"
             )
         )    
     )
+    
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-centers>>[init]
 def show_centers():
@@ -370,9 +372,7 @@ def show_centers():
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"),
-                method="post",
-                action="/add_center"
+                Button("Add Center", type="submit"), method="post", action="/add_center"
             )
         )
     )
@@ -428,7 +428,7 @@ def admin(session, request):
             Div(H1("Access Denied"),
                 P("You do not have permission to access this page.")),
             cls="container")
-
+    params = dict(request.query_params)
     return Main(
         Nav(
             Ul(
@@ -439,8 +439,14 @@ def admin(session, request):
             Button("Logout", hx_post="/logout"),
         ),
         Div(display_markdown("admin-show")),
-        feedback_to_user(request),
-        Div(show_users(), id="users"),
+        feedback_to_user(params),
+    
+        H2("Users"),
+        #Div(feedback_to_user(params), id="users-feedback"),
+        Div(show_users_table(), id="users-table"),
+        H4("Add New User"),
+        show_users_form(),
+
         show_centers(),
         show_planners(),
         cls="container",
@@ -478,7 +484,7 @@ def delete_user(session, email: str):
         )
 
 @rt('/add_user')
-def add_user(session, new_user_email: str, role_name: str):
+def post(session, new_user_email: str, role_name: str):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -506,7 +512,8 @@ def add_user(session, new_user_email: str, role_name: str):
             magic_link_token=None,
             magic_link_expiry=None
         )
-        return RedirectResponse('/admin_page?success=user_added')
+        #return RedirectResponse('/admin_page?success=user_added')
+        return Div(show_users_table())
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 # ~/~ end
