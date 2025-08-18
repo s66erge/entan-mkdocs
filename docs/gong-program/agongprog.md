@@ -19,7 +19,12 @@ css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursiv
 
 <<auth-beforeware>>
 
+# TODO decorator to check role in admin routes
+
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
+
+# TODO move data definitions in on=wn file and bring user messages here
+# TODO create special page for database errors
 
 <<setup-database>>
 <<initialize-database>>

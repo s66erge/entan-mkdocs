@@ -41,7 +41,7 @@ def delete_user(session, email: str):
 
 @rt('/add_user')
 def post(session, new_user_email: str = "", role_name: str =""):
-    print(f"email: {new_user_email}, role: {role_name}")
+    # print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -52,7 +52,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
             message = {"error" : "missing_fields"}
 
         # Validate role
-        elif role_name not in ['admin', 'user']:
+        elif not roles("role_name = ?", (role_name,)):
             message = {"error": "invalid_role"}
 
         # Check if user already exists

@@ -24,7 +24,12 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
+# TODO decorator to check role in admin routes
+
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
+
+# TODO move data definitions in on=wn file and bring user messages here
+# TODO create special page for database errors
 
 # ~/~ begin <<docs/gong-program/agongprog.md#setup-database>>[init]
 
@@ -331,14 +336,14 @@ def show_users_table():
 
   
 def show_users_form():
+    role_names = [r.role_name for r in roles()]
     return Main(
        Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
                 Select( 
                     Option("Select Role", value="", selected=True, disabled=True),
-                    Option("Admin", value="admin"),
-                    Option("User", value="user"),
+                    *[Option(role, value=role) for role in role_names],
                         name="role_name", required=True),
                 #Button("Add User", type="submit"), method="post", action="/add_user"
                 Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
@@ -485,7 +490,7 @@ def delete_user(session, email: str):
 
 @rt('/add_user')
 def post(session, new_user_email: str = "", role_name: str =""):
-    print(f"email: {new_user_email}, role: {role_name}")
+    # print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -496,7 +501,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
             message = {"error" : "missing_fields"}
 
         # Validate role
-        elif role_name not in ['admin', 'user']:
+        elif not roles("role_name = ?", (role_name,)):
             message = {"error": "invalid_role"}
 
         # Check if user already exists

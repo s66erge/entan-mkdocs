@@ -114,14 +114,14 @@ def show_users_table():
 
   
 def show_users_form():
+    role_names = [r.role_name for r in roles()]
     return Main(
        Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
                 Select( 
                     Option("Select Role", value="", selected=True, disabled=True),
-                    Option("Admin", value="admin"),
-                    Option("User", value="user"),
+                    *[Option(role, value=role) for role in role_names],
                         name="role_name", required=True),
                 #Button("Add User", type="submit"), method="post", action="/add_user"
                 Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
