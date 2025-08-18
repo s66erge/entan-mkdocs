@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-program/agongprog.md#main.py>>[init]
+# ~/~ begin <<docs/gong-program/aaGongprog.md#main.py>>[init]
 
 import secrets
 import os
@@ -24,14 +24,12 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
-# TODO decorator to check role in admin routes
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# TODO move data definitions in on=wn file and bring user messages here
-# TODO create special page for database errors
+# ~/~ begin <<docs/gong-program/data-def-db.md#data-defi-db-md>>[init]
 
-# ~/~ begin <<docs/gong-program/agongprog.md#setup-database>>[init]
+# ~/~ begin <<docs/gong-program/data-def-db.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -87,7 +85,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/gong-program/agongprog.md#initialize-database>>[init]
+# ~/~ begin <<docs/gong-program/data-def-db.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -104,6 +102,44 @@ if not users():
 if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
+# ~/~ end
+# ~/~ end
+# ~/~ begin <<docs/gong-program/aaGongprog.md#feedback-messages>>[init]
+
+def feedback_to_user(params):
+    # query_params = dict(request.query_params)
+    # Handle success and error messages
+    success_messages = {
+        'user_added': 'User added successfully!',
+        'center_added': 'Center added successfully!',
+        'planner_added': 'Planner association added successfully!',
+        'user_deleted': 'User deleted successfully!',
+        'center_deleted': 'Center and associated database deleted successfully!',
+        'planner_deleted': 'Planner association deleted successfully!'
+    }
+    error_messages = {
+        'missing_fields': 'Please fill in all required fields.',
+        'user_exists': 'User with this email already exists.',
+        'center_exists': 'Center with this name already exists.',
+        'planner_exists': 'This planner association already exists.',
+        'user_not_found': 'User not found.',
+        'center_not_found': 'Center not found.',
+        'invalid_role': 'Invalid role selected.',
+        'database_error': 'Database error occurred. Please try again.',
+        'db_file_exists': 'Database file with this name already exists.',
+        'template_not_found': 'Template database (mahi.db) not found.',
+        'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
+        'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{params.get("center", "")}". Each center must have at least one planner.'
+    }
+    message_div = None
+    if 'success' in params:
+        message = success_messages.get(params['success'], 'Operation completed successfully!')
+        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
+    elif 'error' in params:
+        message = error_messages.get(params['error'], 'An error occurred.')
+        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
+    return message_div
 # ~/~ end
 # ~/~ begin <<docs/gong-program/utilities.md#utilities-md>>[init]
 
@@ -234,7 +270,7 @@ def post(session):
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/agongprog.md#home-page>>[init]
+# ~/~ begin <<docs/gong-program/aaGongprog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
@@ -276,43 +312,6 @@ def unfinished():
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#admin-show-md>>[init]
 
-# ~/~ begin <<docs/gong-program/admin-show.md#feedback-messages>>[init]
-
-def feedback_to_user(params):
-    # query_params = dict(request.query_params)
-    # Handle success and error messages
-    success_messages = {
-        'user_added': 'User added successfully!',
-        'center_added': 'Center added successfully!',
-        'planner_added': 'Planner association added successfully!',
-        'user_deleted': 'User deleted successfully!',
-        'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
-    }
-    error_messages = {
-        'missing_fields': 'Please fill in all required fields.',
-        'user_exists': 'User with this email already exists.',
-        'center_exists': 'Center with this name already exists.',
-        'planner_exists': 'This planner association already exists.',
-        'user_not_found': 'User not found.',
-        'center_not_found': 'Center not found.',
-        'invalid_role': 'Invalid role selected.',
-        'database_error': 'Database error occurred. Please try again.',
-        'db_file_exists': 'Database file with this name already exists.',
-        'template_not_found': 'Template database (mahi.db) not found.',
-        'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
-        'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{params.get("center", "")}". Each center must have at least one planner.'
-    }
-    message_div = None
-    if 'success' in params:
-        message = success_messages.get(params['success'], 'Operation completed successfully!')
-        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
-    elif 'error' in params:
-        message = error_messages.get(params['error'], 'An error occurred.')
-        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
-    return message_div
-# ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-users>>[init]
 
 def show_users_table():
