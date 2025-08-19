@@ -38,15 +38,26 @@ def admin(session, request):
         ),
         Div(display_markdown("admin-show")),
         feedback_to_user(params),
-    
+
         H2("Users"),
         Div(feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(), id="users-table"),
         H4("Add New User"),
         Div(show_users_form(), id="users-form"),
 
-        show_centers(),
-        show_planners(),
+        H2("Centers"),
+        Div(feedback_to_user(params), id="centers-feedback"),
+        Div(show_centers_table(), id="centers-table"),
+        H4("Add New Center"),
+        Div(show_centers_form(), id="centers-form"),
+
+        # show_planners(),
+        H2("Planners"),
+        Div(feedback_to_user(params), id="planners-feedback"),
+        Div(show_planners_table(), id="planners-table"),
+        H4("Add New Planner"),
+        Div(show_planners_form(), id="planners-form"),
+
         cls="container",
     )
 ```
@@ -73,30 +84,27 @@ def show_users_table():
         )
     )
 
-  
+
 def show_users_form():
     role_names = [r.role_name for r in roles()]
     return Main(
-       Div(
+        Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
                 Select( 
                     Option("Select Role", value="", selected=True, disabled=True),
                     *[Option(role, value=role) for role in role_names],
                         name="role_name", required=True),
-                #Button("Add User", type="submit"), method="post", action="/add_user"
                 Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
-    
 ```
 
 ``` {.python #show-centers}
-def show_centers():
+
+def show_centers_table():
     return Main(
-        Div(
-        H2("Centers"),
         Table(
             Thead(
                 Tr(Th("Center Name"), Th("Gong DB Name"), Th("Actions"))
@@ -105,45 +113,50 @@ def show_centers():
                 *[Tr(
                     Td(c.center_name), 
                     Td(c.gong_db_name), 
-                    Td(A("Delete", href=f"/delete_center/{c.center_name}",
-                        onclick="return confirm('Are you sure you want to delete this center?')"))
-                    ) for c in centers()]
-                )
+                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
+                        hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
+                ) for c in centers()]
             )
-        ),
+        )
+    )
+
+def show_centers_form():
+    return Main(
         Div(
-            H4("Add New Center"),
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"), method="post", action="/add_center"
+                Button("Add Center", type="submit"), hx_post="/add_center",hx_target="#centers-feedback"
             )
         )
     )
 ```
 
+DONOW adapt to htmx calls
+
 ``` {.python #show-planners}
-def show_planners():
+
+def show_planners_table():
+    return Main(
+        Table(
+            Thead(
+                Tr(Th("User Email"), Th("Center Name"), Th("Actions"))
+            ),
+            Tbody(
+                *[Tr(
+                    Td(p.user_email), 
+                    Td(p.center_name), 
+                    Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
+                            onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                ) for p in planners()]
+            )
+        )
+    )
+
+def show_planners_form():
     return Main(
         Div(
-            H2("Planners"),
-            Table(
-                Thead(
-                    Tr(Th("User Email"), Th("Center Name"), Th("Actions"))
-                ),
-                Tbody(
-                    *[Tr(
-                        Td(p.user_email), 
-                        Td(p.center_name), 
-                        Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
-                             onclick="return confirm('Are you sure you want to delete this planner association?')"))
-                    ) for p in planners()]
-                )
-            )
-        ),
-        Div(
-            H4("Add New Planner"),
             Form(
                 Select(
                     Option("Select User", value="", selected=True, disabled=True),
@@ -156,8 +169,7 @@ def show_planners():
                     name="new_planner_center_name", required=True
                 ),
                 Button("Add Planner", type="submit"),
-                method="post",
-                action="/add_planner"
+                method="post", action="/add_planner"
             )
         )
     )

@@ -3,12 +3,14 @@
 - checking if the program runs on a development machine
 - sending an email
 - displaying the content of a markdown file
+- route is not implemented yet
 
 ``` {.python #utilities-md}
 
 <<isa-dev-computer>>
 <<send-email>>
 <<display-markdown>>
+<<not-implemented>>
 ```
 
 ### Check if the current computer is a development machine
@@ -62,3 +64,12 @@ def display_markdown(file_name:str):
     return NotStr(html_content)
 ```
 
+``` {.python #not-implemented}
+@rt('/unfinished')
+def unfinished():
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
+```
