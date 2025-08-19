@@ -13,8 +13,8 @@ TODO document admin-change
 
 ``` {.python #change-users}
 
-@rt('/delete_user/{email}')
-def delete_user(session, email: str):
+@rt('/delete_user/{email}') 
+def post(session, email: str):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
@@ -27,11 +27,16 @@ def delete_user(session, email: str):
             # Get the center names for the error message
             center_names = [p.center_name for p in user_planners]
             centers_list = ", ".join(center_names)
-            return RedirectResponse(f'/admin_page?error=user_has_planners&centers={centers_list}')
+            #return RedirectResponse(f'/admin_page?error=user_has_planners&centers={centers_list}')
+            return Div(feedback_to_user({"error": "user_has_planners", "centers": f"{centers_list}"}))
 
         # If no planner associations, proceed with deletion
         db.execute("DELETE FROM users WHERE email = ?", (email,))
-        return RedirectResponse('/admin_page?success=user_deleted')
+        # return RedirectResponse('/admin_page?success=user_deleted')
+        return Div(
+            Div(feedback_to_user({"success": "user_deleted"})),
+            Div(show_users_table(), hx_swap_oob="true", id="users-table")
+        )
     except Exception as e:
         return Main(
             Nav(Li(A("Admin", href="/admin_page"))),
