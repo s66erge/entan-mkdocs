@@ -28,12 +28,5 @@ def get(session):
         cls="container",
     )
 
-@rt('/unfinished')
-def unfinished():
-    return Main(
-        Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(H1("This feature is not yet implemented.")),
-        cls="container"
-    )
 ```
 

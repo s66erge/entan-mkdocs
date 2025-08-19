@@ -45,14 +45,19 @@ def admin(session, request):
         H4("Add New User"),
         Div(show_users_form(), id="users-form"),
 
-        #show_centers(),
         H2("Centers"),
         Div(feedback_to_user(params), id="centers-feedback"),
         Div(show_centers_table(), id="centers-table"),
         H4("Add New Center"),
         Div(show_centers_form(), id="centers-form"),
 
-        show_planners(),
+        # show_planners(),
+        H2("Planners"),
+        Div(feedback_to_user(params), id="planners-feedback"),
+        Div(show_planners_table(), id="planners-table"),
+        H4("Add New Planner"),
+        Div(show_planners_form(), id="planners-form"),
+
         cls="container",
     )
 ```
@@ -128,27 +133,30 @@ def show_centers_form():
     )
 ```
 
+DONOW adapt to htmx calls
+
 ``` {.python #show-planners}
-def show_planners():
+
+def show_planners_table():
+    return Main(
+        Table(
+            Thead(
+                Tr(Th("User Email"), Th("Center Name"), Th("Actions"))
+            ),
+            Tbody(
+                *[Tr(
+                    Td(p.user_email), 
+                    Td(p.center_name), 
+                    Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
+                            onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                ) for p in planners()]
+            )
+        )
+    )
+
+def show_planners_form():
     return Main(
         Div(
-            H2("Planners"),
-            Table(
-                Thead(
-                    Tr(Th("User Email"), Th("Center Name"), Th("Actions"))
-                ),
-                Tbody(
-                    *[Tr(
-                        Td(p.user_email), 
-                        Td(p.center_name), 
-                        Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
-                             onclick="return confirm('Are you sure you want to delete this planner association?')"))
-                    ) for p in planners()]
-                )
-            )
-        ),
-        Div(
-            H4("Add New Planner"),
             Form(
                 Select(
                     Option("Select User", value="", selected=True, disabled=True),
@@ -161,8 +169,7 @@ def show_planners():
                     name="new_planner_center_name", required=True
                 ),
                 Button("Add Planner", type="submit"),
-                method="post",
-                action="/add_planner"
+                method="post", action="/add_planner"
             )
         )
     )
