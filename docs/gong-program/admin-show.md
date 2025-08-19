@@ -67,8 +67,7 @@ def show_users_table():
                     Td(u.name or ""), 
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
-                    Td(A("Delete", href=f"/delete_user/{u.email}", 
-                        onclick="return confirm('Are you sure you want to delete this user?')"))
+                    Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", onclick="return confirm('Are you sure you want to delete this user?')"))
                 ) for u in users()]
             )
         )
