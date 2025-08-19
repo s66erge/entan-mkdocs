@@ -2,7 +2,7 @@
 /*
 # Ignore hidden/work directories
 .*/
-site/
+site/*
 /__pycache__/*
 .entangled/**/filedb.json
 .entangled/**/filedb.lock
