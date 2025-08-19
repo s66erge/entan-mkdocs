@@ -820,10 +820,12 @@
 <li>checking if the program runs on a development machine</li>
 <li>sending an email</li>
 <li>displaying the content of a markdown file</li>
+<li>route is not implemented yet</li>
 </ul>
 <div id="utilities-md" class="highlight"><span class="filename">#utilities-md</span><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">isa</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">computer</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">send</span><span class="o">-</span><span class="n">email</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">display</span><span class="o">-</span><span class="n">markdown</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="ow">not</span><span class="o">-</span><span class="n">implemented</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <h3 id="check-if-the-current-computer-is-a-development-machine">Check if the current computer is a development machine</h3>
 <p>This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.</p>
@@ -860,6 +862,14 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;md-text/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.md&#39;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">html_content</span> <span class="o">=</span> <span class="n">markdown2</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">NotStr</span><span class="p">(</span><span class="n">html_content</span><span class="p">)</span>
+</code></pre></div>
+<div id="not-implemented" class="highlight"><span class="filename">#not-implemented</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/unfinished&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unfinished</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">))),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="s2">&quot;This feature is not yet implemented.&quot;</span><span class="p">)),</span>
+        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
+    <span class="p">)</span>
 </code></pre></div>
 
 
