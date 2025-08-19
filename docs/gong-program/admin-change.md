@@ -1,6 +1,6 @@
-# User pages
+# Admin change functions
 
-Will only be reachable for users who are signed in.
+Used by the admin page : admin-show.md
 
 ``` {.python #admin-change-md}
 

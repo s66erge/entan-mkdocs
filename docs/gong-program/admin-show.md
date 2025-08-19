@@ -1,6 +1,6 @@
-# User pages
+# Admin page
 
-Will only be reachable for users who are signed in.
+Will only be reachable for signed in admin users.
 
 ``` {.python #admin-show-md}
 
@@ -12,6 +12,7 @@ Will only be reachable for users who are signed in.
 
 TODO document admin-show
 
+TODO show tables sorted by key
 
 ``` {.python #admin-page}
 
