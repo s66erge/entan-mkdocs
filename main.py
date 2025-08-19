@@ -217,7 +217,7 @@ def post(email: str):
         return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
 
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
-    
+
     if (not isa_dev_computer()) and (domainame is not None):
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
@@ -332,7 +332,7 @@ def show_users_table():
         )
     )
 
-  
+
 def show_users_form():
     role_names = [r.role_name for r in roles()]
     return Main(
@@ -343,12 +343,10 @@ def show_users_form():
                     Option("Select Role", value="", selected=True, disabled=True),
                     *[Option(role, value=role) for role in role_names],
                         name="role_name", required=True),
-                #Button("Add User", type="submit"), method="post", action="/add_user"
                 Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
-    
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-centers>>[init]
 
@@ -362,8 +360,8 @@ def show_centers_table():
                 *[Tr(
                     Td(c.center_name), 
                     Td(c.gong_db_name), 
-                    Td(A("Delete", href=f"/delete_center/{c.center_name}",
-                        onclick="return confirm('Are you sure you want to delete this center?')"))
+                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
+                        hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
                 ) for c in centers()]
             )
         )
@@ -376,7 +374,7 @@ def show_centers_form():
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"), method="post", action="/add_center"
+                Button("Add Center", type="submit"), hx_post="/add_center",hx_target="#centers-feedback"
             )
         )
     )
@@ -444,7 +442,7 @@ def admin(session, request):
         ),
         Div(display_markdown("admin-show")),
         feedback_to_user(params),
-    
+
         H2("Users"),
         Div(feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(), id="users-table"),
@@ -457,7 +455,6 @@ def admin(session, request):
         Div(show_centers_table(), id="centers-table"),
         H4("Add New Center"),
         Div(show_centers_form(), id="centers-form"),
-
 
         show_planners(),
         cls="container",
@@ -476,21 +473,27 @@ def post(session, email: str):
         return RedirectResponse('/dashboard')
 
     try:
-        # Check if user has any planner associations
+        user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))
-        if user_planners:
+        
+        if not user_info:
+            message = {'error' : 'user_not_found'}
+       
+        # Check if user has any planner associations
+        elif user_planners:
             # Get the center names for the error message
             center_names = [p.center_name for p in user_planners]
             centers_list = ", ".join(center_names)
-            #return RedirectResponse(f'/admin_page?error=user_has_planners&centers={centers_list}')
-            return Div(feedback_to_user({"error": "user_has_planners", "centers": f"{centers_list}"}))
+            message = {"error": "user_has_planners", "centers": f"{centers_list}"}
 
-        # If no planner associations, proceed with deletion
-        db.execute("DELETE FROM users WHERE email = ?", (email,))
-        # return RedirectResponse('/admin_page?success=user_deleted')
+        else:
+            # If no planner associations, proceed with deletion
+            db.execute("DELETE FROM users WHERE email = ?", (email,))
+            message = {"success": "user_deleted"}
+
         return Div(
-            Div(feedback_to_user({"success": "user_deleted"})),
-            Div(show_users_table(), hx_swap_oob="true", id="users-table")
+            Div(feedback_to_user(message)),
+            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None
         )
     except Exception as e:
         return Main(
@@ -554,35 +557,40 @@ def delete_center(session, center_name: str):
         return RedirectResponse('/dashboard')
 
     try:
+        center_planners = planners("center_name = ?", (center_name,))
         # Get the center info to find the database file
         center_info = centers("center_name = ?", (center_name,))
-        if not center_info:
-            return RedirectResponse('/admin_page?error=center_not_found')
-
-        # Check if center has any planner associations
-        center_planners = planners("center_name = ?", (center_name,))
-        if center_planners:
-            # Get the user emails for the error message
-            user_emails = [p.user_email for p in center_planners]
-            users_list = ", ".join(user_emails)
-            return RedirectResponse(f'/admin_page?error=center_has_planners&users={users_list}')
-
         gong_db_name = center_info[0].gong_db_name
         db_path = f'data/{gong_db_name}'
 
-        # If no planner associations, proceed with deletion
-        db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
+        if not center_info:
+            message = {'error' : 'center_not_found'}
 
-        # Finally, delete the associated database file if it exists
-        if os.path.exists(db_path):
-            os.remove(db_path)
-            # Also remove any SQLite journal files
-            for ext in ['-shm', '-wal']:
-                journal_file = db_path + ext
-                if os.path.exists(journal_file):
-                    os.remove(journal_file)
+        # Check if center has any planner associations
+        elif center_planners:
+            # Get the user emails for the error message
+            user_emails = [p.user_email for p in center_planners]
+            users_list = ", ".join(user_emails)
+            message = {'error' : 'center_has_planners','users' : f'{users_list}'}
 
-        return RedirectResponse('/admin_page?success=center_deleted')
+        else:
+            # If no planner associations, proceed with deletion
+            db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
+            # Finally, delete the associated database file if it exists
+            if os.path.exists(db_path):
+                os.remove(db_path)
+                # Also remove any SQLite journal files
+                for ext in ['-shm', '-wal']:
+                    journal_file = db_path + ext
+                    if os.path.exists(journal_file):
+                        os.remove(journal_file)
+            message = {'success' : 'center_deleted'}
+
+        # return RedirectResponse('/admin_page?success=center_deleted')
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None
+        )
     except Exception as e:
         return Main(
             Nav(Li(A("Admin", href="/admin_page"))),
@@ -591,44 +599,50 @@ def delete_center(session, center_name: str):
         )
 
 @rt('/add_center')
-def add_center(session, new_center_name: str, new_gong_db_name: str):
+def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
         return RedirectResponse('/dashboard')
 
-    if not new_center_name or not new_gong_db_name:
-        return RedirectResponse('/admin_page?error=missing_fields')
+    # Ensure gong_db_name ends with .db
+    if not new_gong_db_name.endswith('.db'):
+        new_gong_db_name += '.db'
+    db_path = f'data/{new_gong_db_name}'
+    template_db = 'data/mahi.db'
 
     try:
-        # Check if center already exists
-        existing_center = centers("center_name = ?", (new_center_name,))
-        if existing_center:
-            return RedirectResponse('/admin_page?error=center_exists')
+        if new_center_name == "" or new_gong_db_name == "":
+            message = {"error" : "missing_fields"}
 
-        # Ensure gong_db_name ends with .db
-        if not new_gong_db_name.endswith('.db'):
-            new_gong_db_name += '.db'
+        # Check if center already exists
+        elif centers("center_name = ?", (new_center_name,)):
+            message = {"error" : "center_exists"}
 
         # Check if database file already exists
-        db_path = f'data/{new_gong_db_name}'
-        if os.path.exists(db_path):
-            return RedirectResponse('/admin_page?error=db_file_exists')
+        elif os.path.exists(db_path):
+            message = {"error" : 'db_file_exists'}
 
         # Copy mahi.db as template for new center
-        template_db = 'data/mahi.db'
-        if not os.path.exists(template_db):
-            return RedirectResponse('/admin_page?error=template_not_found')
+        elif not os.path.exists(template_db):
+            message = {'error' : 'template_not_found'}
 
-        # Create the new database by copying mahi.db
-        shutil.copy2(template_db, db_path)
+        else:
+            # Create the new database by copying mahi.db
+            shutil.copy2(template_db, db_path)
+            # Add new center to the centers table
+            centers.insert(
+                center_name=new_center_name,
+                gong_db_name=new_gong_db_name
+            )
+            message = {'success': 'center_added'}
 
-        # Add new center to the centers table
-        centers.insert(
-            center_name=new_center_name,
-            gong_db_name=new_gong_db_name
+        # return RedirectResponse('/admin_page?success=center_added')
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(show_centers_form(), hx_swap_oob="true", id="center-form")
         )
-        return RedirectResponse('/admin_page?success=center_added')
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 # ~/~ end

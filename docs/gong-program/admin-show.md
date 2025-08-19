@@ -38,7 +38,7 @@ def admin(session, request):
         ),
         Div(display_markdown("admin-show")),
         feedback_to_user(params),
-    
+
         H2("Users"),
         Div(feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(), id="users-table"),
@@ -51,7 +51,6 @@ def admin(session, request):
         Div(show_centers_table(), id="centers-table"),
         H4("Add New Center"),
         Div(show_centers_form(), id="centers-form"),
-
 
         show_planners(),
         cls="container",
@@ -80,7 +79,7 @@ def show_users_table():
         )
     )
 
-  
+
 def show_users_form():
     role_names = [r.role_name for r in roles()]
     return Main(
@@ -91,12 +90,10 @@ def show_users_form():
                     Option("Select Role", value="", selected=True, disabled=True),
                     *[Option(role, value=role) for role in role_names],
                         name="role_name", required=True),
-                #Button("Add User", type="submit"), method="post", action="/add_user"
                 Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
-    
 ```
 
 ``` {.python #show-centers}
@@ -111,8 +108,8 @@ def show_centers_table():
                 *[Tr(
                     Td(c.center_name), 
                     Td(c.gong_db_name), 
-                    Td(A("Delete", href=f"/delete_center/{c.center_name}",
-                        onclick="return confirm('Are you sure you want to delete this center?')"))
+                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
+                        hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
                 ) for c in centers()]
             )
         )
@@ -125,7 +122,7 @@ def show_centers_form():
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"), method="post", action="/add_center"
+                Button("Add Center", type="submit"), hx_post="/add_center",hx_target="#centers-feedback"
             )
         )
     )

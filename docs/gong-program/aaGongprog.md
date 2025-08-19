@@ -38,7 +38,6 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 # print(client.get("/login").text)
 
 serve()
-
 ```
 ### Home page   
 
@@ -88,5 +87,4 @@ def feedback_to_user(params):
         message = error_messages.get(params['error'], 'An error occurred.')
         message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
     return message_div
-
 ```
