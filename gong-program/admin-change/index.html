@@ -728,25 +728,36 @@
 <span class="o">&lt;&lt;</span><span class="n">change</span><span class="o">-</span><span class="n">planners</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <p>TODO document admin-change</p>
-<div id="change-users" class="highlight"><span class="filename">#change-users</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/delete_user/</span><span class="si">{email}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">delete_user</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div id="change-users" class="highlight"><span class="filename">#change-users</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/delete_user/</span><span class="si">{email}</span><span class="s1">&#39;</span><span class="p">)</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">sessemail</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">sessemail</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">role_name</span> <span class="o">!=</span> <span class="s2">&quot;admin&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Check if user has any planner associations</span>
+        <span class="n">user_info</span> <span class="o">=</span> <span class="n">users</span><span class="p">(</span><span class="s2">&quot;email = ?&quot;</span><span class="p">,(</span><span class="n">email</span><span class="p">,))</span>
         <span class="n">user_planners</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;user_email = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">email</span><span class="p">,))</span>
-        <span class="k">if</span> <span class="n">user_planners</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_info</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;user_not_found&#39;</span><span class="p">}</span>
+
+        <span class="c1"># Check if user has any planner associations</span>
+        <span class="k">elif</span> <span class="n">user_planners</span><span class="p">:</span>
             <span class="c1"># Get the center names for the error message</span>
             <span class="n">center_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">center_name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">user_planners</span><span class="p">]</span>
             <span class="n">centers_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">center_names</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/admin_page?error=user_has_planners&amp;centers=</span><span class="si">{</span><span class="n">centers_list</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;user_has_planners&quot;</span><span class="p">,</span> <span class="s2">&quot;centers&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">centers_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
 
-        <span class="c1"># If no planner associations, proceed with deletion</span>
-        <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM users WHERE email = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">email</span><span class="p">,))</span>
-        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?success=user_deleted&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If no planner associations, proceed with deletion</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM users WHERE email = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">email</span><span class="p">,))</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="s2">&quot;user_deleted&quot;</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">show_users_table</span><span class="p">(),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
             <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/admin_page&quot;</span><span class="p">))),</span>
@@ -807,35 +818,40 @@
         <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
+        <span class="n">center_planners</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
         <span class="c1"># Get the center info to find the database file</span>
         <span class="n">center_info</span> <span class="o">=</span> <span class="n">centers</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">center_info</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=center_not_found&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Check if center has any planner associations</span>
-        <span class="n">center_planners</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
-        <span class="k">if</span> <span class="n">center_planners</span><span class="p">:</span>
-            <span class="c1"># Get the user emails for the error message</span>
-            <span class="n">user_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">user_email</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">center_planners</span><span class="p">]</span>
-            <span class="n">users_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_emails</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/admin_page?error=center_has_planners&amp;users=</span><span class="si">{</span><span class="n">users_list</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
         <span class="n">gong_db_name</span> <span class="o">=</span> <span class="n">center_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">gong_db_name</span>
         <span class="n">db_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;data/</span><span class="si">{</span><span class="n">gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>
 
-        <span class="c1"># If no planner associations, proceed with deletion</span>
-        <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM centers WHERE center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">center_info</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_not_found&#39;</span><span class="p">}</span>
 
-        <span class="c1"># Finally, delete the associated database file if it exists</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
-            <span class="c1"># Also remove any SQLite journal files</span>
-            <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-shm&#39;</span><span class="p">,</span> <span class="s1">&#39;-wal&#39;</span><span class="p">]:</span>
-                <span class="n">journal_file</span> <span class="o">=</span> <span class="n">db_path</span> <span class="o">+</span> <span class="n">ext</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">journal_file</span><span class="p">):</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">journal_file</span><span class="p">)</span>
+        <span class="c1"># Check if center has any planner associations</span>
+        <span class="k">elif</span> <span class="n">center_planners</span><span class="p">:</span>
+            <span class="c1"># Get the user emails for the error message</span>
+            <span class="n">user_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">user_email</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">center_planners</span><span class="p">]</span>
+            <span class="n">users_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_emails</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_has_planners&#39;</span><span class="p">,</span><span class="s1">&#39;users&#39;</span> <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">users_list</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
 
-        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?success=center_deleted&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If no planner associations, proceed with deletion</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM centers WHERE center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
+            <span class="c1"># Finally, delete the associated database file if it exists</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
+                <span class="c1"># Also remove any SQLite journal files</span>
+                <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-shm&#39;</span><span class="p">,</span> <span class="s1">&#39;-wal&#39;</span><span class="p">]:</span>
+                    <span class="n">journal_file</span> <span class="o">=</span> <span class="n">db_path</span> <span class="o">+</span> <span class="n">ext</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">journal_file</span><span class="p">):</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">journal_file</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_deleted&#39;</span><span class="p">}</span>
+
+        <span class="c1"># return RedirectResponse(&#39;/admin_page?success=center_deleted&#39;)</span>
+        <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
             <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/admin_page&quot;</span><span class="p">))),</span>
@@ -844,44 +860,50 @@
         <span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/add_center&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_center</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_gong_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_center</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_center_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">new_gong_db_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="n">sessemail</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">sessemail</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">role_name</span> <span class="o">!=</span> <span class="s2">&quot;admin&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">new_center_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">new_gong_db_name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=missing_fields&#39;</span><span class="p">)</span>
+    <span class="c1"># Ensure gong_db_name ends with .db</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">new_gong_db_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.db&#39;</span><span class="p">):</span>
+        <span class="n">new_gong_db_name</span> <span class="o">+=</span> <span class="s1">&#39;.db&#39;</span>
+    <span class="n">db_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;data/</span><span class="si">{</span><span class="n">new_gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">template_db</span> <span class="o">=</span> <span class="s1">&#39;data/mahi.db&#39;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Check if center already exists</span>
-        <span class="n">existing_center</span> <span class="o">=</span> <span class="n">centers</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">new_center_name</span><span class="p">,))</span>
-        <span class="k">if</span> <span class="n">existing_center</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=center_exists&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_center_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">new_gong_db_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span> <span class="p">:</span> <span class="s2">&quot;missing_fields&quot;</span><span class="p">}</span>
 
-        <span class="c1"># Ensure gong_db_name ends with .db</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_gong_db_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.db&#39;</span><span class="p">):</span>
-            <span class="n">new_gong_db_name</span> <span class="o">+=</span> <span class="s1">&#39;.db&#39;</span>
+        <span class="c1"># Check if center already exists</span>
+        <span class="k">elif</span> <span class="n">centers</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">new_center_name</span><span class="p">,)):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span> <span class="p">:</span> <span class="s2">&quot;center_exists&quot;</span><span class="p">}</span>
 
         <span class="c1"># Check if database file already exists</span>
-        <span class="n">db_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;data/</span><span class="si">{</span><span class="n">new_gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=db_file_exists&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span> <span class="p">:</span> <span class="s1">&#39;db_file_exists&#39;</span><span class="p">}</span>
 
         <span class="c1"># Copy mahi.db as template for new center</span>
-        <span class="n">template_db</span> <span class="o">=</span> <span class="s1">&#39;data/mahi.db&#39;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_db</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=template_not_found&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_db</span><span class="p">):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;template_not_found&#39;</span><span class="p">}</span>
 
-        <span class="c1"># Create the new database by copying mahi.db</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">template_db</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Create the new database by copying mahi.db</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">template_db</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+            <span class="c1"># Add new center to the centers table</span>
+            <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">center_name</span><span class="o">=</span><span class="n">new_center_name</span><span class="p">,</span>
+                <span class="n">gong_db_name</span><span class="o">=</span><span class="n">new_gong_db_name</span>
+            <span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="s1">&#39;center_added&#39;</span><span class="p">}</span>
 
-        <span class="c1"># Add new center to the centers table</span>
-        <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-            <span class="n">center_name</span><span class="o">=</span><span class="n">new_center_name</span><span class="p">,</span>
-            <span class="n">gong_db_name</span><span class="o">=</span><span class="n">new_gong_db_name</span>
+        <span class="c1"># return RedirectResponse(&#39;/admin_page?success=center_added&#39;)</span>
+        <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_form</span><span class="p">(),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;center-form&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?success=center_added&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/admin_page?error=database_error&#39;</span><span class="p">)</span>
 </code></pre></div>
