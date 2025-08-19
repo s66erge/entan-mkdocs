@@ -1,3 +1,3 @@
 # Overall architecture
 
-TODO write overall arch.
+TODO write overall architecture.
