@@ -336,7 +336,7 @@ def show_users_table():
 def show_users_form():
     role_names = [r.role_name for r in roles()]
     return Main(
-       Div(
+        Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
                 Select( 
@@ -351,10 +351,9 @@ def show_users_form():
     
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-centers>>[init]
-def show_centers():
+
+def show_centers_table():
     return Main(
-        Div(
-        H2("Centers"),
         Table(
             Thead(
                 Tr(Th("Center Name"), Th("Gong DB Name"), Th("Actions"))
@@ -365,12 +364,14 @@ def show_centers():
                     Td(c.gong_db_name), 
                     Td(A("Delete", href=f"/delete_center/{c.center_name}",
                         onclick="return confirm('Are you sure you want to delete this center?')"))
-                    ) for c in centers()]
-                )
+                ) for c in centers()]
             )
-        ),
+        )
+    )
+
+def show_centers_form():
+    return Main(
         Div(
-            H4("Add New Center"),
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
@@ -450,7 +451,14 @@ def admin(session, request):
         H4("Add New User"),
         Div(show_users_form(), id="users-form"),
 
-        show_centers(),
+        #show_centers(),
+        H2("Centers"),
+        Div(feedback_to_user(params), id="centers-feedback"),
+        Div(show_centers_table(), id="centers-table"),
+        H4("Add New Center"),
+        Div(show_centers_form(), id="centers-form"),
+
+
         show_planners(),
         cls="container",
     )
