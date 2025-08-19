@@ -28,6 +28,7 @@ uv pip install mkdocs-entangled-plugin
 * `mkdocs new [dir-name]` - Create a new project.
 * `mkdocs serve` - Start the live-reloading docs server at http://127.0.0.1:8000/
 * `mkdocs build` - Build the documentation site.
+* `mkdocs gh-deploy` - Deploy site on the gh-pages branch: see site_url in config. 
 * `mkdocs -h` - Print help message and exit.
 
 ## Configuration

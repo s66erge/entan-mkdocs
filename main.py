@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-program/agongprog.md#main.py>>[init]
+# ~/~ begin <<docs/gong-program/aaGongprog.md#main.py>>[init]
 
 import secrets
 import os
@@ -24,9 +24,12 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
 
+
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# ~/~ begin <<docs/gong-program/agongprog.md#setup-database>>[init]
+# ~/~ begin <<docs/gong-program/data-def-db.md#data-defi-db-md>>[init]
+
+# ~/~ begin <<docs/gong-program/data-def-db.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -82,7 +85,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/gong-program/agongprog.md#initialize-database>>[init]
+# ~/~ begin <<docs/gong-program/data-def-db.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -99,6 +102,44 @@ if not users():
 if not planners():
     planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
+# ~/~ end
+# ~/~ end
+# ~/~ begin <<docs/gong-program/aaGongprog.md#feedback-messages>>[init]
+
+def feedback_to_user(params):
+    # query_params = dict(request.query_params)
+    # Handle success and error messages
+    success_messages = {
+        'user_added': 'User added successfully!',
+        'center_added': 'Center added successfully!',
+        'planner_added': 'Planner association added successfully!',
+        'user_deleted': 'User deleted successfully!',
+        'center_deleted': 'Center and associated database deleted successfully!',
+        'planner_deleted': 'Planner association deleted successfully!'
+    }
+    error_messages = {
+        'missing_fields': 'Please fill in all required fields.',
+        'user_exists': 'User with this email already exists.',
+        'center_exists': 'Center with this name already exists.',
+        'planner_exists': 'This planner association already exists.',
+        'user_not_found': 'User not found.',
+        'center_not_found': 'Center not found.',
+        'invalid_role': 'Invalid role selected.',
+        'database_error': 'Database error occurred. Please try again.',
+        'db_file_exists': 'Database file with this name already exists.',
+        'template_not_found': 'Template database (mahi.db) not found.',
+        'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
+        'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{params.get("center", "")}". Each center must have at least one planner.'
+    }
+    message_div = None
+    if 'success' in params:
+        message = success_messages.get(params['success'], 'Operation completed successfully!')
+        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
+    elif 'error' in params:
+        message = error_messages.get(params['error'], 'An error occurred.')
+        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
+    return message_div
 # ~/~ end
 # ~/~ begin <<docs/gong-program/utilities.md#utilities-md>>[init]
 
@@ -229,7 +270,7 @@ def post(session):
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/agongprog.md#home-page>>[init]
+# ~/~ begin <<docs/gong-program/aaGongprog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
@@ -271,49 +312,11 @@ def unfinished():
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#admin-show-md>>[init]
 
-# ~/~ begin <<docs/gong-program/admin-show.md#feedback-messages>>[init]
-
-def feedback_to_user(request):
-    query_params = dict(request.query_params)
-    # Handle success and error messages
-    success_messages = {
-        'user_added': 'User added successfully!',
-        'center_added': 'Center added successfully!',
-        'planner_added': 'Planner association added successfully!',
-        'user_deleted': 'User deleted successfully!',
-        'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
-    }
-    error_messages = {
-        'missing_fields': 'Please fill in all required fields.',
-        'user_exists': 'User with this email already exists.',
-        'center_exists': 'Center with this name already exists.',
-        'planner_exists': 'This planner association already exists.',
-        'user_not_found': 'User not found.',
-        'center_not_found': 'Center not found.',
-        'invalid_role': 'Invalid role selected.',
-        'database_error': 'Database error occurred. Please try again.',
-        'db_file_exists': 'Database file with this name already exists.',
-        'template_not_found': 'Template database (mahi.db) not found.',
-        'user_has_planners': f'Cannot delete user. User is still associated with centers: {query_params.get("centers", "")}. Please remove all planner associations first.',
-        'center_has_planners': f'Cannot delete center. Center is still associated with users: {query_params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{query_params.get("center", "")}". Each center must have at least one planner.'
-    }
-    message_div = None
-    if 'success' in query_params:
-        message = success_messages.get(query_params['success'], 'Operation completed successfully!')
-        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
-    elif 'error' in query_params:
-        message = error_messages.get(query_params['error'], 'An error occurred.')
-        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
-    return message_div
-# ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-users>>[init]
-def show_users():
-    return Main( 
-        Div(
+
+def show_users_table():
+    return Main(
         Table(
-        H2("Users"),
             Thead(
                 Tr(Th("Email"), Th("Name"), Th("Role"), Th("Active"), Th("Action"))
             ),
@@ -328,22 +331,25 @@ def show_users():
                 ) for u in users()]
             )
         )
-    ),
-    Div(
-        H4("Add New User"),
-        Form(
-            Input(type="email", placeholder="User Email", name="new_user_email", required=True),
-            Select( 
-                Option("Select Role", value="", selected=True, disabled=True),
-                Option("Admin", value="admin"),
-                Option("User", value="user"),
-                    name="role_name", required=True),
-            Button("Add User", type="submit"),
-            method="post",
-            action="/add_user"
+    )
+
+  
+def show_users_form():
+    role_names = [r.role_name for r in roles()]
+    return Main(
+       Div(
+            Form(
+                Input(type="email", placeholder="User Email", name="new_user_email", required=True),
+                Select( 
+                    Option("Select Role", value="", selected=True, disabled=True),
+                    *[Option(role, value=role) for role in role_names],
+                        name="role_name", required=True),
+                #Button("Add User", type="submit"), method="post", action="/add_user"
+                Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
+    
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-show.md#show-centers>>[init]
 def show_centers():
@@ -370,9 +376,7 @@ def show_centers():
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"),
-                method="post",
-                action="/add_center"
+                Button("Add Center", type="submit"), method="post", action="/add_center"
             )
         )
     )
@@ -428,7 +432,7 @@ def admin(session, request):
             Div(H1("Access Denied"),
                 P("You do not have permission to access this page.")),
             cls="container")
-
+    params = dict(request.query_params)
     return Main(
         Nav(
             Ul(
@@ -439,8 +443,14 @@ def admin(session, request):
             Button("Logout", hx_post="/logout"),
         ),
         Div(display_markdown("admin-show")),
-        feedback_to_user(request),
-        show_users(),
+        feedback_to_user(params),
+    
+        H2("Users"),
+        Div(feedback_to_user(params), id="users-feedback"),
+        Div(show_users_table(), id="users-table"),
+        H4("Add New User"),
+        Div(show_users_form(), id="users-form"),
+
         show_centers(),
         show_planners(),
         cls="container",
@@ -478,37 +488,49 @@ def delete_user(session, email: str):
         )
 
 @rt('/add_user')
-def add_user(session, new_user_email: str, role_name: str):
+def post(session, new_user_email: str = "", role_name: str =""):
+    # print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
         return RedirectResponse('/dashboard')
 
-    if not new_user_email or not role_name:
-        return RedirectResponse('/admin_page?error=missing_fields')
-
     try:
-        # Check if user already exists
-        existing_user = users("email = ?", (new_user_email,))
-        if existing_user:
-            return RedirectResponse('/admin_page?error=user_exists')
+        if new_user_email == "" or role_name == "":
+            message = {"error" : "missing_fields"}
 
         # Validate role
-        if role_name not in ['admin', 'user']:
-            return RedirectResponse('/admin_page?error=invalid_role')
+        elif not roles("role_name = ?", (role_name,)):
+            message = {"error": "invalid_role"}
+
+        # Check if user already exists
+        elif users("email = ?", (new_user_email,)):
+            message = {"error": "user_exists"}
 
         # Add new user
-        users.insert(
+        else:
+            users.insert(
             email=new_user_email,
             name=new_user_email.split('@')[0],  # Use email prefix as default name
             role_name=role_name,
             is_active=False,
             magic_link_token=None,
             magic_link_expiry=None
+            )
+            message = {"success": "user_added"}
+
+        #return RedirectResponse('/admin_page?success=user_added')
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
-        return RedirectResponse('/admin_page?success=user_added')
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        #return RedirectResponse('/admin_page?error=database_error')
+        return Div(
+            Div(feedback_to_user({"error": "database_error"})),
+            Div(show_users_form(), hx_swap_oob="true", id="users-form")
+        )
 # ~/~ end
 # ~/~ begin <<docs/gong-program/admin-change.md#change-centers>>[init]
 

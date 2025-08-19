@@ -1,48 +1,10 @@
-# Main gong program
+# Data definitions and databases
 
-### Main program
 
-``` {.python file= main.py}
-
-import secrets
-import os
-import socket
-import markdown2
-import smtplib
-import shutil
-from datetime import datetime, timedelta
-from email.mime.text import MIMEText
-from fasthtml.common import *
-# from starlette.testclient import TestClient
-
-css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
-
-<<auth-beforeware>>
-
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
+``` {.python #data-defi-db-md}
 
 <<setup-database>>
 <<initialize-database>>
-<<utilities-md>>
-<<authenticate-md>>
-<<home-page>>
-<<start-dash-md>>
-<<admin-show-md>>
-<<admin-change-md>>
-# client = TestClient(app)
-# print(client.get("/login").text)
-
-serve()
-```
-### Home page   
-
-``` {.python #home-page}
-@rt('/')
-def home():
-    return Main(
-        Div(display_markdown("home")),
-        A("Login",href="/login", class_="button"),
-        cls="container")
 ```
 
 ### Admin database

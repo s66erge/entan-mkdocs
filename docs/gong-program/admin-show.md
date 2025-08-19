@@ -1,10 +1,9 @@
-# User pages
+# Admin page
 
-Will only be reachable for users who are signed in.
+Will only be reachable for signed in admin users.
 
 ``` {.python #admin-show-md}
 
-<<feedback-messages>>
 <<show-users>>
 <<show-centers>>
 <<show-planners>>
@@ -13,6 +12,7 @@ Will only be reachable for users who are signed in.
 
 TODO document admin-show
 
+TODO show tables sorted by key
 
 ``` {.python #admin-page}
 
@@ -26,7 +26,7 @@ def admin(session, request):
             Div(H1("Access Denied"),
                 P("You do not have permission to access this page.")),
             cls="container")
-
+    params = dict(request.query_params)
     return Main(
         Nav(
             Ul(
@@ -37,60 +37,27 @@ def admin(session, request):
             Button("Logout", hx_post="/logout"),
         ),
         Div(display_markdown("admin-show")),
-        feedback_to_user(request),
-        show_users(),
+        feedback_to_user(params),
+    
+        H2("Users"),
+        Div(feedback_to_user(params), id="users-feedback"),
+        Div(show_users_table(), id="users-table"),
+        H4("Add New User"),
+        Div(show_users_form(), id="users-form"),
+
         show_centers(),
         show_planners(),
         cls="container",
     )
 ```
 
-``` {.python #feedback-messages}
-
-def feedback_to_user(request):
-    query_params = dict(request.query_params)
-    # Handle success and error messages
-    success_messages = {
-        'user_added': 'User added successfully!',
-        'center_added': 'Center added successfully!',
-        'planner_added': 'Planner association added successfully!',
-        'user_deleted': 'User deleted successfully!',
-        'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
-    }
-    error_messages = {
-        'missing_fields': 'Please fill in all required fields.',
-        'user_exists': 'User with this email already exists.',
-        'center_exists': 'Center with this name already exists.',
-        'planner_exists': 'This planner association already exists.',
-        'user_not_found': 'User not found.',
-        'center_not_found': 'Center not found.',
-        'invalid_role': 'Invalid role selected.',
-        'database_error': 'Database error occurred. Please try again.',
-        'db_file_exists': 'Database file with this name already exists.',
-        'template_not_found': 'Template database (mahi.db) not found.',
-        'user_has_planners': f'Cannot delete user. User is still associated with centers: {query_params.get("centers", "")}. Please remove all planner associations first.',
-        'center_has_planners': f'Cannot delete center. Center is still associated with users: {query_params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{query_params.get("center", "")}". Each center must have at least one planner.'
-    }
-    message_div = None
-    if 'success' in query_params:
-        message = success_messages.get(query_params['success'], 'Operation completed successfully!')
-        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
-    elif 'error' in query_params:
-        message = error_messages.get(query_params['error'], 'An error occurred.')
-        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
-    return message_div
-
-```
 
 
 ``` {.python #show-users}
-def show_users():
-    return Main( 
-        Div(
+
+def show_users_table():
+    return Main(
         Table(
-        H2("Users"),
             Thead(
                 Tr(Th("Email"), Th("Name"), Th("Role"), Th("Active"), Th("Action"))
             ),
@@ -105,22 +72,25 @@ def show_users():
                 ) for u in users()]
             )
         )
-    ),
-    Div(
-        H4("Add New User"),
-        Form(
-            Input(type="email", placeholder="User Email", name="new_user_email", required=True),
-            Select( 
-                Option("Select Role", value="", selected=True, disabled=True),
-                Option("Admin", value="admin"),
-                Option("User", value="user"),
-                    name="role_name", required=True),
-            Button("Add User", type="submit"),
-            method="post",
-            action="/add_user"
+    )
+
+  
+def show_users_form():
+    role_names = [r.role_name for r in roles()]
+    return Main(
+       Div(
+            Form(
+                Input(type="email", placeholder="User Email", name="new_user_email", required=True),
+                Select( 
+                    Option("Select Role", value="", selected=True, disabled=True),
+                    *[Option(role, value=role) for role in role_names],
+                        name="role_name", required=True),
+                #Button("Add User", type="submit"), method="post", action="/add_user"
+                Button("Add User", type="submit"), hx_post="/add_user",hx_target="#users-feedback"
             )
         )    
     )
+    
 ```
 
 ``` {.python #show-centers}
@@ -148,9 +118,7 @@ def show_centers():
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
                 Small("The database file will be created as a copy of mahi.db"),
-                Button("Add Center", type="submit"),
-                method="post",
-                action="/add_center"
+                Button("Add Center", type="submit"), method="post", action="/add_center"
             )
         )
     )
