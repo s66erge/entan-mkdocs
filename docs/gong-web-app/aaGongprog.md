@@ -1,4 +1,4 @@
-# Main gong program
+# Program start 
 
 ### Main program
 
@@ -22,18 +22,25 @@ from fasthtml.common import *
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 <<auth-beforeware>>
-
+# in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-<<data-defi-db-md>>
+<<database-setup>>
+# is adatabase-setup.md
 <<feedback-messages>>
-<<utilities-md>>
-<<authenticate-md>>
+<<utilities>>
+# is utilities.md
+<<authentication>>
+# is authenticate.md
 <<home-page>>
-<<start-dash-md>>
-<<admin-show-md>>
+<<user-dashboard>>
+# is dashboard.md
+<<admin-show>>
+# is admin-show.md
 <<admin-change-md>>
+# is admin-change.md
+
 # client = TestClient(app)
 # print(client.get("/login").text)
 

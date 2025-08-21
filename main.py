@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-program/aaGongprog.md#main.py>>[init]
+# ~/~ begin <<docs/gong-web-app/aaGongprog.md#main.py>>[init]
 
 import secrets
 import os
@@ -13,7 +13,7 @@ from fasthtml.common import *
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
-# ~/~ begin <<docs/gong-program/authenticate.md#auth-beforeware>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#auth-beforeware>>[init]
 
 login_redir = RedirectResponse('/login', status_code=303)
 
@@ -23,13 +23,13 @@ def before(req, session):
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 # ~/~ end
-
+# in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# ~/~ begin <<docs/gong-program/data-def-db.md#data-defi-db-md>>[init]
+# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#database-setup>>[init]
 
-# ~/~ begin <<docs/gong-program/data-def-db.md#setup-database>>[init]
+# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -85,7 +85,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/gong-program/data-def-db.md#initialize-database>>[init]
+# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -104,7 +104,8 @@ if not planners():
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/aaGongprog.md#feedback-messages>>[init]
+# is adatabase-setup.md
+# ~/~ begin <<docs/gong-web-app/aaGongprog.md#feedback-messages>>[init]
 
 def feedback_to_user(params):
     # query_params = dict(request.query_params)
@@ -141,16 +142,16 @@ def feedback_to_user(params):
         message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
     return message_div
 # ~/~ end
-# ~/~ begin <<docs/gong-program/utilities.md#utilities-md>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#utilities>>[init]
 
-# ~/~ begin <<docs/gong-program/utilities.md#isa-dev-computer>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#isa-dev-computer>>[init]
 
 DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-linuxmint","serge-framework"]
 def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
 # ~/~ end
-# ~/~ begin <<docs/gong-program/utilities.md#send-email>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
     sender = os.environ.get('GOOGLE_SMTP_USER') 
@@ -166,14 +167,14 @@ def send_email(subject, body, recipients):
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
 # ~/~ end
-# ~/~ begin <<docs/gong-program/utilities.md#display-markdown>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_name:str):
     with open(f'md-text/{file_name}.md', "r") as f:
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 # ~/~ end
-# ~/~ begin <<docs/gong-program/utilities.md#not-implemented>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#not-implemented>>[init]
 @rt('/unfinished')
 def unfinished():
     return Main(
@@ -183,9 +184,10 @@ def unfinished():
     )
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/authenticate.md#authenticate-md>>[init]
+# is utilities.md
+# ~/~ begin <<docs/gong-web-app/authenticate.md#authentication>>[init]
 
-# ~/~ begin <<docs/gong-program/authenticate.md#build-serve-login-form>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
 def MyForm(btn_text: str, target: str):
    return Form(
        Div(
@@ -210,7 +212,7 @@ def get():
        ), cls="container"
    )
 # ~/~ end
-# ~/~ begin <<docs/gong-program/authenticate.md#handling-form>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#handling-form>>[init]
 
 @rt('/create_magic_link')
 def post(email: str):
@@ -238,7 +240,7 @@ def post(email: str):
 
     return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
-# ~/~ begin <<docs/gong-program/authenticate.md#send-link>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
 
 def send_magic_link_email(email_address: str, magic_link: str):
 
@@ -259,7 +261,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    else:
        send_email(email_subject, email_text, [email_address])
 # ~/~ end
-# ~/~ begin <<docs/gong-program/authenticate.md#verify-token>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#verify-token>>[init]
 
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
@@ -272,14 +274,15 @@ def get(session, token: str):
    except IndexError:
        return "Invalid or expired magic link"
 # ~/~ end
-# ~/~ begin <<docs/gong-program/authenticate.md#logout>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#logout>>[init]
 @rt('/logout')
 def post(session):
     del session['auth']
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/aaGongprog.md#home-page>>[init]
+# is authenticate.md
+# ~/~ begin <<docs/gong-web-app/aaGongprog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
@@ -287,9 +290,9 @@ def home():
         A("Login",href="/login", class_="button"),
         cls="container")
 # ~/~ end
-# ~/~ begin <<docs/gong-program/dashboard.md#start-dash-md>>[init]
+# ~/~ begin <<docs/gong-web-app/dashboard.md#user-dashboard>>[init]
 
-# ~/~ begin <<docs/gong-program/dashboard.md#dashboard>>[init]
+# ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard>>[init]
 
 @rt('/dashboard')
 def get(session): 
@@ -311,9 +314,10 @@ def get(session):
     )
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-show.md#admin-show-md>>[init]
+# is dashboard.md
+# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-show>>[init]
 
-# ~/~ begin <<docs/gong-program/admin-show.md#show-users>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
 
 def show_users_table():
     return Main(
@@ -349,7 +353,7 @@ def show_users_form():
         )    
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-show.md#show-centers>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-centers>>[init]
 
 def show_centers_table():
     return Main(
@@ -380,7 +384,7 @@ def show_centers_form():
         )
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-show.md#show-planners>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-planners>>[init]
 
 def show_planners_table():
     return Main(
@@ -419,7 +423,7 @@ def show_planners_form():
         )
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-show.md#admin-page>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-page>>[init]
 
 @rt('/admin_page')
 def admin(session, request):
@@ -467,9 +471,10 @@ def admin(session, request):
     )
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-change.md#admin-change-md>>[init]
+# is admin-show.md
+# ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change-md>>[init]
 
-# ~/~ begin <<docs/gong-program/admin-change.md#change-users>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#change-users>>[init]
 
 @rt('/delete_user/{email}') 
 def post(session, email: str):
@@ -553,7 +558,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
             Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-change.md#change-centers>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#change-centers>>[init]
 
 @rt('/delete_center/{center_name}')
 def delete_center(session, center_name: str):
@@ -652,7 +657,7 @@ def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 # ~/~ end
-# ~/~ begin <<docs/gong-program/admin-change.md#change-planners>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#change-planners>>[init]
 
 @rt('/delete_planner/{user_email}/{center_name}')
 def delete_planner(session, user_email: str, center_name: str):
@@ -715,6 +720,8 @@ def add_planner(session, new_planner_user_email: str, new_planner_center_name: s
         return RedirectResponse('/admin_page?error=database_error')
 # ~/~ end
 # ~/~ end
+# is admin-change.md
+
 # client = TestClient(app)
 # print(client.get("/login").text)
 

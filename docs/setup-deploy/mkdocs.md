@@ -34,7 +34,7 @@ uv pip install mkdocs-entangled-plugin
 ## Configuration
 
 ``` {.yaml file= mkdocs.yml}
-site_name: My Docs
+site_name: Gong system and apps for Vipassane centers
 site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
 
@@ -58,7 +58,7 @@ markdown_extensions:
 
 theme:
   name: readthedocs
-  name: material
+g  name: material
   features:
     - content.code.copy
   palette: 
@@ -77,6 +77,8 @@ theme:
   watch:
   - docs
 ```
+
+Note: to use the 'material' theme, add '' under 'readthedocs'
 
 ## Project layout
 

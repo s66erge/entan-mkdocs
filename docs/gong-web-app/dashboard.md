@@ -1,8 +1,8 @@
-# User pages
+# User dashboard
 
 Will only be reachable for users who are signed in.
 
-``` {.python #start-dash-md}
+``` {.python #user-dashboard}
 
 <<dashboard>>
 ```
