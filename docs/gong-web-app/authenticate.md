@@ -23,16 +23,16 @@ This is a passwordless authentication:
 The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!
 
 ``` {.python #build-serve-login-form}
-def MyForm(btn_text: str, target: str):
+def signin_form():
    return Form(
        Div(
            Div(
                Input(id='email', type='email', placeholder='foo@bar.com'),
            ),
        ),
-       Button(btn_text, type="submit", id="submit-btn"),
-       P(id="error"),
-       hx_post=target,
+       Button("Sign In with Email", type="submit", id="submit-btn"),
+       # P(id="error"),
+       hx_post="/create_magic_link",
        hx_target="#error",
        hx_disabled_elt="#submit-btn"
    )
@@ -43,7 +43,8 @@ def get():
        Div(
            H1("Sign In"),
            P("Enter your email to sign in to The App."),
-           MyForm("Sign In with Email", "/create_magic_link")
+           Div(signin_form(), id='login_form'),
+           P(id="error")
        ), cls="container"
    )
 ```
@@ -86,7 +87,7 @@ Also I want to disable the submit button and show a message that the magic link 
 @rt('/create_magic_link')
 def post(email: str):
     if not email:
-       return "Email is required"
+       return (feedback_to_user({'error': 'missing_email'}))
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -94,8 +95,10 @@ def post(email: str):
        user = users[email]
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
     except NotFoundError:
-        return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
-
+        return Div(
+            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            Div(signin_form(), hx_swap_oob="true", id="login_form")
+        )
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):
@@ -107,7 +110,8 @@ def post(email: str):
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
-    return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 ```
 
 
