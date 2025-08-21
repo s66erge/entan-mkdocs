@@ -5,7 +5,7 @@
 - displaying the content of a markdown file
 - route is not implemented yet
 
-``` {.python #utilities-md}
+``` {.python #utilities}
 
 <<isa-dev-computer>>
 <<send-email>>
