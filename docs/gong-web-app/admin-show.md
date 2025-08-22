@@ -79,7 +79,7 @@ def show_users_table():
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
                     Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", onclick="return confirm('Are you sure you want to delete this user?')"))
-                ) for u in users()]
+                ) for u in sorted(users(), key=lambda x: x.name)]
             )
         )
     )
@@ -91,6 +91,7 @@ def show_users_form():
         Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
+                Input(type="text", placeholder="User full name", name="name", required=True),                
                 Select( 
                     Option("Select Role", value="", selected=True, disabled=True),
                     *[Option(role, value=role) for role in role_names],
@@ -115,7 +116,7 @@ def show_centers_table():
                     Td(c.gong_db_name), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
                         hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
-                ) for c in centers()]
+                ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
         )
     )
@@ -133,8 +134,6 @@ def show_centers_form():
     )
 ```
 
-DONOW adapt to htmx calls
-
 ``` {.python #show-planners}
 
 def show_planners_table():
@@ -147,9 +146,8 @@ def show_planners_table():
                 *[Tr(
                     Td(p.user_email), 
                     Td(p.center_name), 
-                    Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
-                            onclick="return confirm('Are you sure you want to delete this planner association?')"))
-                ) for p in planners()]
+                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                ) for p in sorted(planners(), key=lambda x: x.center_name)]
             )
         )
     )
@@ -168,8 +166,7 @@ def show_planners_form():
                     *[Option(c.center_name, value=c.center_name) for c in centers()],
                     name="new_planner_center_name", required=True
                 ),
-                Button("Add Planner", type="submit"),
-                method="post", action="/add_planner"
+                Button("Add Planner", type="submit"), hx_post="/add_planner", hx_target="#planners-feedback"
             )
         )
     )

@@ -51,7 +51,7 @@ def post(session, email: str):
         )
 
 @rt('/add_user')
-def post(session, new_user_email: str = "", role_name: str =""):
+def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
     # print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
@@ -59,7 +59,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
         return RedirectResponse('/dashboard')
 
     try:
-        if new_user_email == "" or role_name == "":
+        if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
 
         # Validate role
@@ -74,7 +74,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
         else:
             users.insert(
             email=new_user_email,
-            name=new_user_email.split('@')[0],  # Use email prefix as default name
+            name=name,  # Use email prefix as default name
             role_name=role_name,
             is_active=False,
             magic_link_token=None,
@@ -190,7 +190,7 @@ def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(), hx_swap_oob="true", id="center-form")
+            Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
         )
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
@@ -208,14 +208,19 @@ def delete_planner(session, user_email: str, center_name: str):
     try:
         # Check how many planners are associated with this center
         center_planners = planners("center_name = ?", (center_name,))
-
         # If this is the only planner for this center, prevent deletion
         if len(center_planners) <= 1:
-            return RedirectResponse(f'/admin_page?error=last_planner_for_center&center={center_name}')
+            message ={"error" : "last_planner_for_center", "center" : f"{center_name}"}
+        else:
+            # If there are other planners for this center, proceed with deletion
+            db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
+            message = {"success" : "planner_deleted"}
 
-        # If there are other planners for this center, proceed with deletion
-        db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
-        return RedirectResponse('/admin_page?success=planner_deleted')
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None
+        )
+
     except Exception as e:
         return Main(
             Nav(Li(A("Admin", href="/admin_page"))),
@@ -224,37 +229,41 @@ def delete_planner(session, user_email: str, center_name: str):
         )
 
 @rt('/add_planner')
-def add_planner(session, new_planner_user_email: str, new_planner_center_name: str):
+def add_planner(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
         return RedirectResponse('/dashboard')
 
-    if not new_planner_user_email or not new_planner_center_name:
-        return RedirectResponse('/admin_page?error=missing_fields')
-
     try:
+        if new_planner_user_email == "" or new_planner_center_name == "":
+            message = {"error" : "missing_fields"}
+
         # Check if user exists
-        user_exists = users("email = ?", (new_planner_user_email,))
-        if not user_exists:
-            return RedirectResponse('/admin_page?error=user_not_found')
+        elif not users("email = ?", (new_planner_user_email,)):
+            message = {"error" : "user_not_found"}
 
         # Check if center exists
-        center_exists = centers("center_name = ?", (new_planner_center_name,))
-        if not center_exists:
-            return RedirectResponse('/admin_page?error=center_not_found')
+        elif not centers("center_name = ?", (new_planner_center_name,)):
+            message = {'error' : 'center_not_found'}
 
         # Check if planner association already exists
-        existing_planner = planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name))
-        if existing_planner:
-            return RedirectResponse('/admin_page?error=planner_exists')
+        elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
+            message = {'error' : 'planner_exists'}
 
         # Add new planner association
-        planners.insert(
+        else:
+            planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
+            )
+            message = {'success' : 'planner_added'}
+
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None,
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
-        return RedirectResponse('/admin_page?success=planner_added')
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 ```

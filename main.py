@@ -111,6 +111,7 @@ def feedback_to_user(params):
     # query_params = dict(request.query_params)
     # Handle success and error messages
     success_messages = {
+        'magic_link_sent': "A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.",
         'user_added': 'User added successfully!',
         'center_added': 'Center added successfully!',
         'planner_added': 'Planner association added successfully!',
@@ -119,6 +120,8 @@ def feedback_to_user(params):
         'planner_deleted': 'Planner association deleted successfully!'
     }
     error_messages = {
+        'missing_email':'Email is required.',
+        'not_registered':f'Email "{params.get("email", "")}" is not registered, try again or send a message to xxx@xxx.xx to get registered',
         'missing_fields': 'Please fill in all required fields.',
         'user_exists': 'User with this email already exists.',
         'center_exists': 'Center with this name already exists.',
@@ -136,10 +139,16 @@ def feedback_to_user(params):
     message_div = None
     if 'success' in params:
         message = success_messages.get(params['success'], 'Operation completed successfully!')
-        message_div = Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
+        message_div = Div(
+            Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
+            Small("To clear this message, reload the page")
+        )
     elif 'error' in params:
         message = error_messages.get(params['error'], 'An error occurred.')
-        message_div = Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
+        message_div = Div(
+            Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;"),
+            Small("To clear this message, reload the page")
+        )
     return message_div
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#utilities>>[init]
@@ -188,16 +197,15 @@ def unfinished():
 # ~/~ begin <<docs/gong-web-app/authenticate.md#authentication>>[init]
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
-def MyForm(btn_text: str, target: str):
+def signin_form():
    return Form(
        Div(
            Div(
                Input(id='email', type='email', placeholder='foo@bar.com'),
            ),
        ),
-       Button(btn_text, type="submit", id="submit-btn"),
-       P(id="error"),
-       hx_post=target,
+       Button("Sign In with Email", type="submit", id="submit-btn"),
+       hx_post="/create_magic_link",
        hx_target="#error",
        hx_disabled_elt="#submit-btn"
    )
@@ -208,7 +216,8 @@ def get():
        Div(
            H1("Sign In"),
            P("Enter your email to sign in to The App."),
-           MyForm("Sign In with Email", "/create_magic_link")
+           Div(signin_form(), id='login_form'),
+           P(id="error")
        ), cls="container"
    )
 # ~/~ end
@@ -217,7 +226,7 @@ def get():
 @rt('/create_magic_link')
 def post(email: str):
     if not email:
-       return "Email is required"
+       return (feedback_to_user({'error': 'missing_email'}))
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -225,8 +234,10 @@ def post(email: str):
        user = users[email]
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
     except NotFoundError:
-        return "Email is not registered, try again or send a message to xxx@xxx.xx to get registered"
-
+        return Div(
+            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            Div(signin_form(), hx_swap_oob="true", id="login_form")
+        )
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):
@@ -238,7 +249,8 @@ def post(email: str):
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
-    return P("A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.", id="success"), HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
 
@@ -332,7 +344,7 @@ def show_users_table():
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
                     Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", onclick="return confirm('Are you sure you want to delete this user?')"))
-                ) for u in users()]
+                ) for u in sorted(users(), key=lambda x: x.name)]
             )
         )
     )
@@ -344,6 +356,7 @@ def show_users_form():
         Div(
             Form(
                 Input(type="email", placeholder="User Email", name="new_user_email", required=True),
+                Input(type="text", placeholder="User full name", name="name", required=True),                
                 Select( 
                     Option("Select Role", value="", selected=True, disabled=True),
                     *[Option(role, value=role) for role in role_names],
@@ -367,7 +380,7 @@ def show_centers_table():
                     Td(c.gong_db_name), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
                         hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
-                ) for c in centers()]
+                ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
         )
     )
@@ -396,9 +409,8 @@ def show_planners_table():
                 *[Tr(
                     Td(p.user_email), 
                     Td(p.center_name), 
-                    Td(A("Delete", href=f"/delete_planner/{p.user_email}/{p.center_name}",
-                            onclick="return confirm('Are you sure you want to delete this planner association?')"))
-                ) for p in planners()]
+                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                ) for p in sorted(planners(), key=lambda x: x.center_name)]
             )
         )
     )
@@ -417,8 +429,7 @@ def show_planners_form():
                     *[Option(c.center_name, value=c.center_name) for c in centers()],
                     name="new_planner_center_name", required=True
                 ),
-                Button("Add Planner", type="submit"),
-                method="post", action="/add_planner"
+                Button("Add Planner", type="submit"), hx_post="/add_planner", hx_target="#planners-feedback"
             )
         )
     )
@@ -514,7 +525,7 @@ def post(session, email: str):
         )
 
 @rt('/add_user')
-def post(session, new_user_email: str = "", role_name: str =""):
+def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
     # print(f"email: {new_user_email}, role: {role_name}")
     sessemail = session['auth']
     u = users[sessemail]
@@ -522,7 +533,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
         return RedirectResponse('/dashboard')
 
     try:
-        if new_user_email == "" or role_name == "":
+        if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
 
         # Validate role
@@ -537,7 +548,7 @@ def post(session, new_user_email: str = "", role_name: str =""):
         else:
             users.insert(
             email=new_user_email,
-            name=new_user_email.split('@')[0],  # Use email prefix as default name
+            name=name,  # Use email prefix as default name
             role_name=role_name,
             is_active=False,
             magic_link_token=None,
@@ -652,7 +663,7 @@ def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(), hx_swap_oob="true", id="center-form")
+            Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
         )
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
@@ -669,14 +680,19 @@ def delete_planner(session, user_email: str, center_name: str):
     try:
         # Check how many planners are associated with this center
         center_planners = planners("center_name = ?", (center_name,))
-
         # If this is the only planner for this center, prevent deletion
         if len(center_planners) <= 1:
-            return RedirectResponse(f'/admin_page?error=last_planner_for_center&center={center_name}')
+            message ={"error" : "last_planner_for_center", "center" : f"{center_name}"}
+        else:
+            # If there are other planners for this center, proceed with deletion
+            db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
+            message = {"success" : "planner_deleted"}
 
-        # If there are other planners for this center, proceed with deletion
-        db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
-        return RedirectResponse('/admin_page?success=planner_deleted')
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None
+        )
+
     except Exception as e:
         return Main(
             Nav(Li(A("Admin", href="/admin_page"))),
@@ -685,37 +701,41 @@ def delete_planner(session, user_email: str, center_name: str):
         )
 
 @rt('/add_planner')
-def add_planner(session, new_planner_user_email: str, new_planner_center_name: str):
+def add_planner(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
     sessemail = session['auth']
     u = users[sessemail]
     if u.role_name != "admin":
         return RedirectResponse('/dashboard')
 
-    if not new_planner_user_email or not new_planner_center_name:
-        return RedirectResponse('/admin_page?error=missing_fields')
-
     try:
+        if new_planner_user_email == "" or new_planner_center_name == "":
+            message = {"error" : "missing_fields"}
+
         # Check if user exists
-        user_exists = users("email = ?", (new_planner_user_email,))
-        if not user_exists:
-            return RedirectResponse('/admin_page?error=user_not_found')
+        elif not users("email = ?", (new_planner_user_email,)):
+            message = {"error" : "user_not_found"}
 
         # Check if center exists
-        center_exists = centers("center_name = ?", (new_planner_center_name,))
-        if not center_exists:
-            return RedirectResponse('/admin_page?error=center_not_found')
+        elif not centers("center_name = ?", (new_planner_center_name,)):
+            message = {'error' : 'center_not_found'}
 
         # Check if planner association already exists
-        existing_planner = planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name))
-        if existing_planner:
-            return RedirectResponse('/admin_page?error=planner_exists')
+        elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
+            message = {'error' : 'planner_exists'}
 
         # Add new planner association
-        planners.insert(
+        else:
+            planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
+            )
+            message = {'success' : 'planner_added'}
+
+        return Div(
+            Div(feedback_to_user(message)),
+            Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None,
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
-        return RedirectResponse('/admin_page?success=planner_added')
     except Exception as e:
         return RedirectResponse('/admin_page?error=database_error')
 # ~/~ end
