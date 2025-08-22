@@ -149,7 +149,7 @@ def feedback_to_user(params):
         'user_not_found': 'User not found.',
         'center_not_found': 'Center not found.',
         'invalid_role': 'Invalid role selected.',
-        'database_error': 'Database error occurred. Please try again.',
+        'db_error': f'Database error occurred: {params.get("etext")}. Please contact the program support.',
         'db_file_exists': 'Database file with this name already exists.',
         'template_not_found': 'Template database (mahi.db) not found.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
@@ -170,6 +170,18 @@ def feedback_to_user(params):
             Small("To clear this message, reload the page")
         )
     return message_div
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/aaGongprog.md#db-error>>[init]
+
+@rt('/db_error')
+def db_error(session, etext: str):
+    return Html(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Head(Title("Database error")),
+        Body(Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        (A("Dashboard", href="/dashboard")),
+        cls="container"
+    )
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#utilities>>[init]
 
@@ -545,11 +557,7 @@ def post(session, email: str):
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete user: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_user')
 @admin_required
@@ -585,7 +593,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
     except Exception as e:
-        return RedirectResponse(f'/db_error?error={e}')
+        return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-centers>>[init]
 
@@ -628,11 +636,7 @@ def post(session, center_name: str):
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete center: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_center')
 @admin_required
@@ -676,7 +680,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-planners>>[init]
 
@@ -700,11 +704,7 @@ def post(session, user_email: str, center_name: str):
         )
 
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete planner association: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_planner')
 @admin_required
@@ -739,7 +739,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ end
 # is admin-change.md

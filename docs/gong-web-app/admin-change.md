@@ -40,11 +40,7 @@ def post(session, email: str):
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete user: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_user')
 @admin_required
@@ -80,7 +76,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
     except Exception as e:
-        return RedirectResponse(f'/db_error?etext={e}')
+        return Redirect(f'/db_error?etext={e}')
 ```
 
 ``` {.python #change-centers}
@@ -124,11 +120,7 @@ def post(session, center_name: str):
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete center: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_center')
 @admin_required
@@ -172,7 +164,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 ```
 
 ``` {.python #change-planners}
@@ -197,11 +189,7 @@ def post(session, user_email: str, center_name: str):
         )
 
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete planner association: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_planner')
 @admin_required
@@ -236,5 +224,5 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 ```

@@ -31,7 +31,7 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 <<database-setup>>
 # is adatabase-setup.md
 <<feedback-messages>>
-<<database-error>>
+<<db-error>>
 <<utilities>>
 # is utilities.md
 <<authentication>>
@@ -108,12 +108,15 @@ def feedback_to_user(params):
     return message_div
 ```
 
-``` {.python #database-error}
+``` {.python #db-error}
+
 @rt('/db_error')
 def db_error(session, etext: str):
-    return Main(
+    return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'})),
+        Head(Title("Database error")),
+        Body(Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        (A("Dashboard", href="/dashboard")),
         cls="container"
     )
-
+```
