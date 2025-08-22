@@ -58,7 +58,7 @@ markdown_extensions:
 
 theme:
   name: readthedocs
-g  name: material
+  name: material
   features:
     - content.code.copy
   palette: 
