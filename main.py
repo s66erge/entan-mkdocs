@@ -6,6 +6,7 @@ import socket
 import markdown2
 import smtplib
 import shutil
+from functools import wraps
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from fasthtml.common import *
@@ -22,6 +23,25 @@ def before(req, session):
    if not auth: return login_redir
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#guard-role-admin>>[init]
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        # Assuming user info is in session
+        sessemail = session['auth'] 
+        u = users[sessemail]
+        if not u or not u.role_name == "admin":
+            # Redirect to login or unauthorized page if not admin
+            return Main(
+                Nav(Li(A("Dashboard", href="/dashboard"))),
+                Div(H1("Access Denied"),
+                    P("You do not have permission to access this page.")),
+                cls="container")
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
 # ~/~ end
 # in authenticate.md
 
@@ -141,7 +161,7 @@ def feedback_to_user(params):
         message = success_messages.get(params['success'], 'Operation completed successfully!')
         message_div = Div(
             Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
-            Small("To clear this message, reload the page")
+            Small("To clear this message and/or update the tables, reload the page")
         )
     elif 'error' in params:
         message = error_messages.get(params['error'], 'An error occurred.')
@@ -286,6 +306,25 @@ def get(session, token: str):
    except IndexError:
        return "Invalid or expired magic link"
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#guard-role-admin>>[init]
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        # Assuming user info is in session
+        sessemail = session['auth'] 
+        u = users[sessemail]
+        if not u or not u.role_name == "admin":
+            # Redirect to login or unauthorized page if not admin
+            return Main(
+                Nav(Li(A("Dashboard", href="/dashboard"))),
+                Div(H1("Access Denied"),
+                    P("You do not have permission to access this page.")),
+                cls="container")
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#logout>>[init]
 @rt('/logout')
 def post(session):
@@ -343,7 +382,7 @@ def show_users_table():
                     Td(u.name or ""), 
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
-                    Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", onclick="return confirm('Are you sure you want to delete this user?')"))
+                    Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", hx_confirm="Are you sure you want to delete this user?"))
                 ) for u in sorted(users(), key=lambda x: x.name)]
             )
         )
@@ -378,8 +417,7 @@ def show_centers_table():
                 *[Tr(
                     Td(c.center_name), 
                     Td(c.gong_db_name), 
-                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
-                        hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
+                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback", hx_confirm="Are you sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
         )
@@ -409,7 +447,7 @@ def show_planners_table():
                 *[Tr(
                     Td(p.user_email), 
                     Td(p.center_name), 
-                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", hx_confirm='Are you sure you want to delete this planner association?'))
                 ) for p in sorted(planners(), key=lambda x: x.center_name)]
             )
         )
@@ -437,15 +475,8 @@ def show_planners_form():
 # ~/~ begin <<docs/gong-web-app/admin-show.md#admin-page>>[init]
 
 @rt('/admin_page')
-def admin(session, request):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return Main(
-            Nav(Li(A("Dashboard", href="/dashboard"))),
-            Div(H1("Access Denied"),
-                P("You do not have permission to access this page.")),
-            cls="container")
+@admin_required
+def admin(request):
     params = dict(request.query_params)
     return Main(
         Nav(
@@ -487,13 +518,9 @@ def admin(session, request):
 
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-users>>[init]
 
-@rt('/delete_user/{email}') 
+@rt('/delete_user/{email}')
+@admin_required
 def post(session, email: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))
@@ -525,13 +552,8 @@ def post(session, email: str):
         )
 
 @rt('/add_user')
+@admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
-    # print(f"email: {new_user_email}, role: {role_name}")
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
     try:
         if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
@@ -572,12 +594,8 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-centers>>[init]
 
 @rt('/delete_center/{center_name}')
-def delete_center(session, center_name: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, center_name: str):
     try:
         center_planners = planners("center_name = ?", (center_name,))
         # Get the center info to find the database file
@@ -621,12 +639,8 @@ def delete_center(session, center_name: str):
         )
 
 @rt('/add_center')
-def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
     # Ensure gong_db_name ends with .db
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
@@ -671,12 +685,8 @@ def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-planners>>[init]
 
 @rt('/delete_planner/{user_email}/{center_name}')
-def delete_planner(session, user_email: str, center_name: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, user_email: str, center_name: str):
     try:
         # Check how many planners are associated with this center
         center_planners = planners("center_name = ?", (center_name,))
@@ -701,12 +711,8 @@ def delete_planner(session, user_email: str, center_name: str):
         )
 
 @rt('/add_planner')
-def add_planner(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
     try:
         if new_planner_user_email == "" or new_planner_center_name == "":
             message = {"error" : "missing_fields"}

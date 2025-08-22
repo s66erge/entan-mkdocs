@@ -12,20 +12,11 @@ Will only be reachable for signed in admin users.
 
 TODO document admin-show
 
-TODO show tables sorted by key
-
 ``` {.python #admin-page}
 
 @rt('/admin_page')
-def admin(session, request):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return Main(
-            Nav(Li(A("Dashboard", href="/dashboard"))),
-            Div(H1("Access Denied"),
-                P("You do not have permission to access this page.")),
-            cls="container")
+@admin_required
+def admin(request):
     params = dict(request.query_params)
     return Main(
         Nav(
@@ -78,7 +69,7 @@ def show_users_table():
                     Td(u.name or ""), 
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
-                    Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", onclick="return confirm('Are you sure you want to delete this user?')"))
+                    Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", hx_confirm="Are you sure you want to delete this user?"))
                 ) for u in sorted(users(), key=lambda x: x.name)]
             )
         )
@@ -114,8 +105,7 @@ def show_centers_table():
                 *[Tr(
                     Td(c.center_name), 
                     Td(c.gong_db_name), 
-                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}",
-                        hx_target="#centers-feedback", onclick="return confirm('Are you sure you want to delete this center?')"))
+                    Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback", hx_confirm="Are you sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
         )
@@ -146,7 +136,7 @@ def show_planners_table():
                 *[Tr(
                     Td(p.user_email), 
                     Td(p.center_name), 
-                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", onclick="return confirm('Are you sure you want to delete this planner association?')"))
+                    Td(A("Delete", hx_post=f"/delete_planner/{p.user_email}/{p.center_name}", hx_target="#planners-feedback", hx_confirm='Are you sure you want to delete this planner association?'))
                 ) for p in sorted(planners(), key=lambda x: x.center_name)]
             )
         )

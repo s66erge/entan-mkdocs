@@ -15,6 +15,7 @@ This is a passwordless authentication:
 <<handling-form>>
 <<send-link>>
 <<verify-token>>
+<<guard-role-admin>>
 <<logout>>
 ```
 
@@ -190,6 +191,27 @@ def before(req, session):
    if not auth: return login_redir
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
+```
+
+``` {.python #guard-role-admin}
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        # Assuming user info is in session
+        sessemail = session['auth'] 
+        u = users[sessemail]
+        if not u or not u.role_name == "admin":
+            # Redirect to login or unauthorized page if not admin
+            return Main(
+                Nav(Li(A("Dashboard", href="/dashboard"))),
+                Div(H1("Access Denied"),
+                    P("You do not have permission to access this page.")),
+                cls="container")
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
+
 ```
 
 ``` {.python #logout}

@@ -14,6 +14,7 @@ import socket
 import markdown2
 import smtplib
 import shutil
+from functools import wraps
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from fasthtml.common import *
@@ -22,6 +23,7 @@ from fasthtml.common import *
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 <<auth-beforeware>>
+<<guard-role-admin>>
 # in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
@@ -94,7 +96,7 @@ def feedback_to_user(params):
         message = success_messages.get(params['success'], 'Operation completed successfully!')
         message_div = Div(
             Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
-            Small("To clear this message, reload the page")
+            Small("To clear this message and/or update the tables, reload the page")
         )
     elif 'error' in params:
         message = error_messages.get(params['error'], 'An error occurred.')
