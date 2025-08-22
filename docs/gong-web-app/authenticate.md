@@ -31,7 +31,6 @@ def signin_form():
            ),
        ),
        Button("Sign In with Email", type="submit", id="submit-btn"),
-       # P(id="error"),
        hx_post="/create_magic_link",
        hx_target="#error",
        hx_disabled_elt="#submit-btn"
