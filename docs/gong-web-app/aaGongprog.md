@@ -4,8 +4,6 @@
 
 TODO decorator to check role in admin routes
 
-TODO create special page for database errors
-
 ``` {.python file= main.py}
 
 import secrets
