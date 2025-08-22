@@ -31,6 +31,7 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 <<database-setup>>
 # is adatabase-setup.md
 <<feedback-messages>>
+<<database-error>>
 <<utilities>>
 # is utilities.md
 <<authentication>>
@@ -84,7 +85,7 @@ def feedback_to_user(params):
         'user_not_found': 'User not found.',
         'center_not_found': 'Center not found.',
         'invalid_role': 'Invalid role selected.',
-        'database_error': 'Database error occurred. Please try again.',
+        'db_error': f'Database error occurred: {params.get("etext")}. Please contact the program support.',
         'db_file_exists': 'Database file with this name already exists.',
         'template_not_found': 'Template database (mahi.db) not found.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
@@ -106,3 +107,13 @@ def feedback_to_user(params):
         )
     return message_div
 ```
+
+``` {.python #database-error}
+@rt('/db_error')
+def db_error(session, etext: str):
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'})),
+        cls="container"
+    )
+

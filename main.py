@@ -585,11 +585,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
     except Exception as e:
-        #return RedirectResponse('/admin_page?error=database_error')
-        return Div(
-            Div(feedback_to_user({"error": "database_error"})),
-            Div(show_users_form(), hx_swap_oob="true", id="users-form")
-        )
+        return RedirectResponse(f'/db_error?error={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#change-centers>>[init]
 
