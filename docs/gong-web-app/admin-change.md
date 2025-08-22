@@ -13,13 +13,9 @@ TODO document admin-change
 
 ``` {.python #change-users}
 
-@rt('/delete_user/{email}') 
+@rt('/delete_user/{email}')
+@admin_required
 def post(session, email: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))
@@ -44,20 +40,11 @@ def post(session, email: str):
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete user: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_user')
+@admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
-    # print(f"email: {new_user_email}, role: {role_name}")
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
     try:
         if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
@@ -89,22 +76,14 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             Div(show_users_form(), hx_swap_oob="true", id="users-form")
         )
     except Exception as e:
-        #return RedirectResponse('/admin_page?error=database_error')
-        return Div(
-            Div(feedback_to_user({"error": "database_error"})),
-            Div(show_users_form(), hx_swap_oob="true", id="users-form")
-        )
+        return Redirect(f'/db_error?etext={e}')
 ```
 
 ``` {.python #change-centers}
 
 @rt('/delete_center/{center_name}')
-def delete_center(session, center_name: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, center_name: str):
     try:
         center_planners = planners("center_name = ?", (center_name,))
         # Get the center info to find the database file
@@ -141,19 +120,11 @@ def delete_center(session, center_name: str):
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None
         )
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete center: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_center')
-def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
     # Ensure gong_db_name ends with .db
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
@@ -193,18 +164,14 @@ def add_center(session, new_center_name: str = "", new_gong_db_name: str = ""):
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 ```
 
 ``` {.python #change-planners}
 
 @rt('/delete_planner/{user_email}/{center_name}')
-def delete_planner(session, user_email: str, center_name: str):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, user_email: str, center_name: str):
     try:
         # Check how many planners are associated with this center
         center_planners = planners("center_name = ?", (center_name,))
@@ -222,19 +189,11 @@ def delete_planner(session, user_email: str, center_name: str):
         )
 
     except Exception as e:
-        return Main(
-            Nav(Li(A("Admin", href="/admin_page"))),
-            Div(H1("Error"), P(f"Could not delete planner association: {str(e)}")),
-            cls="container"
-        )
+        return Redirect(f'/db_error?etext={e}')
 
 @rt('/add_planner')
-def add_planner(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
-    sessemail = session['auth']
-    u = users[sessemail]
-    if u.role_name != "admin":
-        return RedirectResponse('/dashboard')
-
+@admin_required
+def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
     try:
         if new_planner_user_email == "" or new_planner_center_name == "":
             message = {"error" : "missing_fields"}
@@ -265,5 +224,5 @@ def add_planner(session, new_planner_user_email: str = "", new_planner_center_na
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
-        return RedirectResponse('/admin_page?error=database_error')
+        return Redirect(f'/db_error?etext={e}')
 ```
