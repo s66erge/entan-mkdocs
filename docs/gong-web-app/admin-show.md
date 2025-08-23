@@ -143,17 +143,19 @@ def show_planners_table():
     )
 
 def show_planners_form():
+    sorted_centers = sorted(centers(), key=lambda x: x.center_name)
+    sorted_users = sorted(users(), key=lambda x: x.name)
     return Main(
         Div(
             Form(
                 Select(
                     Option("Select User", value="", selected=True, disabled=True),
-                    *[Option(u.email, value=u.email) for u in users()],
+                    *[Option(u.email, value=u.email) for u in sorted_users],
                     name="new_planner_user_email", required=True
                 ),
                 Select(
                     Option("Select Center", value="", selected=True, disabled=True),
-                    *[Option(c.center_name, value=c.center_name) for c in centers()],
+                    *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                     name="new_planner_center_name", required=True
                 ),
                 Button("Add Planner", type="submit"), hx_post="/add_planner", hx_target="#planners-feedback"

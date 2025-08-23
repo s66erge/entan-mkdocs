@@ -466,17 +466,19 @@ def show_planners_table():
     )
 
 def show_planners_form():
+    sorted_centers = sorted(centers(), key=lambda x: x.center_name)
+    sorted_users = sorted(users(), key=lambda x: x.name)
     return Main(
         Div(
             Form(
                 Select(
                     Option("Select User", value="", selected=True, disabled=True),
-                    *[Option(u.email, value=u.email) for u in users()],
+                    *[Option(u.email, value=u.email) for u in sorted_users],
                     name="new_planner_user_email", required=True
                 ),
                 Select(
                     Option("Select Center", value="", selected=True, disabled=True),
-                    *[Option(c.center_name, value=c.center_name) for c in centers()],
+                    *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                     name="new_planner_center_name", required=True
                 ),
                 Button("Add Planner", type="submit"), hx_post="/add_planner", hx_target="#planners-feedback"
@@ -528,7 +530,7 @@ def admin(request):
 # is admin-show.md
 # ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change-md>>[init]
 
-# ~/~ begin <<docs/gong-web-app/admin-change.md#change-users>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
 
 @rt('/delete_user/{email}')
 @admin_required
@@ -554,11 +556,13 @@ def post(session, email: str):
 
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None
+            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
-
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-change.md#add-user>>[init]
 @rt('/add_user')
 @admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
@@ -590,12 +594,13 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
         return Div(
             Div(feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
-            Div(show_users_form(), hx_swap_oob="true", id="users-form")
+            Div(show_users_form(), hx_swap_oob="true", id="users-form"),
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#change-centers>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-center>>[init]
 
 @rt('/delete_center/{center_name}')
 @admin_required
@@ -633,15 +638,18 @@ def post(session, center_name: str):
         # return RedirectResponse('/admin_page?success=center_deleted')
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None
+            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-change.md#add-center>>[init]
 
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
-    # Ensure gong_db_name ends with .db
+    # (1)
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
     db_path = f'data/{new_gong_db_name}'
@@ -651,38 +659,34 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
         if new_center_name == "" or new_gong_db_name == "":
             message = {"error" : "missing_fields"}
 
-        # Check if center already exists
         elif centers("center_name = ?", (new_center_name,)):
             message = {"error" : "center_exists"}
 
-        # Check if database file already exists
         elif os.path.exists(db_path):
             message = {"error" : 'db_file_exists'}
 
-        # Copy mahi.db as template for new center
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
-        else:
-            # Create the new database by copying mahi.db
+        else:  # (2)
             shutil.copy2(template_db, db_path)
-            # Add new center to the centers table
             centers.insert(
                 center_name=new_center_name,
                 gong_db_name=new_gong_db_name
             )
             message = {'success': 'center_added'}
 
-        # return RedirectResponse('/admin_page?success=center_added')
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(), hx_swap_oob="true", id="centers-form")
+            Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
+            # (3)
+            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#change-planners>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-planner>>[init]
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
@@ -705,6 +709,8 @@ def post(session, user_email: str, center_name: str):
 
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-change.md#add-planner>>[init]
 
 @rt('/add_planner')
 @admin_required
