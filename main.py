@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/aaGongprog.md#main.py>>[init]
+# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
 import secrets
 import os
@@ -43,7 +43,7 @@ def admin_required(handler):
         return handler(session, *args, **kwargs)
     return wrapper
 # ~/~ end
-# in authenticate.md
+# both in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
@@ -720,7 +720,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 # ~/~ end
 # ~/~ end
 
-# ~/~ begin <<docs/gong-web-app/aaGongprog.md#home-page>>[init]
+# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#home-page>>[init]
 @rt('/')
 def home():
     return Main(
