@@ -20,24 +20,17 @@ css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursiv
 
 <<auth-beforeware>>
 <<guard-role-admin>>
-# in authenticate.md
+# both in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-<<database-setup>>
-# is adatabase-setup.md
-<<user-feedback>>
-# is user-feedback.md
-<<utilities>>
-# is utilities.md
-<<authentication>>
-# is authenticate.md
-<<user-dashboard>>
-# is dashboard.md
-<<admin-show>>
-# is admin-show.md
-<<admin-change>>
-# is admin-change.md
+<<database-setup-md>>
+<<user-feedback-md>>
+<<utilities-md>>
+<<authenticate-md>>
+<<dashboard-md>>
+<<admin-show-md>>
+<<admin-change-md>>
 
 <<home-page>>
 

@@ -2,7 +2,7 @@
 
 Will only be reachable for signed in admin users.
 
-``` {.python #admin-show}
+``` {.python #admin-show-md}
 
 <<show-users>>
 <<show-centers>>

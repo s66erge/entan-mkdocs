@@ -2,7 +2,7 @@
 
 Will only be reachable for users who are signed in.
 
-``` {.python #user-dashboard}
+``` {.python #dashboard-md}
 
 <<dashboard>>
 ```

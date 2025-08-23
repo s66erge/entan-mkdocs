@@ -1,6 +1,6 @@
 # Database setup and init
 
-``` {.python #database-setup}
+``` {.python #database-setup-md}
 
 <<setup-database>>
 <<initialize-database>>

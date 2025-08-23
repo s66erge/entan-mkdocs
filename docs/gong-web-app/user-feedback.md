@@ -2,7 +2,7 @@
 
 ### Success/error messages
 
-``` {.python #user-feedback}
+``` {.python #user-feedback-md}
 
 <<feedback-messages>>
 <<db-error>>

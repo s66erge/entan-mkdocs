@@ -47,9 +47,9 @@ def admin_required(handler):
 
 app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
 
-# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#database-setup>>[init]
+# ~/~ begin <<docs/gong-web-app/database-setup.md#database-setup-md>>[init]
 
-# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#setup-database>>[init]
+# ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
 db = database('data/gongUsers.db')
 
@@ -105,7 +105,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/adatabase-setup.md#initialize-database>>[init]
+# ~/~ begin <<docs/gong-web-app/database-setup.md#initialize-database>>[init]
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")
@@ -124,8 +124,7 @@ if not planners():
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
 # ~/~ end
-# is adatabase-setup.md
-# ~/~ begin <<docs/gong-web-app/user-feedback.md#user-feedback>>[init]
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#user-feedback-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/user-feedback.md#feedback-messages>>[init]
 
@@ -186,8 +185,7 @@ def db_error(session, etext: str):
     )
 # ~/~ end
 # ~/~ end
-# is user-feedback.md
-# ~/~ begin <<docs/gong-web-app/utilities.md#utilities>>[init]
+# ~/~ begin <<docs/gong-web-app/utilities.md#utilities-md>>[init]
 # ~/~ begin <<docs/gong-web-app/utilities.md#isa-dev-computer>>[init]
 
 DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-linuxmint","serge-framework"]
@@ -228,8 +226,7 @@ def unfinished():
     )
 # ~/~ end
 # ~/~ end
-# is utilities.md
-# ~/~ begin <<docs/gong-web-app/authenticate.md#authentication>>[init]
+# ~/~ begin <<docs/gong-web-app/authenticate.md#authenticate-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
 def signin_form():
@@ -347,8 +344,7 @@ def post(session):
     return HttpHeader('HX-Redirect', '/login')
 # ~/~ end
 # ~/~ end
-# is authenticate.md
-# ~/~ begin <<docs/gong-web-app/dashboard.md#user-dashboard>>[init]
+# ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard>>[init]
 
@@ -372,8 +368,7 @@ def get(session):
     )
 # ~/~ end
 # ~/~ end
-# is dashboard.md
-# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-show>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-show-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
 
@@ -522,8 +517,7 @@ def admin(request):
     )
 # ~/~ end
 # ~/~ end
-# is admin-show.md
-# ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change>>[init]
+# ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change-md>>[init]
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
 
 @rt('/delete_user/{email}')
@@ -725,7 +719,6 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ end
-# is admin-change.md
 
 # ~/~ begin <<docs/gong-web-app/aaGongprog.md#home-page>>[init]
 @rt('/')
