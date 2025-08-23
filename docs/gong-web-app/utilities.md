@@ -3,10 +3,9 @@
 - checking if the program runs on a development machine
 - sending an email
 - displaying the content of a markdown file
-- route is not implemented yet
+- route or function not implemented yet
 
 ``` {.python #utilities}
-
 <<isa-dev-computer>>
 <<send-email>>
 <<display-markdown>>
@@ -64,6 +63,8 @@ def display_markdown(file_name:str):
     return NotStr(html_content)
 ```
 
+### Route not implemented yet
+
 ``` {.python #not-implemented}
 @rt('/unfinished')
 def unfinished():
@@ -73,3 +74,5 @@ def unfinished():
         cls="container"
     )
 ```
+
+

@@ -125,7 +125,9 @@ if not planners():
 # ~/~ end
 # ~/~ end
 # is adatabase-setup.md
-# ~/~ begin <<docs/gong-web-app/aaGongprog.md#feedback-messages>>[init]
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#user-feedback>>[init]
+
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#feedback-messages>>[init]
 
 def feedback_to_user(params):
     # query_params = dict(request.query_params)
@@ -171,7 +173,7 @@ def feedback_to_user(params):
         )
     return message_div
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/aaGongprog.md#db-error>>[init]
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#db-error>>[init]
 
 @rt('/db_error')
 def db_error(session, etext: str):
@@ -183,8 +185,9 @@ def db_error(session, etext: str):
         cls="container"
     )
 # ~/~ end
+# ~/~ end
+# is user-feedback.md
 # ~/~ begin <<docs/gong-web-app/utilities.md#utilities>>[init]
-
 # ~/~ begin <<docs/gong-web-app/utilities.md#isa-dev-computer>>[init]
 
 DEV_COMPUTERS = ["ASROCK-MY-OFFICE","DESKTOP-UIPS8J2","serge-virtual-linuxmint","serge-framework"]
@@ -345,14 +348,6 @@ def post(session):
 # ~/~ end
 # ~/~ end
 # is authenticate.md
-# ~/~ begin <<docs/gong-web-app/aaGongprog.md#home-page>>[init]
-@rt('/')
-def home():
-    return Main(
-        Div(display_markdown("home")),
-        A("Login",href="/login", class_="button"),
-        cls="container")
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/dashboard.md#user-dashboard>>[init]
 
 # ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard>>[init]
@@ -528,8 +523,7 @@ def admin(request):
 # ~/~ end
 # ~/~ end
 # is admin-show.md
-# ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change-md>>[init]
-
+# ~/~ begin <<docs/gong-web-app/admin-change.md#admin-change>>[init]
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
 
 @rt('/delete_user/{email}')
@@ -537,26 +531,24 @@ def admin(request):
 def post(session, email: str):
     try:
         user_info = users("email = ?",(email,))
-        user_planners = planners("user_email = ?", (email,))
+        user_planners = planners("user_email = ?", (email,))  ## [1]
         
         if not user_info:
             message = {'error' : 'user_not_found'}
        
-        # Check if user has any planner associations
-        elif user_planners:
-            # Get the center names for the error message
-            center_names = [p.center_name for p in user_planners]
+        elif user_planners:  ## [1] 
+            center_names = [p.center_name for p in user_planners]  ## [2]
             centers_list = ", ".join(center_names)
             message = {"error": "user_has_planners", "centers": f"{centers_list}"}
 
-        else:
-            # If no planner associations, proceed with deletion
+        else:  ## [3]
             db.execute("DELETE FROM users WHERE email = ?", (email,))
             message = {"success": "user_deleted"}
 
         return Div(
             Div(feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            ## [4]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
@@ -570,19 +562,16 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
         if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
 
-        # Validate role
         elif not roles("role_name = ?", (role_name,)):
             message = {"error": "invalid_role"}
 
-        # Check if user already exists
         elif users("email = ?", (new_user_email,)):
             message = {"error": "user_exists"}
 
-        # Add new user
-        else:
+        else:  ## [1]
             users.insert(
             email=new_user_email,
-            name=name,  # Use email prefix as default name
+            name=name,
             role_name=role_name,
             is_active=False,
             magic_link_token=None,
@@ -590,11 +579,11 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             )
             message = {"success": "user_added"}
 
-        #return RedirectResponse('/admin_page?success=user_added')
         return Div(
             Div(feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
             Div(show_users_form(), hx_swap_oob="true", id="users-form"),
+            ## [2]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
@@ -606,39 +595,33 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
 @admin_required
 def post(session, center_name: str):
     try:
-        center_planners = planners("center_name = ?", (center_name,))
-        # Get the center info to find the database file
         center_info = centers("center_name = ?", (center_name,))
-        gong_db_name = center_info[0].gong_db_name
-        db_path = f'data/{gong_db_name}'
+        gong_db_name = center_info[0].gong_db_name  ## [1]
+        db_path = f'data/{gong_db_name}'  ## [1]
+        center_planners = planners("center_name = ?", (center_name,))  ## [2]
 
         if not center_info:
             message = {'error' : 'center_not_found'}
 
-        # Check if center has any planner associations
-        elif center_planners:
-            # Get the user emails for the error message
-            user_emails = [p.user_email for p in center_planners]
+        elif center_planners:  ## [2]
+            user_emails = [p.user_email for p in center_planners]  ## [3]
             users_list = ", ".join(user_emails)
             message = {'error' : 'center_has_planners','users' : f'{users_list}'}
 
-        else:
-            # If no planner associations, proceed with deletion
+        else:  ## [4]
             db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
-            # Finally, delete the associated database file if it exists
             if os.path.exists(db_path):
                 os.remove(db_path)
-                # Also remove any SQLite journal files
-                for ext in ['-shm', '-wal']:
+                for ext in ['-shm', '-wal']:  ## [5]
                     journal_file = db_path + ext
                     if os.path.exists(journal_file):
                         os.remove(journal_file)
             message = {'success' : 'center_deleted'}
 
-        # return RedirectResponse('/admin_page?success=center_deleted')
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            ## [6]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
@@ -649,7 +632,7 @@ def post(session, center_name: str):
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
-    # (1)
+    ## [1]
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
     db_path = f'data/{new_gong_db_name}'
@@ -668,7 +651,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
-        else:  # (2)
+        else:  ## [2]
             shutil.copy2(template_db, db_path)
             centers.insert(
                 center_name=new_center_name,
@@ -680,7 +663,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
             Div(feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
-            # (3)
+            ## [3]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
@@ -692,13 +675,11 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
 @admin_required
 def post(session, user_email: str, center_name: str):
     try:
-        # Check how many planners are associated with this center
         center_planners = planners("center_name = ?", (center_name,))
-        # If this is the only planner for this center, prevent deletion
-        if len(center_planners) <= 1:
+        if len(center_planners) == 1:  ## [1]
             message ={"error" : "last_planner_for_center", "center" : f"{center_name}"}
-        else:
-            # If there are other planners for this center, proceed with deletion
+
+        else:  ## [2]
             db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
             message = {"success" : "planner_deleted"}
 
@@ -719,20 +700,16 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
         if new_planner_user_email == "" or new_planner_center_name == "":
             message = {"error" : "missing_fields"}
 
-        # Check if user exists
         elif not users("email = ?", (new_planner_user_email,)):
             message = {"error" : "user_not_found"}
 
-        # Check if center exists
         elif not centers("center_name = ?", (new_planner_center_name,)):
             message = {'error' : 'center_not_found'}
 
-        # Check if planner association already exists
         elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
             message = {'error' : 'planner_exists'}
 
-        # Add new planner association
-        else:
+        else:  ## (1)
             planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
@@ -749,6 +726,15 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 # ~/~ end
 # ~/~ end
 # is admin-change.md
+
+# ~/~ begin <<docs/gong-web-app/aaGongprog.md#home-page>>[init]
+@rt('/')
+def home():
+    return Main(
+        Div(display_markdown("home")),
+        A("Login",href="/login", class_="button"),
+        cls="container")
+# ~/~ end
 
 # client = TestClient(app)
 # print(client.get("/login").text)
