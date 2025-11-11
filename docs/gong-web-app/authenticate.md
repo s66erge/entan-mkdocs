@@ -9,7 +9,7 @@ This is a passwordless authentication:
 - The website looks for a record in the users database table with the token from the link
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
-``` {.python #authenticate-md}
+```{.python #authenticate-md}
 
 <<build-serve-login-form>>
 <<handling-form>>
@@ -23,7 +23,7 @@ This is a passwordless authentication:
 
 The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!
 
-``` {.python #build-serve-login-form}
+```{.python #build-serve-login-form}
 def signin_form():
    return Form(
        Div(
@@ -82,7 +82,7 @@ If everything went well, we return a success message to the user. Remember, the 
 
 Also I want to disable the submit button and show a message that the magic link has been sent. To do this, we use one of the most powerful features of HTMX, out-of-band swaps. In HTMX you can update more than one piece of UI by setting the hx-swap-oob attribute to true on an element. HTMX will then swap in the returned element at the location of the element with the same id (#submit-btn in this case). You can read more about HTMX's out-of-band swaps [here](https://htmx.org/docs/#oob_swaps).
 
-``` {.python #handling-form}
+```{.python #handling-form}
 
 @rt('/create_magic_link')
 def post(email: str):
@@ -99,7 +99,7 @@ def post(email: str):
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
-    
+
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):
@@ -125,7 +125,7 @@ In production mode - remote or local within railway CLI -, we can use the smtpli
 
 In dev mode, lets just mock sending the email by printing the email content to the console.
 
-``` {.python #send-link}
+```{.python #send-link}
 
 def send_magic_link_email(email_address: str, magic_link: str):
 
@@ -157,7 +157,7 @@ If a user has been found using this query, we will save his or hers email in the
 
 We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.
 
-``` {.python #verify-token}
+```{.python #verify-token}
 
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
@@ -183,7 +183,7 @@ Then well define a Beforeware object with our newly defined before function. Thi
 
 app, rt = fast_app(..., before=bware)
 
-``` {.python #auth-beforeware}
+```{.python #auth-beforeware}
 
 login_redir = RedirectResponse('/login', status_code=303)
 
@@ -194,7 +194,7 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
 ```
 
-``` {.python #guard-role-admin}
+```{.python #guard-role-admin}
 
 def admin_required(handler):
     @wraps(handler)
@@ -214,7 +214,7 @@ def admin_required(handler):
     return wrapper
 ```
 
-``` {.python #logout}
+```{.python #logout}
 @rt('/logout')
 def post(session):
     del session['auth']

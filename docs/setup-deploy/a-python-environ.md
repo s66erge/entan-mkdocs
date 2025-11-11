@@ -12,7 +12,7 @@ VSCode extensions:
 
 ### Initial installation
 
-``` {.pwsh file= setup/environ.ps1}
+```{.pwsh file= setup/environ.ps1}
 scoop install main/uv
 uv python install
 uv venv
@@ -20,7 +20,7 @@ uv pip install -r requirements.txt
 ```
 ### VSCode startup
 
-``` {.pwsh file= setup/startup.ps1}
+```{.pwsh file= setup/startup.ps1}
 .venv\Scripts\activate.ps1
 ```
 
@@ -28,7 +28,7 @@ uv pip install -r requirements.txt
 
 ### Initial installation
 
-``` {.bash file= setup/environ.sh}
+```{.bash file= setup/environ.sh}
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv python install
 uv venv

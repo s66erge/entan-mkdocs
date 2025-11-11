@@ -1,13 +1,13 @@
 # Database setup and init
 
-``` {.python #database-setup-md}
+```{.python #database-setup-md}
 
 <<setup-database>>
 <<initialize-database>>
 ```
 ### Database setup
 
-``` {.python #setup-database}
+```{.python #setup-database}
 
 db = database('data/gongUsers.db')
 
@@ -67,7 +67,7 @@ User = users.dataclass()
 
 Check if any table(s) is(are) empty and insert default values if needed
 
-``` {.python #initialize-database}
+```{.python #initialize-database}
 
 if not roles():
     roles.insert(role_name="admin", description="administrator")

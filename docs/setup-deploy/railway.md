@@ -4,15 +4,17 @@ Railway is a platform that allows you to deploy applications easily. It provides
 
 ## New instruction for this repo
 
-Railway connected to Github : all changes pushed to Github repo branch 'main' are deployed immediately (+/-) to Railway 'entan-mkdocs', where the 'main.py' file is the entry point.
+Railway connected to Github : all changes pushed to Github repo branch 'master' are deployed immediately (+/-) to Railway 'entan-mkdocs', where the 'main.py' file is the entry point.
 
-### Railway CLI installation
+### Railway CLI
+
+#### Installation
 
 ``` pwsh
 scoop install railway
 ```
 
-### Using the Railway CLI
+#### Using it
 
 The Railway CLI is used to:
 
@@ -24,6 +26,10 @@ The Railway CLI is used to:
    ``` pwsh
    railway run python main.py
    ```
+
+### Resend api key
+
+On the entan-mkdocs service in Railway, [define the variable 'RESEND_API_KEY'](../gong-web-app/utilities.md#via-resendcom)
 
 ## Previous instructions
 

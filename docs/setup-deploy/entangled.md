@@ -19,14 +19,14 @@ VSCode extensions:
 
 ### Windows
 
-``` {.pwsh file= setup/entangled.ps1}
+```{.pwsh file= setup/entangled.ps1}
 scoop install pandoc
 uv pip install entangled-cli
 ```
 
 ### Linux Mint
 
-``` {.bash file= setup/entangled.sh}
+```{.bash file= setup/entangled.sh}
 sudo apt install pandoc
 uv pip install entangled-cli
 ```
@@ -87,7 +87,7 @@ git commit --amend                # amend your commit to perfection
 
 ## Configuration
 
-``` {.toml file= entangled.toml}
+```{.toml file= entangled.toml}
 
 version = "2.0"
 watch_list = ["docs/**/*.md"]

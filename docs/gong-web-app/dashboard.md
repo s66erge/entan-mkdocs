@@ -2,12 +2,12 @@
 
 Will only be reachable for users who are signed in.
 
-``` {.python #dashboard-md}
+```{.python #dashboard-md}
 
 <<dashboard>>
 ```
 
-``` {.python #dashboard}
+```{.python #dashboard}
 
 @rt('/dashboard')
 def get(session): 

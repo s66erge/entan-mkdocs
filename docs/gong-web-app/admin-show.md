@@ -2,7 +2,7 @@
 
 Will only be reachable for signed in admin users.
 
-``` {.python #admin-show-md}
+```{.python #admin-show-md}
 
 <<show-users>>
 <<show-centers>>
@@ -12,7 +12,7 @@ Will only be reachable for signed in admin users.
 
 TODO document admin-show
 
-``` {.python #admin-page}
+```{.python #admin-page}
 
 @rt('/admin_page')
 @admin_required
@@ -55,7 +55,7 @@ def admin(session, request):
 
 
 
-``` {.python #show-users}
+```{.python #show-users}
 
 def show_users_table():
     return Main(
@@ -93,7 +93,7 @@ def show_users_form():
     )
 ```
 
-``` {.python #show-centers}
+```{.python #show-centers}
 
 def show_centers_table():
     return Main(
@@ -124,7 +124,7 @@ def show_centers_form():
     )
 ```
 
-``` {.python #show-planners}
+```{.python #show-planners}
 
 def show_planners_table():
     return Main(

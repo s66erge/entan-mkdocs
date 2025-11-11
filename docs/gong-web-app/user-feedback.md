@@ -2,14 +2,14 @@
 
 ### Success/error messages
 
-``` {.python #user-feedback-md}
+```{.python #user-feedback-md}
 
 <<feedback-messages>>
 <<db-error>>
 ```
 
 
-``` {.python #feedback-messages}
+```{.python #feedback-messages}
 
 def feedback_to_user(params):
     # query_params = dict(request.query_params)
@@ -58,7 +58,7 @@ def feedback_to_user(params):
 
 ### Error message when database error
 
-``` {.python #db-error}
+```{.python #db-error}
 
 @rt('/db_error')
 def db_error(session, etext: str):

@@ -220,7 +220,6 @@ def send_email(subject, body, recipients):
         "subject": subject,
         "text": body,
     }
-
     email = resend.Emails.send(params)
     print(f'Message sent: {email}')
 # ~/~ end
@@ -285,7 +284,7 @@ def post(email: str):
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
-    
+
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):

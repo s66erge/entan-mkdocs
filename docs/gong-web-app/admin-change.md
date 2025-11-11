@@ -8,7 +8,7 @@ All these functions are called with these htmx ([intro](../architecture/ui-archi
 - `hx_target=` id of DOM element where the resulting html will be placed  
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
 
-``` {.python #admin-change-md}
+```{.python #admin-change-md}
 <<delete-user>>
 <<add-user>>
 <<delete-center>>
@@ -17,7 +17,7 @@ and these functions can update multiple other DOM elements with `hx_swap_oob="tr
 <<add-planner>>
 ```
 
-``` {.python #delete-user}
+```{.python #delete-user}
 
 @rt('/delete_user/{email}')
 @admin_required
@@ -53,7 +53,7 @@ def post(session, email: str):
 [4] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-``` {.python #add-user}
+```{.python #add-user}
 @rt('/add_user')
 @admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
@@ -92,7 +92,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
 [2] rebuild the dropdown of the planners form to show changed users/centers
 <br><br> 
 
-``` {.python #delete-center}
+```{.python #delete-center}
 
 @rt('/delete_center/{center_name}')
 @admin_required
@@ -138,7 +138,7 @@ def post(session, center_name: str):
 [6] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-``` {.python #add-center}
+```{.python #add-center}
 
 @rt('/add_center')
 @admin_required
@@ -185,7 +185,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
 [3] rebuild the dropdown of the planners form to show changed users/center
 <br><br>
 
-``` {.python #delete-planner}
+```{.python #delete-planner}
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
@@ -211,7 +211,7 @@ def post(session, user_email: str, center_name: str):
 [2] proceed with deletion
 <br><br>
 
-``` {.python #add-planner}
+```{.python #add-planner}
 
 @rt('/add_planner')
 @admin_required
