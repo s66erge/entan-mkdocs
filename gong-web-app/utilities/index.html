@@ -1216,7 +1216,7 @@
 <h4 id="via-google-smtp">via Google smtp<a class="headerlink" href="#via-google-smtp" title="Permanent link">#</a></h4>
 <p>We will need to create an App Password in your Google Account settings as we have 2-Step Verification enabled. And we set up environmemt variables 'GOOGLE_SMTP_USER' and 'GOOGLE_SMTP_PASS' .</p>
 <h4 id="via-resendcom">via resend.com<a class="headerlink" href="#via-resendcom" title="Permanent link">#</a></h4>
-<p>As railway does not give smtp access to Hobby plan, we are using instead the resend API: https://resend.com/docs/send-with-python . And we set up the environmemt variable 'RESEND_API_KEY' .</p>
+<p>As railway does not give smtp access to Hobby plan, we are using instead the resend API: https://resend.com/docs/send-with-python . And we set up <a href="../../setup-deploy/railway/#resend-api-key">the environmemt variable 'RESEND_API_KEY'</a> .</p>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
 <p>Using: <em>send_email(subject, body, recipients)</em></p>
 <ul>
@@ -1248,7 +1248,6 @@
         <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="n">subject</span><span class="p">,</span>
         <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">body</span><span class="p">,</span>
     <span class="p">}</span>
-
     <span class="n">email</span> <span class="o">=</span> <span class="n">resend</span><span class="o">.</span><span class="n">Emails</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Message sent: </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </code></pre></div>
