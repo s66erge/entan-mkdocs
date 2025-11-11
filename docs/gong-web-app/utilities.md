@@ -37,6 +37,8 @@ Example for using: *send_email(subject, body, recipients)*
 ``` {.python #send-email}
 
 def send_email(subject, body, recipients):
+    # old code via smtp
+    """
     sender = os.environ.get('GOOGLE_SMTP_USER') 
     password = os.environ.get('GOOGLE_SMTP_PASS')
     # Create MIMEText email object with the email body
@@ -48,7 +50,19 @@ def send_email(subject, body, recipients):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
+    """
+    # using resend
+    sender = "spegoff@authentica.eu" 
+    resend.api_key = os.environ.get['RESEND_API_KEY']
+    params: resend.Emails.SendParams = {
+        "from": sender,
+        "to": recipients,
+        "subject": subject,
+        "text": body,
+    }
+
+    email = resend.Emails.send(params)
+    print(f'Message sent: {email}')
 ```
 
 ### Displaying the content of a markdown file

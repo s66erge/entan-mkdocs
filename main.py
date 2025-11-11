@@ -6,6 +6,7 @@ import socket
 import markdown2
 import smtplib
 import shutil
+import resend
 from functools import wraps
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -196,6 +197,8 @@ def isa_dev_computer():
 # ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
+    # old code via smtp
+    """
     sender = os.environ.get('GOOGLE_SMTP_USER') 
     password = os.environ.get('GOOGLE_SMTP_PASS')
     # Create MIMEText email object with the email body
@@ -207,7 +210,19 @@ def send_email(subject, body, recipients):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
-    print("Message sent!")
+    """
+    # using resend
+    sender = "spegoff@authentica.eu" 
+    resend.api_key = os.environ.get['RESEND_API_KEY']
+    params: resend.Emails.SendParams = {
+        "from": sender,
+        "to": recipients,
+        "subject": subject,
+        "text": body,
+    }
+
+    email = resend.Emails.send(params)
+    print(f'Message sent: {email}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 
@@ -270,6 +285,7 @@ def post(email: str):
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
+    
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):
@@ -299,8 +315,8 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   email_sender = os.environ.get('GOOGLE_SMTP_USER','None')
-   if email_sender == 'None':
+   resend_api_key = os.environ.get('RESEND_API_KEY','None')
+   if resend_api_key == 'None':
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])

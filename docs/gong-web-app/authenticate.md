@@ -99,6 +99,7 @@ def post(email: str):
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
+    
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
     if (not isa_dev_computer()) and (domainame is not None):
@@ -139,8 +140,8 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   email_sender = os.environ.get('GOOGLE_SMTP_USER','None')
-   if email_sender == 'None':
+   resend_api_key = os.environ.get('RESEND_API_KEY','None')
+   if resend_api_key == 'None':
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])

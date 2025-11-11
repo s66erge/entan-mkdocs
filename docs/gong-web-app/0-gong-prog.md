@@ -12,6 +12,7 @@ import socket
 import markdown2
 import smtplib
 import shutil
+import resend
 from functools import wraps
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
