@@ -53,7 +53,7 @@ def send_email(subject, body, recipients):
     """
     # using resend
     sender = "spegoff@authentica.eu" 
-    resend.api_key = os.environ.get['RESEND_API_KEY']
+    resend.api_key = os.environ['RESEND_API_KEY']
     params: resend.Emails.SendParams = {
         "from": sender,
         "to": recipients,
