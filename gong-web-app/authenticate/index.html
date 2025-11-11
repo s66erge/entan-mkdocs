@@ -1137,7 +1137,7 @@
   
 
 
-<h1 id="authentication">Authentication</h1>
+<h1 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">#</a></h1>
 <p>This is a passwordless authentication:</p>
 <ul>
 <li>The user enters their email on a website</li>
@@ -1154,7 +1154,7 @@
 <span class="o">&lt;&lt;</span><span class="n">guard</span><span class="o">-</span><span class="n">role</span><span class="o">-</span><span class="n">admin</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">logout</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
-<h3 id="login-form">Login form</h3>
+<h3 id="login-form">Login form<a class="headerlink" href="#login-form" title="Permanent link">#</a></h3>
 <p>The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!</p>
 <div id="build-serve-login-form" class="highlight"><span class="filename">#build-serve-login-form</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">signin_form</span><span class="p">():</span>
    <span class="k">return</span> <span class="n">Form</span><span class="p">(</span>
@@ -1180,7 +1180,7 @@
        <span class="p">),</span> <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
    <span class="p">)</span>
 </code></pre></div>
-<h3 id="handling-the-login-form">Handling the login form</h3>
+<h3 id="handling-the-login-form">Handling the login form<a class="headerlink" href="#handling-the-login-form" title="Permanent link">#</a></h3>
 <p>This handler first checks if the email is present. If its not, it returns an error that will be swapped into the #error paragraph in the form by HTMX, just like last time.</p>
 <p>We create a magic_link_token using the secrets package from the python standard library. This token is a 32 characters long string. Also we generate an expiry date, which lies 15 minutes in the future.</p>
 <p>The token should only be valid for a certain amount of time to increase the security of the authentication system.</p>
@@ -1228,7 +1228,7 @@ If we are running locally (os.name == 'nt'), directly or within railway CLI, the
     <span class="k">return</span> <span class="n">P</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="s1">&#39;magic_link_sent&#39;</span><span class="p">}),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">),</span>
     <span class="n">HttpHeader</span><span class="p">(</span><span class="s1">&#39;HX-Reswap&#39;</span><span class="p">,</span> <span class="s1">&#39;outerHTML&#39;</span><span class="p">),</span> <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Magic link sent&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;submit-btn&quot;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="send-the-magic-link">Send the magic link</h3>
+<h3 id="send-the-magic-link">Send the magic link<a class="headerlink" href="#send-the-magic-link" title="Permanent link">#</a></h3>
 <p>Now we only need to send an email to the user with the link.
 The link then sends a get request to the /verify_magic_link/{token} endpoint.</p>
 <p>In production mode - remote or local within railway CLI -, we can use the smtplib via send_email (in utilities.md) to send an email using Gmail's SMTP server. </p>
@@ -1252,7 +1252,7 @@ The link then sends a get request to the /verify_magic_link/{token} endpoint.</p
    <span class="k">else</span><span class="p">:</span>
        <span class="n">send_email</span><span class="p">(</span><span class="n">email_subject</span><span class="p">,</span> <span class="n">email_text</span><span class="p">,</span> <span class="p">[</span><span class="n">email_address</span><span class="p">])</span>
 </code></pre></div>
-<h3 id="authenticate-the-user">Authenticate the user</h3>
+<h3 id="authenticate-the-user">Authenticate the user<a class="headerlink" href="#authenticate-the-user" title="Permanent link">#</a></h3>
 <p>We save the current time into the variable now, because we need to look whether the token is already expired. Then we retrieve the first item with the specified token and an expiration date that lies in the future from the users table.</p>
 <p>There should only be one or no user coming back from this query, so we wrap this whole code in a try/catch block.</p>
 <p>If a user has been found using this query, we will save his or hers email in the auth key of our session dictionary. If its the first time the user logs in, we set is_active to true for this database record.</p>
@@ -1268,7 +1268,7 @@ The link then sends a get request to the /verify_magic_link/{token} endpoint.</p
    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
        <span class="k">return</span> <span class="s2">&quot;Invalid or expired magic link&quot;</span>
 </code></pre></div>
-<h3 id="beforeware-to-restrict-access">Beforeware to restrict access</h3>
+<h3 id="beforeware-to-restrict-access">Beforeware to restrict access<a class="headerlink" href="#beforeware-to-restrict-access" title="Permanent link">#</a></h3>
 <p>We need a page that is only accessible for authenticated users and a mechanism to restrict the access to this page for non-authenticated users. We will use FastHTMLs concept of beforeware for restricting access.</p>
 <p>Here we define a function called before that takes in the request and saves whatever in the auth key of the session into the auth variable as well as the scope of the request. The request scope is something that comes from ASGI, the underlying webserver technology of FastHTML. Think of it as a kind of metadata or context of the request.</p>
 <p>If there is nothing in session["auth"], auth will evaluate to False and we will redirect the user to the login page.</p>

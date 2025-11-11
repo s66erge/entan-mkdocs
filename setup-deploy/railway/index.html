@@ -1359,15 +1359,15 @@
   
 
 
-<h1 id="railway">Railway</h1>
+<h1 id="railway">Railway<a class="headerlink" href="#railway" title="Permanent link">#</a></h1>
 <p>Railway is a platform that allows you to deploy applications easily. It provides a simple way to host your applications and manage their deployments.</p>
-<h2 id="new-instruction-for-this-repo">New instruction for this repo</h2>
+<h2 id="new-instruction-for-this-repo">New instruction for this repo<a class="headerlink" href="#new-instruction-for-this-repo" title="Permanent link">#</a></h2>
 <p>Railway connected to Github : all changes pushed to Github repo branch 'master' are deployed immediately (+/-) to Railway 'entan-mkdocs', where the 'main.py' file is the entry point.</p>
-<h3 id="railway-cli">Railway CLI</h3>
-<h4 id="installation">Installation</h4>
+<h3 id="railway-cli">Railway CLI<a class="headerlink" href="#railway-cli" title="Permanent link">#</a></h3>
+<h4 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">scoop</span> <span class="n">install</span> <span class="n">railway</span>
 </code></pre></div>
-<h4 id="using-it">Using it</h4>
+<h4 id="using-it">Using it<a class="headerlink" href="#using-it" title="Permanent link">#</a></h4>
 <p>The Railway CLI is used to:</p>
 <ol>
 <li>link the local project to a Railway project:
@@ -1377,19 +1377,19 @@
    <div class="highlight"><pre><span></span><code><span class="n">railway</span> <span class="n">run</span> <span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div></li>
 </ol>
-<h3 id="resend-api-key">Resend api key</h3>
+<h3 id="resend-api-key">Resend api key<a class="headerlink" href="#resend-api-key" title="Permanent link">#</a></h3>
 <p>On the entan-mkdocs service in Railway, define the variable 'RESEND_API_KEY'</p>
-<h2 id="previous-instructions">Previous instructions</h2>
-<h3 id="setup">Setup</h3>
+<h2 id="previous-instructions">Previous instructions<a class="headerlink" href="#previous-instructions" title="Permanent link">#</a></h2>
+<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h3>
 <p>Run the commands below on your local machine.
 <div class="highlight"><pre><span></span><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">AnswerDotAI</span><span class="p">/</span><span class="n">fh-deploy</span><span class="p">.</span><span class="n">git</span>
 <span class="nb">cd </span><span class="n">railway</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
 </code></pre></div></p>
-<h3 id="run-the-app-locally">Run the app locally</h3>
+<h3 id="run-the-app-locally">Run the app locally<a class="headerlink" href="#run-the-app-locally" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
-<h3 id="deploying-to-railway">Deploying to Railway</h3>
+<h3 id="deploying-to-railway">Deploying to Railway<a class="headerlink" href="#deploying-to-railway" title="Permanent link">#</a></h3>
 <ul>
 <li>create a Railway <a href="https://railway.app/">account</a> and signup to the Hobby plan. </li>
 <li>install the Railway <a href="https://docs.railway.app/guides/cli#installing-the-cli">CLI</a>.</li>
@@ -1397,8 +1397,8 @@
 <li>run <code>fh_railway_deploy YOUR_APP_NAME</code>.</li>
 </ul>
 <p>Your app's entry point must be located in a <code>main.py</code> file for this to work.</p>
-<h3 id="supplementary-info">Supplementary Info.</h3>
-<h4 id="whats-in-fh_railway_deploy">what's in <code>fh_railway_deploy</code></h4>
+<h3 id="supplementary-info">Supplementary Info.<a class="headerlink" href="#supplementary-info" title="Permanent link">#</a></h3>
+<h4 id="whats-in-fh_railway_deploy">what's in <code>fh_railway_deploy</code><a class="headerlink" href="#whats-in-fh_railway_deploy" title="Permanent link">#</a></h4>
 <p><code>fh_railway_deploy</code> runs the following commands behind the scenes for you:</p>
 <div class="highlight"><pre><span></span><code>railway<span class="w"> </span>init<span class="w"> </span>-n<span class="w"> </span>&lt;app-name&gt;
 railway<span class="w"> </span>up<span class="w"> </span>-c
@@ -1407,7 +1407,7 @@ railway<span class="w"> </span>link<span class="w"> </span>...
 railway<span class="w"> </span>volume<span class="w"> </span>add<span class="w"> </span>-m<span class="w"> </span>/app/data
 </code></pre></div>
 <p>It handles automatically linking your current app to a railway project, setting up all the environment variables such as the port to listen on and setting up a <code>requirements.txt</code> if you haven't one already.</p>
-<h4 id="changing-the-start-command-or-sleep-directive-or">Changing the start command or sleep directive or ...</h4>
+<h4 id="changing-the-start-command-or-sleep-directive-or">Changing the start command or sleep directive or ...<a class="headerlink" href="#changing-the-start-command-or-sleep-directive-or" title="Permanent link">#</a></h4>
 <p>Put a <code>railway.toml</code> file in the top application folder :</p>
 <div class="highlight"><pre><span></span><code><span class="k">[build]</span>
 <span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;NIXPACKS&quot;</span>
@@ -1417,7 +1417,7 @@ railway<span class="w"> </span>volume<span class="w"> </span>add<span class="w">
 <span class="n">sleepApplication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">startCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;uvicorn main:app --host 0.0.0.0 --port $PORT&quot;</span>
 </code></pre></div>
-<h4 id="customizing-your-domain-name">Customizing your Domain Name</h4>
+<h4 id="customizing-your-domain-name">Customizing your Domain Name<a class="headerlink" href="#customizing-your-domain-name" title="Permanent link">#</a></h4>
 <p>Railway automatically assigns your website a unique domain name such as <code>quickdraw-production.up.railway.app</code>. However, if you want to use your own that you've purchased through services like <a href="https://www.godaddy.com/">GoDaddy</a> or <a href="https://domains.squarespace.com/">Squarespace Domains</a> and have users be able to navigate to your site using that domain, you'll need to configure it both in your domain registration service and in Railway. Railway has put together a nice tutorial for setting it up <a href="https://docs.railway.app/guides/public-networking#custom-domains">here</a>.</p>
 <p>Make sure to notice the difference between setting up a regular domain and a subdomain. Regular domains don't have any prefixes before the main site name such as <code>example.com</code> and is setup differently from a subdomain which might look like <code>subdomain.example.com</code>. Make sure to follow your domain registration service's documentation on how to set these types up.</p>
 

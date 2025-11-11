@@ -1193,7 +1193,7 @@
   
 
 
-<h1 id="utilities">Utilities</h1>
+<h1 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">#</a></h1>
 <ul>
 <li>checking if the program runs on a development machine</li>
 <li>sending an email</li>
@@ -1205,19 +1205,19 @@
 <span class="o">&lt;&lt;</span><span class="n">display</span><span class="o">-</span><span class="n">markdown</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="ow">not</span><span class="o">-</span><span class="n">implemented</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
-<h3 id="check-if-the-current-computer-is-a-development-machine">Check if the current computer is a development machine</h3>
+<h3 id="check-if-the-current-computer-is-a-development-machine">Check if the current computer is a development machine<a class="headerlink" href="#check-if-the-current-computer-is-a-development-machine" title="Permanent link">#</a></h3>
 <p>This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.</p>
 <div id="isa-dev-computer" class="highlight"><span class="filename">#isa-dev-computer</span><pre><span></span><code><span class="n">DEV_COMPUTERS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ASROCK-MY-OFFICE&quot;</span><span class="p">,</span><span class="s2">&quot;DESKTOP-UIPS8J2&quot;</span><span class="p">,</span><span class="s2">&quot;serge-virtual-linuxmint&quot;</span><span class="p">,</span><span class="s2">&quot;serge-framework&quot;</span><span class="p">]</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">isa_dev_computer</span><span class="p">():</span>
     <span class="n">hostname</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">hostname</span> <span class="ow">in</span> <span class="n">DEV_COMPUTERS</span>
 </code></pre></div>
-<h3 id="send-email">Send email</h3>
-<h4 id="via-google-smtp">via Google smtp</h4>
+<h3 id="send-email">Send email<a class="headerlink" href="#send-email" title="Permanent link">#</a></h3>
+<h4 id="via-google-smtp">via Google smtp<a class="headerlink" href="#via-google-smtp" title="Permanent link">#</a></h4>
 <p>We will need to create an App Password in your Google Account settings as we have 2-Step Verification enabled. And we set up environmemt variables 'GOOGLE_SMTP_USER' and 'GOOGLE_SMTP_PASS' .</p>
-<h4 id="via-resendcom">via resend.com</h4>
+<h4 id="via-resendcom">via resend.com<a class="headerlink" href="#via-resendcom" title="Permanent link">#</a></h4>
 <p>As railway does not give smtp access to Hobby plan, we are using instead the resend API: https://resend.com/docs/send-with-python . And we set up the environmemt variable 'RESEND_API_KEY' .</p>
-<h3 id="example">Example</h3>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
 <p>Using: <em>send_email(subject, body, recipients)</em></p>
 <ul>
 <li>subject = "Hello from Python"</li>
@@ -1252,14 +1252,14 @@
     <span class="n">email</span> <span class="o">=</span> <span class="n">resend</span><span class="o">.</span><span class="n">Emails</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Message sent: </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="displaying-the-content-of-a-markdown-file">Displaying the content of a markdown file</h3>
+<h3 id="displaying-the-content-of-a-markdown-file">Displaying the content of a markdown file<a class="headerlink" href="#displaying-the-content-of-a-markdown-file" title="Permanent link">#</a></h3>
 <p>This function reads a markdown file name, without the extension '.md', then finds the file in the 'md-text' directory and converts it to HTML using the <code>markdown2</code> library, which is then returned as a NotStr object for rendering in the app.</p>
 <div id="display-markdown" class="highlight"><span class="filename">#display-markdown</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_markdown</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;md-text/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.md&#39;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">html_content</span> <span class="o">=</span> <span class="n">markdown2</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">NotStr</span><span class="p">(</span><span class="n">html_content</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="route-not-implemented-yet">Route not implemented yet</h3>
+<h3 id="route-not-implemented-yet">Route not implemented yet<a class="headerlink" href="#route-not-implemented-yet" title="Permanent link">#</a></h3>
 <div id="not-implemented" class="highlight"><span class="filename">#not-implemented</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/unfinished&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">unfinished</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>

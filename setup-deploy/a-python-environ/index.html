@@ -1205,34 +1205,34 @@
   
 
 
-<h1 id="the-python-environment">The python environment</h1>
+<h1 id="the-python-environment">The python environment<a class="headerlink" href="#the-python-environment" title="Permanent link">#</a></h1>
 <p>Make sure this computer will be recognized by name as a dev machine : see isa_dev_computer() in utilities.md !!!</p>
 <p>To set up and manage the virtual Python environment for this project, we use the <a href="https://docs.astral.sh/uv/">uv tool</a>.</p>
 <p>VSCode extensions:</p>
 <ul>
 <li>Python (from Microsoft)</li>
 </ul>
-<h2 id="windows">Windows</h2>
-<h3 id="initial-installation">Initial installation</h3>
+<h2 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">#</a></h2>
+<h3 id="initial-installation">Initial installation<a class="headerlink" href="#initial-installation" title="Permanent link">#</a></h3>
 <div class="highlight"><span class="filename">file: setup/environ.ps1</span><pre><span></span><code><span class="n">scoop</span> <span class="n">install</span> <span class="n">main</span><span class="p">/</span><span class="n">uv</span>
 <span class="n">uv</span> <span class="n">python</span> <span class="n">install</span>
 <span class="n">uv</span> <span class="n">venv</span>
 <span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
 </code></pre></div>
-<h3 id="vscode-startup">VSCode startup</h3>
+<h3 id="vscode-startup">VSCode startup<a class="headerlink" href="#vscode-startup" title="Permanent link">#</a></h3>
 <div class="highlight"><span class="filename">file: setup/startup.ps1</span><pre><span></span><code><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">activate</span><span class="p">.</span><span class="n">ps1</span>
 </code></pre></div>
-<h2 id="linux-mint">Linux Mint</h2>
-<h3 id="initial-installation_1">Initial installation</h3>
+<h2 id="linux-mint">Linux Mint<a class="headerlink" href="#linux-mint" title="Permanent link">#</a></h2>
+<h3 id="initial-installation_1">Initial installation<a class="headerlink" href="#initial-installation_1" title="Permanent link">#</a></h3>
 <div class="highlight"><span class="filename">file: setup/environ.sh</span><pre><span></span><code>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
 uv<span class="w"> </span>python<span class="w"> </span>install
 uv<span class="w"> </span>venv
 uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </code></pre></div>
-<h3 id="vscode-startup_1">VSCode startup</h3>
+<h3 id="vscode-startup_1">VSCode startup<a class="headerlink" href="#vscode-startup_1" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 </code></pre></div>
-<h2 id="command">command</h2>
+<h2 id="command">command<a class="headerlink" href="#command" title="Permanent link">#</a></h2>
 <p>python main.py</p>
 
 
