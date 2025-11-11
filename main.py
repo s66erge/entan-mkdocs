@@ -52,7 +52,9 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
-db = database('data/gongUsers.db')
+db_path = "" if isa_dev_computer() else os.environ['RAILWAY_VOLUME_MOUNT_PATH'] + "/"
+print(f'db_path: {db_path}data/gongUsers.db')
+db = database(db_path + 'data/gongUsers.db')
 
 SQL_CREATE_ROLES = """
 CREATE TABLE IF NOT EXISTS roles (
@@ -314,8 +316,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   resend_api_key = os.environ.get('RESEND_API_KEY','None')
-   if resend_api_key == 'None':
+   if isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])
