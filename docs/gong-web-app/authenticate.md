@@ -211,7 +211,6 @@ def admin_required(handler):
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper
-
 ```
 
 ``` {.python #logout}

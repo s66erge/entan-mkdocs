@@ -4,7 +4,8 @@
 
 
 
-``` {.python file= main.py}
+```{.python file=main.py}
+
 import secrets
 import os
 import socket
@@ -43,7 +44,7 @@ serve()
 
 ### Home page   
 
-``` {.python #home-page}
+```{.python #home-page}
 @rt('/')
 def home():
     return Main(

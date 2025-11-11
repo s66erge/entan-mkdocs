@@ -480,7 +480,7 @@ def show_planners_form():
 
 @rt('/admin_page')
 @admin_required
-def admin(request):
+def admin(session, request):
     params = dict(request.query_params)
     return Main(
         Nav(
@@ -526,10 +526,10 @@ def post(session, email: str):
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))  ## [1]
-        
+
         if not user_info:
             message = {'error' : 'user_not_found'}
-       
+
         elif user_planners:  ## [1] 
             center_names = [p.center_name for p in user_planners]  ## [2]
             centers_list = ", ".join(center_names)
