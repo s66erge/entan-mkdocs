@@ -14,7 +14,7 @@
         <link rel="prev" href="../user-feedback/">
       
       
-        <link rel="next" href="../../setup-deploy/a-python-environ/">
+        <link rel="next" href="../../obtain-schedule/API/">
       
       
         
@@ -923,7 +923,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Obtain schedule
   
 
     
@@ -936,6 +936,116 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Obtain schedule
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    dhamma.org courses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/python-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    python program
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup deploy
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1207,7 +1317,7 @@
 </code></pre></div>
 <h3 id="check-if-the-current-computer-is-a-development-machine">Check if the current computer is a development machine<a class="headerlink" href="#check-if-the-current-computer-is-a-development-machine" title="Permanent link">#</a></h3>
 <p>This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.</p>
-<div id="isa-dev-computer" class="highlight"><span class="filename">#isa-dev-computer</span><pre><span></span><code><span class="n">DEV_COMPUTERS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ASROCK-MY-OFFICE&quot;</span><span class="p">,</span><span class="s2">&quot;DESKTOP-UIPS8J2&quot;</span><span class="p">,</span><span class="s2">&quot;serge-virtual-linuxmint&quot;</span><span class="p">,</span><span class="s2">&quot;serge-framework&quot;</span><span class="p">]</span>
+<div id="isa-dev-computer" class="highlight"><span class="filename">#isa-dev-computer</span><pre><span></span><code><span class="n">DEV_COMPUTERS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;serge-asrock&quot;</span><span class="p">,</span><span class="s2">&quot;DESKTOP-UIPS8J2&quot;</span><span class="p">,</span><span class="s2">&quot;serge-virtual-linuxmint&quot;</span><span class="p">,</span><span class="s2">&quot;serge-framework&quot;</span><span class="p">]</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">isa_dev_computer</span><span class="p">():</span>
     <span class="n">hostname</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">hostname</span> <span class="ow">in</span> <span class="n">DEV_COMPUTERS</span>

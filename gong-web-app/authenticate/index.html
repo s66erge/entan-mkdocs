@@ -895,7 +895,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Obtain schedule
   
 
     
@@ -908,6 +908,116 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Obtain schedule
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    dhamma.org courses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/python-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    python program
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup deploy
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1246,8 +1356,7 @@ The link then sends a get request to the /verify_magic_link/{token} endpoint.</p
 <span class="s2">   Cheers,</span>
 <span class="s2">   The App Team</span>
 <span class="s2">   &quot;&quot;&quot;</span>
-   <span class="n">resend_api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RESEND_API_KEY&#39;</span><span class="p">,</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
-   <span class="k">if</span> <span class="n">resend_api_key</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+   <span class="k">if</span> <span class="n">isa_dev_computer</span><span class="p">():</span>
        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;To: </span><span class="si">{</span><span class="n">email_address</span><span class="si">}</span><span class="se">\n</span><span class="s1"> Subject: </span><span class="si">{</span><span class="n">email_subject</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">email_text</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
    <span class="k">else</span><span class="p">:</span>
        <span class="n">send_email</span><span class="p">(</span><span class="n">email_subject</span><span class="p">,</span> <span class="n">email_text</span><span class="p">,</span> <span class="p">[</span><span class="n">email_address</span><span class="p">])</span>

@@ -862,7 +862,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Obtain schedule
   
 
     
@@ -875,6 +875,116 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Obtain schedule
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    dhamma.org courses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../obtain-schedule/python-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    python program
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup deploy
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1076,7 +1186,9 @@
 <span class="o">&lt;&lt;</span><span class="n">initialize</span><span class="o">-</span><span class="n">database</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <h3 id="database-setup">Database setup<a class="headerlink" href="#database-setup" title="Permanent link">#</a></h3>
-<div id="setup-database" class="highlight"><span class="filename">#setup-database</span><pre><span></span><code><span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="s1">&#39;data/gongUsers.db&#39;</span><span class="p">)</span>
+<div id="setup-database" class="highlight"><span class="filename">#setup-database</span><pre><span></span><code><span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">isa_dev_computer</span><span class="p">()</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;</span><span class="p">,</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;db_path: </span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s1">data/gongUsers.db&#39;</span><span class="p">)</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;data/gongUsers.db&#39;</span><span class="p">)</span>
 
 <span class="n">SQL_CREATE_ROLES</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">CREATE TABLE IF NOT EXISTS roles (</span>
