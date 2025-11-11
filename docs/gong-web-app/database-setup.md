@@ -9,7 +9,8 @@
 
 ```{.python #setup-database}
 
-db = database('data/gongUsers.db')
+db_path = "" if isa_dev_computer() else os.environ['RAILWAY_VOLUME_MOUNT_PATH'] + "/"
+db = database(db_path + 'data/gongUsers.db')
 
 SQL_CREATE_ROLES = """
 CREATE TABLE IF NOT EXISTS roles (
