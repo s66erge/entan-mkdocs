@@ -25,10 +25,10 @@ def post(session, email: str):
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))  ## [1]
-        
+
         if not user_info:
             message = {'error' : 'user_not_found'}
-       
+
         elif user_planners:  ## [1] 
             center_names = [p.center_name for p in user_planners]  ## [2]
             centers_list = ", ".join(center_names)
@@ -129,7 +129,6 @@ def post(session, center_name: str):
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
-
 ```
 [1] get gong database path  
 [2] check if center has planners  
@@ -207,7 +206,6 @@ def post(session, user_email: str, center_name: str):
 
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
-
 ```
 [1] if this is the only planner for this center, prevent deletion
 [2] proceed with deletion

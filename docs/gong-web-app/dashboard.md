@@ -27,6 +27,5 @@ def get(session):
         Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
         cls="container",
     )
-
 ```
 

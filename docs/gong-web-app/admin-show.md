@@ -16,7 +16,7 @@ TODO document admin-show
 
 @rt('/admin_page')
 @admin_required
-def admin(request):
+def admin(session, request):
     params = dict(request.query_params)
     return Main(
         Nav(
