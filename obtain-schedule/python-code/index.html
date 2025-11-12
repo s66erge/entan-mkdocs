@@ -1093,12 +1093,59 @@
 
 
 <h1 id="python-program">python program<a class="headerlink" href="#python-program" title="Permanent link">#</a></h1>
-<p>Mahi location = 'location_1396'</p>
-<p>Pajjota location = 'location_1370'</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<div class="highlight"><span class="filename">file: zkeep/fetch-courses.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tabulate</span><span class="w"> </span><span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">calendar</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">fetch_dhamma_courses</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_months</span><span class="p">(</span><span class="n">date_str</span><span class="p">,</span> <span class="n">num_months</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an ISO date string num_months after date_str (YYYY-MM-DD).</span>
+<span class="sd">    Uses divmod to compute year/month rollover and preserves end-of-month.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date_str</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+    <span class="c1"># total months since year 0 (make month zero-based)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">year</span> <span class="o">*</span> <span class="mi">12</span> <span class="o">+</span> <span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">num_months</span>
+    <span class="n">new_year</span><span class="p">,</span> <span class="n">new_month0</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">new_month</span> <span class="o">=</span> <span class="n">new_month0</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">last_day</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">new_year</span><span class="p">,</span> <span class="n">new_month</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">new_day</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">last_day</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">date</span><span class="p">(</span><span class="n">new_year</span><span class="p">,</span> <span class="n">new_month</span><span class="p">,</span> <span class="n">new_day</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_period_type</span><span class="p">(</span><span class="n">raw_course_type</span><span class="p">,</span> <span class="n">course_type</span><span class="p">,</span> <span class="n">list_of_types</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the dict in list_of_types where &#39;raw_course_type&#39; matches arg1</span>
+<span class="sd">    and return the value of &#39;period_type&#39; if:</span>
+<span class="sd">    - arg1 != &quot;Other&quot;</span>
+<span class="sd">    - arg1 == &quot;Other&quot; and arg2 in &#39;course_type&#39;</span>
+<span class="sd">    and return &quot;UNKNOWN&quot; if not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_of_types</span><span class="p">:</span>
+        <span class="k">if</span>  <span class="n">raw_course_type</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_course_type&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">raw_course_type</span> <span class="o">==</span> <span class="s2">&quot;Other&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">course_type</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type&quot;</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;period_type&#39;</span><span class="p">)</span>    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;period_type&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;UNKNOWN&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_dhamma_courses</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">num_months</span><span class="p">):</span>
+
+    <span class="n">loc</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mahi&quot;</span><span class="p">:</span> <span class="s2">&quot;location_1396&quot;</span><span class="p">,</span> <span class="s2">&quot;pajjota&quot;</span><span class="p">:</span> <span class="s2">&quot;location_1370&quot;</span><span class="p">}</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">add_months</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">add_months</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">num_months</span><span class="p">)</span>
+
+    <span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="c1"># if isa_dev_computer() else os.environ.get(&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;,&quot;None&quot;) + &quot;/&quot;</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;data/course_type_map.xlsx&#39;</span><span class="p">)</span>
+    <span class="n">list_of_types</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+    <span class="c1"># print(tabulate(list_of_types, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
+
     <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.dhamma.org/en-US/courses/do_search&quot;</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;entan-mkdocs-fetcher/1.0&quot;</span><span class="p">}</span>
     <span class="n">all_courses</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1109,12 +1156,12 @@
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;current_state&quot;</span><span class="p">:</span> <span class="s2">&quot;OldStudents&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;regions[]&quot;</span><span class="p">:</span> <span class="s2">&quot;location_1370&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;daterange&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-12-10 - 2026-12-31&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;regions[]&quot;</span><span class="p">:</span> <span class="n">location</span><span class="p">,</span>
+            <span class="s2">&quot;daterange&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">page</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching Dhamma courses - Page </span><span class="si">{</span><span class="n">page</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching courses Dhamma </span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2"> - Page </span><span class="si">{</span><span class="n">page</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
             <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
@@ -1150,8 +1197,14 @@
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_courses</span>
     <span class="p">]</span>
 
+    <span class="c1"># print intermediary data</span>
+    <span class="c1"># print(tabulate(extracted, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
+
     <span class="c1"># Filter out extracted where &#39;center_non&#39; = &#39;noncenter&#39;</span>
     <span class="n">extracted</span> <span class="o">=</span> <span class="p">[</span><span class="n">course</span> <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span> <span class="k">if</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;center_non&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;noncenter&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Filter out extracted for 1-Day courses</span>
+    <span class="n">extracted</span> <span class="o">=</span> <span class="p">[</span><span class="n">course</span> <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;raw_course_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;1-Day&quot;</span><span class="p">)]</span>
 
     <span class="c1"># Remove the last two fields: &#39;sub_location&#39; and &#39;center_non&#39;</span>
     <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span><span class="p">:</span>
@@ -1163,13 +1216,24 @@
         <span class="k">if</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;OSC&quot;</span><span class="p">):</span>
             <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">][:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">extracted</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">))</span>
+    <span class="c1"># print(tabulate(extracted, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
 
-    <span class="k">return</span> <span class="n">extracted</span>
+    <span class="n">periods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_start_date&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;period_type&quot;</span><span class="p">:</span> <span class="n">get_period_type</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type_anchor&quot;</span><span class="p">),</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type&quot;</span><span class="p">),</span> <span class="n">list_of_types</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">extracted</span>
+    <span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">periods</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">periods</span>
 
 <span class="c1"># Example usage:</span>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">fetch_dhamma_courses</span><span class="p">()</span>
+    <span class="n">fetch_dhamma_courses</span><span class="p">(</span><span class="s2">&quot;mahi&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">fetch_dhamma_courses</span><span class="p">(</span><span class="s2">&quot;pajjota&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
 </code></pre></div>
 
 
