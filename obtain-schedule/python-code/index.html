@@ -1138,7 +1138,7 @@
     <span class="n">location</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
 
     <span class="n">start_date</span> <span class="o">=</span> <span class="n">add_months</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">end_date</span> <span class="o">=</span> <span class="n">add_months</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">num_months</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">add_months</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">num_months</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="c1"># if isa_dev_computer() else os.environ.get(&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;,&quot;None&quot;) + &quot;/&quot;</span>
 
