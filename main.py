@@ -4,7 +4,7 @@ import secrets
 import os
 import socket
 import markdown2
-import smtplib
+# import smtplib
 import shutil
 import resend
 from functools import wraps
@@ -107,6 +107,7 @@ def unfinished():
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
 db_path = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
+print(f'db_path: {db_path}data/gongUsers.db')
 db = database(db_path + 'data/gongUsers.db')
 
 SQL_CREATE_ROLES = """

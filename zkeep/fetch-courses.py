@@ -1,6 +1,4 @@
-# python program
-
-```{.python file=zkeep/fetch-courses.py}
+# ~/~ begin <<docs/obtain-schedule/python-code.md#zkeep/fetch-courses.py>>[init]
 import requests
 import pandas as pd
 import calendar
@@ -194,4 +192,4 @@ def fetch_dhamma_courses(center, num_months):
 if __name__ == "__main__":
     fetch_dhamma_courses("mahi", 6)
     fetch_dhamma_courses("pajjota", 6)
-```
+# ~/~ end
