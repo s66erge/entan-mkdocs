@@ -18,6 +18,7 @@ from libs import *
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
+
 # ~/~ begin <<docs/gong-web-app/authenticate.md#auth-beforeware>>[init]
 
 login_redir = RedirectResponse('/login', status_code=303)
@@ -628,17 +629,16 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 # ~/~ end
 # ~/~ end
 
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#home-page>>[init]
+# client = TestClient(app)
+# print(client.get("/login").text)
+
 @rt('/')
 def home():
     return Main(
         Div(utils.display_markdown("home")),
         A("Login",href="/login", class_="button"),
-        cls="container")
-# ~/~ end
-
-# client = TestClient(app)
-# print(client.get("/login").text)
+        cls="container"
+    )
 
 @rt('/unfinished')
 def unfinished():

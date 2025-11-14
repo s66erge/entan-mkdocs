@@ -10,7 +10,6 @@
 ```{.python #setup-database}
 
 db_path = "" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-print(f'db_path: {db_path}data/gongUsers.db')
 db = database(db_path + 'data/gongUsers.db')
 
 SQL_CREATE_ROLES = """

@@ -3,7 +3,6 @@
 ### Program start
 
 
-
 ```{.python file=main.py}
 
 import secrets
@@ -24,6 +23,7 @@ from libs import *
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
+
 <<auth-beforeware>>
 <<guard-role-admin>>
 # both in authenticate.md
@@ -39,10 +39,16 @@ app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.i
 <<admin-show-md>>
 <<admin-change-md>>
 
-<<home-page>>
-
 # client = TestClient(app)
 # print(client.get("/login").text)
+
+@rt('/')
+def home():
+    return Main(
+        Div(utils.display_markdown("home")),
+        A("Login",href="/login", class_="button"),
+        cls="container"
+    )
 
 @rt('/unfinished')
 def unfinished():
@@ -65,13 +71,4 @@ def db_error(session, etext: str):
 serve()
 ```
 
-### Home page   
 
-```{.python #home-page}
-@rt('/')
-def home():
-    return Main(
-        Div(utils.display_markdown("home")),
-        A("Login",href="/login", class_="button"),
-        cls="container")
-```
