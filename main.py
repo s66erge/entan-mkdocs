@@ -1,13 +1,11 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
-import secrets
+# import secrets
 import os
 import importlib
-# import socket
-# import markdown2
 import smtplib
 import shutil
-import resend
+# import resend
 from functools import wraps
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -18,92 +16,17 @@ from libs import *
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
-
-# ~/~ begin <<docs/gong-web-app/authenticate.md#auth-beforeware>>[init]
-
-login_redir = RedirectResponse('/login', status_code=303)
-
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
-   if not auth: return login_redir
+   if not auth: return RedirectResponse('/login', status_code=303)
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#guard-role-admin>>[init]
-
-def admin_required(handler):
-    @wraps(handler)
-    def wrapper(session, *args, **kwargs):
-        # Assuming user info is in session
-        sessemail = session['auth'] 
-        u = users[sessemail]
-        if not u or not u.role_name == "admin":
-            # Redirect to login or unauthorized page if not admin
-            return Main(
-                Nav(Li(A("Dashboard", href="/dashboard"))),
-                Div(H1("Access Denied"),
-                    P("You do not have permission to access this page.")),
-                cls="container")
-        # Proceed if user is admin
-        return handler(session, *args, **kwargs)
-    return wrapper
-# ~/~ end
-# both in authenticate.md
 
 app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
                    before=bware, hdrs=(picolink,css),)
 
-# <utilities-md>
-
-# ~/~ begin <<docs/gong-web-app/database-setup.md#database-setup-md>>[init]
-
-# ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
-
-db_path = "" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-print(f'db_path: {db_path}data/gongUsers.db')
-db = database(db_path + 'data/gongUsers.db')
-
-SQL_CREATE_ROLES = """
-CREATE TABLE IF NOT EXISTS roles (
-    role_name TEXT PRIMARY KEY,
-    description TEXT
-);
-"""
-
-SQL_CREATE_CENTERS = """
-CREATE TABLE IF NOT EXISTS centers (
-    center_name TEXT PRIMARY KEY,
-    gong_db_name TEXT
-);
-"""
-
-SQL_CREATE_USERS = """
-CREATE TABLE IF NOT EXISTS users (
-    email TEXT PRIMARY KEY,
-    name TEXT,
-    role_name TEXT,
-    magic_link_token TEXT,
-    magic_link_expiry TIMESTAMP,
-    is_active BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (role_name) REFERENCES roles(role_name)
-);
-
-"""
-
-SQL_CREATE_PLANNERS = """
-CREATE TABLE IF NOT EXISTS planners (
-    user_email TEXT,
-    center_name TEXT,
-    PRIMARY KEY (user_email, center_name),
-    FOREIGN KEY (user_email) REFERENCES users(email),
-    FOREIGN KEY (center_name) REFERENCES centers(center_name)
-);
-"""
-
-db.execute(SQL_CREATE_ROLES)
-db.execute(SQL_CREATE_CENTERS)
-db.execute(SQL_CREATE_USERS)
-db.execute(SQL_CREATE_PLANNERS)
+db = dbset.get_database()
+dbset.create_tables(db)
 
 users = db.t.users
 roles = db.t.roles
@@ -114,126 +37,14 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/database-setup.md#initialize-database>>[init]
 
-if not roles():
-    roles.insert(role_name="admin", description="administrator")
-    roles.insert(role_name="user", description="regular user")
-
-if not centers():
-    centers.insert(center_name="Mahi", gong_db_name="mahi.db")
-    centers.insert(center_name="Pajjota", gong_db_name="pajjota.db")
-
-if not users():
-    users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
-    users.insert(email="spegoff@gmail.com", name="sp2", role_name="user", is_active=True)
-
-if not planners():
-    planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
-    planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
-# ~/~ end
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#authenticate-md>>[init]
-import socket
-
-# ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
-def signin_form():
-   return Form(
-       Div(
-           Div(
-               Input(id='email', type='email', placeholder='foo@bar.com'),
-           ),
-       ),
-       Button("Sign In with Email", type="submit", id="submit-btn"),
-       hx_post="/create_magic_link",
-       hx_target="#error",
-       hx_disabled_elt="#submit-btn"
-   )
-
-@rt('/login')
-def get():   
-   return Main(
-       Div(
-           H1("Sign In"),
-           P("Enter your email to sign in to The App."),
-           Div(signin_form(), id='login_form'),
-           P(id="error")
-       ), cls="container"
-   )
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#handling-form>>[init]
-
-@rt('/create_magic_link')
-def post(email: str):
-    if not email:
-       return (feedb.feedback_to_user({'error': 'missing_email'}))
-
-    magic_link_token = secrets.token_urlsafe(32)
-    magic_link_expiry = datetime.now() + timedelta(minutes=15)
-    try:
-       user = users[email]
-       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
-    except NotFoundError:
-        return Div(
-            (feedb.feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
-            Div(signin_form(), hx_swap_oob="true", id="login_form")
-        )
-
-    domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
-
-    if (not utils.isa_dev_computer()) and (domainame is not None):
-        base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else: 
-        print(" machine name: " + socket.gethostname())
-        base_url = 'http://localhost:5001'
-
-    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
-    send_magic_link_email(email, magic_link)
-
-    return P(feedb.feedback_to_user({'success': 'magic_link_sent'}), id="success"),
-    HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
-
-def send_magic_link_email(email_address: str, magic_link: str):
-
-   email_subject = "Sign in to The App"
-   email_text = f"""
-   Hey there,
-
-   Click this link to sign in to The App: {magic_link}
-
-   If you didn't request this, just ignore this email.
-
-   Cheers,
-   The App Team
-   """
-   if utils.isa_dev_computer():
-       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
-   else:
-       utils.send_email(email_subject, email_text, [email_address])
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#verify-token>>[init]
-
-@rt('/verify_magic_link/{token}')
-def get(session, token: str):
-   nowstr = f"'{datetime.now()}'"
-   try:
-       user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-       session['auth'] = user.email
-       users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-       return RedirectResponse('/dashboard')
-   except IndexError:
-       return "Invalid or expired magic link"
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#guard-role-admin>>[init]
+dbset.init_data(roles, centers, users, planners)
 
 def admin_required(handler):
     @wraps(handler)
     def wrapper(session, *args, **kwargs):
         # Assuming user info is in session
-        sessemail = session['auth'] 
+        sessemail = session['auth']
         u = users[sessemail]
         if not u or not u.role_name == "admin":
             # Redirect to login or unauthorized page if not admin
@@ -245,38 +56,19 @@ def admin_required(handler):
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#logout>>[init]
-@rt('/logout')
-def post(session):
-    del session['auth']
-    return HttpHeader('HX-Redirect', '/login')
-# ~/~ end
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard-md>>[init]
 
-# ~/~ begin <<docs/gong-web-app/dashboard.md#dashboard>>[init]
+@rt('/login')
+def get():
+    return auth.login()
 
-@rt('/dashboard')
-def get(session): 
-    sessemail = session['auth']
-    u = users[sessemail]
-    centers = planners("user_email = ?", (u.email,))
-    center_names = ", ".join(c.center_name for c in centers)
-    return Main(
-        Nav(
-            Ul(
-                Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None ,
-                Li(A(href="/unfinished")("Contact")),
-                Li(A("About", href="#")),
-            ), 
-            Button("Logout", hx_post="/logout"),
-        ),
-        Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
-        cls="container",
-    )
-# ~/~ end
-# ~/~ end
+@rt('/create_magic_link')
+def post(email: str):
+    return auth.create_link(email, users)
+
+@rt('/verify_magic_link/{token}')
+def get(session, token: str):
+    return auth.verify_link(session, token, users) 
+
 # ~/~ begin <<docs/gong-web-app/admin-show.md#admin-show-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
@@ -639,6 +431,30 @@ def home():
         A("Login",href="/login", class_="button"),
         cls="container"
     )
+
+@rt('/dashboard')
+def get(session): 
+    sessemail = session['auth']
+    u = users[sessemail]
+    centers = planners("user_email = ?", (u.email,))
+    center_names = ", ".join(c.center_name for c in centers)
+    return Main(
+        Nav(
+            Ul(
+                Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None ,
+                Li(A(href="/unfinished")("Contact")),
+                Li(A("About", href="#")),
+            ), 
+            Button("Logout", hx_post="/logout"),
+        ),
+        Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
+        cls="container",
+    )
+
+@rt('/logout')
+def post(session):
+    del session['auth']
+    return HttpHeader('HX-Redirect', '/login')
 
 @rt('/unfinished')
 def unfinished():

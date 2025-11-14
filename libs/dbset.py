@@ -1,25 +1,14 @@
-# Database setup and init
-
-```{.python file=libs/dbset.py}
+# ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
-<<get-database>>
-<<setup-database>>
-<<initialize-database>>
-```
-### Get database
-
-```{.python #get-database}
+# ~/~ begin <<docs/gong-web-app/database-setup.md#get-database>>[init]
 def get_database():
     db_path = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     db = database(db_path + 'data/gongUsers.db')
     return db
-```
-
-### Database setup
-
-```{.python #setup-database}
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
 def create_tables(db):
     SQL_CREATE_ROLES = """
@@ -59,12 +48,8 @@ def create_tables(db):
     db.execute(SQL_CREATE_CENTERS)
     db.execute(SQL_CREATE_USERS)
     db.execute(SQL_CREATE_PLANNERS)
-```
-### Database initialization
-
-Check if any table(s) is(are) empty and insert default values if needed
-
-```{.python #initialize-database}
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/database-setup.md#initialize-database>>[init]
 
 def init_data(roles, centers, users, planners):
 
@@ -83,4 +68,5 @@ def init_data(roles, centers, users, planners):
     if not planners():
         planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
         planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
-```
+# ~/~ end
+# ~/~ end

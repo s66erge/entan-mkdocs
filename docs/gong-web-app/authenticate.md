@@ -9,15 +9,18 @@ This is a passwordless authentication:
 - The website looks for a record in the users database table with the token from the link
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
-```{.python #authenticate-md}
+```{.python file=libs/auth.py}
 import socket
+import secrets
+from datetime import datetime, timedelta
+from fasthtml.common import *
+from libs.feedb import feedback_to_user
+from libs.utils import isa_dev_computer, send_email
 
 <<build-serve-login-form>>
 <<handling-form>>
 <<send-link>>
-<<verify-token>>
-<<guard-role-admin>>
-<<logout>>
+<<verify-link>>
 ```
 
 ### Login form
@@ -38,8 +41,12 @@ def signin_form():
        hx_disabled_elt="#submit-btn"
    )
 
+"""
 @rt('/login')
 def get():   
+    return auth.login()
+"""    
+def login():
    return Main(
        Div(
            H1("Sign In"),
@@ -84,11 +91,14 @@ If everything went well, we return a success message to the user. Remember, the 
 Also I want to disable the submit button and show a message that the magic link has been sent. To do this, we use one of the most powerful features of HTMX, out-of-band swaps. In HTMX you can update more than one piece of UI by setting the hx-swap-oob attribute to true on an element. HTMX will then swap in the returned element at the location of the element with the same id (#submit-btn in this case). You can read more about HTMX's out-of-band swaps [here](https://htmx.org/docs/#oob_swaps).
 
 ```{.python #handling-form}
-
+"""
 @rt('/create_magic_link')
 def post(email: str):
+    return auth.create_link(email, users)
+"""
+def create_link(email,users):
     if not email:
-       return (feedb.feedback_to_user({'error': 'missing_email'}))
+       return (feedback_to_user({'error': 'missing_email'}))
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -97,13 +107,13 @@ def post(email: str):
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
     except NotFoundError:
         return Div(
-            (feedb.feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
 
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
-    if (not utils.isa_dev_computer()) and (domainame is not None):
+    if (not isa_dev_computer()) and (domainame is not None):
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
         print(" machine name: " + socket.gethostname())
@@ -112,7 +122,7 @@ def post(email: str):
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
-    return P(feedb.feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
     HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 ```
 
@@ -141,10 +151,10 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if utils.isa_dev_computer():
+   if isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
-       utils.send_email(email_subject, email_text, [email_address])
+       send_email(email_subject, email_text, [email_address])
 ```
 
 ### Authenticate the user
@@ -157,10 +167,13 @@ If a user has been found using this query, we will save his or hers email in the
 
 We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.
 
-```{.python #verify-token}
-
+```{.python #verify-link}
+"""
 @rt('/verify_magic_link/{token}')
 def get(session, token: str):
+    return auth.verify_link(session, token, users) 
+"""
+def verify_link(session, token, users):
    nowstr = f"'{datetime.now()}'"
    try:
        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
@@ -169,54 +182,4 @@ def get(session, token: str):
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
-```
-
-### Beforeware to restrict access
-
-We need a page that is only accessible for authenticated users and a mechanism to restrict the access to this page for non-authenticated users. We will use FastHTMLs concept of beforeware for restricting access.
-
-Here we define a function called before that takes in the request and saves whatever in the auth key of the session into the auth variable as well as the scope of the request. The request scope is something that comes from ASGI, the underlying webserver technology of FastHTML. Think of it as a kind of metadata or context of the request.
-
-If there is nothing in session["auth"], auth will evaluate to False and we will redirect the user to the login page.
-
-Then well define a Beforeware object with our newly defined before function. This will make sure that every request runs first through our function, unless its targeting one of the paths we define in the skip list. Everything else will be guarded by this Beforeware. Now we just need to pass our newly created Beforeware class to our fast_app function as the beforeware argument:
-
-app, rt = fast_app(..., before=bware)
-
-```{.python #auth-beforeware}
-
-login_redir = RedirectResponse('/login', status_code=303)
-
-def before(req, session):
-   auth = req.scope['auth'] = session.get('auth', None)
-   if not auth: return login_redir
-
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*'])
-```
-
-```{.python #guard-role-admin}
-
-def admin_required(handler):
-    @wraps(handler)
-    def wrapper(session, *args, **kwargs):
-        # Assuming user info is in session
-        sessemail = session['auth'] 
-        u = users[sessemail]
-        if not u or not u.role_name == "admin":
-            # Redirect to login or unauthorized page if not admin
-            return Main(
-                Nav(Li(A("Dashboard", href="/dashboard"))),
-                Div(H1("Access Denied"),
-                    P("You do not have permission to access this page.")),
-                cls="container")
-        # Proceed if user is admin
-        return handler(session, *args, **kwargs)
-    return wrapper
-```
-
-```{.python #logout}
-@rt('/logout')
-def post(session):
-    del session['auth']
-    return HttpHeader('HX-Redirect', '/login')
 ```

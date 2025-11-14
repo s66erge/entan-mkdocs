@@ -1,0 +1,109 @@
+# ~/~ begin <<docs/gong-web-app/authenticate.md#libs/auth.py>>[init]
+import socket
+import secrets
+from datetime import datetime, timedelta
+from fasthtml.common import *
+from libs.feedb import feedback_to_user
+from libs.utils import isa_dev_computer, send_email
+
+# ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
+def signin_form():
+   return Form(
+       Div(
+           Div(
+               Input(id='email', type='email', placeholder='foo@bar.com'),
+           ),
+       ),
+       Button("Sign In with Email", type="submit", id="submit-btn"),
+       hx_post="/create_magic_link",
+       hx_target="#error",
+       hx_disabled_elt="#submit-btn"
+   )
+
+"""
+@rt('/login')
+def get():   
+    return auth.login()
+"""    
+def login():
+   return Main(
+       Div(
+           H1("Sign In"),
+           P("Enter your email to sign in to The App."),
+           Div(signin_form(), id='login_form'),
+           P(id="error")
+       ), cls="container"
+   )
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#handling-form>>[init]
+"""
+@rt('/create_magic_link')
+def post(email: str):
+    return auth.create_link(email, users)
+"""
+def create_link(email,users):
+    if not email:
+       return (feedback_to_user({'error': 'missing_email'}))
+
+    magic_link_token = secrets.token_urlsafe(32)
+    magic_link_expiry = datetime.now() + timedelta(minutes=15)
+    try:
+       user = users[email]
+       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
+    except NotFoundError:
+        return Div(
+            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            Div(signin_form(), hx_swap_oob="true", id="login_form")
+        )
+
+    domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
+
+    if (not isa_dev_computer()) and (domainame is not None):
+        base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    else: 
+        print(" machine name: " + socket.gethostname())
+        base_url = 'http://localhost:5001'
+
+    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
+    send_magic_link_email(email, magic_link)
+
+    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
+
+def send_magic_link_email(email_address: str, magic_link: str):
+
+   email_subject = "Sign in to The App"
+   email_text = f"""
+   Hey there,
+
+   Click this link to sign in to The App: {magic_link}
+
+   If you didn't request this, just ignore this email.
+
+   Cheers,
+   The App Team
+   """
+   if isa_dev_computer():
+       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
+   else:
+       send_email(email_subject, email_text, [email_address])
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
+"""
+@rt('/verify_magic_link/{token}')
+def get(session, token: str):
+    return auth.verify_link(session, token, users) 
+"""
+def verify_link(session, token, users):
+   nowstr = f"'{datetime.now()}'"
+   try:
+       user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
+       session['auth'] = user.email
+       users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+       return RedirectResponse('/dashboard')
+   except IndexError:
+       return "Invalid or expired magic link"
+# ~/~ end
+# ~/~ end
