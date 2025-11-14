@@ -34,7 +34,6 @@ app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.i
 # <utilities-md>
 
 <<database-setup-md>>
-<<user-feedback-md>>
 <<authenticate-md>>
 <<dashboard-md>>
 <<admin-show-md>>
@@ -50,6 +49,16 @@ def unfinished():
     return Main(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
+
+@rt('/db_error')
+def db_error(session, etext: str):
+    return Html(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Head(Title("Database error")),
+        Body(Div(feedb.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        (A("Dashboard", href="/dashboard")),
         cls="container"
     )
 

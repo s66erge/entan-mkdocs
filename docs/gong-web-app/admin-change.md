@@ -39,7 +39,7 @@ def post(session, email: str):
             message = {"success": "user_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -79,7 +79,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             message = {"success": "user_added"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
             Div(show_users_form(), hx_swap_oob="true", id="users-form"),
             ## [2]
@@ -122,7 +122,7 @@ def post(session, center_name: str):
             message = {'success' : 'center_deleted'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -171,7 +171,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
             message = {'success': 'center_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
             ## [3]
@@ -200,7 +200,7 @@ def post(session, user_email: str, center_name: str):
             message = {"success" : "planner_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None
         )
 
@@ -237,7 +237,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
             message = {'success' : 'planner_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None,
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )

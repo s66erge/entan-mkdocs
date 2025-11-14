@@ -1,15 +1,7 @@
-# User feedback
-
-### Success/error messages
-
-```{.python file=libs/feedb.py}
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#libs/feedb.py>>[init]
 from fasthtml.common import *
 
-<<feedback-to-user>>
-```
-
-
-```{.python #feedback-to-user}
+# ~/~ begin <<docs/gong-web-app/user-feedback.md#feedback-to-user>>[init]
 
 def feedback_to_user(params):
     # query_params = dict(request.query_params)
@@ -54,4 +46,5 @@ def feedback_to_user(params):
             Small("To clear this message, reload the page")
         )
     return message_div
-```
+# ~/~ end
+# ~/~ end

@@ -88,7 +88,7 @@ Also I want to disable the submit button and show a message that the magic link 
 @rt('/create_magic_link')
 def post(email: str):
     if not email:
-       return (feedback_to_user({'error': 'missing_email'}))
+       return (feedb.feedback_to_user({'error': 'missing_email'}))
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -97,7 +97,7 @@ def post(email: str):
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
     except NotFoundError:
         return Div(
-            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            (feedb.feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
 
@@ -112,7 +112,7 @@ def post(email: str):
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
-    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    return P(feedb.feedback_to_user({'success': 'magic_link_sent'}), id="success"),
     HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 ```
 

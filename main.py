@@ -133,67 +133,6 @@ if not planners():
     planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
 # ~/~ end
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/user-feedback.md#user-feedback-md>>[init]
-
-# ~/~ begin <<docs/gong-web-app/user-feedback.md#feedback-messages>>[init]
-
-def feedback_to_user(params):
-    # query_params = dict(request.query_params)
-    # Handle success and error messages
-    success_messages = {
-        'magic_link_sent': "A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.",
-        'user_added': 'User added successfully!',
-        'center_added': 'Center added successfully!',
-        'planner_added': 'Planner association added successfully!',
-        'user_deleted': 'User deleted successfully!',
-        'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
-    }
-    error_messages = {
-        'missing_email':'Email is required.',
-        'not_registered':f'Email "{params.get("email", "")}" is not registered, try again or send a message to xxx@xxx.xx to get registered',
-        'missing_fields': 'Please fill in all required fields.',
-        'user_exists': 'User with this email already exists.',
-        'center_exists': 'Center with this name already exists.',
-        'planner_exists': 'This planner association already exists.',
-        'user_not_found': 'User not found.',
-        'center_not_found': 'Center not found.',
-        'invalid_role': 'Invalid role selected.',
-        'db_error': f'Database error occurred: {params.get("etext")}. Please contact the program support.',
-        'db_file_exists': 'Database file with this name already exists.',
-        'template_not_found': 'Template database (mahi.db) not found.',
-        'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
-        'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center "{params.get("center", "")}". Each center must have at least one planner.'
-    }
-    message_div = None
-    if 'success' in params:
-        message = success_messages.get(params['success'], 'Operation completed successfully!')
-        message_div = Div(
-            Div(P(message), style="color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
-            Small("To clear this message and/or update the tables, reload the page")
-        )
-    elif 'error' in params:
-        message = error_messages.get(params['error'], 'An error occurred.')
-        message_div = Div(
-            Div(P(message), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;"),
-            Small("To clear this message, reload the page")
-        )
-    return message_div
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/user-feedback.md#db-error>>[init]
-
-@rt('/db_error')
-def db_error(session, etext: str):
-    return Html(
-        Nav(Li(A("Dashboard", href="/dashboard"))),
-        Head(Title("Database error")),
-        Body(Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
-        (A("Dashboard", href="/dashboard")),
-        cls="container"
-    )
-# ~/~ end
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#authenticate-md>>[init]
 import socket
 
@@ -227,7 +166,7 @@ def get():
 @rt('/create_magic_link')
 def post(email: str):
     if not email:
-       return (feedback_to_user({'error': 'missing_email'}))
+       return (feedb.feedback_to_user({'error': 'missing_email'}))
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -236,7 +175,7 @@ def post(email: str):
        users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
     except NotFoundError:
         return Div(
-            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
+            (feedb.feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
 
@@ -251,7 +190,7 @@ def post(email: str):
     magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
-    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+    return P(feedb.feedback_to_user({'success': 'magic_link_sent'}), id="success"),
     HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
@@ -461,23 +400,23 @@ def admin(session, request):
             Button("Logout", hx_post="/logout"),
         ),
         Div(utils.display_markdown("admin-show")),
-        feedback_to_user(params),
+        feedb.feedback_to_user(params),
 
         H2("Users"),
-        Div(feedback_to_user(params), id="users-feedback"),
+        Div(feedb.feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(), id="users-table"),
         H4("Add New User"),
         Div(show_users_form(), id="users-form"),
 
         H2("Centers"),
-        Div(feedback_to_user(params), id="centers-feedback"),
+        Div(feedb.feedback_to_user(params), id="centers-feedback"),
         Div(show_centers_table(), id="centers-table"),
         H4("Add New Center"),
         Div(show_centers_form(), id="centers-form"),
 
         # show_planners(),
         H2("Planners"),
-        Div(feedback_to_user(params), id="planners-feedback"),
+        Div(feedb.feedback_to_user(params), id="planners-feedback"),
         Div(show_planners_table(), id="planners-table"),
         H4("Add New Planner"),
         Div(show_planners_form(), id="planners-form"),
@@ -509,7 +448,7 @@ def post(session, email: str):
             message = {"success": "user_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -543,7 +482,7 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
             message = {"success": "user_added"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
             Div(show_users_form(), hx_swap_oob="true", id="users-form"),
             ## [2]
@@ -582,7 +521,7 @@ def post(session, center_name: str):
             message = {'success' : 'center_deleted'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -623,7 +562,7 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
             message = {'success': 'center_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
             ## [3]
@@ -647,7 +586,7 @@ def post(session, user_email: str, center_name: str):
             message = {"success" : "planner_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None
         )
 
@@ -672,7 +611,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
         elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
             message = {'error' : 'planner_exists'}
 
-        else:  ## (1)
+        else:  ## [1]
             planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
@@ -680,7 +619,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
             message = {'success' : 'planner_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
+            Div(feedb.feedback_to_user(message)),
             Div(show_planners_table(), hx_swap_oob="true", id="planners-table") if "success" in message else None,
             Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
         )
@@ -706,6 +645,16 @@ def unfinished():
     return Main(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
+
+@rt('/db_error')
+def db_error(session, etext: str):
+    return Html(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Head(Title("Database error")),
+        Body(Div(feedb.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        (A("Dashboard", href="/dashboard")),
         cls="container"
     )
 
