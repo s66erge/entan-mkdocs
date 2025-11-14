@@ -178,6 +178,7 @@ def verify_link(session, token, users):
    try:
        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
        session['auth'] = user.email
+       session['role'] = user.role
        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
        return RedirectResponse('/dashboard')
    except IndexError:

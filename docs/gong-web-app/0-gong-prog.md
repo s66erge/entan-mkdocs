@@ -42,10 +42,8 @@ dbset.init_data(roles, centers, users, planners)
 def admin_required(handler):
     @wraps(handler)
     def wrapper(session, *args, **kwargs):
-        # Assuming user info is in session
-        sessemail = session['auth']
-        u = users[sessemail]
-        if not u or not u.role_name == "admin":
+        role = session['role']
+        if not role or not role == "admin":
             # Redirect to login or unauthorized page if not admin
             return Main(
                 Nav(Li(A("Dashboard", href="/dashboard"))),
