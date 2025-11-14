@@ -12,6 +12,7 @@ from fasthtml.common import *
 # from starlette.testclient import TestClient
 
 from libs import *
+from libs.auth import admin_required
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
@@ -38,21 +39,6 @@ Planner = planners.dataclass()
 User = users.dataclass()
 
 dbset.init_data(roles, centers, users, planners)
-
-def admin_required(handler):
-    @wraps(handler)
-    def wrapper(session, *args, **kwargs):
-        role = session['role']
-        if not role or not role == "admin":
-            # Redirect to login or unauthorized page if not admin
-            return Main(
-                Nav(Li(A("Dashboard", href="/dashboard"))),
-                Div(H1("Access Denied"),
-                    P("You do not have permission to access this page.")),
-                cls="container")
-        # Proceed if user is admin
-        return handler(session, *args, **kwargs)
-    return wrapper
 
 @rt('/login')
 def get():
@@ -104,8 +90,17 @@ def post(session):
     del session['auth']
     return HttpHeader('HX-Redirect', '/login')
 
+@rt('/no_access')
+def get():
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(H1("Access Denied"),
+            P("You do not have permission to access this page.")),
+        cls="container"
+    )
+
 @rt('/unfinished')
-def unfinished():
+def get():
     return Main(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Div(H1("This feature is not yet implemented.")),

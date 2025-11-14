@@ -13,6 +13,7 @@ This is a passwordless authentication:
 import socket
 import secrets
 from datetime import datetime, timedelta
+from functools import wraps
 from fasthtml.common import *
 from libs.feedb import feedback_to_user
 from libs.utils import isa_dev_computer, send_email
@@ -21,6 +22,7 @@ from libs.utils import isa_dev_computer, send_email
 <<handling-form>>
 <<send-link>>
 <<verify-link>>
+<<admin_required>>
 ```
 
 ### Login form
@@ -178,9 +180,26 @@ def verify_link(session, token, users):
    try:
        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
        session['auth'] = user.email
-       session['role'] = user.role
+       session['role'] = user.role_name
        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
 ```
+
+
+
+```{.python #admin_required}
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        role = session['role']
+        if not role or not role == "admin":
+            # Redirect to unauthorized page if not admin
+            return RedirectResponse('/no_access')
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
+```
+

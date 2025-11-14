@@ -7,6 +7,7 @@ from fasthtml.common import *
 # from starlette.testclient import TestClient
 
 from libs import *
+from libs.auth import admin_required
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
@@ -34,13 +35,10 @@ User = users.dataclass()
 
 dbset.init_data(roles, centers, users, planners)
 
+"""
 def admin_required(handler):
     @wraps(handler)
     def wrapper(session, *args, **kwargs):
-        # Assuming user info is in session
-        # sessemail = session['auth']
-        # u = users[sessemail]
-        # if not u or not u.role_name == "admin":
         role = session['role']
         if not role or not role == "admin":
             # Redirect to login or unauthorized page if not admin
@@ -52,6 +50,7 @@ def admin_required(handler):
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper
+"""
 
 @rt('/login')
 def get():

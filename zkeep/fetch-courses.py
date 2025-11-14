@@ -6,11 +6,12 @@ from tabulate import tabulate
 from datetime import datetime, date
 from fasthtml.common import *
 
-def get_location_from_center_db(db_center):
+def get_location_from_db(db_central, center_name):
     # get the dhamma.org location for this center from the table settings in center db
-    settings = db_center.t.settings
-    Setting = settings.dataclass()
-    return f"location_{settings()[0].location}"
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    location = centers[center_name].location
+    return f"location_{location}"
 
 def add_months(date_str, num_months):
     """
@@ -68,7 +69,9 @@ def fetch_dhamma_courses(center, num_months):
 
     # get the path to the center db and the spreadsheet (see below)
     db_path = "" # if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    db_center = database(f"{db_path}data/{center}.ok.db")
+    
+    db_center = database(f"{db_path}data/{center.lower()}.ok.db")
+    db_central = database(f"{db_path}data/gongUsers.db")
 
     # get the start date for the last course just before today = current course - or service
     periods = db_center.t.coming_periods
@@ -82,13 +85,13 @@ def fetch_dhamma_courses(center, num_months):
     {
         'start_date': p.start_date,
         'period_type': p.period_type,
-        'source' : f"{center}_db"
+        'source' : f"{center.lower()}_db"
 
     }
     for p in periods_db_center_obj
     ]
 
-    location = get_location_from_center_db(db_center)
+    location = get_location_from_db(db_central, center)
     end_date = add_months(date_current_course, num_months)
 
 
@@ -172,7 +175,8 @@ def fetch_dhamma_courses(center, num_months):
         {
             "start_date": c.get("course_start_date"),
             "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), list_of_types),
-            "source": "dhamma.org"
+            "source": "dhamma.org",
+            "course_type": c.get("course_type")
         }
         for c in extracted
     ]
@@ -190,6 +194,6 @@ def fetch_dhamma_courses(center, num_months):
 
 # Example usage:
 if __name__ == "__main__":
-    fetch_dhamma_courses("mahi", 6)
-    fetch_dhamma_courses("pajjota", 6)
+    fetch_dhamma_courses("Mahi", 6)
+    fetch_dhamma_courses("Pajjota", 6)
 # ~/~ end

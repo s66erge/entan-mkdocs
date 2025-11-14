@@ -2,6 +2,7 @@
 import socket
 import secrets
 from datetime import datetime, timedelta
+from functools import wraps
 from fasthtml.common import *
 from libs.feedb import feedback_to_user
 from libs.utils import isa_dev_computer, send_email
@@ -106,5 +107,22 @@ def verify_link(session, token, users):
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authenticate.md#admin_required>>[init]
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        role = session['role']
+        if not role or not role == "admin":
+            # Redirect to login or unauthorized page if not admin
+            return Main(
+                Nav(Li(A("Dashboard", href="/dashboard"))),
+                Div(H1("Access Denied"),
+                    P("You do not have permission to access this page.")),
+                cls="container")
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
 # ~/~ end
 # ~/~ end
