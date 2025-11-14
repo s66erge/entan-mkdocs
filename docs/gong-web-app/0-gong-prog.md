@@ -8,8 +8,9 @@
 
 import secrets
 import os
-import socket
-import markdown2
+import importlib
+# import socket
+# import markdown2
 import smtplib
 import shutil
 import resend
@@ -19,15 +20,19 @@ from email.mime.text import MIMEText
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
+from libs import *
+
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 <<auth-beforeware>>
 <<guard-role-admin>>
 # both in authenticate.md
 
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
+app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
+                   before=bware, hdrs=(picolink,css),)
 
-<<utilities-md>>
+# <utilities-md>
+
 <<database-setup-md>>
 <<user-feedback-md>>
 <<authenticate-md>>
@@ -40,6 +45,14 @@ app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), titl
 # client = TestClient(app)
 # print(client.get("/login").text)
 
+@rt('/unfinished')
+def unfinished():
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
+
 serve()
 ```
 
@@ -49,7 +62,7 @@ serve()
 @rt('/')
 def home():
     return Main(
-        Div(display_markdown("home")),
+        Div(utils.display_markdown("home")),
         A("Login",href="/login", class_="button"),
         cls="container")
 ```

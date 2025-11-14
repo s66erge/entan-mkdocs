@@ -19,7 +19,7 @@ def get(session):
         Nav(
             Ul(
                 Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None ,
-                Li(A("Contact", href="#")),
+                Li(A(href="/unfinished")("Contact")),
                 Li(A("About", href="#")),
             ), 
             Button("Logout", hx_post="/logout"),

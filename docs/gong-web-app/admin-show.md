@@ -27,7 +27,7 @@ def admin(session, request):
             ), 
             Button("Logout", hx_post="/logout"),
         ),
-        Div(display_markdown("admin-show")),
+        Div(utils.display_markdown("admin-show")),
         feedback_to_user(params),
 
         H2("Users"),

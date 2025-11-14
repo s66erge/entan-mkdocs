@@ -2,9 +2,10 @@
 
 import secrets
 import os
-import socket
-import markdown2
-# import smtplib
+import importlib
+# import socket
+# import markdown2
+import smtplib
 import shutil
 import resend
 from functools import wraps
@@ -12,6 +13,8 @@ from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from fasthtml.common import *
 # from starlette.testclient import TestClient
+
+from libs import *
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
@@ -46,67 +49,16 @@ def admin_required(handler):
 # ~/~ end
 # both in authenticate.md
 
-app, rt = fast_app(live=True, debug=True, before=bware,hdrs=(picolink,css), title="Gong Users", favicon="favicon.ico")
+app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
+                   before=bware, hdrs=(picolink,css),)
 
-# ~/~ begin <<docs/gong-web-app/utilities.md#utilities-md>>[init]
-# ~/~ begin <<docs/gong-web-app/utilities.md#isa-dev-computer>>[init]
+# <utilities-md>
 
-DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-virtual-linuxmint","serge-framework"]
-def isa_dev_computer():
-    hostname = socket.gethostname()
-    return hostname in DEV_COMPUTERS
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
-
-def send_email(subject, body, recipients):
-    # old code via smtp
-    """
-    sender = os.environ.get('GOOGLE_SMTP_USER') 
-    password = os.environ.get('GOOGLE_SMTP_PASS')
-    # Create MIMEText email object with the email body
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    """
-    # using resend
-    sender = "spegoff@authentica.eu" 
-    resend.api_key = os.environ['RESEND_API_KEY']
-    params: resend.Emails.SendParams = {
-        "from": sender,
-        "to": recipients,
-        "subject": subject,
-        "text": body,
-    }
-    email = resend.Emails.send(params)
-    print(f'Message sent: {email}')
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
-
-def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#not-implemented>>[init]
-@rt('/unfinished')
-def unfinished():
-    return Main(
-        Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(H1("This feature is not yet implemented.")),
-        cls="container"
-    )
-# ~/~ end
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#database-setup-md>>[init]
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
-db_path = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
+db_path = "" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
 print(f'db_path: {db_path}data/gongUsers.db')
 db = database(db_path + 'data/gongUsers.db')
 
@@ -243,6 +195,7 @@ def db_error(session, etext: str):
 # ~/~ end
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#authenticate-md>>[init]
+import socket
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
 def signin_form():
@@ -289,7 +242,7 @@ def post(email: str):
 
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
-    if (not isa_dev_computer()) and (domainame is not None):
+    if (not utils.isa_dev_computer()) and (domainame is not None):
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
         print(" machine name: " + socket.gethostname())
@@ -316,10 +269,10 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if isa_dev_computer():
+   if utils.isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
-       send_email(email_subject, email_text, [email_address])
+       utils.send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-token>>[init]
 
@@ -374,7 +327,7 @@ def get(session):
         Nav(
             Ul(
                 Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None ,
-                Li(A("Contact", href="#")),
+                Li(A(href="/unfinished")("Contact")),
                 Li(A("About", href="#")),
             ), 
             Button("Logout", hx_post="/logout"),
@@ -507,7 +460,7 @@ def admin(session, request):
             ), 
             Button("Logout", hx_post="/logout"),
         ),
-        Div(display_markdown("admin-show")),
+        Div(utils.display_markdown("admin-show")),
         feedback_to_user(params),
 
         H2("Users"),
@@ -740,13 +693,21 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 @rt('/')
 def home():
     return Main(
-        Div(display_markdown("home")),
+        Div(utils.display_markdown("home")),
         A("Login",href="/login", class_="button"),
         cls="container")
 # ~/~ end
 
 # client = TestClient(app)
 # print(client.get("/login").text)
+
+@rt('/unfinished')
+def unfinished():
+    return Main(
+        Nav(Li(A("Dashboard", href="/dashboard"))),
+        Div(H1("This feature is not yet implemented.")),
+        cls="container"
+    )
 
 serve()
 # ~/~ end

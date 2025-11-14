@@ -229,7 +229,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
         elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
             message = {'error' : 'planner_exists'}
 
-        else:  ## (1)
+        else:  ## [1]
             planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
@@ -244,5 +244,5 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-(1) add planner association
+[1] add planner association
 <br><br>

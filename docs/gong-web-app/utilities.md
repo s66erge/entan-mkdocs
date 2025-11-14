@@ -5,11 +5,17 @@
 - displaying the content of a markdown file
 - route or function not implemented yet
 
-```{.python #utilities-md}
+# {python #utilities-md}
+
+```{.python file = libs/utils.py}
+import socket
+import resend
+import markdown2
+from fasthtml.common import *
+
 <<isa-dev-computer>>
 <<send-email>>
 <<display-markdown>>
-<<not-implemented>>
 ```
 
 ### Check if the current computer is a development machine
@@ -83,17 +89,3 @@ def display_markdown(file_name:str):
         html_content = markdown2.markdown(f.read())
     return NotStr(html_content)
 ```
-
-### Route not implemented yet
-
-```{.python #not-implemented}
-@rt('/unfinished')
-def unfinished():
-    return Main(
-        Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(H1("This feature is not yet implemented.")),
-        cls="container"
-    )
-```
-
-

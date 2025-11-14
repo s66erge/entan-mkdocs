@@ -10,6 +10,7 @@ This is a passwordless authentication:
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
 ```{.python #authenticate-md}
+import socket
 
 <<build-serve-login-form>>
 <<handling-form>>
@@ -102,7 +103,7 @@ def post(email: str):
 
     domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
 
-    if (not isa_dev_computer()) and (domainame is not None):
+    if (not utils.isa_dev_computer()) and (domainame is not None):
         base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
     else: 
         print(" machine name: " + socket.gethostname())
@@ -140,10 +141,10 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if isa_dev_computer():
+   if utils.isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
-       send_email(email_subject, email_text, [email_address])
+       utils.send_email(email_subject, email_text, [email_address])
 ```
 
 ### Authenticate the user
