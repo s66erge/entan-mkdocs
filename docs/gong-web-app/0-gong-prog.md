@@ -52,8 +52,8 @@ def post(email: str):
 def get(session, token: str):
     return auth.verify_link(session, token, users) 
 
-<<admin-show-md>>
-<<admin-change-md>>
+# <admin-show-md>>
+# <admin-change-md>>
 
 # client = TestClient(app)
 # print(client.get("/login").text)
@@ -84,6 +84,21 @@ def get(session):
         Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
         cls="container",
     )
+
+@rt('/admin_page')
+@admin_required
+def get(session, request):
+    return admin.show_page(request, users, roles, centers, planners)
+
+@rt('/add_planner')
+@admin_required
+def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
+    return adchan.add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
+
+@rt('/delete_planner/{user_email}/{center_name}')
+@admin_required
+def post(session, user_email: str, center_name: str):
+    return adchan.delete_planner(user_email, center_name, planners,db)
 
 @rt('/logout')
 def post(session):

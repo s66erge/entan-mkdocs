@@ -115,12 +115,8 @@ def admin_required(handler):
     def wrapper(session, *args, **kwargs):
         role = session['role']
         if not role or not role == "admin":
-            # Redirect to login or unauthorized page if not admin
-            return Main(
-                Nav(Li(A("Dashboard", href="/dashboard"))),
-                Div(H1("Access Denied"),
-                    P("You do not have permission to access this page.")),
-                cls="container")
+            # Redirect to unauthorized page if not admin
+            return RedirectResponse('/no_access')
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper

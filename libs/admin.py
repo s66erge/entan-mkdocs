@@ -1,21 +1,9 @@
-# Admin page
-
-Will only be reachable for signed in admin users.
-
-```{.python file=libs/admin.py}
+# ~/~ begin <<docs/gong-web-app/admin-show.md#libs/admin.py>>[init]
 from fasthtml.common import *
 from libs.feedb import *
 from libs.utils import *
 
-<<show-users>>
-<<show-centers>>
-<<show-planners>>
-<<admin-page>>
-```
-
-TODO document admin-show
-
-```{.python #show-users}
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
 
 def show_users_table(users):
     return Main(
@@ -51,9 +39,8 @@ def show_users_form(roles):
             )
         )    
     )
-```
-
-```{.python #show-centers}
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-centers>>[init]
 
 def show_centers_table(centers):
     return Main(
@@ -82,9 +69,8 @@ def show_centers_form():
             )
         )
     )
-```
-
-```{.python #show-planners}
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-show.md#show-planners>>[init]
 
 def show_planners_table(planners):
     return Main(
@@ -122,9 +108,8 @@ def show_planners_form(users, centers):
             )
         )
     )
-```
-
-```{.python #admin-page}
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-page>>[init]
 
 # @rt('/admin_page')
 def show_page(request, users, roles, centers, planners):
@@ -162,4 +147,5 @@ def show_page(request, users, roles, centers, planners):
 
         cls="container",
     )
-```
+# ~/~ end
+# ~/~ end
