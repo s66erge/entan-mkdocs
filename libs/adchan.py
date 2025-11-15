@@ -1,13 +1,17 @@
 # ~/~ begin <<docs/gong-web-app/admin-change.md#libs/adchan.py>>[init]
+import shutil
 from fasthtml.common import *
 from libs.feedb import *
 from libs.admin import *
 
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
 
-@rt('/delete_user/{email}')
-@admin_required
-def post(session, email: str):
+# @rt('/delete_user/{email}')
+
+def delete_user(email, db):
+    users = db.t.users
+    centers = db.t.centers
+    planners = db.t.planners
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))  ## [1]
@@ -26,17 +30,20 @@ def post(session, email: str):
 
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
-            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#add-user>>[init]
-@rt('/add_user')
-@admin_required
-def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
+# @rt('/add_user')
+
+def add_user(new_user_email, name ,role_name, db):
+    users = db.t.users
+    roles = db.t.roles
+    centers = db.t.centers
     try:
         if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
@@ -60,23 +67,26 @@ def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
 
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_users_table(), hx_swap_oob="true", id="users-table") if "success" in message else None,
-            Div(show_users_form(), hx_swap_oob="true", id="users-form"),
+            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(show_users_form(roles), hx_swap_oob="true", id="users-form"),
             ## [2]
-            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-center>>[init]
 
-@rt('/delete_center/{center_name}')
-@admin_required
-def post(session, center_name: str):
+# @rt('/delete_center/{center_name}')
+
+def delete_center(center_name, db, db_path):
+    users = db.t.users
+    centers = db.t.centers
+    planners = db.t.planners
     try:
         center_info = centers("center_name = ?", (center_name,))
         gong_db_name = center_info[0].gong_db_name  ## [1]
-        db_path = f'data/{gong_db_name}'  ## [1]
+        db_file_path = f'{db_path}{gong_db_name}'  ## [1]
         center_planners = planners("center_name = ?", (center_name,))  ## [2]
 
         if not center_info:
@@ -89,33 +99,38 @@ def post(session, center_name: str):
 
         else:  ## [4]
             db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
-            if os.path.exists(db_path):
-                os.remove(db_path)
+            if os.path.exists(db_file_path):
+                os.remove(db_file_path)
                 for ext in ['-shm', '-wal']:  ## [5]
-                    journal_file = db_path + ext
+                    journal_file = db_path + 'gongUsers.db' + ext
                     if os.path.exists(journal_file):
                         os.remove(journal_file)
             message = {'success' : 'center_deleted'}
 
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
-            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/admin-change.md#add-center>>[init]
 
-@rt('/add_center')
-@admin_required
-def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
+# @rt('/add_center')
+
+def add_center(new_center_name, new_gong_db_name, db, db_path):
+    users = db.t.users
+    centers = db.t.centers
     ## [1]
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
-    db_path = f'data/{new_gong_db_name}'
-    template_db = 'data/mahi.db'
+    db_file_path = f'{db_path}{new_gong_db_name}'
+    template_db = f'{db_path}mahi.db'
+    print(db_file_path)
+    print(template_db)
+    print(os.path.exists(template_db))
 
     try:
         if new_center_name == "" or new_gong_db_name == "":
@@ -124,14 +139,14 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
         elif centers("center_name = ?", (new_center_name,)):
             message = {"error" : "center_exists"}
 
-        elif os.path.exists(db_path):
+        elif os.path.exists(db_file_path):
             message = {"error" : 'db_file_exists'}
 
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
         else:  ## [2]
-            shutil.copy2(template_db, db_path)
+            shutil.copy2(template_db, db_file_path)
             centers.insert(
                 center_name=new_center_name,
                 gong_db_name=new_gong_db_name
@@ -140,10 +155,10 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
 
         return Div(
             Div(feedback_to_user(message)),
-            Div(show_centers_table(), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
             ## [3]
-            Div(show_planners_form(), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -152,7 +167,8 @@ def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
 
 # @rt('/delete_planner/{user_email}/{center_name}')
 
-def delete_planner(user_email, center_name, planners):
+def delete_planner(user_email, center_name, db):
+    planners = db.t.planners
     try:
         center_planners = planners("center_name = ?", (center_name,))
         if len(center_planners) == 1:  ## [1]
@@ -174,7 +190,10 @@ def delete_planner(user_email, center_name, planners):
 
 # @rt('/add_planner')
 
-def add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners):
+def add_planner(new_planner_user_email, new_planner_center_name, db):
+    users = db.t.users
+    centers = db.t.centers
+    planners = db.t.planners
     try:
         if new_planner_user_email == "" or new_planner_center_name == "":
             message = {"error" : "missing_fields"}
@@ -198,7 +217,7 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
         return Div(
             Div(feedback_to_user(message)),
             Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
-            Div(show_planners_form(), hx_swap_oob="true", id="planners-form")
+            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')

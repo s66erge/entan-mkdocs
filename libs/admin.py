@@ -112,8 +112,12 @@ def show_planners_form(users, centers):
 # ~/~ begin <<docs/gong-web-app/admin-show.md#admin-page>>[init]
 
 # @rt('/admin_page')
-def show_page(request, users, roles, centers, planners):
+def show_page(request, db):
     params = dict(request.query_params)
+    users = db.t.users
+    roles = db.t.roles
+    centers = db.t.centers
+    planners = db.t.planners
     return Main(
         Nav(
             Ul(

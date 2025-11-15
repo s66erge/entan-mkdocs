@@ -25,7 +25,8 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
                    before=bware, hdrs=(picolink,css),)
 
-db = dbset.get_database()
+db_path = "data/" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "data/"
+db = database(db_path + 'gongUsers.db')
 dbset.create_tables(db)
 
 users = db.t.users
@@ -88,17 +89,37 @@ def get(session):
 @rt('/admin_page')
 @admin_required
 def get(session, request):
-    return admin.show_page(request, users, roles, centers, planners)
+    return admin.show_page(request, db)
 
-@rt('/add_planner')
+@rt('/delete_user/{email}')
 @admin_required
-def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
-    return adchan.add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
+def post(session, email: str):
+    return adchan.delete_user(email, db)
+
+@rt('/add_user')
+@admin_required
+def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
+    return adchan.add_user(new_user_email, name ,role_name, db)
+
+@rt('/delete_center/{center_name}')
+@admin_required
+def post(session, center_name: str):
+    return adchan.delete_center(center_name, db, db_path)
+
+@rt('/add_center')
+@admin_required
+def post(session, new_center_name: str = "", new_gong_db_name: str = ""):
+    return adchan.add_center(new_center_name, new_gong_db_name, db, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
-    return adchan.delete_planner(user_email, center_name, planners,db)
+    return adchan.delete_planner(user_email, center_name, db)
+
+@rt('/add_planner')
+@admin_required
+def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
+    return adchan.add_planner(new_planner_user_email, new_planner_center_name, db)
 
 @rt('/logout')
 def post(session):

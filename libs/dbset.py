@@ -2,12 +2,6 @@
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
-# ~/~ begin <<docs/gong-web-app/database-setup.md#get-database>>[init]
-def get_database():
-    db_path = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    db = database(db_path + 'data/gongUsers.db')
-    return db
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
 def create_tables(db):
