@@ -3,7 +3,8 @@
 # Ignore hidden/work directories
 .*/
 site/*
-/__pycache__/*
+*.pyc
+__pycache__/*
 .entangled/**/filedb.json
 .entangled/**/filedb.lock
 
@@ -17,5 +18,3 @@ site/*
 !setup/
 !src/
 
-# Ignore these in the exceptions
-src/__pycache__/*
