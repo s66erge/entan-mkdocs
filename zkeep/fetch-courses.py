@@ -6,11 +6,12 @@ from tabulate import tabulate
 from datetime import datetime, date
 from fasthtml.common import *
 
-def get_location_from_center_db(db_center):
+def get_location_from_db(db_central, center_name):
     # get the dhamma.org location for this center from the table settings in center db
-    settings = db_center.t.settings
-    Setting = settings.dataclass()
-    return f"location_{settings()[0].location}"
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    location = centers[center_name].location
+    return f"location_{location}"
 
 def add_months(date_str, num_months):
     """
@@ -41,7 +42,7 @@ def get_period_type(raw_course_type, course_type, list_of_types):
                     return item.get('period_type')    
             else:
                 return item.get('period_type')
-    
+
     return "UNKNOWN"
 
 def deduplicate(merged):
@@ -65,37 +66,39 @@ def deduplicate(merged):
     return deduplicated
 
 def fetch_dhamma_courses(center, num_months):
-    
+
     # get the path to the center db and the spreadsheet (see below)
     db_path = "" # if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    db_center = database(f"{db_path}data/{center}.ok.db")
     
+    db_center = database(f"{db_path}data/{center.lower()}.ok.db")
+    db_central = database(f"{db_path}data/gongUsers.db")
+
     # get the start date for the last course just before today = current course - or service
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
     count_past = sum(1 for item in periods() if date.fromisoformat(item.start_date) < date.today())
     date_current_course = periods()[count_past-1].start_date
-    
+
     # get a dict. of all courses in the center db starting from the current course
     periods_db_center_obj = periods()[count_past-1:]
     periods_db_center = [
     {
         'start_date': p.start_date,
         'period_type': p.period_type,
-        'source' : f"{center}_db"
+        'source' : f"{center.lower()}_db"
 
     }
     for p in periods_db_center_obj
     ]
 
-    location = get_location_from_center_db(db_center)
+    location = get_location_from_db(db_central, center)
     end_date = add_months(date_current_course, num_months)
 
 
     url = "https://www.dhamma.org/en-US/courses/do_search"
     headers = {"User-Agent": "entan-mkdocs-fetcher/1.0"}
     all_courses = []
-    
+
     # Initial page
     page = 1
 
@@ -106,7 +109,7 @@ def fetch_dhamma_courses(center, num_months):
             "daterange": f"{date_current_course} - {end_date}",
             "page": str(page),
         }
-        
+
         print(f"Fetching courses Dhamma {center} - Page {page}...")
         try:
             resp = requests.post(url, data=data, headers=headers, timeout=15)
@@ -126,7 +129,7 @@ def fetch_dhamma_courses(center, num_months):
         total_pages = payload.get("pages", 0)
         if page >= total_pages:
             break
-        
+
         page += 1
 
     # Extract relevant fields from all courses
@@ -172,24 +175,25 @@ def fetch_dhamma_courses(center, num_months):
         {
             "start_date": c.get("course_start_date"),
             "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), list_of_types),
-            "source": "dhamma.org"
+            "source": "dhamma.org",
+            "course_type": c.get("course_type")
         }
         for c in extracted
     ]
-    
+
     # print(tabulate(periods_dhamma_org, headers="keys", tablefmt="grid"))
     # print(tabulate(periods_db_center, headers="keys", tablefmt="grid"))
 
     merged = periods_db_center + periods_dhamma_org
     merged.sort(key=lambda x: x['start_date'])
-    
+
     deduplicated = deduplicate(merged)
-    
+
     print(tabulate(deduplicated, headers="keys", tablefmt="grid"))
     return
 
 # Example usage:
 if __name__ == "__main__":
-    fetch_dhamma_courses("mahi", 6)
-    fetch_dhamma_courses("pajjota", 6)
+    fetch_dhamma_courses("Mahi", 6)
+    fetch_dhamma_courses("Pajjota", 6)
 # ~/~ end
