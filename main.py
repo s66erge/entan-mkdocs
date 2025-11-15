@@ -48,11 +48,7 @@ def post(email: str):
 def get(session, token: str):
     return auth.verify_link(session, token, users) 
 
-# <admin-show-md>>
-# <admin-change-md>>
-
 # client = TestClient(app)
-# print(client.get("/login").text)
 
 @rt('/')
 def home():
