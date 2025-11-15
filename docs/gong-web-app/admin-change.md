@@ -129,10 +129,12 @@ def delete_center(center_name, db, db_path):
             db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
             if os.path.exists(db_file_path):
                 os.remove(db_file_path)
+                """
                 for ext in ['-shm', '-wal']:  ## [5]
                     journal_file = db_path + 'gongUsers.db' + ext
                     if os.path.exists(journal_file):
                         os.remove(journal_file)
+                """        
             message = {'success' : 'center_deleted'}
 
         return Div(
@@ -163,10 +165,7 @@ def add_center(new_center_name, new_gong_db_name, db, db_path):
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
     db_file_path = f'{db_path}{new_gong_db_name}'
-    template_db = f'{db_path}mahi.db'
-    print(db_file_path)
-    print(template_db)
-    print(os.path.dirname(.))
+    template_db = f'{db_path}mahi.ok.db'
 
     try:
         if new_center_name == "" or new_gong_db_name == "":
