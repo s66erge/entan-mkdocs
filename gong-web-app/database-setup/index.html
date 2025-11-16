@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/database-setup/">
       
       
-        <link rel="prev" href="../dashboard/">
+        <link rel="prev" href="../authenticate/">
       
       
         <link rel="next" href="../user-feedback/">
@@ -653,34 +653,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User dashboard
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -1182,83 +1154,83 @@
 
 
 <h1 id="database-setup-and-init">Database setup and init<a class="headerlink" href="#database-setup-and-init" title="Permanent link">#</a></h1>
-<div id="database-setup-md" class="highlight"><span class="filename">#database-setup-md</span><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">setup</span><span class="o">-</span><span class="n">database</span><span class="o">&gt;&gt;</span>
+<div class="highlight"><span class="filename">file: libs/dbset.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">database</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isa_dev_computer</span>
+
+<span class="o">&lt;&lt;</span><span class="n">setup</span><span class="o">-</span><span class="n">database</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">initialize</span><span class="o">-</span><span class="n">database</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <h3 id="database-setup">Database setup<a class="headerlink" href="#database-setup" title="Permanent link">#</a></h3>
-<div id="setup-database" class="highlight"><span class="filename">#setup-database</span><pre><span></span><code><span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">isa_dev_computer</span><span class="p">()</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;</span><span class="p">,</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;db_path: </span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s1">data/gongUsers.db&#39;</span><span class="p">)</span>
-<span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;data/gongUsers.db&#39;</span><span class="p">)</span>
+<div id="setup-database" class="highlight"><span class="filename">#setup-database</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_tables</span><span class="p">(</span><span class="n">db</span><span class="p">):</span>
+    <span class="n">SQL_CREATE_ROLES</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    CREATE TABLE IF NOT EXISTS roles (</span>
+<span class="s2">        role_name TEXT PRIMARY KEY,</span>
+<span class="s2">        description TEXT</span>
+<span class="s2">    );</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">SQL_CREATE_CENTERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    CREATE TABLE IF NOT EXISTS centers (</span>
+<span class="s2">        center_name TEXT PRIMARY KEY,</span>
+<span class="s2">        gong_db_name TEXT,</span>
+<span class="s2">        location TEXT,</span>
+<span class="s2">        other_course TEXT</span>
+<span class="s2">    );</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">SQL_CREATE_USERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    CREATE TABLE IF NOT EXISTS users (</span>
+<span class="s2">        email TEXT PRIMARY KEY,</span>
+<span class="s2">        name TEXT,</span>
+<span class="s2">        role_name TEXT,</span>
+<span class="s2">        magic_link_token TEXT,</span>
+<span class="s2">        magic_link_expiry TIMESTAMP,</span>
+<span class="s2">        is_active BOOLEAN DEFAULT FALSE,</span>
+<span class="s2">        FOREIGN KEY (role_name) REFERENCES roles(role_name)</span>
+<span class="s2">    );</span>
 
-<span class="n">SQL_CREATE_ROLES</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">CREATE TABLE IF NOT EXISTS roles (</span>
-<span class="s2">    role_name TEXT PRIMARY KEY,</span>
-<span class="s2">    description TEXT</span>
-<span class="s2">);</span>
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="n">SQL_CREATE_CENTERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">CREATE TABLE IF NOT EXISTS centers (</span>
-<span class="s2">    center_name TEXT PRIMARY KEY,</span>
-<span class="s2">    gong_db_name TEXT</span>
-<span class="s2">);</span>
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="n">SQL_CREATE_USERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">CREATE TABLE IF NOT EXISTS users (</span>
-<span class="s2">    email TEXT PRIMARY KEY,</span>
-<span class="s2">    name TEXT,</span>
-<span class="s2">    role_name TEXT,</span>
-<span class="s2">    magic_link_token TEXT,</span>
-<span class="s2">    magic_link_expiry TIMESTAMP,</span>
-<span class="s2">    is_active BOOLEAN DEFAULT FALSE,</span>
-<span class="s2">    FOREIGN KEY (role_name) REFERENCES roles(role_name)</span>
-<span class="s2">);</span>
-
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="n">SQL_CREATE_PLANNERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">CREATE TABLE IF NOT EXISTS planners (</span>
-<span class="s2">    user_email TEXT,</span>
-<span class="s2">    center_name TEXT,</span>
-<span class="s2">    PRIMARY KEY (user_email, center_name),</span>
-<span class="s2">    FOREIGN KEY (user_email) REFERENCES users(email),</span>
-<span class="s2">    FOREIGN KEY (center_name) REFERENCES centers(center_name)</span>
-<span class="s2">);</span>
-<span class="s2">&quot;&quot;&quot;</span>
-
-<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_ROLES</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_CENTERS</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_USERS</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_PLANNERS</span><span class="p">)</span>
-
-<span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">users</span>
-<span class="n">roles</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">roles</span>
-<span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">centers</span>
-<span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">planners</span>
-
-<span class="n">Role</span> <span class="o">=</span> <span class="n">roles</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
-<span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
-<span class="n">Planner</span> <span class="o">=</span> <span class="n">planners</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
-<span class="n">User</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">SQL_CREATE_PLANNERS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    CREATE TABLE IF NOT EXISTS planners (</span>
+<span class="s2">        user_email TEXT,</span>
+<span class="s2">        center_name TEXT,</span>
+<span class="s2">        PRIMARY KEY (user_email, center_name),</span>
+<span class="s2">        FOREIGN KEY (user_email) REFERENCES users(email),</span>
+<span class="s2">        FOREIGN KEY (center_name) REFERENCES centers(center_name)</span>
+<span class="s2">    );</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_ROLES</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_CENTERS</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_USERS</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SQL_CREATE_PLANNERS</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="database-initialization">Database initialization<a class="headerlink" href="#database-initialization" title="Permanent link">#</a></h3>
 <p>Check if any table(s) is(are) empty and insert default values if needed</p>
-<div id="initialize-database" class="highlight"><span class="filename">#initialize-database</span><pre><span></span><code><span class="k">if</span> <span class="ow">not</span> <span class="n">roles</span><span class="p">():</span>
-    <span class="n">roles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;administrator&quot;</span><span class="p">)</span>
-    <span class="n">roles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;regular user&quot;</span><span class="p">)</span>
+<div id="initialize-database" class="highlight"><span class="filename">#initialize-database</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">init_data</span><span class="p">(</span><span class="n">db</span><span class="p">):</span>
 
-<span class="k">if</span> <span class="ow">not</span> <span class="n">centers</span><span class="p">():</span>
-    <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">center_name</span><span class="o">=</span><span class="s2">&quot;Mahi&quot;</span><span class="p">,</span> <span class="n">gong_db_name</span><span class="o">=</span><span class="s2">&quot;mahi.db&quot;</span><span class="p">)</span>
-    <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">center_name</span><span class="o">=</span><span class="s2">&quot;Pajjota&quot;</span><span class="p">,</span> <span class="n">gong_db_name</span><span class="o">=</span><span class="s2">&quot;pajjota.db&quot;</span><span class="p">)</span>
+    <span class="n">roles</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">roles</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">roles</span><span class="p">():</span>
+        <span class="n">roles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;administrator&quot;</span><span class="p">)</span>
+        <span class="n">roles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;regular user&quot;</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">():</span>
-    <span class="n">users</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s2">&quot;spegoff@authentica.eu&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sp1&quot;</span><span class="p">,</span> <span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">magic_link_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">magic_link_expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">users</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s2">&quot;spegoff@gmail.com&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sp2&quot;</span><span class="p">,</span> <span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">centers</span>
+    <span class="n">other_course_pajjota</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">            {</span>
+<span class="s2">            &quot;TRUST MEETING&quot;: &quot;Trust WE&quot;</span>
+<span class="s2">            }</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">centers</span><span class="p">():</span>
+        <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">center_name</span><span class="o">=</span><span class="s2">&quot;Mahi&quot;</span><span class="p">,</span> <span class="n">gong_db_name</span><span class="o">=</span><span class="s2">&quot;mahi.db&quot;</span><span class="p">,</span> <span class="n">location</span> <span class="o">=</span> <span class="s2">&quot;1396&quot;</span><span class="p">,</span> <span class="n">other_course</span> <span class="o">=</span> <span class="s2">&quot;{ }&quot;</span><span class="p">)</span>
+        <span class="n">centers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">center_name</span><span class="o">=</span><span class="s2">&quot;Pajjota&quot;</span><span class="p">,</span> <span class="n">gong_db_name</span><span class="o">=</span><span class="s2">&quot;pajjota.db&quot;</span><span class="p">,</span> <span class="n">location</span> <span class="o">=</span> <span class="s2">&quot;1370&quot;</span><span class="p">,</span> <span class="n">other_course</span><span class="o">=</span><span class="n">other_course_pajjota</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="ow">not</span> <span class="n">planners</span><span class="p">():</span>
-    <span class="n">planners</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">user_email</span><span class="o">=</span> <span class="s2">&quot;spegoff@authentica.eu&quot;</span><span class="p">,</span> <span class="n">center_name</span><span class="o">=</span> <span class="s2">&quot;Mahi&quot;</span><span class="p">)</span>
-    <span class="n">planners</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">user_email</span><span class="o">=</span> <span class="s2">&quot;spegoff@gmail.com&quot;</span><span class="p">,</span> <span class="n">center_name</span><span class="o">=</span> <span class="s2">&quot;Pajjota&quot;</span><span class="p">)</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">users</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">():</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s2">&quot;spegoff@authentica.eu&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sp1&quot;</span><span class="p">,</span> <span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">magic_link_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">magic_link_expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s2">&quot;spegoff@gmail.com&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sp2&quot;</span><span class="p">,</span> <span class="n">role_name</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">planners</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">planners</span><span class="p">():</span>
+        <span class="n">planners</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">user_email</span><span class="o">=</span> <span class="s2">&quot;spegoff@authentica.eu&quot;</span><span class="p">,</span> <span class="n">center_name</span><span class="o">=</span> <span class="s2">&quot;Mahi&quot;</span><span class="p">)</span>
+        <span class="n">planners</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">user_email</span><span class="o">=</span> <span class="s2">&quot;spegoff@gmail.com&quot;</span><span class="p">,</span> <span class="n">center_name</span><span class="o">=</span> <span class="s2">&quot;Pajjota&quot;</span><span class="p">)</span>
 </code></pre></div>
 
 

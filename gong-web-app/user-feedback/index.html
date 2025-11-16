@@ -656,34 +656,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User dashboard
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -776,17 +748,6 @@
     <span class="md-ellipsis">
       
         Success/error messages
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#error-message-when-database-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Error message when database error
       
     </span>
   </a>
@@ -1150,17 +1111,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#error-message-when-database-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Error message when database error
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1183,10 +1133,11 @@
 
 <h1 id="user-feedback">User feedback<a class="headerlink" href="#user-feedback" title="Permanent link">#</a></h1>
 <h3 id="successerror-messages">Success/error messages<a class="headerlink" href="#successerror-messages" title="Permanent link">#</a></h3>
-<div id="user-feedback-md" class="highlight"><span class="filename">#user-feedback-md</span><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">feedback</span><span class="o">-</span><span class="n">messages</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">db</span><span class="o">-</span><span class="n">error</span><span class="o">&gt;&gt;</span>
+<div class="highlight"><span class="filename">file: libs/feedb.py</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="o">&lt;&lt;</span><span class="n">feedback</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">user</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
-<div id="feedback-messages" class="highlight"><span class="filename">#feedback-messages</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+<div id="feedback-to-user" class="highlight"><span class="filename">#feedback-to-user</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
     <span class="c1"># query_params = dict(request.query_params)</span>
     <span class="c1"># Handle success and error messages</span>
     <span class="n">success_messages</span> <span class="o">=</span> <span class="p">{</span>
@@ -1229,17 +1180,6 @@
             <span class="n">Small</span><span class="p">(</span><span class="s2">&quot;To clear this message, reload the page&quot;</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">message_div</span>
-</code></pre></div>
-<h3 id="error-message-when-database-error">Error message when database error<a class="headerlink" href="#error-message-when-database-error" title="Permanent link">#</a></h3>
-<div id="db-error" class="highlight"><span class="filename">#db-error</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/db_error&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">db_error</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">etext</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Html</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">))),</span>
-        <span class="n">Head</span><span class="p">(</span><span class="n">Title</span><span class="p">(</span><span class="s2">&quot;Database error&quot;</span><span class="p">)),</span>
-        <span class="n">Body</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;db_error&#39;</span><span class="p">,</span> <span class="s1">&#39;etext&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">etext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}))),</span>
-        <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)),</span>
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
-    <span class="p">)</span>
 </code></pre></div>
 
 

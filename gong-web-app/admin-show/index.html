@@ -666,34 +666,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User dashboard
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -1094,51 +1066,17 @@
 
 <h1 id="admin-page">Admin page<a class="headerlink" href="#admin-page" title="Permanent link">#</a></h1>
 <p>Will only be reachable for signed in admin users.</p>
-<div id="admin-show-md" class="highlight"><span class="filename">#admin-show-md</span><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">show</span><span class="o">-</span><span class="n">users</span><span class="o">&gt;&gt;</span>
+<div class="highlight"><span class="filename">file: libs/admin.py</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.feedb</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="o">&lt;&lt;</span><span class="n">show</span><span class="o">-</span><span class="n">users</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">show</span><span class="o">-</span><span class="n">centers</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">show</span><span class="o">-</span><span class="n">planners</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">admin</span><span class="o">-</span><span class="n">page</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <p>TODO document admin-show</p>
-<div id="admin-page" class="highlight"><span class="filename">#admin-page</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/admin_page&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">admin</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span>
-            <span class="n">Ul</span><span class="p">(</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)),</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Contact&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
-            <span class="p">),</span> 
-            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Logout&quot;</span><span class="p">,</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/logout&quot;</span><span class="p">),</span>
-        <span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">&quot;admin-show&quot;</span><span class="p">)),</span>
-        <span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span>
-
-        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Users&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-feedback&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_users_table</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-table&quot;</span><span class="p">),</span>
-        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New User&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_users_form</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-form&quot;</span><span class="p">),</span>
-
-        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Centers&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-feedback&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">),</span>
-        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New Center&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_form</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-form&quot;</span><span class="p">),</span>
-
-        <span class="c1"># show_planners(),</span>
-        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Planners&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-feedback&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_table</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-table&quot;</span><span class="p">),</span>
-        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New Planner&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_form</span><span class="p">(),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-form&quot;</span><span class="p">),</span>
-
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-</code></pre></div>
-<div id="show-users" class="highlight"><span class="filename">#show-users</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_users_table</span><span class="p">():</span>
+<div id="show-users" class="highlight"><span class="filename">#show-users</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_users_table</span><span class="p">(</span><span class="n">users</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
@@ -1157,7 +1095,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">show_users_form</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_users_form</span><span class="p">(</span><span class="n">roles</span><span class="p">):</span>
     <span class="n">role_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">role_name</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">()]</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Div</span><span class="p">(</span>
@@ -1173,15 +1111,16 @@
         <span class="p">)</span>    
     <span class="p">)</span>
 </code></pre></div>
-<div id="show-centers" class="highlight"><span class="filename">#show-centers</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_centers_table</span><span class="p">():</span>
+<div id="show-centers" class="highlight"><span class="filename">#show-centers</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_centers_table</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Center Name&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Gong DB Name&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Actions&quot;</span><span class="p">))</span>
+                <span class="n">Tr</span><span class="p">(</span><span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Center Name&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Dhamma.org location&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Gong DB Name&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Actions&quot;</span><span class="p">))</span>
             <span class="p">),</span>
             <span class="n">Tbody</span><span class="p">(</span>
                 <span class="o">*</span><span class="p">[</span><span class="n">Tr</span><span class="p">(</span>
-                    <span class="n">Td</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">center_name</span><span class="p">),</span> 
+                    <span class="n">Td</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">center_name</span><span class="p">),</span>
+                    <span class="n">Td</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">),</span>
                     <span class="n">Td</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">gong_db_name</span><span class="p">),</span> 
                     <span class="n">Td</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="n">hx_post</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/delete_center/</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">center_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#centers-feedback&quot;</span><span class="p">,</span> <span class="n">hx_confirm</span><span class="o">=</span><span class="s2">&quot;Are you sure you want to delete this center?&quot;</span><span class="p">))</span>
                 <span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">centers</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">center_name</span><span class="p">)]</span>
@@ -1189,19 +1128,25 @@
         <span class="p">)</span>
     <span class="p">)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">show_centers_form</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_centers_form</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+    <span class="n">center_dbs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">gong_db_name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">centers</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Div</span><span class="p">(</span>
             <span class="n">Form</span><span class="p">(</span>
                 <span class="n">Input</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Center Name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;new_center_name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="n">Input</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Center location number (dhamma.org)&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;new_center_location&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                 <span class="n">Input</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Gong DB Name (without .db)&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;new_gong_db_name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="n">Small</span><span class="p">(</span><span class="s2">&quot;The database file will be created as a copy of mahi.db&quot;</span><span class="p">),</span>
+                <span class="n">Select</span><span class="p">(</span>
+                    <span class="n">Option</span><span class="p">(</span><span class="s2">&quot;Center planning to copy&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                    <span class="o">*</span><span class="p">[</span><span class="n">Option</span><span class="p">(</span><span class="n">cdb</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">cdb</span><span class="p">)</span> <span class="k">for</span> <span class="n">cdb</span> <span class="ow">in</span> <span class="n">center_dbs</span><span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;db_template&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">),</span>
                 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add Center&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span><span class="p">),</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/add_center&quot;</span><span class="p">,</span><span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#centers-feedback&quot;</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div>
-<div id="show-planners" class="highlight"><span class="filename">#show-planners</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_planners_table</span><span class="p">():</span>
+<div id="show-planners" class="highlight"><span class="filename">#show-planners</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
@@ -1217,7 +1162,7 @@
         <span class="p">)</span>
     <span class="p">)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">show_planners_form</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_planners_form</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
     <span class="n">sorted_centers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">centers</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">center_name</span><span class="p">)</span>
     <span class="n">sorted_users</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">users</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
@@ -1236,6 +1181,47 @@
                 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add Planner&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span><span class="p">),</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/add_planner&quot;</span><span class="p">,</span> <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planners-feedback&quot;</span>
             <span class="p">)</span>
         <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div>
+<div id="admin-page" class="highlight"><span class="filename">#admin-page</span><pre><span></span><code><span class="c1"># @rt(&#39;/admin_page&#39;)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">users</span>
+    <span class="n">roles</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">roles</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">centers</span>
+    <span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">planners</span>
+    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+        <span class="n">Nav</span><span class="p">(</span>
+            <span class="n">Ul</span><span class="p">(</span>
+                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)),</span>
+                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Contact&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
+                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
+            <span class="p">),</span> 
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Logout&quot;</span><span class="p">,</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/logout&quot;</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">&quot;admin-show&quot;</span><span class="p">)),</span>
+        <span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span>
+
+        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Users&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-feedback&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_users_table</span><span class="p">(</span><span class="n">users</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-table&quot;</span><span class="p">),</span>
+        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New User&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_users_form</span><span class="p">(</span><span class="n">roles</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-form&quot;</span><span class="p">),</span>
+
+        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Centers&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-feedback&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">),</span>
+        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New Center&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_form</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-form&quot;</span><span class="p">),</span>
+
+        <span class="c1"># show_planners(),</span>
+        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Planners&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-feedback&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-table&quot;</span><span class="p">),</span>
+        <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New Planner&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_form</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-form&quot;</span><span class="p">),</span>
+
+        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 

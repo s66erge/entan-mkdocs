@@ -14,7 +14,7 @@
         <link rel="prev" href="../admin-show/">
       
       
-        <link rel="next" href="../dashboard/">
+        <link rel="next" href="../database-setup/">
       
       
         
@@ -731,49 +731,10 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#beforeware-to-restrict-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Beforeware to restrict access
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User dashboard
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1216,17 +1177,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#beforeware-to-restrict-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Beforeware to restrict access
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1257,12 +1207,19 @@
 <li>The website looks for a record in the users database table with the token from the link</li>
 <li>If it can find a record, the user will be logged in (again by storing information in the session)</li>
 </ul>
-<div id="authenticate-md" class="highlight"><span class="filename">#authenticate-md</span><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">build</span><span class="o">-</span><span class="n">serve</span><span class="o">-</span><span class="n">login</span><span class="o">-</span><span class="n">form</span><span class="o">&gt;&gt;</span>
+<div class="highlight"><span class="filename">file: libs/auth.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.feedb</span><span class="w"> </span><span class="kn">import</span> <span class="n">feedback_to_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isa_dev_computer</span><span class="p">,</span> <span class="n">send_email</span>
+
+<span class="o">&lt;&lt;</span><span class="n">build</span><span class="o">-</span><span class="n">serve</span><span class="o">-</span><span class="n">login</span><span class="o">-</span><span class="n">form</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">handling</span><span class="o">-</span><span class="n">form</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">send</span><span class="o">-</span><span class="n">link</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">verify</span><span class="o">-</span><span class="n">token</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">guard</span><span class="o">-</span><span class="n">role</span><span class="o">-</span><span class="n">admin</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">logout</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">verify</span><span class="o">-</span><span class="n">link</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">admin_required</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
 <h3 id="login-form">Login form<a class="headerlink" href="#login-form" title="Permanent link">#</a></h3>
 <p>The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!</p>
@@ -1279,8 +1236,12 @@
        <span class="n">hx_disabled_elt</span><span class="o">=</span><span class="s2">&quot;#submit-btn&quot;</span>
    <span class="p">)</span>
 
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>   
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/login&#39;)</span>
+<span class="sd">def get():   </span>
+<span class="sd">    return auth.login()</span>
+<span class="sd">&quot;&quot;&quot;</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">():</span>
    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
        <span class="n">Div</span><span class="p">(</span>
            <span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Sign In&quot;</span><span class="p">),</span>
@@ -1308,8 +1269,12 @@ If we are from Railway production, os.name == 'posix' and the base URL is saved 
 If we are running locally (os.name == 'nt'), directly or within railway CLI, the base URL is http://localhost:5001.</p>
 <p>If everything went well, we return a success message to the user. Remember, the form has been defined to swap the content of the #error paragraph. Since I want to change the appearance of the text we send back, I also send back a HX-Reswap header with the value outerHTML. This tells HTMX to swap the outer HTML of the #error html element with the content we send back, a paragraph tag with the success message.</p>
 <p>Also I want to disable the submit button and show a message that the magic link has been sent. To do this, we use one of the most powerful features of HTMX, out-of-band swaps. In HTMX you can update more than one piece of UI by setting the hx-swap-oob attribute to true on an element. HTMX will then swap in the returned element at the location of the element with the same id (#submit-btn in this case). You can read more about HTMX's out-of-band swaps <a href="https://htmx.org/docs/#oob_swaps">here</a>.</p>
-<div id="handling-form" class="highlight"><span class="filename">#handling-form</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/create_magic_link&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div id="handling-form" class="highlight"><span class="filename">#handling-form</span><pre><span></span><code><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/create_magic_link&#39;)</span>
+<span class="sd">def post(email: str):</span>
+<span class="sd">    return auth.create_link(email, users)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_link</span><span class="p">(</span><span class="n">email</span><span class="p">,</span><span class="n">users</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">email</span><span class="p">:</span>
        <span class="k">return</span> <span class="p">(</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;missing_email&#39;</span><span class="p">}))</span>
 
@@ -1366,52 +1331,32 @@ The link then sends a get request to the /verify_magic_link/{token} endpoint.</p
 <p>There should only be one or no user coming back from this query, so we wrap this whole code in a try/catch block.</p>
 <p>If a user has been found using this query, we will save his or hers email in the auth key of our session dictionary. If its the first time the user logs in, we set is_active to true for this database record.</p>
 <p>We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.</p>
-<div id="verify-token" class="highlight"><span class="filename">#verify-token</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/verify_magic_link/</span><span class="si">{token}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div id="verify-link" class="highlight"><span class="filename">#verify-link</span><pre><span></span><code><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/verify_magic_link/{token}&#39;)</span>
+<span class="sd">def get(session, token: str):</span>
+<span class="sd">    return auth.verify_link(session, token, users) </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_link</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">users</span><span class="p">):</span>
    <span class="n">nowstr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
    <span class="k">try</span><span class="p">:</span>
        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="p">(</span><span class="s2">&quot;magic_link_token = ? AND magic_link_expiry &gt; ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">nowstr</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+       <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">role_name</span>
        <span class="n">users</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">email</span><span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">magic_link_token</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">magic_link_expiry</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
        <span class="k">return</span> <span class="s2">&quot;Invalid or expired magic link&quot;</span>
 </code></pre></div>
-<h3 id="beforeware-to-restrict-access">Beforeware to restrict access<a class="headerlink" href="#beforeware-to-restrict-access" title="Permanent link">#</a></h3>
-<p>We need a page that is only accessible for authenticated users and a mechanism to restrict the access to this page for non-authenticated users. We will use FastHTMLs concept of beforeware for restricting access.</p>
-<p>Here we define a function called before that takes in the request and saves whatever in the auth key of the session into the auth variable as well as the scope of the request. The request scope is something that comes from ASGI, the underlying webserver technology of FastHTML. Think of it as a kind of metadata or context of the request.</p>
-<p>If there is nothing in session["auth"], auth will evaluate to False and we will redirect the user to the login page.</p>
-<p>Then well define a Beforeware object with our newly defined before function. This will make sure that every request runs first through our function, unless its targeting one of the paths we define in the skip list. Everything else will be guarded by this Beforeware. Now we just need to pass our newly created Beforeware class to our fast_app function as the beforeware argument:</p>
-<p>app, rt = fast_app(..., before=bware)</p>
-<div id="auth-beforeware" class="highlight"><span class="filename">#auth-beforeware</span><pre><span></span><code><span class="n">login_redir</span> <span class="o">=</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">303</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">before</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
-   <span class="n">auth</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">scope</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-   <span class="k">if</span> <span class="ow">not</span> <span class="n">auth</span><span class="p">:</span> <span class="k">return</span> <span class="n">login_redir</span>
-
-<span class="n">bware</span> <span class="o">=</span> <span class="n">Beforeware</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;/favicon\.ico&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;/static/.*&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;.*\.css&#39;</span><span class="p">,</span> <span class="s1">&#39;/login&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;/create_magic_link&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;/verify_magic_link/.*&#39;</span><span class="p">])</span>
-</code></pre></div>
-<div id="guard-role-admin" class="highlight"><span class="filename">#guard-role-admin</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">admin_required</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
+<div id="admin_required" class="highlight"><span class="filename">#admin_required</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">admin_required</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="c1"># Assuming user info is in session</span>
-        <span class="n">sessemail</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> 
-        <span class="n">u</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">sessemail</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">u</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">u</span><span class="o">.</span><span class="n">role_name</span> <span class="o">==</span> <span class="s2">&quot;admin&quot;</span><span class="p">:</span>
-            <span class="c1"># Redirect to login or unauthorized page if not admin</span>
-            <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
-                <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">))),</span>
-                <span class="n">Div</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Access Denied&quot;</span><span class="p">),</span>
-                    <span class="n">P</span><span class="p">(</span><span class="s2">&quot;You do not have permission to access this page.&quot;</span><span class="p">)),</span>
-                <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="p">)</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">role</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;admin&quot;</span><span class="p">:</span>
+            <span class="c1"># Redirect to unauthorized page if not admin</span>
+            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/no_access_right&#39;</span><span class="p">)</span>
         <span class="c1"># Proceed if user is admin</span>
         <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wrapper</span>
-</code></pre></div>
-<div id="logout" class="highlight"><span class="filename">#logout</span><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">HttpHeader</span><span class="p">(</span><span class="s1">&#39;HX-Redirect&#39;</span><span class="p">,</span> <span class="s1">&#39;/login&#39;</span><span class="p">)</span>
 </code></pre></div>
 
 
