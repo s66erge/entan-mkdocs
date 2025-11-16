@@ -69,7 +69,7 @@ def fetch_dhamma_courses(center, num_months):
 
     # get the path to the center db and the spreadsheet (see below)
     db_path = "" # if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    
+
     db_center = database(f"{db_path}data/{center.lower()}.ok.db")
     db_central = database(f"{db_path}data/gongUsers.db")
 

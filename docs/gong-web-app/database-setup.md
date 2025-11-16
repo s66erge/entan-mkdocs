@@ -19,6 +19,7 @@ def create_tables(db):
         description TEXT
     );
     """
+    # FIXME new fields in centers
     SQL_CREATE_CENTERS = """
     CREATE TABLE IF NOT EXISTS centers (
         center_name TEXT PRIMARY KEY,

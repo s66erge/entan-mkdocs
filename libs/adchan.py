@@ -122,7 +122,7 @@ def delete_center(center_name, db, db_path):
 
 # @rt('/add_center')
 
-def add_center(new_center_name, new_gong_db_name, db, db_path):
+def add_center(new_center_name, new_center_location, new_gong_db_name, db_template, db, db_path):
     users = db.t.users
     centers = db.t.centers
     ## [1]
@@ -132,7 +132,7 @@ def add_center(new_center_name, new_gong_db_name, db, db_path):
     template_db = f'{db_path}mahi.ok.db'
 
     try:
-        if new_center_name == "" or new_gong_db_name == "":
+        if new_center_name == "" or new_gong_db_name == "" or new_center_location == "" or db_template == "":
             message = {"error" : "missing_fields"}
 
         elif centers("center_name = ?", (new_center_name,)):
@@ -148,14 +148,16 @@ def add_center(new_center_name, new_gong_db_name, db, db_path):
             shutil.copy2(template_db, db_file_path)
             centers.insert(
                 center_name=new_center_name,
-                gong_db_name=new_gong_db_name
+                gong_db_name=new_gong_db_name,
+                location=new_center_location,
+                other_course="{}"
             )
             message = {'success': 'center_added'}
 
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(), hx_swap_oob="true", id="centers-form"),
+            Div(show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
             ## [3]
             Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )

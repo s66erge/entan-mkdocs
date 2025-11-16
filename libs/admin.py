@@ -46,11 +46,12 @@ def show_centers_table(centers):
     return Main(
         Table(
             Thead(
-                Tr(Th("Center Name"), Th("Gong DB Name"), Th("Actions"))
+                Tr(Th("Center Name"), Th("Dhamma.org location"), Th("Gong DB Name"), Th("Actions"))
             ),
             Tbody(
                 *[Tr(
-                    Td(c.center_name), 
+                    Td(c.center_name),
+                    Td(c.location),
                     Td(c.gong_db_name), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback", hx_confirm="Are you sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
@@ -58,13 +59,19 @@ def show_centers_table(centers):
         )
     )
 
-def show_centers_form():
+def show_centers_form(centers):
+    center_dbs = sorted(c.gong_db_name for c in centers())
     return Main(
         Div(
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
+                Input(type="text", placeholder="Center location number (dhamma.org)", name="new_center_location", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
-                Small("The database file will be created as a copy of mahi.db"),
+                Select(
+                    Option("Center planning to copy", value="", selected=True, disabled=True),
+                    *[Option(cdb, value=cdb) for cdb in center_dbs],
+                    name="db_template", required=True
+                ),
                 Button("Add Center", type="submit"), hx_post="/add_center",hx_target="#centers-feedback"
             )
         )
@@ -140,7 +147,7 @@ def show_page(request, db):
         Div(feedback_to_user(params), id="centers-feedback"),
         Div(show_centers_table(centers), id="centers-table"),
         H4("Add New Center"),
-        Div(show_centers_form(), id="centers-form"),
+        Div(show_centers_form(centers), id="centers-form"),
 
         # show_planners(),
         H2("Planners"),
