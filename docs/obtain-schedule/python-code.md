@@ -4,16 +4,21 @@
 import requests
 import pandas as pd
 import calendar
+import json
 from tabulate import tabulate
 from datetime import datetime, date
 from fasthtml.common import *
 
-def get_location_from_db(db_central, center_name):
+def get_field_from_db(db_central, center_name, field_name):
     # get the dhamma.org location for this center from the table settings in center db
     centers = db_central.t.centers
     Center = centers.dataclass()
-    location = centers[center_name].location
-    return f"location_{location}"
+    if field_name == "location":
+        location = centers[center_name].location
+        return f"location_{location}"
+    else:
+        other_course = centers[center_name].other_course
+        return json.loads(other_course)
 
 def add_months(date_str, num_months):
     """
@@ -29,22 +34,18 @@ def add_months(date_str, num_months):
     new_day = min(dt.day, last_day)
     return date(new_year, new_month, new_day).isoformat()
 
-def get_period_type(raw_course_type, course_type, list_of_types):
+def get_period_type(anchor, course_type, list_of_types, other_dict):
     """
-    Find the dict in list_of_types where 'raw_course_type' matches arg1
-    and return the value of 'period_type' if:
-    - arg1 != "Other"
-    - arg1 == "Other" and arg2 in 'course_type'
+    If anchor == "Other", find in other_dict the value of a key == course_type
     and return "UNKNOWN" if not found.
+    if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' matches anchor and return the value of 'period_type'.
     """
-    for item in list_of_types:
-        if  raw_course_type == item.get('raw_course_type'):
-            if raw_course_type == "Other":
-                if course_type in item.get("course_type"):
-                    return item.get('period_type')    
-            else:
+    if anchor == "Other":
+        return other_dict.get(course_type.upper(), "UNKNOWN")
+    else:    
+        for item in list_of_types:
+            if  anchor == item.get('raw_course_type'):
                 return item.get('period_type')
-
     return "UNKNOWN"
 
 def deduplicate(merged):
@@ -93,7 +94,7 @@ def fetch_dhamma_courses(center, num_months):
     for p in periods_db_center_obj
     ]
 
-    location = get_location_from_db(db_central, center)
+    location = get_field_from_db(db_central, center, "location")
     end_date = add_months(date_current_course, num_months)
 
 
@@ -174,10 +175,11 @@ def fetch_dhamma_courses(center, num_months):
     # and use it to map the course types from dhamma.org to center db
     df = pd.read_excel(db_path + 'data/course_type_map.xlsx')
     list_of_types = df.to_dict(orient='records')
+    other_dict = get_field_from_db(db_central, center, "other_dict")
     periods_dhamma_org = [
         {
             "start_date": c.get("course_start_date"),
-            "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), list_of_types),
+            "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), list_of_types, other_dict),
             "source": "dhamma.org",
             "course_type": c.get("course_type")
         }
@@ -189,7 +191,6 @@ def fetch_dhamma_courses(center, num_months):
 
     merged = periods_db_center + periods_dhamma_org
     merged.sort(key=lambda x: x['start_date'])
-
     deduplicated = deduplicate(merged)
 
     print(tabulate(deduplicated, headers="keys", tablefmt="grid"))

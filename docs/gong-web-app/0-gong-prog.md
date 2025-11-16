@@ -11,7 +11,7 @@ from functools import wraps
 from fasthtml.common import *
 # from starlette.testclient import TestClient
 
-from libs import *
+from libs import * 
 from libs.auth import admin_required
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
