@@ -62,7 +62,7 @@ Check if any table(s) is(are) empty and insert default values if needed
 
 def init_data(db):
 
-    roles = bd.t.roles
+    roles = db.t.roles
     if not roles():
         roles.insert(role_name="admin", description="administrator")
         roles.insert(role_name="user", description="regular user")

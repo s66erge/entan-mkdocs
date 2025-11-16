@@ -197,7 +197,7 @@ def admin_required(handler):
         role = session['role']
         if not role or not role == "admin":
             # Redirect to unauthorized page if not admin
-            return RedirectResponse('/no_access')
+            return RedirectResponse('/no_access_right')
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper

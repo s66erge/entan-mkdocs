@@ -155,6 +155,7 @@ def fetch_dhamma_courses(center, num_months):
     extracted = [course for course in extracted if course['center_non'] != 'noncenter']
 
     # Filter out extracted for 1-Day courses
+    # FIXME one day courses are possible in some centers !!!
     extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
 
     # Remove the last two fields: 'sub_location' and 'center_non'

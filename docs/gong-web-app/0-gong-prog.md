@@ -120,9 +120,9 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 @rt('/logout')
 def post(session):
     del session['auth']
-    return HttpHeader('HX-Redirect', '/login')
+    return RedirectResponse('/login')
 
-@rt('/no_access')
+@rt('/no_access_right')
 def get():
     return Main(
         Nav(Li(A("Dashboard", href="/dashboard"))),

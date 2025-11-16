@@ -50,7 +50,7 @@ def create_tables(db):
 
 def init_data(db):
 
-    roles = bd.t.roles
+    roles = db.t.roles
     if not roles():
         roles.insert(role_name="admin", description="administrator")
         roles.insert(role_name="user", description="regular user")
