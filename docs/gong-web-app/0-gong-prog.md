@@ -27,7 +27,9 @@ app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.i
 
 db_path = "data/" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "data/"
 db = database(db_path + 'gongUsers.db')
+
 dbset.create_tables(db)
+dbset.init_data(db)
 
 users = db.t.users
 roles = db.t.roles
@@ -38,8 +40,6 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
-
-dbset.init_data(roles, centers, users, planners)
 
 @rt('/login')
 def get():

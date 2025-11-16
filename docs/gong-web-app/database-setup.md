@@ -1,6 +1,7 @@
 # Database setup and init
 
 ```{.python file=libs/dbset.py}
+import textwrap
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
@@ -19,11 +20,12 @@ def create_tables(db):
         description TEXT
     );
     """
-    # FIXME new fields in centers
     SQL_CREATE_CENTERS = """
     CREATE TABLE IF NOT EXISTS centers (
         center_name TEXT PRIMARY KEY,
-        gong_db_name TEXT
+        gong_db_name TEXT,
+        location TEXT,
+        other_course TEXT
     );
     """
     SQL_CREATE_USERS = """
@@ -58,20 +60,29 @@ Check if any table(s) is(are) empty and insert default values if needed
 
 ```{.python #initialize-database}
 
-def init_data(roles, centers, users, planners):
+def init_data(db):
 
+    roles = bd.t.roles
     if not roles():
         roles.insert(role_name="admin", description="administrator")
         roles.insert(role_name="user", description="regular user")
 
+    centers = db.t.centers
+    other_course_pajjota = textwrap.dedent("""\
+            {
+            "TRUST MEETING": "Trust WE"
+            }
+        """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name="mahi.db")
-        centers.insert(center_name="Pajjota", gong_db_name="pajjota.db")
+        centers.insert(center_name="Mahi", gong_db_name="mahi.db", location = "1396", other_course = "{ }")
+        centers.insert(center_name="Pajjota", gong_db_name="pajjota.db", location = "1370", other_course=other_course_pajjota)
 
+    users = db.t.users
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
         users.insert(email="spegoff@gmail.com", name="sp2", role_name="user", is_active=True)
 
+    planners = db.t.planners
     if not planners():
         planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
         planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
