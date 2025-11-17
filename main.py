@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
 import os
+import sys
 import shutil
 from functools import wraps
 from fasthtml.common import *
@@ -8,6 +9,11 @@ from fasthtml.common import *
 
 from libs import * 
 from libs.auth import admin_required
+
+if len(sys.argv) > 1:
+    environ = sys.argv[1]
+else:
+    environ = "dev"
 
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
@@ -20,7 +26,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
                    before=bware, hdrs=(picolink,css),)
 
-db_path = "data/" if utils.isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "data/"
+db_path = dbset.get_db_path()
 db = database(db_path + 'gongUsers.db')
 
 dbset.create_tables(db)

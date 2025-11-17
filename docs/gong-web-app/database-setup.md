@@ -2,11 +2,20 @@
 
 ```{.python file=libs/dbset.py}
 import textwrap
+import os
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
+<<getdb-path>>
 <<setup-database>>
 <<initialize-database>>
+```
+### Database path
+
+```{.python #getdb-path}
+def get_db_path():
+    root = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None")
+    return root + "data/"
 ```
 
 ### Database setup

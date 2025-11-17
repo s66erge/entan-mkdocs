@@ -1,8 +1,14 @@
 # ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
 import textwrap
+import os
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
+# ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]
+def get_db_path():
+    root = "" if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None")
+    return root + "data/"
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
 def create_tables(db):

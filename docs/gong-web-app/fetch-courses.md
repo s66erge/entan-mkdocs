@@ -1,13 +1,19 @@
-# python program
+# Get schedule from dhamma.org and merge into center schedule
 
-```{.python file=zkeep/fetch-courses.py}
+```{.python file=libs/fetch.py}
 import requests
 import pandas as pd
-import calendar
 import json
 from tabulate import tabulate
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from fasthtml.common import *
+
+from libs.dbset import get_db_path
+from libs.utils import add_months_days
+
+# Example usage:
+# fetch_dhamma_courses("Mahi", 6, 0)
+# fetch_dhamma_courses("Pajjota", 6, 0)
 
 def get_field_from_db(db_central, center_name, field_name):
     # get the dhamma.org location for this center from the table settings in center db
@@ -20,84 +26,7 @@ def get_field_from_db(db_central, center_name, field_name):
         other_course = centers[center_name].other_course
         return json.loads(other_course)
 
-def add_months(date_str, num_months):
-    """
-    Return an ISO date string num_months after date_str (YYYY-MM-DD).
-    Uses divmod to compute year/month rollover and preserves end-of-month.
-    """
-    dt = datetime.strptime(date_str, "%Y-%m-%d").date()
-    # total months since year 0 (make month zero-based)
-    total = dt.year * 12 + (dt.month - 1) + num_months
-    new_year, new_month0 = divmod(total, 12)
-    new_month = new_month0 + 1
-    last_day = calendar.monthrange(new_year, new_month)[1]
-    new_day = min(dt.day, last_day)
-    return date(new_year, new_month, new_day).isoformat()
-
-def get_period_type(anchor, course_type, list_of_types, other_dict):
-    """
-    If anchor == "Other", find in other_dict the value of a key == course_type
-    and return "UNKNOWN" if not found.
-    if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' matches anchor and return the value of 'period_type'.
-    """
-    if anchor == "Other":
-        return other_dict.get(course_type.upper(), "UNKNOWN")
-    else:    
-        for item in list_of_types:
-            if  anchor == item.get('raw_course_type'):
-                return item.get('period_type')
-    return "UNKNOWN"
-
-def deduplicate(merged):
-    # Remove duplicates: if consecutive items have identical start_date and period_type,
-    # keep only one with source='BOTH'
-    deduplicated = []
-    i = 0
-    while i < len(merged):
-        current = merged[i]
-        if i + 1 < len(merged):
-            next_item = merged[i + 1]
-            if (current['start_date'] == next_item['start_date'] and 
-                current['period_type'] == next_item['period_type']):
-                # Mark as BOTH and skip the next one
-                current['source'] = 'BOTH'
-                deduplicated.append(current)
-                i += 2  # skip next item
-                continue
-        deduplicated.append(current)
-        i += 1
-    return deduplicated
-
-def fetch_dhamma_courses(center, num_months):
-
-    # get the path to the center db and the spreadsheet (see below)
-    db_path = "" # if isa_dev_computer() else os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-
-    db_center = database(f"{db_path}data/{center.lower()}.ok.db")
-    db_central = database(f"{db_path}data/gongUsers.db")
-
-    # get the start date for the last course just before today = current course - or service
-    periods = db_center.t.coming_periods
-    Period = periods.dataclass()
-    count_past = sum(1 for item in periods() if date.fromisoformat(item.start_date) < date.today())
-    date_current_course = periods()[count_past-1].start_date
-
-    # get a dict. of all courses in the center db starting from the current course
-    periods_db_center_obj = periods()[count_past-1:]
-    periods_db_center = [
-    {
-        'start_date': p.start_date,
-        'period_type': p.period_type,
-        'source' : f"{center.lower()}_db"
-
-    }
-    for p in periods_db_center_obj
-    ]
-
-    location = get_field_from_db(db_central, center, "location")
-    end_date = add_months(date_current_course, num_months)
-
-
+def fetch_courses_from_dhamma(location, date_start, date_end):
     url = "https://www.dhamma.org/en-US/courses/do_search"
     headers = {"User-Agent": "entan-mkdocs-fetcher/1.0"}
     all_courses = []
@@ -109,11 +38,11 @@ def fetch_dhamma_courses(center, num_months):
         data = {
             "current_state": "OldStudents",
             "regions[]": location,
-            "daterange": f"{date_current_course} - {end_date}",
+            "daterange": f"{date_start} - {date_end}",
             "page": str(page),
         }
 
-        print(f"Fetching courses Dhamma {center} - Page {page}...")
+        print(f"Fetching courses Dhamma {location} - Page {page}...")
         try:
             resp = requests.post(url, data=data, headers=headers, timeout=15)
             resp.raise_for_status()
@@ -149,13 +78,77 @@ def fetch_dhamma_courses(center, num_months):
         for c in all_courses
     ]
 
-    # print intermediary data
-    # print(tabulate(extracted, headers="keys", tablefmt="grid"))
-
     # Filter out extracted where 'center_non' = 'noncenter'
     extracted = [course for course in extracted if course['center_non'] != 'noncenter']
 
-    # Filter out extracted for 1-Day courses
+    return extracted
+
+def get_period_type(anchor, course_type, list_of_types, other_dict):
+    """
+    If anchor == "Other", find in other_dict the value of a key == course_type
+    and return "UNKNOWN" if not found.
+    if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' matches anchor and return the value of 'period_type'.
+    """
+    if anchor == "Other":
+        return other_dict.get(course_type.upper(), "UNKNOWN")
+    else:    
+        for item in list_of_types:
+            if  anchor == item.get('raw_course_type'):
+                return item.get('period_type')
+    return "UNKNOWN"
+
+def deduplicate(merged):
+    # Remove duplicates: if consecutive items have identical start_date and period_type,
+    # keep only one with source='BOTH'
+    deduplicated = []
+    i = 0
+    while i < len(merged):
+        current = merged[i]
+        if i + 1 < len(merged):
+            next_item = merged[i + 1]
+            if (current['start_date'] == next_item['start_date'] and 
+                current['period_type'] == next_item['period_type']):
+                # Mark as BOTH and skip the next one
+                current['source'] = 'BOTH'
+                deduplicated.append(current)
+                i += 2  # skip next item
+                continue
+        deduplicated.append(current)
+        i += 1
+    return deduplicated
+
+def fetch_dhamma_courses(center, num_months, num_days):
+
+    # get the path to the center db and the spreadsheet (see below)
+    db_path = get_db_path()
+
+    db_center = database(f"{db_path}{center.lower()}.ok.db")
+    db_central = database(f"{db_path}gongUsers.db")
+
+    # get the start date for the last course just before today = current course - or service
+    periods = db_center.t.coming_periods
+    Period = periods.dataclass()
+    count_past = sum(1 for item in periods() if date.fromisoformat(item.start_date) < date.today())
+    date_current_course = periods()[count_past-1].start_date
+
+    # get a dict. of all courses in the center db starting from the current course
+    periods_db_center_obj = periods()[count_past-1:]
+    periods_db_center = [
+    {
+        'start_date': p.start_date,
+        'period_type': p.period_type,
+        'source' : f"{center.lower()}_db"
+
+    }
+    for p in periods_db_center_obj
+    ]
+
+    location = get_field_from_db(db_central, center, "location")
+    end_date = add_months_days(date_current_course, num_months, num_days)
+
+    # fetch extracted courses from dhamma.org
+    extracted = fetch_courses_from_dhamma(location, date_current_course, end_date)
+
     # FIXME one day courses are possible in some centers !!!
     extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
 
@@ -173,7 +166,7 @@ def fetch_dhamma_courses(center, num_months):
 
     # get the course_type mapping table from the spreadsheet
     # and use it to map the course types from dhamma.org to center db
-    df = pd.read_excel(db_path + 'data/course_type_map.xlsx')
+    df = pd.read_excel(db_path + 'course_type_map.xlsx')
     list_of_types = df.to_dict(orient='records')
     other_dict = get_field_from_db(db_central, center, "other_dict")
     periods_dhamma_org = [
@@ -195,9 +188,4 @@ def fetch_dhamma_courses(center, num_months):
 
     print(tabulate(deduplicated, headers="keys", tablefmt="grid"))
     return
-
-# Example usage:
-if __name__ == "__main__":
-    fetch_dhamma_courses("Mahi", 6)
-    fetch_dhamma_courses("Pajjota", 6)
 ```
