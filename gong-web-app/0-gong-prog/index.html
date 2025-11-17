@@ -742,6 +742,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../fetch-courses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get schedule from dhamma.org and merge into center schedule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../user-feedback/" class="md-nav__link">
         
   
@@ -860,34 +888,6 @@
     
   
     dhamma.org courses API
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../obtain-schedule/python-code/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    python program
   
 
     
@@ -1134,13 +1134,19 @@
 <h1 id="gong-main-program">Gong main program<a class="headerlink" href="#gong-main-program" title="Permanent link">#</a></h1>
 <h3 id="program-start">Program start<a class="headerlink" href="#program-start" title="Permanent link">#</a></h3>
 <div class="highlight"><span class="filename">file: main.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="c1"># from starlette.testclient import TestClient</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">libs</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span> 
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">admin_required</span>
+
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="s2">&quot;dev&quot;</span>
 
 <span class="n">css</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s1">&#39;:root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}&#39;</span><span class="p">)</span>
 
@@ -1153,7 +1159,7 @@
 <span class="n">app</span><span class="p">,</span> <span class="n">rt</span> <span class="o">=</span> <span class="n">fast_app</span><span class="p">(</span><span class="n">live</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Gong Users&quot;</span><span class="p">,</span> <span class="n">favicon</span><span class="o">=</span><span class="s2">&quot;favicon.ico&quot;</span><span class="p">,</span>
                    <span class="n">before</span><span class="o">=</span><span class="n">bware</span><span class="p">,</span> <span class="n">hdrs</span><span class="o">=</span><span class="p">(</span><span class="n">picolink</span><span class="p">,</span><span class="n">css</span><span class="p">),)</span>
 
-<span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;data/&quot;</span> <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">isa_dev_computer</span><span class="p">()</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;</span><span class="p">,</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;data/&quot;</span>
+<span class="n">db_path</span> <span class="o">=</span> <span class="n">dbset</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span>
 <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;gongUsers.db&#39;</span><span class="p">)</span>
 
 <span class="n">dbset</span><span class="o">.</span><span class="n">create_tables</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>

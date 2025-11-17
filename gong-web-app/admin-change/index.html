@@ -694,6 +694,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../fetch-courses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get schedule from dhamma.org and merge into center schedule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../user-feedback/" class="md-nav__link">
         
   
@@ -812,34 +840,6 @@
     
   
     dhamma.org courses API
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../obtain-schedule/python-code/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    python program
   
 
     
@@ -1075,6 +1075,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
 <span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.feedb</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.admin</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isa_db_test</span>
 
 <span class="o">&lt;&lt;</span><span class="n">delete</span><span class="o">-</span><span class="n">user</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">add</span><span class="o">-</span><span class="n">user</span><span class="o">&gt;&gt;</span>
@@ -1105,6 +1106,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM users WHERE email = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">email</span><span class="p">,))</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="s2">&quot;user_deleted&quot;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_users_table</span><span class="p">(</span><span class="n">users</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -1146,6 +1148,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="p">)</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="s2">&quot;user_added&quot;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_users_table</span><span class="p">(</span><span class="n">users</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -1163,34 +1166,32 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
 
 <span class="k">def</span><span class="w"> </span><span class="nf">delete_center</span><span class="p">(</span><span class="n">center_name</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
     <span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">users</span>
+    <span class="n">User</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">centers</span>
+    <span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">planners</span>
+    <span class="n">Planner</span> <span class="o">=</span> <span class="n">planners</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">center_info</span> <span class="o">=</span> <span class="n">centers</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
-        <span class="n">gong_db_name</span> <span class="o">=</span> <span class="n">center_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">gong_db_name</span>  <span class="c1">## [1]</span>
-        <span class="n">db_file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}{</span><span class="n">gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1">## [1]</span>
-        <span class="n">center_planners</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>  <span class="c1">## [2]</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">center_info</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_not_found&#39;</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gong_db_name</span> <span class="o">=</span> <span class="n">center_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">gong_db_name</span>  <span class="c1">## [1]</span>
+            <span class="n">db_file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}{</span><span class="n">gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1">## [1]</span>
+            <span class="n">center_planners</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>  <span class="c1">## [2]</span>
 
-        <span class="k">elif</span> <span class="n">center_planners</span><span class="p">:</span>  <span class="c1">## [2]</span>
-            <span class="n">user_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">user_email</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">center_planners</span><span class="p">]</span>  <span class="c1">## [3]</span>
-            <span class="n">users_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_emails</span><span class="p">)</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_has_planners&#39;</span><span class="p">,</span><span class="s1">&#39;users&#39;</span> <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">users_list</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">center_planners</span><span class="p">:</span>  <span class="c1">## [2]</span>
+                <span class="n">user_emails</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">user_email</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">center_planners</span><span class="p">]</span>  <span class="c1">## [3]</span>
+                <span class="n">users_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_emails</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_has_planners&#39;</span><span class="p">,</span><span class="s1">&#39;users&#39;</span> <span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">users_list</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
 
-        <span class="k">else</span><span class="p">:</span>  <span class="c1">## [4]</span>
-            <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM centers WHERE center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_file_path</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_file_path</span><span class="p">)</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">                for ext in [&#39;-shm&#39;, &#39;-wal&#39;]:  ## [5]</span>
-<span class="sd">                    journal_file = db_path + &#39;gongUsers.db&#39; + ext</span>
-<span class="sd">                    if os.path.exists(journal_file):</span>
-<span class="sd">                        os.remove(journal_file)</span>
-<span class="sd">                &quot;&quot;&quot;</span>        
-            <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_deleted&#39;</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1">## [4]</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM centers WHERE center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">center_name</span><span class="p">,))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_file_path</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_file_path</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span> <span class="p">:</span> <span class="s1">&#39;center_deleted&#39;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -1198,6 +1199,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_form</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-form&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/db_error?etext=</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </code></pre></div>
 [1] get gong database path<br />
@@ -1216,7 +1218,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
     <span class="k">if</span> <span class="ow">not</span> <span class="n">new_gong_db_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.db&#39;</span><span class="p">):</span>
         <span class="n">new_gong_db_name</span> <span class="o">+=</span> <span class="s1">&#39;.db&#39;</span>
     <span class="n">db_file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}{</span><span class="n">new_gong_db_name</span><span class="si">}</span><span class="s1">&#39;</span>
-    <span class="n">template_db</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s1">mahi.ok.db&#39;</span>
+    <span class="n">template_db</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}{</span><span class="n">db_template</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">new_center_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">new_gong_db_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">new_center_location</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">db_template</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
@@ -1241,6 +1243,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="p">)</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="s1">&#39;center_added&#39;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_table</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -1268,6 +1271,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM planners WHERE user_email = ? AND center_name = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">user_email</span><span class="p">,</span> <span class="n">center_name</span><span class="p">))</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span> <span class="p">:</span> <span class="s2">&quot;planner_deleted&quot;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span>
@@ -1305,6 +1309,7 @@ and these functions can update multiple other DOM elements with <code>hx_swap_oo
             <span class="p">)</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span> <span class="p">:</span> <span class="s1">&#39;planner_added&#39;</span><span class="p">}</span>
 
+        <span class="k">if</span> <span class="n">isa_db_test</span><span class="p">(</span><span class="n">db</span><span class="p">):</span> <span class="k">return</span> <span class="n">message</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span>
             <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-table&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">message</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
