@@ -5,7 +5,7 @@ from libs.dbset import create_tables, init_data
 from libs.feedb import feed_text
 from fasthtml.common import database, to_xml
 
-from libs.adchan import add_user, delete_user, add_center, delete_center, add_planner
+from libs.adchan import add_user, delete_user, add_center, delete_center, add_planner, delete_planner
 
 
 @pytest.fixture
@@ -229,7 +229,7 @@ def test_delete_center_has_planners(temp_db, clean_files):
     centers = db.t.centers
     # Create center, user and planner association
     center_name = "CenterWithPlanners"
-    add_center(center_name, "Location 2", "shared.db", "mahi.ok.db", db, ffolder)
+    add_center(center_name, "Location 2", "shared2.db", "mahi.ok.db", db, ffolder)
     email = "planner1@example.com"
     add_user(email, "Planner One", "user", db)
     add_planner(email, center_name, db)
@@ -357,7 +357,7 @@ def test_add_planner_multiple_planners_same_center(temp_db, clean_files):
     ffolder = clean_files
     planners = db.t.planners
     # Create center
-    add_center("SharedCenter", "Shared Location", "shared.db", "mahi.ok.db", db, ffolder)
+    add_center("SharedCenter", "Shared Location", "shared3.db", "mahi.ok.db", db, ffolder)
     # Add multiple users and planners
     for i in range(3):
         email = f"planner{i}@example.com"
@@ -387,3 +387,45 @@ def test_add_planner_same_user_multiple_centers(temp_db, clean_files):
     user_planners = planners("user_email = ?", ("versatile@example.com",))
     assert len(user_planners) == 3
 
+def test_delete_planner_last_planner(temp_db, clean_files):
+    "Deleting the only planner for a center should return last_planner_for_center error."
+    message = feed_text({"error": "last_planner_for_center"})["mess"]
+    db, _ = temp_db
+    ffolder = clean_files
+    centers = db.t.centers
+    planners = db.t.planners
+    # Create center and one planner
+    add_center("SoloCenter", "Location", "solo.db", "mahi.ok.db", db, ffolder)
+    add_user("solo_planner@example.com", "Solo Planner", "user", db)
+    add_planner("solo_planner@example.com", "SoloCenter", db)
+    # Attempt to delete the last planner
+    result = delete_planner("solo_planner@example.com", "SoloCenter", db)
+    result_str = to_xml(result)
+    # message may include additional text after ":" so compare prefix
+    assert message.split(":")[0] in result_str
+    assert "SoloCenter" in result_str
+    # planner should still exist
+    remaining = planners("user_email = ? AND center_name = ?", ("solo_planner@example.com", "SoloCenter"))
+    assert len(remaining) == 1
+
+def test_delete_planner_success(temp_db, clean_files):
+    "Deleting a planner when there are multiple planners for the center should succeed."
+    message = feed_text({"success": "planner_deleted"})["mess"]
+    db, _ = temp_db
+    ffolder = clean_files
+    planners = db.t.planners
+    # Create center and two planners
+    add_center("MultiCenter", "Location", "multi.db", "mahi.ok.db", db, ffolder)
+    add_user("p1@example.com", "Planner One", "user", db)
+    add_user("p2@example.com", "Planner Two", "user", db)
+    add_planner("p1@example.com", "MultiCenter", db)
+    add_planner("p2@example.com", "MultiCenter", db)
+    # Delete one planner
+    result = delete_planner("p1@example.com", "MultiCenter", db)
+    result_str = to_xml(result)
+    assert message in result_str
+    # Verify the deleted planner record is gone and the other remains
+    p1 = planners("user_email = ? AND center_name = ?", ("p1@example.com", "MultiCenter"))
+    p2 = planners("user_email = ? AND center_name = ?", ("p2@example.com", "MultiCenter"))
+    assert len(p1) == 0
+    assert len(p2) == 1
