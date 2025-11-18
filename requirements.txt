@@ -2,3 +2,4 @@ python-fasthtml
 markdown2
 resend
 pandas
+tabulate
