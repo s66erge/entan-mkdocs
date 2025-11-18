@@ -5,9 +5,7 @@
 
 ```{.python file=main.py}
 
-import os
 import sys
-import shutil
 from functools import wraps
 from fasthtml.common import *
 # from starlette.testclient import TestClient

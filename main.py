@@ -1,8 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
-import os
 import sys
-import shutil
 from functools import wraps
 from fasthtml.common import *
 # from starlette.testclient import TestClient

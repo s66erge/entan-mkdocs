@@ -29,7 +29,6 @@ def delete_user(email, db):
             db.execute("DELETE FROM users WHERE email = ?", (email,))
             message = {"success": "user_deleted"}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
@@ -67,7 +66,6 @@ def add_user(new_user_email, name ,role_name, db):
             )
             message = {"success": "user_added"}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
@@ -109,7 +107,6 @@ def delete_center(center_name, db, db_path):
                     os.remove(db_file_path)
                 message = {'success' : 'center_deleted'}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
@@ -156,7 +153,6 @@ def add_center(new_center_name, new_center_location, new_gong_db_name, db_templa
             )
             message = {'success': 'center_added'}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
@@ -182,7 +178,6 @@ def delete_planner(user_email, center_name, db):
             db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
             message = {"success" : "planner_deleted"}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
@@ -219,7 +214,6 @@ def add_planner(new_planner_user_email, new_planner_center_name, db):
             )
             message = {'success' : 'planner_added'}
 
-        if isa_db_test(db): return message
         return Div(
             Div(feedback_to_user(message)),
             Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
