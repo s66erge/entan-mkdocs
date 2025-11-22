@@ -1,1 +1,2 @@
-__all__ = ["utils", "feedb", "dbset","auth","admin", "adchan", "fetch"]
+__all__ = ["utils", "feedb", "dbset","auth","admin", "adchan", "fetch",
+           "cdash"]

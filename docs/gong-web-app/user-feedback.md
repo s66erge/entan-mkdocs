@@ -66,5 +66,4 @@ def feedback_to_user(params):
             Small("To clear this message, reload the page")
         )
     return message_div
-
 ```

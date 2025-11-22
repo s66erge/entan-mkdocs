@@ -1,6 +1,8 @@
 import pytest
+from unittest.mock import Mock
 from fasthtml.common import database, to_xml
 from libs.dbset import create_tables, init_data
+from libs.feedb import feed_text
 
 from main import app
 from libs.admin import ( show_users_table, show_users_form,
@@ -9,7 +11,7 @@ from libs.admin import ( show_users_table, show_users_form,
 
 @pytest.fixture
 def temp_db():
-    "Create a temporary database in memory and iniyialize tables"
+    "Create a temporary database in memory and initialize tables"
     db = database(":memory:")
     create_tables(db)
     init_data(db)
@@ -125,3 +127,55 @@ def test_show_planners_form_sorted(temp_db):
     alpha_pos = result.find("Alpha")
     zebra_pos = result.find("Zebra")
     assert alpha_pos < zebra_pos
+
+def test_show_page(temp_db):
+    "Test show_page renders all admin sections."
+    db = temp_db
+    users = db.t.users
+    centers = db.t.centers
+    planners = db.t.planners
+    # Add test data
+    users.insert(email="admin@example.com", name="Admin User", role_name="user", is_active=True, magic_link_token=None, magic_link_expiry=None)
+    centers.insert(center_name="Test Center", location="100", gong_db_name="test.db", other_course="{}")
+    planners.insert(user_email="admin@example.com", center_name="Test Center")
+    # Create mock request with empty query params
+    request = Mock()
+    request.query_params = {}
+    result = to_xml(show_page(request, db))
+    # Check navigation elements
+    assert "Dashboard" in result
+    assert "Contact" in result
+    assert "About" in result
+    assert "Logout" in result
+    # Check main sections
+    assert "Users" in result
+    assert "Centers" in result
+    assert "Planners" in result
+    # Check tables
+    assert "users-table" in result
+    assert "centers-table" in result
+    assert "planners-table" in result
+    # Check forms
+    assert "users-form" in result
+    assert "centers-form" in result
+    assert "planners-form" in result
+    # Check feedback divs
+    assert "users-feedback" in result
+    assert "centers-feedback" in result
+    assert "planners-feedback" in result
+    # Check data appears in result
+    assert "admin@example.com" in result
+    assert "Admin User" in result
+    assert "Test Center" in result
+    assert "test.db" in result
+
+def test_show_page_with_feedback_params(temp_db):
+    "Test show_page with feedback parameters in query."
+    feedback = {"success": "user_added"}
+    message = feed_text(feedback)["mess"]
+    db = temp_db
+    request = Mock()
+    request.query_params = feedback
+    result = to_xml(show_page(request, db))
+    # Check feedback is displayed
+    assert message in result

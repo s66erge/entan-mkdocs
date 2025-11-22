@@ -6,8 +6,8 @@ from tabulate import tabulate
 from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
-from libs.dbset import get_db_path
 from libs.utils import add_months_days
+from libs.dbset import get_db_path
 
 # Example usage:
 # fetch_dhamma_courses("Mahi", 6, 0)
@@ -181,8 +181,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
     # print(tabulate(periods_db_center, headers="keys", tablefmt="grid"))
 
     merged = periods_db_center + periods_dhamma_org
-    merged.sort(key=lambda x: x['start_date'])
-    deduplicated = deduplicate(merged)
+    mer_sort = sorted (merged,key=lambda x: x['start_date'])
+    deduplicated = deduplicate(mer_sort)
 
     print(tabulate(deduplicated, headers="keys", tablefmt="grid"))
     return

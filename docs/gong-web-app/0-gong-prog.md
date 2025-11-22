@@ -68,23 +68,8 @@ def home():
     )
 
 @rt('/dashboard')
-def get(session): 
-    sessemail = session['auth']
-    u = users[sessemail]
-    centers = planners("user_email = ?", (u.email,))
-    center_names = ", ".join(c.center_name for c in centers)
-    return Main(
-        Nav(
-            Ul(
-                Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None ,
-                Li(A(href="/unfinished")("Contact")),
-                Li(A("About", href="#")),
-            ), 
-            Button("Logout", hx_post="/logout"),
-        ),
-        Div(H1("Dashboard"), P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center(s) : {center_names}.")),
-        cls="container",
-    )
+def get(session):
+    return cdash.dashboard(session, db)
 
 @rt('/admin_page')
 @admin_required
