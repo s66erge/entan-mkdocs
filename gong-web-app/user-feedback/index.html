@@ -656,6 +656,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../center-consult/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center consult page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../center-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center dashboard page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -1137,7 +1193,7 @@
 
 <span class="o">&lt;&lt;</span><span class="n">feedback</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">user</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
-<div id="feedback-to-user" class="highlight"><span class="filename">#feedback-to-user</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+<div id="feedback-to-user" class="highlight"><span class="filename">#feedback-to-user</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">feed_text</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
     <span class="c1"># query_params = dict(request.query_params)</span>
     <span class="c1"># Handle success and error messages</span>
     <span class="n">success_messages</span> <span class="o">=</span> <span class="p">{</span>
@@ -1159,24 +1215,36 @@
         <span class="s1">&#39;user_not_found&#39;</span><span class="p">:</span> <span class="s1">&#39;User not found.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;center_not_found&#39;</span><span class="p">:</span> <span class="s1">&#39;Center not found.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;invalid_role&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid role selected.&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;db_error&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Database error occurred: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;etext&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">. Please contact the program support.&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;db_error&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Database error occurred: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;etext&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">. Please contact the program support.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;db_file_exists&#39;</span><span class="p">:</span> <span class="s1">&#39;Database file with this name already exists.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;template_not_found&#39;</span><span class="p">:</span> <span class="s1">&#39;Template database (mahi.db) not found.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;user_has_planners&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Cannot delete user. User is still associated with centers: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;centers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">. Please remove all planner associations first.&#39;</span><span class="p">,</span>
         <span class="s1">&#39;center_has_planners&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Cannot delete center. Center is still associated with users: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;users&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">. Please remove all planner associations first.&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;last_planner_for_center&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Cannot delete planner. This is the last planner for center &quot;</span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;center&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;. Each center must have at least one planner.&#39;</span>
+        <span class="s1">&#39;last_planner_for_center&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Cannot delete planner. This is the last planner for center: &quot;</span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;center&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;. Each center must have at least one planner.&#39;</span>
     <span class="p">}</span>
-    <span class="n">message_div</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;success&#39;</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">success_messages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">],</span> <span class="s1">&#39;Operation completed successfully!&#39;</span><span class="p">)</span>
-        <span class="n">message_div</span> <span class="o">=</span> <span class="n">Div</span><span class="p">(</span>
-            <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;color: #d1f2d1; background: #0f5132; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;&quot;</span><span class="p">),</span>
-            <span class="n">Small</span><span class="p">(</span><span class="s2">&quot;To clear this message and/or update the tables, reload the page&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span>
     <span class="k">elif</span> <span class="s1">&#39;error&#39;</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">error_messages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">],</span> <span class="s1">&#39;An error occurred.&#39;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;mess&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="c1"># query_params = dict(request.query_params)</span>
+    <span class="c1"># Handle success and error messages</span>
+    <span class="n">mess_dict</span> <span class="o">=</span> <span class="n">feed_text</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">message_div</span> <span class="o">=</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">mess_dict</span><span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;success&#39;</span><span class="p">:</span>
         <span class="n">message_div</span> <span class="o">=</span> <span class="n">Div</span><span class="p">(</span>
-            <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;&quot;</span><span class="p">),</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">mess_dict</span><span class="p">[</span><span class="s1">&#39;mess&#39;</span><span class="p">]),</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;&quot;</span><span class="p">),</span>
+            <span class="n">Small</span><span class="p">(</span><span class="s2">&quot;To clear this message and/or update the tables, reload the page&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mess_dict</span><span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
+        <span class="n">message_div</span> <span class="o">=</span> <span class="n">Div</span><span class="p">(</span>
+            <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">mess_dict</span><span class="p">[</span><span class="s1">&#39;mess&#39;</span><span class="p">]),</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;&quot;</span><span class="p">),</span>
             <span class="n">Small</span><span class="p">(</span><span class="s2">&quot;To clear this message, reload the page&quot;</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">message_div</span>

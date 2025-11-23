@@ -714,6 +714,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../center-consult/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center consult page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../center-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center dashboard page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -1133,20 +1189,13 @@
 
 <h1 id="gong-main-program">Gong main program<a class="headerlink" href="#gong-main-program" title="Permanent link">#</a></h1>
 <h3 id="program-start">Program start<a class="headerlink" href="#program-start" title="Permanent link">#</a></h3>
-<div class="highlight"><span class="filename">file: main.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<div class="highlight"><span class="filename">file: main.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="c1"># from starlette.testclient import TestClient</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span> 
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">admin_required</span>
-
-<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">environ</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">environ</span> <span class="o">=</span> <span class="s2">&quot;dev&quot;</span>
 
 <span class="n">css</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s1">&#39;:root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}&#39;</span><span class="p">)</span>
 
@@ -1198,23 +1247,24 @@
     <span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span> 
-    <span class="n">sessemail</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">sessemail</span><span class="p">]</span>
-    <span class="n">centers</span> <span class="o">=</span> <span class="n">planners</span><span class="p">(</span><span class="s2">&quot;user_email = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">email</span><span class="p">,))</span>
-    <span class="n">center_names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">center_name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">centers</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span>
-            <span class="n">Ul</span><span class="p">(</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/admin_page&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">u</span><span class="o">.</span><span class="n">role_name</span> <span class="o">==</span> <span class="s2">&quot;admin&quot;</span> <span class="k">else</span> <span class="kc">None</span> <span class="p">,</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">href</span><span class="o">=</span><span class="s2">&quot;/unfinished&quot;</span><span class="p">)(</span><span class="s2">&quot;Contact&quot;</span><span class="p">)),</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
-            <span class="p">),</span> 
-            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Logout&quot;</span><span class="p">,</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/logout&quot;</span><span class="p">),</span>
-        <span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">),</span> <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You are logged in as &#39;</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">&#39; with role &#39;</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">role_name</span><span class="si">}</span><span class="s2">&#39; and access to gong planning for center(s) : </span><span class="si">{</span><span class="n">center_names</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)),</span>
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">cdash</span><span class="o">.</span><span class="n">dashboard</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+
+<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult_page&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+
+<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_db&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+
+<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_period&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_timetable&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/admin_page&#39;</span><span class="p">)</span>
 <span class="nd">@admin_required</span>
@@ -1254,7 +1304,8 @@
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
     <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/no_access_right&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>

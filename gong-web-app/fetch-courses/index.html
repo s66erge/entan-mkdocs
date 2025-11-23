@@ -656,6 +656,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../center-consult/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center consult page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../center-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center dashboard page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -693,6 +749,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get schedule from dhamma.org and merge into center schedule
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -709,6 +783,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example usage:
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1046,6 +1150,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example usage:
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1065,6 +1188,9 @@
 
 
 <h1 id="get-schedule-from-dhammaorg-and-merge-into-center-schedule">Get schedule from dhamma.org and merge into center schedule<a class="headerlink" href="#get-schedule-from-dhammaorg-and-merge-into-center-schedule" title="Permanent link">#</a></h1>
+<h3 id="example-usage">Example usage:<a class="headerlink" href="#example-usage" title="Permanent link">#</a></h3>
+<p>fetch_dhamma_courses("Mahi", 6, 0)
+fetch_dhamma_courses("Pajjota", 6, 0)</p>
 <div class="highlight"><span class="filename">file: libs/fetch.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -1072,15 +1198,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_db_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_months_days</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_db_path</span>
 
-<span class="c1"># Example usage:</span>
-<span class="c1"># fetch_dhamma_courses(&quot;Mahi&quot;, 6, 0)</span>
-<span class="c1"># fetch_dhamma_courses(&quot;Pajjota&quot;, 6, 0)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">get_field_from_db</span><span class="p">(</span><span class="n">db_central</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
-    <span class="c1"># get the dhamma.org location for this center from the table settings in center db</span>
+<span class="o">&lt;&lt;</span><span class="n">field</span><span class="o">-</span><span class="n">fr</span><span class="o">-</span><span class="n">db</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">fetch</span><span class="o">-</span><span class="n">api</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">period</span><span class="o">-</span><span class="nb">type</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">deduplicate</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">fetch</span><span class="o">-</span><span class="n">courses</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<p>Get the dhamma.org location for this center from the table settings in center db</p>
+<div id="field-fr-db" class="highlight"><span class="filename">#field-fr-db</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_field_from_db</span><span class="p">(</span><span class="n">db_central</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
     <span class="n">centers</span> <span class="o">=</span> <span class="n">db_central</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">centers</span>
     <span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">field_name</span> <span class="o">==</span> <span class="s2">&quot;location&quot;</span><span class="p">:</span>
@@ -1089,8 +1217,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">other_course</span> <span class="o">=</span> <span class="n">centers</span><span class="p">[</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">other_course</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">other_course</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">fetch_courses_from_dhamma</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">date_start</span><span class="p">,</span> <span class="n">date_end</span><span class="p">):</span>
+</code></pre></div>
+<p>Get the courses from www.dhamma.org for a specific center from date_start until date_end, keep only the relevant fields for courses inside the center.</p>
+<div id="fetch-api" class="highlight"><span class="filename">#fetch-api</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_courses_from_dhamma</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">date_start</span><span class="p">,</span> <span class="n">date_end</span><span class="p">):</span>
     <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.dhamma.org/en-US/courses/do_search&quot;</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;entan-mkdocs-fetcher/1.0&quot;</span><span class="p">}</span>
     <span class="n">all_courses</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1128,7 +1257,7 @@
 
         <span class="n">page</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="c1"># Extract relevant fields from all courses</span>
+    <span class="c1"># Extract relevant fields from courses located inside the center</span>
     <span class="n">extracted</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">{</span>
             <span class="s2">&quot;course_start_date&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_start_date&quot;</span><span class="p">),</span>
@@ -1137,22 +1266,20 @@
             <span class="s2">&quot;course_type_anchor&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type_anchor&quot;</span><span class="p">),</span>
             <span class="s2">&quot;course_type&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type&quot;</span><span class="p">),</span>
             <span class="s2">&quot;sub_location&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub_location&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;center_non&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;center_noncenter&quot;</span><span class="p">),</span>
+            <span class="c1"># &quot;center_non&quot;: c.get(&quot;location&quot;, {}).get(&quot;center_noncenter&quot;),</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_courses</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">all_courses</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;center_non&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;noncenter&#39;</span>
     <span class="p">]</span>
 
     <span class="c1"># Filter out extracted where &#39;center_non&#39; = &#39;noncenter&#39;</span>
-    <span class="n">extracted</span> <span class="o">=</span> <span class="p">[</span><span class="n">course</span> <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span> <span class="k">if</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;center_non&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;noncenter&#39;</span><span class="p">]</span>
+    <span class="c1"># extracted = [course for course in extracted if course[&#39;center_non&#39;] != &#39;noncenter&#39;]</span>
 
     <span class="k">return</span> <span class="n">extracted</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">get_period_type</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">course_type</span><span class="p">,</span> <span class="n">list_of_types</span><span class="p">,</span> <span class="n">other_dict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    If anchor == &quot;Other&quot;, find in other_dict the value of a key == course_type</span>
-<span class="sd">    and return &quot;UNKNOWN&quot; if not found.</span>
-<span class="sd">    if anchor != &quot;Other&quot;&#39; find the dict in list_of_types where &#39;raw_course_type&#39; matches anchor and return the value of &#39;period_type&#39;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<p>If anchor == "Other", find in other_dict the value of a key == course_type
+and return "UNKNOWN" if not found.
+if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' matches anchor and return the value of 'period_type'.</p>
+<div id="period-type" class="highlight"><span class="filename">#period-type</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_period_type</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="n">course_type</span><span class="p">,</span> <span class="n">list_of_types</span><span class="p">,</span> <span class="n">other_dict</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">anchor</span> <span class="o">==</span> <span class="s2">&quot;Other&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">other_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">course_type</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;UNKNOWN&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>    
@@ -1160,10 +1287,10 @@
             <span class="k">if</span>  <span class="n">anchor</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raw_course_type&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;period_type&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">&quot;UNKNOWN&quot;</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">deduplicate</span><span class="p">(</span><span class="n">merged</span><span class="p">):</span>
-    <span class="c1"># Remove duplicates: if consecutive items have identical start_date and period_type,</span>
-    <span class="c1"># keep only one with source=&#39;BOTH&#39;</span>
+</code></pre></div>
+<p>Remove duplicates: if consecutive items have identical start_date and period_type,
+keep only one with source='BOTH'</p>
+<div id="deduplicate" class="highlight"><span class="filename">#deduplicate</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">deduplicate</span><span class="p">(</span><span class="n">merged</span><span class="p">):</span>
     <span class="n">deduplicated</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">merged</span><span class="p">):</span>
@@ -1180,23 +1307,24 @@
         <span class="n">deduplicated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">deduplicated</span>
+</code></pre></div>
+<p>Get a merged list of courses from the current courses in the center db and the future courses in dhamma.org:
+- from the start of the current course/service until num_months plus num_days days in th future 
+- course types mapped to the courses databases courses
+- with a source field "dhamma.org", "center db" or "BOTH"</p>
+<p><div id="fetch-courses" class="highlight"><span class="filename">#fetch-courses</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_dhamma_courses</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">num_months</span><span class="p">,</span> <span class="n">num_days</span><span class="p">):</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">fetch_dhamma_courses</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">num_months</span><span class="p">,</span> <span class="n">num_days</span><span class="p">):</span>
-
-    <span class="c1"># get the path to the center db and the spreadsheet (see below)</span>
-    <span class="n">db_path</span> <span class="o">=</span> <span class="n">get_db_path</span><span class="p">()</span>
+    <span class="n">db_path</span> <span class="o">=</span> <span class="n">get_db_path</span><span class="p">()</span>  <span class="c1">## [1]</span>
 
     <span class="n">db_center</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}{</span><span class="n">center</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">.ok.db&quot;</span><span class="p">)</span>
     <span class="n">db_central</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s2">gongUsers.db&quot;</span><span class="p">)</span>
 
-    <span class="c1"># get the start date for the last course just before today = current course - or service</span>
     <span class="n">periods</span> <span class="o">=</span> <span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">coming_periods</span>
     <span class="n">Period</span> <span class="o">=</span> <span class="n">periods</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">count_past</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">()</span> <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())</span>
-    <span class="n">date_current_course</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start_date</span>
+    <span class="n">date_current_course</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start_date</span>  <span class="c1">## [2]</span>
 
-    <span class="c1"># get a dict. of all courses in the center db starting from the current course</span>
-    <span class="n">periods_db_center_obj</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">periods_db_center_obj</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1">## [3]</span>
     <span class="n">periods_db_center</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
         <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span>
@@ -1204,34 +1332,25 @@
         <span class="s1">&#39;source&#39;</span> <span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">center</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_db&quot;</span>
 
     <span class="p">}</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periods_db_center_obj</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periods_db_center_obj</span>  <span class="c1">## [3]</span>
     <span class="p">]</span>
 
     <span class="n">location</span> <span class="o">=</span> <span class="n">get_field_from_db</span><span class="p">(</span><span class="n">db_central</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">)</span>
     <span class="n">end_date</span> <span class="o">=</span> <span class="n">add_months_days</span><span class="p">(</span><span class="n">date_current_course</span><span class="p">,</span> <span class="n">num_months</span><span class="p">,</span> <span class="n">num_days</span><span class="p">)</span>
 
-    <span class="c1"># fetch extracted courses from dhamma.org</span>
-    <span class="n">extracted</span> <span class="o">=</span> <span class="n">fetch_courses_from_dhamma</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">date_current_course</span><span class="p">,</span> <span class="n">end_date</span><span class="p">)</span>
+    <span class="n">extracted</span> <span class="o">=</span> <span class="n">fetch_courses_from_dhamma</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">date_current_course</span><span class="p">,</span> <span class="n">end_date</span><span class="p">)</span>  <span class="c1">## [4]</span>
 
     <span class="c1"># FIXME one day courses are possible in some centers !!!</span>
     <span class="n">extracted</span> <span class="o">=</span> <span class="p">[</span><span class="n">course</span> <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;raw_course_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;1-Day&quot;</span><span class="p">)]</span>
 
-    <span class="c1"># Remove the last two fields: &#39;sub_location&#39; and &#39;center_non&#39;</span>
-    <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">extracted</span><span class="p">:</span>   <span class="c1">## [5]</span>
         <span class="n">course</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;sub_location&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">course</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;center_non&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="c1"># Remove &quot;OSC&quot; suffix from &#39;raw_course_type&#39; and &#39;course_type_anchor&#39; if present</span>
-        <span class="c1"># if course[&#39;raw_course_type&#39;].endswith(&quot;OSC&quot;):</span>
-        <span class="c1">#      course[&#39;raw_course_type&#39;] = course[&#39;raw_course_type&#39;][:-3].strip()</span>
         <span class="k">if</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;OSC&quot;</span><span class="p">):</span>
             <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">course</span><span class="p">[</span><span class="s1">&#39;course_type_anchor&#39;</span><span class="p">][:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-    <span class="c1"># print(tabulate(extracted, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
-
-    <span class="c1"># get the course_type mapping table from the spreadsheet</span>
-    <span class="c1"># and use it to map the course types from dhamma.org to center db</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;course_type_map.xlsx&#39;</span><span class="p">)</span>
-    <span class="n">list_of_types</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+    <span class="n">list_of_types</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>         <span class="c1">## [6]</span>
     <span class="n">other_dict</span> <span class="o">=</span> <span class="n">get_field_from_db</span><span class="p">(</span><span class="n">db_central</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="s2">&quot;other_dict&quot;</span><span class="p">)</span>
     <span class="n">periods_dhamma_org</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">{</span>
@@ -1241,18 +1360,23 @@
             <span class="s2">&quot;course_type&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type&quot;</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">extracted</span>
-    <span class="p">]</span>
+    <span class="p">]</span>                         <span class="c1">## [7]</span>
 
-    <span class="c1"># print(tabulate(periods_dhamma_org, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
-    <span class="c1"># print(tabulate(periods_db_center, headers=&quot;keys&quot;, tablefmt=&quot;grid&quot;))</span>
-
-    <span class="n">merged</span> <span class="o">=</span> <span class="n">periods_db_center</span> <span class="o">+</span> <span class="n">periods_dhamma_org</span>
-    <span class="n">merged</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
-    <span class="n">deduplicated</span> <span class="o">=</span> <span class="n">deduplicate</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">periods_db_center</span> <span class="o">+</span> <span class="n">periods_dhamma_org</span>            <span class="c1">## [8]</span>
+    <span class="n">mer_sort</span> <span class="o">=</span> <span class="nb">sorted</span> <span class="p">(</span><span class="n">merged</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
+    <span class="n">deduplicated</span> <span class="o">=</span> <span class="n">deduplicate</span><span class="p">(</span><span class="n">mer_sort</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">deduplicated</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">))</span>
     <span class="k">return</span>
 </code></pre></div>
+[1] get the path to the center db, the gong db and the spreadsheet (see below)
+[2] get the start date for the last course just before today = current course - or service
+[3] get a dict. of all courses in the center db starting from the current course
+[4] fetch extracted courses from dhamma.org
+[5] Remove the last two fields: 'sub_location' and 'center_non'. Remove "OSC" suffix from 'raw_course_type' if present
+[6] get the course_type mapping table from the spreadsheet
+[7] and use it to map the course types from dhamma.org to center db
+[8] merge the 2 course lists, sort the merge and deduplicate identical courses</p>
 
 
 

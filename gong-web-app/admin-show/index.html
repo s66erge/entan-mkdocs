@@ -666,6 +666,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../center-consult/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center consult page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../center-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Center dashboard page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../database-setup/" class="md-nav__link">
         
   
@@ -1077,6 +1133,7 @@
 </code></pre></div>
 <p>TODO document admin-show</p>
 <div id="show-users" class="highlight"><span class="filename">#show-users</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_users_table</span><span class="p">(</span><span class="n">users</span><span class="p">):</span>
+    <span class="n">User</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
@@ -1096,6 +1153,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">show_users_form</span><span class="p">(</span><span class="n">roles</span><span class="p">):</span>
+    <span class="n">Role</span> <span class="o">=</span> <span class="n">roles</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">role_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">role_name</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">()]</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Div</span><span class="p">(</span>
@@ -1112,6 +1170,7 @@
     <span class="p">)</span>
 </code></pre></div>
 <div id="show-centers" class="highlight"><span class="filename">#show-centers</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_centers_table</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+    <span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
@@ -1129,6 +1188,7 @@
     <span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">show_centers_form</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+    <span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">center_dbs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">gong_db_name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">centers</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Div</span><span class="p">(</span>
@@ -1147,6 +1207,7 @@
     <span class="p">)</span>
 </code></pre></div>
 <div id="show-planners" class="highlight"><span class="filename">#show-planners</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">):</span>
+    <span class="n">Planner</span> <span class="o">=</span> <span class="n">planners</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
         <span class="n">Table</span><span class="p">(</span>
             <span class="n">Thead</span><span class="p">(</span>
@@ -1163,6 +1224,8 @@
     <span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">show_planners_form</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
+    <span class="n">Center</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+    <span class="n">User</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
     <span class="n">sorted_centers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">centers</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">center_name</span><span class="p">)</span>
     <span class="n">sorted_users</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">users</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
@@ -1194,13 +1257,13 @@
         <span class="n">Nav</span><span class="p">(</span>
             <span class="n">Ul</span><span class="p">(</span>
                 <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)),</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Contact&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
-                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)),</span>
+                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Contact&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/unfinished&quot;</span><span class="p">)),</span>
+                <span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/unfinished&quot;</span><span class="p">)),</span>
             <span class="p">),</span> 
             <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Logout&quot;</span><span class="p">,</span> <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/logout&quot;</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">&quot;admin-show&quot;</span><span class="p">)),</span>
-        <span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span>
+        <span class="c1"># feedback_to_user(params),</span>
 
         <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Users&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;users-feedback&quot;</span><span class="p">),</span>
@@ -1214,7 +1277,6 @@
         <span class="n">H4</span><span class="p">(</span><span class="s2">&quot;Add New Center&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="n">show_centers_form</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;centers-form&quot;</span><span class="p">),</span>
 
-        <span class="c1"># show_planners(),</span>
         <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Planners&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-feedback&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="n">show_planners_table</span><span class="p">(</span><span class="n">planners</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planners-table&quot;</span><span class="p">),</span>
