@@ -136,13 +136,13 @@ def show_page(request, db):
         Nav(
             Ul(
                 Li(A("Dashboard", href="/dashboard")),
-                Li(A("Contact", href="#")),
-                Li(A("About", href="#")),
+                Li(A("Contact", href="/unfinished")),
+                Li(A("About", href="/unfinished")),
             ), 
             Button("Logout", hx_post="/logout"),
         ),
         Div(display_markdown("admin-show")),
-        feedback_to_user(params),
+        # feedback_to_user(params),
 
         H2("Users"),
         Div(feedback_to_user(params), id="users-feedback"),
@@ -156,7 +156,6 @@ def show_page(request, db):
         H4("Add New Center"),
         Div(show_centers_form(centers), id="centers-form"),
 
-        # show_planners(),
         H2("Planners"),
         Div(feedback_to_user(params), id="planners-feedback"),
         Div(show_planners_table(planners), id="planners-table"),

@@ -1,47 +1,43 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from fasthtml.common import *
-from libs.feedb import *
-from libs.utils import *
+
+DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
+
+def top_menu(role):
+    return Nav(
+            Ul(
+                Li(A("Admin", href="/admin_page")) if role == "admin" else None,
+                Li(A("Contact", href="/unfinished")),
+                Li(A("About", href="/unfinished")),
+            ),
+            Button("Logout", hx_post="/logout"),
+    )
 
 # @rt('/dashboard')
 def dashboard(session, db): 
     users = db.t.users
     planners = db.t.planners
+    Planner = planners.dataclass()
     sessemail = session['auth']
     u = users[sessemail]
-    user_centers = planners("user_email = ?", (u.email,))
-
-    # build center section: single center -> show it, multiple -> ask and show selection menu
-    if not user_centers:
-        center_section = P("You don't have access to any center.")
-    elif len(user_centers) == 1:
-        cname = user_centers[0].center_name
-        center_section = P(f"You are logged in as '{u.email}' with role '{u.role_name}' and access to gong planning for center: {cname}.")
-    else:
-        # question + selection menu (HTMX post endpoint /set_current_center can be implemented separately)
-        options = [Option(c.center_name, value=c.center_name) for c in user_centers]
-        sel = Select(*options, name="selected_center", id="selected-center")
-        frm = Form(sel, Button("Work on selected center", hx_post="/set_current_center", hx_target="#dashboard-center"))
-        center_section = Div(
-            P("Which center do you want to work on?"),
-            frm,
-            id="dashboard-center"
-        )
+    user_planners = planners("user_email = ?", (u.email,))
+    user_centers = [(p.center_name) for p in user_planners] 
+    user_center_list = ", ".join(user_centers)
 
     return Main(
-        Nav(
-            Ul(
-                Li(A("Admin", href="/admin_page")) if u.role_name == "admin" else None,
-                Li(A(href="/unfinished")("Contact")),
-                Li(A("About", href="#")),
-            ),
-            Button("Logout", hx_post="/logout"),
-        ),
+        top_menu(session['role']),
         Div(H1("Dashboard"),
-            center_section,
-            cls="dashboard-body"),
+            P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
+            P(f"You can modify the gong planning for: {user_center_list}") if user_centers else None,
+            H3(A("To consult a specific center gong planning", href="/consult_page")),
+
+
+
+
+            cls="container"
+        ),
         cls="container",
     )
 # ~/~ end

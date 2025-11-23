@@ -32,7 +32,7 @@ def feed_text(params):
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
         'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.'
     }
-    message = "Unknown message: please contact the program support"
+    message = ""
     result = ""
     if 'success' in params:
         message = success_messages.get(params['success'], 'Operation completed successfully!')
@@ -46,7 +46,7 @@ def feedback_to_user(params):
     # query_params = dict(request.query_params)
     # Handle success and error messages
     mess_dict = feed_text(params)
-    message_div = Div(P("Unknown message: please contact the program support"))
+    message_div = Div(P(""))
     if mess_dict["res"] == 'success':
         message_div = Div(
             Div(P(mess_dict['mess']), style="color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),

@@ -66,6 +66,22 @@ def home():
 def get(session):
     return cdash.dashboard(session, db)
 
+@rt('/consult_page')
+def get(session, request):
+    return consul.consult_page(session, request, db)
+
+@rt('/consult/select_db')
+def get(request):
+    return consul.consult_select_db(request)
+
+@rt('/consult/select_period')
+def get(request):
+    return consul.consult_select_period(request)
+
+@rt('/consult/select_timetable')
+def get(request):
+    return consul.consult_select_timetable(request)
+
 @rt('/admin_page')
 @admin_required
 def get(session, request):
@@ -104,7 +120,8 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 @rt('/logout')
 def post(session):
     del session['auth']
-    return RedirectResponse('/login')
+    del session['role']
+    return Redirect('/login')
 
 @rt('/no_access_right')
 def get():
