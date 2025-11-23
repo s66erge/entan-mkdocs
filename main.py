@@ -8,11 +8,6 @@ from fasthtml.common import *
 from libs import * 
 from libs.auth import admin_required
 
-if len(sys.argv) > 1:
-    environ = sys.argv[1]
-else:
-    environ = "dev"
-
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
 
 def before(req, session):

@@ -24,8 +24,9 @@ DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
 def list_gong_dbs(db):
     # Return sorted list of .db filenames in db = gongUsers.db.
     centers = db.t.centers
-    rows = list(centers())
-    return [getattr(row, "gong_db_name") for row in rows]
+    Center = centers.dataclass()
+    # return [getattr(row, "gong_db_name") for row in centers()]
+    return [(c.gong_db_name) for c in centers()]
 
 # @rt('/consult_page')
 def consult_page(session, request, db):
@@ -52,10 +53,8 @@ def consult_page(session, request, db):
         Div(P("Choose a gong planning database:"), form, id="consult-db"),
         H2("Coming periods"),
         Div(id="coming-periods"),            # filled by /consult/select_db
-        H2("Selected Periods type"),
-        Div(id="periods-struct"),           # filled by /consult/select_period 
-        H2("Timetables"),
-        Div(id="timetables"),               # filled by /consult/select_timetable
+        Div(id="periods-struct"),            # filled by /consult/select_period 
+        Div(id="timetables"),                # filled by /consult/select_timetable
         cls="container"
     )
 
@@ -86,7 +85,6 @@ def consult_select_db(request):
 
     rows = []
     for cp in sorted(cps, key=lambda x: getattr(x, "start_date", "")):
-        print(cp)
         start = cp.get("start_date")
         ptype = cp.get("period_type")
         # build select link that posts db and period_type to select_period endpoint
@@ -104,7 +102,11 @@ def consult_select_db(request):
         Tbody(*rows)
     )
 
-    return Div(table, id="coming-periods-table")
+    return Div(
+        Div(table, id="coming-periods-table"),
+        Div("", hx_swap_oob="true", id="timetables"),
+        Div("", hx_swap_oob="true", id="periods-struct")
+    )
 
 
 # @rt('/consult/select_period')
@@ -159,7 +161,11 @@ def consult_select_period(request):
         Tbody(*tbl_rows)
     )
 
-    return Div(table, id="periods-struct-table")
+    return Div(
+        Div("", hx_swap_oob="true", id="timetables"),
+        H3(f"Structure for period type:'{period_type}', in '{db_name}'"),
+        table, id="periods-struct-table"
+    )
 ```
 
 ```{.python #consult-timetable}
@@ -216,7 +222,7 @@ def consult_select_timetable(request):
     table = Table(thead, Tbody(*tbl_rows))
 
     return Div(
-        H3(f"Timetables for period_type='{period_type}', day_type='{day_type}'"),
+        H3(f"Timetable for period type: '{period_type}', day type: '{day_type}', in '{db_name}'"),
         table,
         id="timetables-table"
     )
