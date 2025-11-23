@@ -10,22 +10,16 @@ DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
 
 # ~/~ begin <<docs/gong-web-app/center-consult.md#consult-page>>[init]
 
-def list_gong_dbs(db):
-    # Return sorted list of .db filenames in db = gongUsers.db.
-    centers = db.t.centers
-    Center = centers.dataclass()
-    # return [getattr(row, "gong_db_name") for row in centers()]
-    return [(c.gong_db_name) for c in centers()]
-
 # @rt('/consult_page')
-def consult_page(session, request, db):
-    # Main consult page: select a gong DB and show its coming_periods.
-    db_files = list_gong_dbs(db)
+def consult_page(session, request, centers):
+    # Main consult page: select a center and show its coming_periods.
+    Center = centers.dataclass()
+    center_names = [(c.center_name) for c in centers()]
 
     select = Select(
         Option("Select a Gong DB", value="", selected=True, disabled=True),
-        *[Option(name, value=name) for name in db_files],
-        name="selected_db",
+        *[Option(name, value=name) for name in center_names],
+        name="selected_name",
         id="consult-db-select"
     )
 
@@ -39,7 +33,7 @@ def consult_page(session, request, db):
     return Main(
         top_menu(session['role']),
         H1("Consult Gong Planning"),
-        Div(P("Choose a gong planning database:"), form, id="consult-db"),
+        Div(P("Choose a center:"), form, id="consult-db"),
         H2("Coming periods"),
         Div(id="coming-periods"),            # filled by /consult/select_db
         Div(id="periods-struct"),            # filled by /consult/select_period 
@@ -49,15 +43,19 @@ def consult_page(session, request, db):
 
 
 # @rt('/consult/select_db')
-def consult_select_db(request):
+def consult_select_db(request, centers):
     # HTMX endpoint: receive form with selected_db in request.form or query_params,
     # return the coming_periods table for that DB. Each row has a Select action that
     # posts period_type (and db) to /consult/select_period.
     params = dict(request.query_params)
-    selected_db = params.get("selected_db")
+    selected_name = params.get("selected_name")
 
-    if not selected_db:
-        return Div(P("No database selected."))
+    if not selected_name:
+        return Div(P("No center selected."))
+
+    Center = centers.dataclass()
+    center = centers[selected_name]
+    selected_db = center.gong_db_name
 
     db_path = DATA_FOLDER / selected_db
     if not db_path.exists():

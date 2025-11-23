@@ -68,11 +68,11 @@ def get(session):
 
 @rt('/consult_page')
 def get(session, request):
-    return consul.consult_page(session, request, db)
+    return consul.consult_page(session, request, centers)
 
 @rt('/consult/select_db')
 def get(request):
-    return consul.consult_select_db(request)
+    return consul.consult_select_db(request, centers)
 
 @rt('/consult/select_period')
 def get(request):
