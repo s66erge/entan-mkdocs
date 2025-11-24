@@ -67,6 +67,7 @@ def consult_select_db(request, centers, db_path):
     selected_db = center.gong_db_name
 
     dbfile_path = Path(db_path) / selected_db
+    print(str(dbfile_path))
     if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
 
