@@ -6,8 +6,6 @@ from fasthtml.common import database
 
 from libs.cdash import top_menu
 
-DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
-
 # ~/~ begin <<docs/gong-web-app/center-consult.md#consult-page>>[init]
 
 # @rt('/consult_page')
@@ -43,7 +41,7 @@ def consult_page(session, request, centers):
 
 
 # @rt('/consult/select_db')
-def consult_select_db(request, centers):
+def consult_select_db(request, centers, db_path):
     # HTMX endpoint: receive form with selected_db in request.form or query_params,
     # return the coming_periods table for that DB. Each row has a Select action that
     # posts period_type (and db) to /consult/select_period.
@@ -57,11 +55,11 @@ def consult_select_db(request, centers):
     center = centers[selected_name]
     selected_db = center.gong_db_name
 
-    db_path = DATA_FOLDER / selected_db
-    if not db_path.exists():
+    dbfile_path = Path(db_path) / selected_db
+    if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
 
-    db = database(str(db_path))
+    db = database(str(dbfile_path))
 
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
     try:
@@ -97,7 +95,7 @@ def consult_select_db(request, centers):
 
 
 # @rt('/consult/select_period')
-def consult_select_period(request):
+def consult_select_period(request, db_path):
     # HTMX endpoint: show periods_strust rows where period_type matches the selected period_type.
     # Expects query params: db and period_type
     params = dict(request.query_params)
@@ -107,11 +105,11 @@ def consult_select_period(request):
     if not db_name or not period_type:
         return Div(P("Missing db or period_type parameter."))
 
-    db_path = DATA_FOLDER / db_name
-    if not db_path.exists():
+    dbfile_path = Path(db_path) / db_name
+    if not dbfile_path.exists():
         return Div(P(f"Database not found: {db_name}"))
 
-    db = database(str(db_path))
+    db = database(str(dbfile_path))
 
     try:
         # periods_struct expected fields: start_date, period_type, other fields...
@@ -157,7 +155,7 @@ def consult_select_period(request):
 # ~/~ begin <<docs/gong-web-app/center-consult.md#consult-timetable>>[init]
 
 # @rt('/consult/select_timetables')
-def consult_select_timetable(request):
+def consult_select_timetable(request, db_path):
     # HTMX endpoint: show timetables rows where period_type and day_type match.
     # Expects query params: db, period_type, day_type
     params = dict(request.query_params)
@@ -168,11 +166,11 @@ def consult_select_timetable(request):
     if not db_name or not period_type or not day_type:
         return Div(P("Missing db, period_type, or day_type parameter."))
 
-    db_path = DATA_FOLDER / db_name
-    if not db_path.exists():
+    dbfile_path = Path(db_path) / db_name
+    if not dbfile_path.exists():
         return Div(P(f"Database not found: {db_name}"))
 
-    db = database(str(db_path))
+    db = database(str(dbfile_path))
 
     try:
         timetables = list(db.t.timetables())

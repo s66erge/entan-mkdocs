@@ -1,8 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from fasthtml.common import *
 
-DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
-
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
 def top_menu(role):

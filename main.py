@@ -67,15 +67,15 @@ def get(session, request):
 
 @rt('/consult/select_db')
 def get(request):
-    return consul.consult_select_db(request, centers)
+    return consul.consult_select_db(request, centers, db_path)
 
 @rt('/consult/select_period')
 def get(request):
-    return consul.consult_select_period(request)
+    return consul.consult_select_period(request, db_path)
 
 @rt('/consult/select_timetable')
 def get(request):
-    return consul.consult_select_timetable(request)
+    return consul.consult_select_timetable(request, db_path)
 
 @rt('/admin_page')
 @admin_required

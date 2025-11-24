@@ -5,8 +5,6 @@ Will only be reachable for authenticated users.
 ```{.python file=libs/cdash.py}
 from fasthtml.common import *
 
-DATA_FOLDER = Path("data")  # adjust if your gong DBs are elsewhere
-
 <<dashboard>>
 ```
 
