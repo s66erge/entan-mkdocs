@@ -1243,7 +1243,10 @@
 </code></pre></div>
 <h3 id="database-path">Database path<a class="headerlink" href="#database-path" title="Permanent link">#</a></h3>
 <div id="getdb-path" class="highlight"><span class="filename">#getdb-path</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_db_path</span><span class="p">():</span>
-    <span class="n">root</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">isa_dev_computer</span><span class="p">()</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;</span><span class="p">,</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isa_dev_computer</span><span class="p">():</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>   <span class="c1"># Railway production computer</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;RAILWAY_VOLUME_MOUNT_PATH&#39;</span><span class="p">,</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
     <span class="k">return</span> <span class="n">root</span> <span class="o">+</span> <span class="s2">&quot;data/&quot;</span>
 </code></pre></div>
 <h3 id="database-setup">Database setup<a class="headerlink" href="#database-setup" title="Permanent link">#</a></h3>

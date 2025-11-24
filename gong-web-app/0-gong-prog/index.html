@@ -1256,15 +1256,15 @@
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_db&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_period&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_timetable&#39;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
 
 <span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/admin_page&#39;</span><span class="p">)</span>
 <span class="nd">@admin_required</span>

@@ -1163,6 +1163,89 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-access-a-railway-volume-by-installing-a-file-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to access a railway volume by installing a file browser ?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to access a railway volume by installing a file browser ?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-the-volume-file-browser-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add the Volume File Browser service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporarily-move-the-volume-to-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporarily move the volume to the browser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-in-and-browse-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log in and browse files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restore-the-volume-to-your-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restore the volume to your app
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1372,6 +1455,89 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-access-a-railway-volume-by-installing-a-file-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to access a railway volume by installing a file browser ?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to access a railway volume by installing a file browser ?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-the-volume-file-browser-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add the Volume File Browser service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporarily-move-the-volume-to-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporarily move the volume to the browser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-in-and-browse-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log in and browse files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restore-the-volume-to-your-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restore the volume to your app
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1517,6 +1683,64 @@
 </ol>
 <h3 id="resend-api-key">Resend api key<a class="headerlink" href="#resend-api-key" title="Permanent link">#</a></h3>
 <p>On the entan-mkdocs service in Railway, <a href="../../gong-web-app/utilities/#via-resendcom">define the variable 'RESEND_API_KEY'</a></p>
+<h3 id="how-to-access-a-railway-volume-by-installing-a-file-browser">How to access a railway volume by installing a file browser ?<a class="headerlink" href="#how-to-access-a-railway-volume-by-installing-a-file-browser" title="Permanent link">#</a></h3>
+<p>You can use a pre-made “Filebrowser” template service on Railway to inspect and download files from an existing volume. Below is a step‑by‑step workflow tailored to a single volume you already use in a project.​</p>
+<h4 id="concept">Concept<a class="headerlink" href="#concept" title="Permanent link">#</a></h4>
+<p>Railway volumes are mounted into a service at a mount path (for example /app/storage), and appear there as a normal directory. The “Volume File Browser” template is a small helper service that mounts that same volume at /data and exposes a web UI where you can browse and download files.​</p>
+<h4 id="preparation">Preparation<a class="headerlink" href="#preparation" title="Permanent link">#</a></h4>
+<ol>
+<li>
+<p>Open the Railway project that contains the service currently using the volume you want to inspect.​</p>
+</li>
+<li>
+<p>Right‑click the volume, choose “View settings,” and note its current mount path (for example /permanent), because you need this later to restore it.​</p>
+</li>
+</ol>
+<h4 id="add-the-volume-file-browser-service">Add the Volume File Browser service<a class="headerlink" href="#add-the-volume-file-browser-service" title="Permanent link">#</a></h4>
+<ol>
+<li>
+<p>In the same project, click the “+ New” button and search for “Volume File Browser”, then add it as a new service.​</p>
+</li>
+<li>
+<p>In your original service that currently has the volume attached, remove the active deployment (three‑dot menu → “Remove”) so it will not keep trying to access the volume.​</p>
+</li>
+</ol>
+<h4 id="temporarily-move-the-volume-to-the-browser">Temporarily move the volume to the browser<a class="headerlink" href="#temporarily-move-the-volume-to-the-browser" title="Permanent link">#</a></h4>
+<ol>
+<li>
+<p>Right‑click the volume and choose “Disconnect” to detach it from the original service.​</p>
+</li>
+<li>
+<p>Click the now‑disconnected volume, then click “Mount” and select the “Volume File Browser” service as the destination.​</p>
+</li>
+<li>
+<p>Use /permanent as the mount path for the file browser service and wait for that service to redeploy.​</p>
+</li>
+</ol>
+<h4 id="log-in-and-browse-files">Log in and browse files<a class="headerlink" href="#log-in-and-browse-files" title="Permanent link">#</a></h4>
+<ol>
+<li>
+<p>Open the “Variables” tab for the Volume File Browser service and note the automatically generated basic‑auth username and password.​</p>
+</li>
+<li>
+<p>Click the Railway‑provided domain of the Volume File Browser service, log in with those credentials, and you will see the files from the volume under /permanent.​</p>
+</li>
+<li>
+<p>Upload/Download any files you need directly through this interface.​</p>
+</li>
+</ol>
+<h4 id="restore-the-volume-to-your-app">Restore the volume to your app<a class="headerlink" href="#restore-the-volume-to-your-app" title="Permanent link">#</a></h4>
+<ol>
+<li>
+<p>Disconnect the volume from the Volume File Browser service once done.​</p>
+</li>
+<li>
+<p>Re‑mount the volume back to the original service, using the original mount path you wrote down earlier (for example /permanent).​</p>
+</li>
+<li>
+<p>Redeploy the original service so it starts again with the volume attached.​</p>
+</li>
+</ol>
 <h2 id="previous-instructions">Previous instructions<a class="headerlink" href="#previous-instructions" title="Permanent link">#</a></h2>
 <h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h3>
 <p>Run the commands below on your local machine.
@@ -1542,7 +1766,7 @@
 railway<span class="w"> </span>up<span class="w"> </span>-c
 railway<span class="w"> </span>domain
 railway<span class="w"> </span>link<span class="w"> </span>...
-railway<span class="w"> </span>volume<span class="w"> </span>add<span class="w"> </span>-m<span class="w"> </span>/app/data
+railway<span class="w"> </span>volume<span class="w"> </span>add<span class="w"> </span>-m<span class="w"> </span>/permanent
 </code></pre></div>
 <p>It handles automatically linking your current app to a railway project, setting up all the environment variables such as the port to listen on and setting up a <code>requirements.txt</code> if you haven't one already.</p>
 <h4 id="changing-the-start-command-or-sleep-directive-or">Changing the start command or sleep directive or ...<a class="headerlink" href="#changing-the-start-command-or-sleep-directive-or" title="Permanent link">#</a></h4>

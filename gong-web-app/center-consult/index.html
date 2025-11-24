@@ -1196,8 +1196,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">libs.cdash</span><span class="w"> </span><span class="kn">import</span> <span class="n">top_menu</span>
 
-<span class="n">DATA_FOLDER</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>  <span class="c1"># adjust if your gong DBs are elsewhere</span>
-
 <span class="o">&lt;&lt;</span><span class="n">consult</span><span class="o">-</span><span class="n">page</span><span class="o">&gt;&gt;</span>
 <span class="o">&lt;&lt;</span><span class="n">consult</span><span class="o">-</span><span class="n">timetable</span><span class="o">&gt;&gt;</span>
 </code></pre></div>
@@ -1235,7 +1233,7 @@
 
 
 <span class="c1"># @rt(&#39;/consult/select_db&#39;)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
     <span class="c1"># HTMX endpoint: receive form with selected_db in request.form or query_params,</span>
     <span class="c1"># return the coming_periods table for that DB. Each row has a Select action that</span>
     <span class="c1"># posts period_type (and db) to /consult/select_period.</span>
@@ -1249,11 +1247,11 @@
     <span class="n">center</span> <span class="o">=</span> <span class="n">centers</span><span class="p">[</span><span class="n">selected_name</span><span class="p">]</span>
     <span class="n">selected_db</span> <span class="o">=</span> <span class="n">center</span><span class="o">.</span><span class="n">gong_db_name</span>
 
-    <span class="n">db_path</span> <span class="o">=</span> <span class="n">DATA_FOLDER</span> <span class="o">/</span> <span class="n">selected_db</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">dbfile_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">selected_db</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dbfile_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database not found: </span><span class="si">{</span><span class="n">selected_db</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
 
-    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">db_path</span><span class="p">))</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dbfile_path</span><span class="p">))</span>
 
     <span class="c1"># coming_periods table expected fields: start_date, period_type (adjust if field names differ)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1289,7 +1287,7 @@
 
 
 <span class="c1"># @rt(&#39;/consult/select_period&#39;)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
     <span class="c1"># HTMX endpoint: show periods_strust rows where period_type matches the selected period_type.</span>
     <span class="c1"># Expects query params: db and period_type</span>
     <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
@@ -1299,11 +1297,11 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">db_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">period_type</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="s2">&quot;Missing db or period_type parameter.&quot;</span><span class="p">))</span>
 
-    <span class="n">db_path</span> <span class="o">=</span> <span class="n">DATA_FOLDER</span> <span class="o">/</span> <span class="n">db_name</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">dbfile_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">db_name</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dbfile_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database not found: </span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
 
-    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">db_path</span><span class="p">))</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dbfile_path</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># periods_struct expected fields: start_date, period_type, other fields...</span>
@@ -1347,7 +1345,7 @@
     <span class="p">)</span>
 </code></pre></div>
 <div id="consult-timetable" class="highlight"><span class="filename">#consult-timetable</span><pre><span></span><code><span class="c1"># @rt(&#39;/consult/select_timetables&#39;)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
     <span class="c1"># HTMX endpoint: show timetables rows where period_type and day_type match.</span>
     <span class="c1"># Expects query params: db, period_type, day_type</span>
     <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
@@ -1358,11 +1356,11 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">db_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">period_type</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">day_type</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="s2">&quot;Missing db, period_type, or day_type parameter.&quot;</span><span class="p">))</span>
 
-    <span class="n">db_path</span> <span class="o">=</span> <span class="n">DATA_FOLDER</span> <span class="o">/</span> <span class="n">db_name</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">dbfile_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">db_name</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dbfile_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database not found: </span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
 
-    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">db_path</span><span class="p">))</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dbfile_path</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">timetables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">timetables</span><span class="p">())</span>
