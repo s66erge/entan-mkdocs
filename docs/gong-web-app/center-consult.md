@@ -79,6 +79,20 @@ def consult_select_db(request, centers, db_path):
         # fallback: try to read generic table
         cps = []
 
+    # Get all period_types from periods_struct and find those not in current rows
+    try:
+        all_periods = list(db.t.periods_struct())
+        all_ptypes = {p.get("period_type") for p in all_periods}
+        shown_ptypes = {p.get("period_type") for p in cps}  # Extract period_type from Td
+        missing_ptypes = sorted(all_ptypes - shown_ptypes)
+    except Exception:
+        missing_ptypes = []
+
+    # Add also unplanned periods for inspection 
+    for mpt in missing_ptypes:
+        # Add a row with start_date as 'unplanned' and the missing period_type
+        cps.append({"start_date": "unplanned", "period_type": mpt})
+
     rows = []
     for cp in sorted(cps, key=lambda x: getattr(x, "start_date", "")):
         start = cp.get("start_date")
