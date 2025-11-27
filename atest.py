@@ -29,43 +29,39 @@ def get_color_options(selected_color=None):
 
 @rt("/")
 def home():
-    return Html(
-        Head(Title("FastHTML HTMX Table")),
-        Body(
-            H1("Edit Table Row"),
-            Table(
-                Thead(Tr(Th("Name"), Th("Price"), Th("Color"), Th("Action"))),
-                Tbody(
-                    *[Tr(
-                        Td(item["name"], id=f"name-{item['id']}"),
-                        Td(item["price"], id=f"price-{item['id']}"),
-                        Td(item["color"], id=f"color-{item['id']}"),
-                        Td(
-                            Button("Edit", hx_get=f"/edit/{item['id']}", hx_target=f"#row-{item['id']}", hx_swap="outerHTML"),
-                            " ",
-                            Button("Delete", hx_get=f"/delete_confirm/{item['id']}", hx_target=f"#row-{item['id']}", hx_swap="outerHTML", cls="danger")
-                        ),
-                        id=f"row-{item['id']}"
-                    ) for item in items],
-                    id="table-body"
-                )
-            ),
-            H2("Add New Item"),
-            Div(
-                Button("Show Form", hx_get="/add_form", hx_target="#add-form-container", hx_swap="innerHTML"),
-                Div(id="add-form-container"),
-                id="add-section"
-            ),
-            Hr(),
-            H2("Available Colors"),
-            Table(
-                Thead(Tr(Th("Color Name"))),
-                Tbody(
-                    *[Tr(Td(color["name"])) for color in colors]
-                )
-            ),
-            Script(src="https://unpkg.com/htmx.org")
-        )
+    return Main(
+        H1("Edit Table Row"),
+        Table(
+            Thead(Tr(Th("Name"), Th("Price"), Th("Color"), Th("Action"))),
+            Tbody(
+                *[Tr(
+                    Td(item["name"], id=f"name-{item['id']}"),
+                    Td(item["price"], id=f"price-{item['id']}"),
+                    Td(item["color"], id=f"color-{item['id']}"),
+                    Td(
+                        Button("Edit", hx_get=f"/edit/{item['id']}", hx_target=f"#row-{item['id']}", hx_swap="outerHTML"),
+                        " ",
+                        Button("Delete", hx_get=f"/delete_confirm/{item['id']}", hx_target=f"#row-{item['id']}", hx_swap="outerHTML", cls="danger")
+                    ),
+                    id=f"row-{item['id']}"
+                ) for item in items],
+                id="table-body"
+            )
+        ),
+        H2("Add New Item"),
+        Div(
+            Button("Show Form", hx_get="/add_form", hx_target="#add-form-container", hx_swap="innerHTML"),
+            Div(id="add-form-container"),
+            id="add-section"
+        ),
+        Hr(),
+        H2("Available Colors"),
+        Table(
+            Thead(Tr(Th("Color Name"))),
+            Tbody(
+                *[Tr(Td(color["name"])) for color in colors]
+            )
+        ),
     )
 
 @rt("/add_form")
