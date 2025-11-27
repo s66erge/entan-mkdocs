@@ -12,10 +12,9 @@ from libs.cdash import top_menu
 def consult_page(session, request, centers):
     # Main consult page: select a center and show its coming_periods.
     Center = centers.dataclass()
-    center_names = [(c.center_name) for c in centers()]
-
+    center_names = [c.center_name for c in centers()]
     select = Select(
-        Option("Select a Gong DB", value="", selected=True, disabled=True),
+        Option("Select a cnter", value="", selected=True, disabled=True),
         *[Option(name, value=name) for name in center_names],
         name="selected_name",
         id="consult-db-select"
@@ -47,33 +46,26 @@ def consult_select_db(request, centers, db_path):
     # posts period_type (and db) to /consult/select_period.
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
-
     if not selected_name:
         return Div(P("No center selected."))
-
     Center = centers.dataclass()
-    center = centers[selected_name]
-    selected_db = center.gong_db_name
+    selected_db = centers[selected_name].gong_db_name
 
     dbfile_path = Path(db_path) / selected_db
     if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
-
     db = database(str(dbfile_path))
 
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
-    try:
-        cps = list(db.t.coming_periods())
-    except Exception:
-        # fallback: try to read generic table
-        cps = []
-
+    cps = list(db.t.coming_periods())
+    pers = list(db.t.periods_struct())
+    # gives error : Periods_struct = periods_structs.dataclass()
+    
     # Get all period_types from periods_struct and find those not in current rows
     try:
-        all_periods = list(db.t.periods_struct())
-        all_ptypes = {p.get("period_type") for p in all_periods}
-        shown_ptypes = {p.get("period_type") for p in cps}  # Extract period_type from Td
-        missing_ptypes = sorted(all_ptypes - shown_ptypes)
+        all_types =  {p.get("period_type") for p in pers}
+        seen_types = {p.get("period_type") for p in cps}
+        missing_ptypes = sorted(all_types - seen_types)
     except Exception:
         missing_ptypes = []
 
