@@ -111,6 +111,7 @@ def deduplicate(merged):
     return deduplicated
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
+
 def fetch_dhamma_courses(center, num_months, num_days):
 
     db_path = get_db_path()  ## [1]
@@ -139,8 +140,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     extracted = fetch_courses_from_dhamma(location, date_current_course, end_date)  ## [4]
 
-    # FIXME one day courses are possible in some centers !!!
-    extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
+    # one day courses are possible in some centers !!!
+    # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
 
     for course in extracted:   ## [5]
         course.pop('sub_location', None)

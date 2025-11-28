@@ -3,6 +3,7 @@ from fasthtml.common import *
 app, rt = fast_app()
 
 # Color table
+
 colors = [
     {"id": 1, "name": "Red"},
     {"id": 2, "name": "Blue"},

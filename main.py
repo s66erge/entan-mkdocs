@@ -63,7 +63,7 @@ def get(session):
 
 @rt('/consult_page')
 def get(session, request):
-    return consul.consult_page(session, request, centers)
+    return consul.consult_page(session, centers)
 
 @rt('/consult/select_db')
 def get(request):
@@ -76,6 +76,14 @@ def get(request):
 @rt('/consult/select_timetable')
 def get(request):
     return consul.consult_select_timetable(request, db_path)
+
+@rt('/planning_page')
+def get(session, request):
+    return planning.planning_page(session, db)
+
+@rt('/planning/change_db')
+def get(request):
+    return planning.change_db(request, centers, db_path)
 
 @rt('/admin_page')
 @admin_required
