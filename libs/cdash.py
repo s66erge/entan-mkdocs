@@ -29,7 +29,7 @@ def dashboard(session, db):
         top_menu(session['role']),
         Div(H1("Dashboard"),
             P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
-            
+
             P(A("To consult any center gong planning", href="/consult_page")),
 
             P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,

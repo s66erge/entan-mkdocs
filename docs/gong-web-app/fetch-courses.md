@@ -8,12 +8,11 @@ fetch_dhamma_courses("Pajjota", 6, 0)
 import requests
 import pandas as pd
 import json
-from tabulate import tabulate
-from datetime import datetime, date, timedelta
+from datetime import date
 from fasthtml.common import *
 
 from libs.utils import add_months_days
-from libs.dbset import get_db_path
+from libs.dbset import get_db_path, get_central_db
 
 <<field-fr-db>>
 <<fetch-api>>
@@ -90,7 +89,7 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
             "sub_location": c.get("location", {}).get("sub_location"),
             # "center_non": c.get("location", {}).get("center_noncenter"),
         }
-        for c in all_courses if c['center_non'] != 'noncenter'
+        for c in all_courses if c.get("location", {}).get("center_noncenter") != 'noncenter'
     ]
 
     # Filter out extracted where 'center_non' = 'noncenter'
@@ -148,9 +147,11 @@ Get a merged list of courses from the current courses in the center db and the f
 def fetch_dhamma_courses(center, num_months, num_days):
 
     db_path = get_db_path()  ## [1]
-
-    db_center = database(f"{db_path}{center.lower()}.ok.db")
-    db_central = database(f"{db_path}gongUsers.db")
+    db_central = get_central_db()
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    selected_db = centers[center].gong_db_name
+    db_center = database(db_path + selected_db)
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
@@ -192,15 +193,14 @@ def fetch_dhamma_courses(center, num_months, num_days):
             "source": "dhamma.org",
             "course_type": c.get("course_type")
         }
-        for c in extracted
-    ]                         ## [7]
+        for c in extracted     ## [7]
+    ]                         
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
     deduplicated = deduplicate(mer_sort)
 
-    print(tabulate(deduplicated, headers="keys", tablefmt="grid"))
-    return
+    return deduplicated
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)
 [2] get the start date for the last course just before today = current course - or service

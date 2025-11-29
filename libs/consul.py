@@ -57,8 +57,7 @@ def consult_select_db(request, centers, db_path):
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
     cps = list(db.t.coming_periods())
     pers = list(db.t.periods_struct())
-    # gives error : Periods_struct = periods_structs.dataclass()
-    
+
     # Get all period_types from periods_struct and find those not in current rows
     try:
         all_types =  {p.get("period_type") for p in pers}

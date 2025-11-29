@@ -20,7 +20,7 @@ app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.i
                    before=bware, hdrs=(picolink,css),)
 
 db_path = dbset.get_db_path()
-db = database(db_path + 'gongUsers.db')
+db = dbset.get_central_db()
 
 dbset.create_tables(db)
 dbset.init_data(db)

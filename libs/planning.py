@@ -1,10 +1,12 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 from pathlib import Path
 from urllib.parse import quote_plus
+from tabulate import tabulate
 from fasthtml.common import *
 from fasthtml.common import database
 
 from libs.cdash import top_menu
+from libs.fetch import fetch_dhamma_courses
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
@@ -52,9 +54,6 @@ def planning_page(session, db):
 
 # @rt('/planning/change_db')
 def change_db(request, centers, db_path):
-    # HTMX endpoint: receive form with selected_db in request.form or query_params,
-    # return the coming_periods table for that DB. Each row has a Select action that
-    # posts period_type (and db) to /consult/select_period.
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
     if not selected_name:
@@ -65,29 +64,17 @@ def change_db(request, centers, db_path):
     dbfile_path = Path(db_path) / selected_db
     if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
-    db = database(str(dbfile_path))
+    db_center = database(str(dbfile_path))
 
-    # CONTINOW integrate 'wwww.google.com' and build + show the new draft planning 
+    new_draft_plan = fetch_dhamma_courses(selected_name, 12, 0)
 
+    print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
+
+    """
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
-    cps = list(db.t.coming_periods())
-    pers = list(db.t.periods_struct())
-    # gives error : Periods_struct = periods_structs.dataclass()
+    cps = list(db_center.t.coming_periods())
+    pers = list(db_center.t.periods_struct())
 
-    """
-    # Get all period_types from periods_struct and find those not in current rows
-    try:
-        all_types =  {p.get("period_type") for p in pers}
-        seen_types = {p.get("period_type") for p in cps}
-        missing_ptypes = sorted(all_types - seen_types)
-    except Exception:
-        missing_ptypes = []
-
-    # Add also unplanned periods for inspection 
-    for mpt in missing_ptypes:
-        # Add a row with start_date as 'unplanned' and the missing period_type
-        cps.append({"start_date": "unplanned", "period_type": mpt})
-    """
     rows = []
     for cp in sorted(cps, key=lambda x: getattr(x, "start_date", "")):
         start = cp.get("start_date")
@@ -112,6 +99,8 @@ def change_db(request, centers, db_path):
         Div("", hx_swap_oob="true", id="timetables"),
         Div("", hx_swap_oob="true", id="periods-struct")
     )
+    """
+    return
 
 
 # @rt('/consult/select_period')
