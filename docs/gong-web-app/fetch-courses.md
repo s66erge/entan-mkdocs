@@ -225,6 +225,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
 
+    # FIXME use a .csv file instead and allow to change it in admin.
+
     df = pd.read_excel(db_path + 'course_type_map.xlsx')
     list_of_types = df.to_dict(orient='records')         ## [6]
     other_dict = get_field_from_db(db_central, center, "other_dict")
