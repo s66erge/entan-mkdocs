@@ -13,8 +13,7 @@ from libs.cdash import top_menu
 from libs.fetch import fetch_dhamma_courses
 
 <<planning-page>>
-
-<<consult-timetable>>
+<<planning-timetable>>
 ```
 
 
@@ -63,7 +62,6 @@ def planning_page(session, db):
         cls="container"
     )
 
-
 # @rt('/planning/change_db')
 def change_db(request, centers, db_path):
     params = dict(request.query_params)
@@ -98,7 +96,7 @@ def change_db(request, centers, db_path):
             check_cell = Td(check, style="background: red")
         else:
             check_cell = Td(check)
-        # CONTINOW build links
+        # CONTINOW build amnd show 
         rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
 
     table = Table(
@@ -173,12 +171,12 @@ def consult_select_period(request, db_path):
     )
 ```
 
-```{.python #consult-timetable}
+```{.python #planning-timetable}
 
 # @rt('/consult/select_timetables')
 def consult_select_timetable(request, db_path):
     # HTMX endpoint: show timetables rows where period_type and day_type match.
-    # Expects query params: db, period_type, day_type
+    # Expects query params: db, period_type, day_type 
     params = dict(request.query_params)
     db_name = params.get("db")
     period_type = params.get("period_type")

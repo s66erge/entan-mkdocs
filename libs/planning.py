@@ -51,7 +51,6 @@ def planning_page(session, db):
         cls="container"
     )
 
-
 # @rt('/planning/change_db')
 def change_db(request, centers, db_path):
     params = dict(request.query_params)
@@ -86,7 +85,7 @@ def change_db(request, centers, db_path):
             check_cell = Td(check, style="background: red")
         else:
             check_cell = Td(check)
-        # CONTINOW build links
+        # CONTINOW build amnd show 
         rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
 
     table = Table(
@@ -160,72 +159,12 @@ def consult_select_period(request, db_path):
         table, id="periods-struct-table"
     )
 # ~/~ end
-
-# ~/~ begin <<docs/gong-web-app/center-consult.md#consult-timetable>>[init]
-
-# @rt('/consult/select_timetables')
-def consult_select_timetable(request, db_path):
-    # HTMX endpoint: show timetables rows where period_type and day_type match.
-    # Expects query params: db, period_type, day_type
-    params = dict(request.query_params)
-    db_name = params.get("db")
-    period_type = params.get("period_type")
-    day_type = params.get("day_type")
-
-    if not db_name or not period_type or not day_type:
-        return Div(P("Missing db, period_type, or day_type parameter."))
-
-    dbfile_path = Path(db_path) / db_name
-    if not dbfile_path.exists():
-        return Div(P(f"Database not found: {db_name}"))
-
-    db = database(str(dbfile_path))
-
-    try:
-        timetables = list(db.t.timetables())
-    except Exception:
-        timetables = []
-
-    # Filter where period_type and day_type match
-    filtered = [
-        t for t in timetables 
-        if (t.get("period_type").strip() == period_type.strip() and
-            t.get("day_type").strip() == day_type.strip())
-    ]
-
-    if not filtered:
-        return Div(P(f"No timetables found with period_type = {period_type} and day_type = {day_type}"))
-
-    tbl_rows = []
-    for t in filtered:
-        # Display all fields from timetables row
-        if isinstance(t, dict):
-            cells = [Td(str(v)) for v in t.values()]
-            headers = list(t.keys())
-        else:
-            td_dict = getattr(t, "__dict__", {})
-            cells = [Td(str(v)) for v in td_dict.values()]
-            headers = list(td_dict.keys())
-
-        tbl_rows.append(Tr(*cells))
-
-    # Build headers
-    thead = Thead(Tr(*[Th(h) for h in headers]))
-
-    table = Table(thead, Tbody(*tbl_rows))
-
-    return Div(
-        H3(f"Timetable for period type: '{period_type}', day type: '{day_type}', in '{db_name}'"),
-        table,
-        id="timetables-table"
-    )
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-planning.md#consult-timetable>>[0]
+# ~/~ begin <<docs/gong-web-app/center-planning.md#planning-timetable>>[init]
 
 # @rt('/consult/select_timetables')
 def consult_select_timetable(request, db_path):
     # HTMX endpoint: show timetables rows where period_type and day_type match.
-    # Expects query params: db, period_type, day_type
+    # Expects query params: db, period_type, day_type 
     params = dict(request.query_params)
     db_name = params.get("db")
     period_type = params.get("period_type")
