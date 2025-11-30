@@ -7,6 +7,7 @@ def top_menu(role):
     return Nav(
             Ul(
                 Li(A("Admin", href="/admin_page")) if role == "admin" else None,
+                Li(A("Dashboard", href="/dashboard")),
                 Li(A("Contact", href="/unfinished")),
                 Li(A("About", href="/unfinished")),
             ),
@@ -28,8 +29,10 @@ def dashboard(session, db):
         top_menu(session['role']),
         Div(H1("Dashboard"),
             P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
-            P(f"You can modify the gong planning for: {user_center_list}") if user_centers else None,
-            H3(A("To consult a specific center gong planning", href="/consult_page")),
+
+            P(A("To consult any center gong planning", href="/consult_page")),
+
+            P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,
 
 
 

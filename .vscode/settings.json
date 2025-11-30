@@ -1,3 +1,5 @@
 {
-    "kiroAgent.configureMCP": "Disabled"
+    "kiroAgent.configureMCP": "Disabled",
+    "workbench.activityBar.location": "default",
+    "workbench.activityBar.orientation": "vertical"
 }

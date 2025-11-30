@@ -2,12 +2,11 @@
 import requests
 import pandas as pd
 import json
-from tabulate import tabulate
-from datetime import datetime, date, timedelta
+from datetime import date
 from fasthtml.common import *
 
 from libs.utils import add_months_days
-from libs.dbset import get_db_path
+from libs.dbset import get_db_path, get_central_db
 
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#field-fr-db>>[init]
 
@@ -62,6 +61,7 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
         page += 1
 
     # Extract relevant fields from courses located inside the center
+    # Filter out where 'center_non' = 'noncenter'
     extracted = [
         {
             "course_start_date": c.get("course_start_date"),
@@ -72,12 +72,8 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
             "sub_location": c.get("location", {}).get("sub_location"),
             # "center_non": c.get("location", {}).get("center_noncenter"),
         }
-        for c in all_courses if c['center_non'] != 'noncenter'
+        for c in all_courses if c.get("location", {}).get("center_noncenter") != 'noncenter'
     ]
-
-    # Filter out extracted where 'center_non' = 'noncenter'
-    # extracted = [course for course in extracted if course['center_non'] != 'noncenter']
-
     return extracted
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#period-type>>[init]
@@ -109,14 +105,62 @@ def deduplicate(merged):
         deduplicated.append(current)
         i += 1
     return deduplicated
+
+def check_plan(plan, db_center):
+    try:
+        # build set of all period_types in db_center.t.periods_struct
+        periods_struct = db_center.t.periods_struct()
+        valid_types = {row.get("period_type") for row in periods_struct}
+    except Exception:
+        valid_types = set()
+    for item in plan:
+        pt = item.get("period_type")
+        if pt in valid_types:
+            item["check"] = "OK"
+        else:
+            item["check"] = "NoType"
+
+    for idx, item in enumerate(plan[:-1]):
+        type_check = item.get("check")
+        if type_check.startswith("OK"):
+            pt = item.get("period_type")
+            try:
+                # Fetch periods_struct with matching period_type
+                periods_struct_rows = [row for row in db_center.t.periods_struct() if row.get("period_type") == pt]
+                # Find the biggest 'day' value
+                max_day = max((row.get("day") for row in periods_struct_rows if row.get("day") is not None), default=None)
+            except Exception:
+                max_day = None
+
+            # Get this and next start_date as date objects
+            start_date_1 = item.get("start_date")
+            start_date_2 = plan[idx + 1].get("start_date")
+            try:
+                d1 = date.fromisoformat(start_date_1)
+                d2 = date.fromisoformat(start_date_2)
+                number_of_days = (d2 - d1).days
+            except Exception:
+                # If missing or invalid, skip to next
+                continue
+
+            if max_day is not None:
+                if number_of_days < max_day:
+                    item["check"] = f"Nok-{max_day}"
+        else:
+            item["check"] += "|???"
+
+    return plan
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
+
 def fetch_dhamma_courses(center, num_months, num_days):
 
     db_path = get_db_path()  ## [1]
-
-    db_center = database(f"{db_path}{center.lower()}.ok.db")
-    db_central = database(f"{db_path}gongUsers.db")
+    db_central = get_central_db()
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    selected_db = centers[center].gong_db_name
+    db_center = database(db_path + selected_db)
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
@@ -139,8 +183,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     extracted = fetch_courses_from_dhamma(location, date_current_course, end_date)  ## [4]
 
-    # FIXME one day courses are possible in some centers !!!
-    extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
+    # one day courses are possible in some centers !!!
+    # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
 
     for course in extracted:   ## [5]
         course.pop('sub_location', None)
@@ -158,14 +202,14 @@ def fetch_dhamma_courses(center, num_months, num_days):
             "source": "dhamma.org",
             "course_type": c.get("course_type")
         }
-        for c in extracted
-    ]                         ## [7]
+        for c in extracted     ## [7]
+    ]                         
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
     deduplicated = deduplicate(mer_sort)
+    checked_draft_plan = check_plan(deduplicated, db_center) 
 
-    print(tabulate(deduplicated, headers="keys", tablefmt="grid"))
-    return
+    return checked_draft_plan
 # ~/~ end
 # ~/~ end

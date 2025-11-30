@@ -1,2 +1,2 @@
 __all__ = ["utils", "feedb", "dbset","auth","admin", "adchan", "fetch",
-           "cdash", "consul"]
+           "cdash", "consul", "planning"]

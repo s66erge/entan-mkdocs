@@ -21,7 +21,6 @@ from fasthtml.common import *
 <<display-markdown>>
 <<plus-months-days>>
 ```
-
 ### Dummy start
 
 ```{.python #dummy}

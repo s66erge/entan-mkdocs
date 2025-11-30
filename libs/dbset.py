@@ -11,6 +11,9 @@ def get_db_path():
     else:   # Railway production computer
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
+
+def get_central_db():
+    return database (get_db_path() + "gongUsers.db")
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
 
