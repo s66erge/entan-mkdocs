@@ -79,40 +79,39 @@ def change_db(request, centers, db_path):
     db_center = database(str(dbfile_path))
 
     new_draft_plan = fetch_dhamma_courses(selected_name, 12, 0)
-
     print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
-    """
-    # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
-    cps = list(db_center.t.coming_periods())
-    pers = list(db_center.t.periods_struct())
-
     rows = []
-    for cp in sorted(cps, key=lambda x: getattr(x, "start_date", "")):
-        start = cp.get("start_date")
-        ptype = cp.get("period_type")
-        # build select link that posts db and period_type to select_period endpoint
-        q_db = quote_plus(selected_db)
-        q_pt = quote_plus(ptype)
-        select_link = A(
-            "Select",
-            hx_get=f"/consult/select_period?db={q_db}&period_type={q_pt}",
-            hx_target="#periods-struct"
-        )
-        rows.append(Tr(Td(start), Td(ptype), Td(select_link)))
+    # Color ptype in red if equal to UNKNOWN
+    for plan_line in sorted(new_draft_plan, key=lambda x: getattr(x, "start_date", "")):
+        start = plan_line.get("start_date")
+        ptype = plan_line.get("period_type")
+        source = plan_line.get("source")
+        check = plan_line.get("check")
+        course = plan_line.get("course_type")
+        # Color period_type red if it's UNKNOWN
+        if ptype == "UNKNOWN":
+            ptype_cell = Td(ptype, style="background: red")
+        else:
+            ptype_cell = Td(ptype)
+        if not check.startswith("OK"):
+            check_cell = Td(check, style="background: red")
+        else:
+            check_cell = Td(check)
+        # CONTINOW build links
+        rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
 
     table = Table(
-        Thead(Tr(Th("Start date"), Th("Period type"), Th("Action"))),
+        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
+        Th("Dhamma.org center course"))),
         Tbody(*rows)
     )
 
     return Div(
         Div(table, id="coming-periods-table"),
-        Div("", hx_swap_oob="true", id="timetables"),
-        Div("", hx_swap_oob="true", id="periods-struct")
+        # Div("", hx_swap_oob="true", id="timetables"),
+        # Div("", hx_swap_oob="true", id="periods-struct")
     )
-    """
-    return
 
 
 # @rt('/consult/select_period')

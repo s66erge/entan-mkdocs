@@ -61,6 +61,7 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
         page += 1
 
     # Extract relevant fields from courses located inside the center
+    # Filter out where 'center_non' = 'noncenter'
     extracted = [
         {
             "course_start_date": c.get("course_start_date"),
@@ -73,10 +74,6 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
         }
         for c in all_courses if c.get("location", {}).get("center_noncenter") != 'noncenter'
     ]
-
-    # Filter out extracted where 'center_non' = 'noncenter'
-    # extracted = [course for course in extracted if course['center_non'] != 'noncenter']
-
     return extracted
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#period-type>>[init]
@@ -108,6 +105,51 @@ def deduplicate(merged):
         deduplicated.append(current)
         i += 1
     return deduplicated
+
+def check_plan(plan, db_center):
+    try:
+        # build set of all period_types in db_center.t.periods_struct
+        periods_struct = db_center.t.periods_struct()
+        valid_types = {row.get("period_type") for row in periods_struct}
+    except Exception:
+        valid_types = set()
+    for item in plan:
+        pt = item.get("period_type")
+        if pt in valid_types:
+            item["check"] = "OK"
+        else:
+            item["check"] = "NoType"
+
+    for idx, item in enumerate(plan[:-1]):
+        type_check = item.get("check")
+        if type_check.startswith("OK"):
+            pt = item.get("period_type")
+            try:
+                # Fetch periods_struct with matching period_type
+                periods_struct_rows = [row for row in db_center.t.periods_struct() if row.get("period_type") == pt]
+                # Find the biggest 'day' value
+                max_day = max((row.get("day") for row in periods_struct_rows if row.get("day") is not None), default=None)
+            except Exception:
+                max_day = None
+
+            # Get this and next start_date as date objects
+            start_date_1 = item.get("start_date")
+            start_date_2 = plan[idx + 1].get("start_date")
+            try:
+                d1 = date.fromisoformat(start_date_1)
+                d2 = date.fromisoformat(start_date_2)
+                number_of_days = (d2 - d1).days
+            except Exception:
+                # If missing or invalid, skip to next
+                continue
+
+            if max_day is not None:
+                if number_of_days < max_day:
+                    item["check"] = f"Nok-{max_day}"
+        else:
+            item["check"] += "|???"
+
+    return plan
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
 
@@ -166,7 +208,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
     deduplicated = deduplicate(mer_sort)
+    checked_draft_plan = check_plan(deduplicated, db_center) 
 
-    return deduplicated
+    return checked_draft_plan
 # ~/~ end
 # ~/~ end
