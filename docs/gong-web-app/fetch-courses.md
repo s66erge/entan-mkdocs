@@ -227,7 +227,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     # FIXME use a .csv file instead and allow to change it in admin.
 
-    df = pd.read_excel(db_path + 'course_type_map.xlsx')
+    df = pd.read_csv(db_path + 'course_type_map.csv')
     list_of_types = df.to_dict(orient='records')         ## [6]
     other_dict = get_field_from_db(db_central, center, "other_dict")
     periods_dhamma_org = [
