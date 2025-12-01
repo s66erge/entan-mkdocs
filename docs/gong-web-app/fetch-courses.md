@@ -242,9 +242,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
     deduplicated = deduplicate(mer_sort)
-    checked_draft_plan = check_plan(deduplicated, db_center) 
 
-    return checked_draft_plan
+    return deduplicated
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)
 [2] get the start date for the last course just before today = current course - or service

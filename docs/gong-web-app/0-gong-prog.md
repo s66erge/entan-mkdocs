@@ -86,9 +86,9 @@ def get(request):
 def get(session, request):
     return planning.planning_page(session, db)
 
-@rt('/planning/change_db')
+@rt('/planning/get_dhamma_db')
 def get(request):
-    return planning.change_db(request, centers, db_path)
+    return planning.get_dhamma_db(request, centers, db_path)
 
 @rt('/admin_page')
 @admin_required
