@@ -59,6 +59,34 @@ def planning_page(session, db_central):
         cls="container"
     )
 
+def create_draft_plan_table(draft_plan):
+    # Create an HTML table from a draft plan list of dictionaries.
+    rows = []
+    # Color ptype in red if equal to UNKNOWN
+    for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
+        start = plan_line.get("start_date")
+        ptype = plan_line.get("period_type")
+        source = plan_line.get("source")
+        check = plan_line.get("check")
+        course = plan_line.get("course_type")
+        # Color period_type red if it's UNKNOWN
+        if ptype.startswith("UNKNOWN"):
+            ptype_cell = Td(ptype, style="background: red")
+        else:
+            ptype_cell = Td(ptype)
+        if not check.startswith("OK"):
+            check_cell = Td(check, style="background: red")
+        else:
+            check_cell = Td(check)
+        rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
+
+    table = Table(
+        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
+        Th("Dhamma.org center course"))),
+        Tbody(*rows)
+    )
+    return table
+
 # @rt('/planning/get_dhamma_db')
 def get_dhamma_db(request, centers, db_path):
     params = dict(request.query_params)
@@ -74,36 +102,10 @@ def get_dhamma_db(request, centers, db_path):
     db_center = database(str(dbfile_path))
 
     new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-
     new_draft_plan = check_plan(new_merged_plan, db_center)
+    # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
-    print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-
-    rows = []
-    # Color ptype in red if equal to UNKNOWN
-    for plan_line in sorted(new_draft_plan, key=lambda x: getattr(x, "start_date", "")):
-        start = plan_line.get("start_date")
-        ptype = plan_line.get("period_type")
-        source = plan_line.get("source")
-        check = plan_line.get("check")
-        course = plan_line.get("course_type")
-        # Color period_type red if it's UNKNOWN
-        if ptype == "UNKNOWN":
-            ptype_cell = Td(ptype, style="background: red")
-        else:
-            ptype_cell = Td(ptype)
-        if not check.startswith("OK"):
-            check_cell = Td(check, style="background: red")
-        else:
-            check_cell = Td(check)
-        # CONTINOW build amnd show 
-        rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
-
-    table = Table(
-        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
-        Th("Dhamma.org center course"))),
-        Tbody(*rows)
-    )
+    table = create_draft_plan_table(new_draft_plan)
 
     return Div(
         Div(table, id="coming-periods-table"),
