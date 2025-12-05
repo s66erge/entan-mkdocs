@@ -81,9 +81,13 @@ def get(request):
 def get(session):
     return planning.planning_page(session, db)
 
-@rt('/planning/get_dhamma_db')
+@rt('/planning/load_dhamma_db')
 def get(session, request):
-    return planning.get_dhamma_db(session, request, db, db_path)
+    return planning.load_dhamma_db(session, request, db, db_path)
+
+@rt('/planning/show_dhamma')
+def get(session, request):
+    return planning.show_dhamma(request, db, db_path)
 
 @rt('/planning/set_free')
 def get(session, request):
