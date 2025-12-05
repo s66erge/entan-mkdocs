@@ -108,7 +108,7 @@ def get_period_type(anchor, course_type, list_of_types, other_dict):
         for item in list_of_types:
             if  anchor == item.get('raw_course_type'):
                 return item.get('period_type')
-    return "UNKNOWN"
+    return "UNKNOWN " + anchor
 ```
 
 Remove duplicates: if consecutive items have identical start_date and period_type,
@@ -133,6 +133,33 @@ def deduplicate(merged):
         i += 1
     return deduplicated
 
+def check_row(row, next_start_date, types_with_duration):
+    pt = row.get("period_type")
+    if pt in [t.get("valid_types") for t in types_with_duration]:
+        if next_start_date == "NoMore":
+            row["check"] = "OK"
+            return row
+        else:
+            try:
+                d1 = date.fromisoformat(row.get("start_date"))
+                d2 = date.fromisoformat(next_start_date)
+                number_of_days = (d2 - d1).days
+            except Exception:
+                row["check"] = "InvalidDate"
+            else:
+                # max_type =types_with_duration.filter(lambda x: x.get("valid_types") == pt)[0]
+                max_type = next((t for t in types_with_duration if t.get("valid_types") == pt), None)
+                if number_of_days < max_type.get("duration"):
+                    row["check"] = f"Nok-{max_type.get('duration')}"
+                elif number_of_days == 0:
+                    row["check"] = "Same start"
+                else:
+                    row["check"] = "OK"
+    else:
+        row["check"] = "NoType"
+    return row
+
+
 def check_plan(plan, db_center):
     try:
         # build set of all period_types in db_center.t.periods_struct
@@ -140,42 +167,18 @@ def check_plan(plan, db_center):
         valid_types = {row.get("period_type") for row in periods_struct}
     except Exception:
         valid_types = set()
-    for item in plan:
-        pt = item.get("period_type")
-        if pt in valid_types:
-            item["check"] = "OK"
-        else:
-            item["check"] = "NoType"
+    # Build a list of dicts: {"valid_types": <valid_type>, "duration": max_day}
+    periods_struct_rows = list(db_center.t.periods_struct())
+    types_with_duration = []
+    for vt in valid_types:
+        days = [row.get("day") for row in periods_struct_rows if row.get("period_type") == vt and row.get("day") is not None]
+        max_day = max(days) if days else None
+        types_with_duration.append({'valid_types': vt, 'duration': max_day})
 
     for idx, item in enumerate(plan[:-1]):
-        type_check = item.get("check")
-        if type_check.startswith("OK"):
-            pt = item.get("period_type")
-            try:
-                # Fetch periods_struct with matching period_type
-                periods_struct_rows = [row for row in db_center.t.periods_struct() if row.get("period_type") == pt]
-                # Find the biggest 'day' value
-                max_day = max((row.get("day") for row in periods_struct_rows if row.get("day") is not None), default=None)
-            except Exception:
-                max_day = None
+        check_row(item, plan[idx + 1].get("start_date"), types_with_duration)
 
-            # Get this and next start_date as date objects
-            start_date_1 = item.get("start_date")
-            start_date_2 = plan[idx + 1].get("start_date")
-            try:
-                d1 = date.fromisoformat(start_date_1)
-                d2 = date.fromisoformat(start_date_2)
-                number_of_days = (d2 - d1).days
-            except Exception:
-                # If missing or invalid, skip to next
-                continue
-
-            if max_day is not None:
-                if number_of_days < max_day:
-                    item["check"] = f"Nok-{max_day}"
-        else:
-            item["check"] += "|???"
-
+    check_row(plan[-1], "NoMore", types_with_duration)
     return plan
 ```
 
@@ -225,8 +228,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
 
-    # FIXME use a .csv file instead and allow to change it in admin.
-
+    # course_type_map in .csv file
     df = pd.read_csv(db_path + 'course_type_map.csv')
     list_of_types = df.to_dict(orient='records')         ## [6]
     other_dict = get_field_from_db(db_central, center, "other_dict")
@@ -243,9 +245,8 @@ def fetch_dhamma_courses(center, num_months, num_days):
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
     deduplicated = deduplicate(mer_sort)
-    checked_draft_plan = check_plan(deduplicated, db_center) 
 
-    return checked_draft_plan
+    return deduplicated
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)
 [2] get the start date for the last course just before today = current course - or service

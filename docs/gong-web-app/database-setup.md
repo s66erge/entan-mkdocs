@@ -38,9 +38,12 @@ def create_tables(db):
     SQL_CREATE_CENTERS = """
     CREATE TABLE IF NOT EXISTS centers (
         center_name TEXT PRIMARY KEY,
+        timezone TEXT,
         gong_db_name TEXT,
         location TEXT,
-        other_course TEXT
+        other_course TEXT,
+        status TEXT,
+        current_user TEXT
     );
     """
     SQL_CREATE_USERS = """
@@ -83,14 +86,14 @@ def init_data(db):
         roles.insert(role_name="user", description="regular user")
 
     centers = db.t.centers
-    other_course_pajjota = textwrap.dedent("""\
+    oc_pajj_mahi = textwrap.dedent("""\
             {
             "TRUST MEETING": "Trust WE"
             }
         """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name="mahi.db", location = "1396", other_course = "{ }")
-        centers.insert(center_name="Pajjota", gong_db_name="pajjota.db", location = "1370", other_course=other_course_pajjota)
+        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_pajj_mahi,  status="free", current_user="")
+        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj_mahi, status="free", current_user="")
 
     users = db.t.users
     if not users():

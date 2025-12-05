@@ -1,5 +1,7 @@
 {
-    "kiroAgent.configureMCP": "Disabled",
+     "workbench.editorAssociations": {
+        "*.url": "default"
+     },
     "workbench.activityBar.location": "default",
     "workbench.activityBar.orientation": "vertical"
 }

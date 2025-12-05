@@ -1,0 +1,467 @@
+# ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
+import json
+from pathlib import Path
+from urllib.parse import quote_plus
+from tabulate import tabulate
+from fasthtml.common import *
+from fasthtml.common import database
+
+from libs.cdash import top_menu
+from libs.fetch import fetch_dhamma_courses
+
+# ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
+
+# @rt('/planning_page')
+def planning_page(session, db):
+    # Main consult page: select a center and show its coming_periods.
+    planners = db.t.planners
+    sessemail = session['auth']
+    user_planners = planners("user_email = ?", (sessemail,))
+    center_names = [(p.center_name) for p in user_planners] 
+
+    select = Select(
+        Option("Select a center", value="", selected=True, disabled=True),
+        *[Option(name, value=name) for name in center_names],
+        name="selected_name",
+        id="planning-db-select"
+    )
+    form = Form(
+        select,
+        Button("Open", type="submit"),
+        hx_get="/planning/change_db",
+        hx_target="#planning-periods"
+    )
+    return Main(
+        top_menu(session['role']),
+        H1("Change Gong Planning"),
+        Div(
+            P("Choose a center:"),
+            form,
+            id="consult-db"
+        ) if len(center_names) > 1 else None,
+        Button(
+            f"{str(center_names[0])}", 
+            hx_get=f"/planning/change_db?selected_name={str(center_names[0])}",
+            hx_target="#planning-periods",
+            hx_trigger="load"
+        ) if len(center_names) == 1 else None,
+        H2("Plan with 'www.google.org' added for 12 month from current course start"),
+        Div(id="planning-periods"),          # filled by /planning/change_db
+        #Div(id="periods-struct"),            # filled by /consult/select_period 
+        #Div(id="timetables"),                # filled by /consult/select_timetable
+        cls="container"
+    )
+
+# Store draft plans in memory (in production, use session or database)
+draft_plans = {}
+
+# @rt('/planning/change_db')
+def change_db(request, centers, db_path):
+    params = dict(request.query_params)
+    selected_name = params.get("selected_name")
+    if not selected_name:
+        return Div(P("No center selected."))
+    Center = centers.dataclass()
+    selected_db = centers[selected_name].gong_db_name
+
+    dbfile_path = Path(db_path) / selected_db
+    if not dbfile_path.exists():
+        return Div(P(f"Database not found: {selected_db}"))
+    db_center = database(str(dbfile_path))
+
+    new_draft_plan = fetch_dhamma_courses(selected_name, 12, 0)
+    print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
+
+    # Store the draft plan in memory for this center
+    draft_key = f"{selected_name}_draft"
+    draft_plans[draft_key] = new_draft_plan.copy()
+
+    # Get valid period types from periods_struct for the dropdown
+    try:
+        periods_struct = list(db_center.t.periods_struct())
+        valid_period_types = sorted(set(row.get("period_type") for row in periods_struct if row.get("period_type")))
+    except:
+        valid_period_types = []
+
+    rows = []
+    # Color ptype in red if equal to UNKNOWN
+    for idx, plan_line in enumerate(sorted(new_draft_plan, key=lambda x: getattr(x, "start_date", ""))):
+        start = plan_line.get("start_date")
+        ptype = plan_line.get("period_type")
+        source = plan_line.get("source")
+        check = plan_line.get("check")
+        course = plan_line.get("course_type")
+
+        # Create unique row ID
+        row_id = f"plan-row-{idx}"
+
+        # Color period_type red if it's UNKNOWN
+        if ptype == "UNKNOWN":
+            ptype_cell = Td(ptype, style="background: red")
+        else:
+            ptype_cell = Td(ptype)
+
+        if not check.startswith("OK"):
+            check_cell = Td(check, style="background: red")
+        else:
+            check_cell = Td(check)
+
+        # Action buttons
+        delete_btn = Button("Delete",
+            hx_post=f"/planning/delete_dict_row?center={selected_name}&row_index={idx}",
+            hx_target="#planning-periods",
+            hx_confirm="Are you sure you want to delete this row?",
+            cls="danger"
+        )
+
+        edit_btn = Button("Edit",
+            hx_get=f"/planning/edit_dict_row?center={selected_name}&row_index={idx}",
+            hx_target=f"#{row_id}",
+            hx_swap="outerHTML"
+        )
+
+        action_cell = Td(delete_btn, " ", edit_btn)
+
+        rows.append(Tr(
+            Td(start, id=f"start-{idx}"),
+            Td(ptype, id=f"ptype-{idx}"),
+            Td(source),
+            check_cell,
+            Td(course),
+            action_cell,
+            id=row_id
+        ))
+
+    table = Table(
+        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
+        Th("Dhamma.org center course"), Th("Actions"))),
+        Tbody(*rows, id="planning-rows")
+    )
+
+    # Save button
+    save_btn = Button("Save to Database",
+        hx_post=f"/planning/save_to_db?center={selected_name}",
+        hx_target="#planning-periods",
+        hx_confirm="This will replace all existing coming_periods for this center. Continue?",
+        cls="primary"
+    )
+
+    return Div(
+        Div(table, id="coming-periods-table"),
+        Div(save_btn, style="margin-top: 20px;"),
+        # Store the draft plan data for later use
+        Script(f"window.draftPlan = {json.dumps(new_draft_plan)};"),
+        # Div("", hx_swap_oob="true", id="timetables"),
+        # Div("", hx_swap_oob="true", id="periods-struct")
+    )
+
+# @rt('/planning/delete_dict_row', methods=['POST'])
+def delete_dict_row(request, centers, db_path):
+    """Delete a row from the in-memory draft plan dict."""
+    params = dict(request.query_params)
+    center_name = params.get("center")
+    row_index = int(params.get("row_index", -1))
+
+    if not center_name or row_index < 0:
+        return Div(P("Missing parameters for row deletion."))
+
+    try:
+        # Get the draft plan for this center
+        draft_key = f"{center_name}_draft"
+        if draft_key not in draft_plans:
+            return Div(P("No draft plan found for this center."))
+
+        draft_plan = draft_plans[draft_key]
+
+        # Remove the row at the specified index
+        if 0 <= row_index < len(draft_plan):
+            draft_plan.pop(row_index)
+
+            # Return updated table
+            class MockRequest:
+                def __init__(self, center_name):
+                    self.query_params = {"selected_name": center_name}
+
+            mock_request = MockRequest(center_name)
+            return create_draft_table(mock_request, centers, db_path, draft_plan)
+        else:
+            return Div(P("Invalid row index."))
+
+    except Exception as e:
+        return Div(P(f"Error deleting row: {str(e)}"))
+
+# @rt('/planning/edit_dict_row')
+def edit_dict_row(request, centers, db_path):
+    """Edit a row in the draft plan with inline editing."""
+    params = dict(request.query_params)
+    center_name = params.get("center")
+    row_index = int(params.get("row_index", -1))
+
+    if not center_name or row_index < 0:
+        return Div(P("Missing parameters for row editing."))
+
+    try:
+        draft_key = f"{center_name}_draft"
+        if draft_key not in draft_plans:
+            return Div(P("No draft plan found for this center."))
+
+        draft_plan = draft_plans[draft_key]
+        Center = centers.dataclass()
+        selected_db = centers[center_name].gong_db_name
+
+        dbfile_path = Path(db_path) / selected_db
+        db_center = database(str(dbfile_path))
+
+        # Get valid period types from periods_struct
+        try:
+            periods_struct = list(db_center.t.periods_struct())
+            valid_period_types = sorted(set(row.get("period_type") for row in periods_struct if row.get("period_type")))
+        except:
+            valid_period_types = []
+
+        if 0 <= row_index < len(draft_plan):
+            plan_line = draft_plan[row_index]
+            start = plan_line.get("start_date", "")
+            ptype = plan_line.get("period_type", "")
+            source = plan_line.get("source", "")
+            check = plan_line.get("check", "")
+            course = plan_line.get("course_type", "")
+
+            # Create period type options
+            ptype_options = [Option(pt, value=pt, selected=(pt == ptype)) for pt in valid_period_types]
+            if not ptype_options:
+                ptype_options = [Option(ptype, value=ptype, selected=True)]
+
+            # Edit form row
+            return Tr(
+                Td(Input(type="date", name="start_date", value=start, id=f"edit-start-{row_index}")),
+                Td(Select(*ptype_options, name="period_type", id=f"edit-ptype-{row_index}")),
+                Td(source),
+                Td(check),
+                Td(course),
+                Td(
+                    Button("Save", type="button",
+                        hx_post=f"/planning/save_dict_row?center={center_name}&row_index={row_index}",
+                        hx_include=f"#edit-start-{row_index},#edit-ptype-{row_index}",
+                        hx_target=f"#plan-row-{row_index}",
+                        hx_swap="outerHTML"
+                    ),
+                    " ",
+                    Button("Cancel", type="button",
+                        hx_get=f"/planning/cancel_edit?center={center_name}&row_index={row_index}",
+                        hx_target=f"#plan-row-{row_index}",
+                        hx_swap="outerHTML"
+                    )
+                ),
+                id=f"plan-row-{row_index}"
+            )
+        else:
+            return Div(P("Invalid row index."))
+
+    except Exception as e:
+        return Div(P(f"Error editing row: {str(e)}"))
+
+# @rt('/planning/save_dict_row', methods=['POST'])
+async def save_dict_row(request, centers, db_path):
+    """Save the edited row back to the draft plan."""
+    params = dict(request.query_params)
+    center_name = params.get("center")
+    row_index = int(params.get("row_index", -1))
+
+    form_data = await request.form()
+    new_start_date = form_data.get("start_date")
+    new_period_type = form_data.get("period_type")
+
+    if not center_name or row_index < 0:
+        return Div(P("Missing parameters for saving row."))
+
+    try:
+        draft_key = f"{center_name}_draft"
+        if draft_key not in draft_plans:
+            return Div(P("No draft plan found for this center."))
+
+        draft_plan = draft_plans[draft_key]
+
+        if 0 <= row_index < len(draft_plan):
+            # Update the row in draft plan
+            draft_plan[row_index]["start_date"] = new_start_date
+            draft_plan[row_index]["period_type"] = new_period_type
+
+            # Return updated table
+            class MockRequest:
+                def __init__(self, center_name):
+                    self.query_params = {"selected_name": center_name}
+
+            mock_request = MockRequest(center_name)
+            return create_draft_table(mock_request, centers, db_path, draft_plan)
+        else:
+            return Div(P("Invalid row index."))
+
+    except Exception as e:
+        return Div(P(f"Error saving row: {str(e)}"))
+
+# @rt('/planning/cancel_edit')
+def cancel_edit(request, centers, db_path):
+    """Cancel editing and return to display mode."""
+    params = dict(request.query_params)
+    center_name = params.get("center")
+    row_index = int(params.get("row_index", -1))
+
+    if not center_name or row_index < 0:
+        return Div(P("Missing parameters for canceling edit."))
+
+    try:
+        draft_key = f"{center_name}_draft"
+        if draft_key not in draft_plans:
+            return Div(P("No draft plan found for this center."))
+
+        draft_plan = draft_plans[draft_key]
+
+        # Return updated table (this will show the current state)
+        class MockRequest:
+            def __init__(self, center_name):
+                self.query_params = {"selected_name": center_name}
+
+        mock_request = MockRequest(center_name)
+        return create_draft_table(mock_request, centers, db_path, draft_plan)
+
+    except Exception as e:
+        return Div(P(f"Error canceling edit: {str(e)}"))
+
+# @rt('/planning/save_to_db', methods=['POST'])
+def save_to_db(request, centers, db_path):
+    """Save all draft plan rows to the coming_periods table."""
+    params = dict(request.query_params)
+    center_name = params.get("center")
+
+    if not center_name:
+        return Div(P("Missing center name."))
+
+    try:
+        Center = centers.dataclass()
+        selected_db = centers[center_name].gong_db_name
+
+        dbfile_path = Path(db_path) / selected_db
+        if not dbfile_path.exists():
+            return Div(P(f"Database not found: {selected_db}"))
+
+        db_center = database(str(dbfile_path))
+
+        draft_key = f"{center_name}_draft"
+        if draft_key not in draft_plans:
+            return Div(P("No draft plan found for this center."))
+
+        draft_plan = draft_plans[draft_key]
+
+        # Clear existing coming_periods and insert new ones
+        coming_periods = db_center.t.coming_periods
+
+        # Delete all existing records
+        coming_periods.delete_where("1=1")  # Delete all rows
+
+        # Insert new records
+        for plan_line in draft_plan:
+            coming_periods.insert({
+                "start_date": plan_line["start_date"],
+                "period_type": plan_line["period_type"]
+            })
+
+        # Clear the draft plan
+        del draft_plans[draft_key]
+
+        return Div(
+            P("✅ Planning periods saved successfully!", style="color: green; font-weight: bold;"),
+            Button("Reload", hx_get=f"/planning/change_db?selected_name={center_name}", hx_target="#planning-periods")
+        )
+
+    except Exception as e:
+        return Div(P(f"Error saving to database: {str(e)}"))
+
+def create_draft_table(request, centers, db_path, draft_plan):
+    """Helper function to create the draft table HTML."""
+    params = dict(request.query_params)
+    selected_name = params.get("selected_name")
+
+    if not selected_name:
+        return Div(P("No center selected."))
+
+    Center = centers.dataclass()
+    selected_db = centers[selected_name].gong_db_name
+
+    dbfile_path = Path(db_path) / selected_db
+    db_center = database(str(dbfile_path))
+
+    # Get valid period types from periods_struct for the dropdown
+    try:
+        periods_struct = list(db_center.t.periods_struct())
+        valid_period_types = sorted(set(row.get("period_type") for row in periods_struct if row.get("period_type")))
+    except:
+        valid_period_types = []
+
+    rows = []
+    for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
+        start = plan_line.get("start_date")
+        ptype = plan_line.get("period_type")
+        source = plan_line.get("source")
+        check = plan_line.get("check")
+        course = plan_line.get("course_type")
+
+        # Color period_type red if it's UNKNOWN
+        if ptype == "UNKNOWN":
+            ptype_cell = Td(ptype, style="background: red")
+        else:
+            ptype_cell = Td(ptype)
+
+        if not check.startswith("OK"):
+            check_cell = Td(check, style="background: red")
+        else:
+            check_cell = Td(check)
+
+        # Action buttons
+        delete_btn = Button("Delete",
+            hx_post=f"/planning/delete_dict_row?center={selected_name}&row_index={idx}",
+            hx_target="#planning-periods",
+            hx_confirm="Are you sure you want to delete this row?",
+            cls="danger"
+        )
+
+        edit_btn = Button("Edit",
+            hx_get=f"/planning/edit_dict_row?center={selected_name}&row_index={idx}",
+            hx_target=f"#plan-row-{idx}",
+            hx_swap="outerHTML"
+        )
+
+        action_cell = Td(delete_btn, " ", edit_btn)
+
+        rows.append(Tr(
+            Td(start, id=f"start-{idx}"),
+            Td(ptype, id=f"ptype-{idx}"),
+            Td(source),
+            check_cell,
+            Td(course),
+            action_cell,
+            id=f"plan-row-{idx}"
+        ))
+
+    table = Table(
+        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
+        Th("Dhamma.org center course"), Th("Actions"))),
+        Tbody(*rows, id="planning-rows")
+    )
+
+    # Save button
+    save_btn = Button("Save to Database",
+        hx_post=f"/planning/save_to_db?center={selected_name}",
+        hx_target="#planning-periods",
+        hx_confirm="This will replace all existing coming_periods for this center. Continue?",
+        cls="primary"
+    )
+
+    return Div(
+        Div(table, id="coming-periods-table"),
+        Div(save_btn, style="margin-top: 20px;"),
+        Script(f"window.draftPlan = {json.dumps(draft_plan)};")
+    )
+
+# ~/~ end
+# ~/~ end

@@ -78,12 +78,17 @@ def get(request):
     return consul.consult_select_timetable(request, db_path)
 
 @rt('/planning_page')
-def get(session, request):
+def get(session):
     return planning.planning_page(session, db)
 
-@rt('/planning/change_db')
-def get(request):
-    return planning.change_db(request, centers, db_path)
+@rt('/planning/get_dhamma_db')
+def get(session, request):
+    return planning.get_dhamma_db(session, request, db, db_path)
+
+@rt('/planning/set_free')
+def get(session, request):
+    print(request)
+    return planning.set_free(request, db)
 
 @rt('/admin_page')
 @admin_required

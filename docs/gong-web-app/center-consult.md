@@ -11,6 +11,8 @@ from fasthtml.common import database
 from libs.cdash import top_menu
 
 <<consult-page>>
+<<consult-periods>>
+<<consult-structure>>
 <<consult-timetable>>
 ```
 
@@ -46,7 +48,12 @@ def consult_page(session, centers):
         Div(id="timetables"),                # filled by /consult/select_timetable
         cls="container"
     )
+```
 
+
+### Consult panning periods + unused periods
+
+```{.python #consult-periods}
 
 # @rt('/consult/select_db')
 def consult_select_db(request, centers, db_path):
@@ -106,7 +113,12 @@ def consult_select_db(request, centers, db_path):
         Div("", hx_swap_oob="true", id="timetables"),
         Div("", hx_swap_oob="true", id="periods-struct")
     )
+```
 
+
+### Consult structures
+
+```{.python #consult-structure}
 
 # @rt('/consult/select_period')
 def consult_select_period(request, db_path):
