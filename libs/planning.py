@@ -1,15 +1,14 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
+import json
 from pathlib import Path
 from urllib.parse import quote_plus
 from tabulate import tabulate
 from fasthtml.common import *
-from fasthtml.common import database
 
 from libs.cdash import top_menu
 from libs.fetch import fetch_dhamma_courses, check_plan
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
-
 # @rt('/planning_page')
 def planning_page(session, db_central):
     # Main consult page: select a center and show its coming_periods.
@@ -52,14 +51,13 @@ def planning_page(session, db_central):
 def create_draft_plan_table(draft_plan):
     # Create an HTML table from a draft plan list of dictionaries.
     rows = []
-    # Color ptype in red if equal to UNKNOWN
     for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
         start = plan_line.get("start_date")
         ptype = plan_line.get("period_type")
         source = plan_line.get("source")
         check = plan_line.get("check")
         course = plan_line.get("course_type")
-        # Color period_type red if it's UNKNOWN
+        # Color period_type red if it's starting with UNKNOWN
         if ptype.startswith("UNKNOWN"):
             ptype_cell = Td(ptype, style="background: red")
         else:
@@ -78,12 +76,30 @@ def create_draft_plan_table(draft_plan):
     return table
 
 # @rt('/planning/get_dhamma_db')
-def get_dhamma_db(request, centers, db_path):
+def get_dhamma_db(session, request, db, db_path):
+    centers = db.t.centers
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
     if not selected_name:
         return Div(P("No center selected."))
     Center = centers.dataclass()
+
+    this_center = centers[selected_name].center_name
+    q_center = quote_plus(this_center)
+    this_user= session['auth']
+
+    # use SQL db commit for the following 5 lines ?
+    status_bef = centers[selected_name].status
+    if status_bef == "free":
+        centers.update(center_name=this_center, status="edit", current_user=this_user)
+    else:
+        return Div(
+            P("NOT AVAILABLE"),
+            A("Set status to 'free'",
+                hx_get=f"/planning/set_free?center_name={q_center}",
+                hx_target="#planning-periods"
+            ))
+
     selected_db = centers[selected_name].gong_db_name
 
     dbfile_path = Path(db_path) / selected_db
@@ -95,12 +111,26 @@ def get_dhamma_db(request, centers, db_path):
     new_draft_plan = check_plan(new_merged_plan, db_center)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
+    # CONTINOW start timer, save temp db with draft plan
     table = create_draft_plan_table(new_draft_plan)
 
     return Div(
-        Div(table, id="coming-periods-table"),
+        table
         # Div("", hx_swap_oob="true", id="timetables"),
         # Div("", hx_swap_oob="true", id="periods-struct")
     )
+
+#@rt('/planning/set_free')
+def set_free(request, db):
+    centers = db.t.centers
+    params = dict(request.query_params)
+    this_center = params.get("center_name")
+    if not this_center:
+        return Div(P("No center selected."))
+    Center = centers.dataclass()
+    print(this_center)
+    centers.update(center_name=this_center, status="free", current_user="")
+
+    return Div("")
 # ~/~ end
 # ~/~ end
