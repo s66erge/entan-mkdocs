@@ -10,6 +10,7 @@ This is a passwordless authentication:
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
 ```{.python file=libs/auth.py}
+import os
 import socket
 import secrets
 from datetime import datetime, timedelta

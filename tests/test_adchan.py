@@ -105,7 +105,7 @@ def test_delete_user_has_planners(temp_db, clean_files):
     User = users.dataclass()
     # create center, user and planner association
     center_name = "TestCenter"
-    add_center(center_name, "laba", "tc.db", "mahi.ok.db", db, ffolder)
+    add_center(center_name, "timez", "mok.db", "laba", "mahi.ok.db", db, ffolder)
     email = "planner@example.com"
     add_user(email, "Planner", "user", db)
     planners.insert(user_email=email, center_name=center_name)
@@ -134,8 +134,8 @@ def test_add_center_success(temp_db, clean_files):
     ffolder = clean_files
     centers = db.t.centers
     Center = centers.dataclass()
-    result = add_center("NewCenter", "New Location", "new_center.db",
-                        "mahi.ok.db", db, ffolder)
+    result = add_center("NewCenter", "timez", "new_center.db", "New Location", "mahi.ok.db",
+                        db, ffolder)
     result_str = to_xml(result)
     assert message in result_str
     # Verify center was added
@@ -150,7 +150,7 @@ def test_add_center_missing_fields(temp_db, clean_files):
     db, _ = temp_db
     ffolder = clean_files
     centers = db.t.centers
-    result = add_center("", "Location", "db.db", "mahi.ok.db", db, ffolder)
+    result = add_center("", "timez", "mahi.ok.db", "laba", "tc.db", db, ffolder)
     result_str = to_xml(result)
     assert message in result_str
     # Check that no center was added
@@ -165,11 +165,11 @@ def test_add_center_already_exists(temp_db, clean_files):
     centers = db.t.centers
     Center = centers.dataclass()
     # Add first center
-    result = add_center("ExistingCenter", "Existing Location", "existing.db", "mahi.ok.db",
+    result = add_center("ExistingCenter", "tz", "existing.db", "Existing Location", "mahi.ok.db",
                         db, ffolder)
     # Try to add same center again
-    result = add_center("ExistingCenter", "Different Location", "different.db", "mahi.ok.db",
-                        db, ffolder)
+    result = add_center("ExistingCenter", "tz", "different.db", "Different Location",
+                        "mahi.ok.db", db, ffolder)
     result_str = to_xml(result)
     assert message in result_str
     # Verify original center unchanged
@@ -185,8 +185,8 @@ def test_add_center_invalid_template(temp_db, clean_files):
     db, _ = temp_db
     ffolder = clean_files
     centers = db.t.centers
-    result = add_center("TemplateTestCenter", "Template Test", "template_test.db",
-                        "nonexistent_template.db", db, ffolder)
+    result = add_center("TemplateTestCenter", "Tz", "template_test.db",
+                        "Template Test", "nonexistent_template.db", db, ffolder)
     # Should contain error about template
     result_str = to_xml(result)
     assert message in result_str 
@@ -202,9 +202,9 @@ def test_add_center_duplicate_gong_db_name(temp_db, clean_files):
     centers = db.t.centers
     Center = centers.dataclass()
     # Add first center
-    add_center("Center1", "Location 2", "shared.db", "mahi.ok.db", db, ffolder)
+    add_center("Center1", "tz", "shared.db", "Location 2", "mahi.ok.db", db, ffolder)
     # Try to add center with same gong_db_name
-    result = add_center("Center2", "Location 2", "shared.db", "mahi.ok.db",
+    result = add_center("Center2", "tz", "shared.db", "Location 2", "mahi.ok.db",
                         db, ffolder)
     result_str = to_xml(result)
     assert message in result_str
@@ -229,7 +229,7 @@ def test_delete_center_has_planners(temp_db, clean_files):
     centers = db.t.centers
     # Create center, user and planner association
     center_name = "CenterWithPlanners"
-    add_center(center_name, "Location 2", "shared2.db", "mahi.ok.db", db, ffolder)
+    add_center(center_name, "tz", "shared2.db", "Location 2", "mahi.ok.db", db, ffolder)
     email = "planner1@example.com"
     add_user(email, "Planner One", "user", db)
     add_planner(email, center_name, db)
@@ -248,7 +248,7 @@ def test_delete_center_success(temp_db, clean_files):
     db_path = clean_files
     centers = db.t.centers
     # First add a center
-    add_center("CenterToDelete", "Delete Location", "delete_center.db", "mahi.ok.db",
+    add_center("CenterToDelete", "tz", "delete_center.db", "Delete Location", "mahi.ok.db",
                db, db_path)
     # Verify center was added
     center = centers("center_name = ?", ("CenterToDelete",))
@@ -269,7 +269,7 @@ def test_delete_center_removes_gong_db(temp_db, clean_files):
     centers = db.t.centers
     gong_db_name = "remove_me.db"
     # Add a center
-    add_center("CenterWithDB", "DB Location", gong_db_name, "mahi.ok.db", db, db_path)
+    add_center("CenterWithDB", "tz", gong_db_name, "DB Location", "mahi.ok.db", db, db_path)
     # Verify gong database file exists
     db_file_path = os.path.join(db_path, gong_db_name)
     assert os.path.exists(db_file_path), f"Gong DB file not found at {db_file_path}"
@@ -287,7 +287,7 @@ def test_add_planner_success(temp_db, clean_files):
     ffolder = clean_files
     planners = db.t.planners
     # First create a center and user
-    add_center("PlannerCenter", "Center Location", "planner.db", "mahi.ok.db", db, ffolder)
+    add_center("PlannerCenter", "tz", "planner.db", "Center Location", "mahi.ok.db", db, ffolder)
     add_user("planner@example.com", "Test Planner", "user", db)
     # Add planner association
     result = add_planner("planner@example.com", "PlannerCenter", db)
@@ -316,7 +316,7 @@ def test_add_planner_user_not_found(temp_db, clean_files):
     db, _ = temp_db
     ffolder = clean_files
     # Create a center but no user
-    add_center("TestCenter", "Location", "test.db", "mahi.ok.db", db, ffolder)
+    add_center("TestCenter", "tz", "test.db", "Location", "mahi.ok.db", db, ffolder)
     result = add_planner("nonexistent@example.com", "TestCenter", db)
     result_str = to_xml(result)
     assert message in result_str
@@ -338,7 +338,7 @@ def test_add_planner_already_exists(temp_db, clean_files):
     ffolder = clean_files
     planners = db.t.planners
     # Create center and user
-    add_center("ExistingCenter", "Location", "existing.db", "mahi.ok.db", db, ffolder)
+    add_center("ExistingCenter", "tz", "existing.db",  "Location", "mahi.ok.db", db, ffolder)
     add_user("existing@example.com", "Existing Planner", "user", db)
     # Add planner first time
     add_planner("existing@example.com", "ExistingCenter", db)
@@ -357,7 +357,7 @@ def test_add_planner_multiple_planners_same_center(temp_db, clean_files):
     ffolder = clean_files
     planners = db.t.planners
     # Create center
-    add_center("SharedCenter", "Shared Location", "shared3.db", "mahi.ok.db", db, ffolder)
+    add_center("SharedCenter", "tz", "shared3.db", "Shared Location", "mahi.ok.db", db, ffolder)
     # Add multiple users and planners
     for i in range(3):
         email = f"planner{i}@example.com"
@@ -379,7 +379,7 @@ def test_add_planner_same_user_multiple_centers(temp_db, clean_files):
     add_user("versatile@example.com", "Versatile Planner", "user", db)
     # Add multiple centers
     for i in range(3):
-        add_center(f"Center{i}", f"Location {i}", f"center{i}.db", "mahi.ok.db", db, ffolder)
+        add_center(f"Center{i}", "tz", f"center{i}.db", f"Location {i}", "mahi.ok.db", db, ffolder)
         result = add_planner("versatile@example.com", f"Center{i}", db)
         result_str = to_xml(result)
         assert message in result_str
@@ -395,7 +395,7 @@ def test_delete_planner_last_planner(temp_db, clean_files):
     centers = db.t.centers
     planners = db.t.planners
     # Create center and one planner
-    add_center("SoloCenter", "Location", "solo.db", "mahi.ok.db", db, ffolder)
+    add_center("SoloCenter", "tz", "solo.db", "Location", "mahi.ok.db", db, ffolder)
     add_user("solo_planner@example.com", "Solo Planner", "user", db)
     add_planner("solo_planner@example.com", "SoloCenter", db)
     # Attempt to delete the last planner
@@ -415,7 +415,7 @@ def test_delete_planner_success(temp_db, clean_files):
     ffolder = clean_files
     planners = db.t.planners
     # Create center and two planners
-    add_center("MultiCenter", "Location", "multi.db", "mahi.ok.db", db, ffolder)
+    add_center("MultiCenter", "tz", "multi.db", "Location", "mahi.ok.db", db, ffolder)
     add_user("p1@example.com", "Planner One", "user", db)
     add_user("p2@example.com", "Planner Two", "user", db)
     add_planner("p1@example.com", "MultiCenter", db)

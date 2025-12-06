@@ -120,8 +120,8 @@ def post(session, center_name: str):
 
 @rt('/add_center')
 @admin_required
-def post(session, new_center_name: str = "", new_center_location: str = "",new_gong_db_name: str = "", db_template: str = ""):
-    return adchan.add_center(new_center_name, new_center_location, new_gong_db_name, db_template, db, db_path)
+def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
+    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
