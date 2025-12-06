@@ -6,21 +6,11 @@ from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]
 def get_db_path():
-    # Check if we're in a CI/test environment
-    import sys
-    is_test_env = any('pytest' in arg or 'test' in arg.lower() for arg in sys.argv)
-    is_ci_env = (
-        os.environ.get('CI') == 'true' or           # Generic CI
-        os.environ.get('GITHUB_ACTIONS') == 'true' or  # GitHub Actions
-        os.environ.get('CONTINUOUS_INTEGRATION') == 'true'  # Some CI systems
-    )
-
-    # Debug logging (remove in production)
-    # print(f"DEBUG: is_test_env={is_test_env}, is_ci_env={is_ci_env}, GITHUB_ACTIONS={os.environ.get('GITHUB_ACTIONS')}")
-
-    if isa_dev_computer() or is_test_env or is_ci_env:
+    if isa_dev_computer():
         root = ""
-    else:   # Railway production computer
+    elif os.environ.get('CI') == 'true': # Github CI actions
+        root = ""
+    else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
 
