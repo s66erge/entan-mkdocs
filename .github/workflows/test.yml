@@ -28,7 +28,7 @@ jobs:
     - name: Run tests
       run: pytest
       env: 
-        CI: true
+        Github_CI: true
         
     - name: Run tests with coverage
       run: |
