@@ -83,17 +83,19 @@ def get(request):
     return consul.consult_select_timetable(request, db_path)
 
 @rt('/planning_page')
-def get(session):
-    return planning.planning_page(session, db)
-
-@rt('/planning/get_dhamma_db')
 def get(session, request):
-    print(request)
-    return planning.get_dhamma_db(session, request, db, db_path)
+    return planning.planning_page(session, request, db)
+
+@rt('/planning/load_dhamma_db')
+def get(session, request):
+    return planning.load_dhamma_db(session, request, db)
+
+@rt('/planning/show_dhamma')
+def get(session, request):
+    return planning.show_dhamma(request, db, db_path)
 
 @rt('/planning/set_free')
 def get(session, request):
-    print(request)
     return planning.set_free(request, db)
 
 @rt('/admin_page')
@@ -118,8 +120,8 @@ def post(session, center_name: str):
 
 @rt('/add_center')
 @admin_required
-def post(session, new_center_name: str = "", new_center_location: str = "",new_gong_db_name: str = "", db_template: str = ""):
-    return adchan.add_center(new_center_name, new_center_location, new_gong_db_name, db_template, db, db_path)
+def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
+    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required

@@ -25,6 +25,20 @@ def dashboard(session, db):
     user_centers = [(p.center_name) for p in user_planners] 
     user_center_list = ", ".join(user_centers)
 
+    select = Select(
+        Option("Select a center", value="", selected=True, disabled=True),
+        *[Option(name, value=name) for name in user_centers],
+        name="selected_name",
+        id="planning-db-select"
+    )
+    form = Form(
+        select,
+        Button("Open", type="submit"),
+        action="/planning_page",
+        method='get'
+    )
+
+
     return Main(
         top_menu(session['role']),
         Div(H1("Dashboard"),
@@ -32,8 +46,12 @@ def dashboard(session, db):
 
             P(A("To consult any center gong planning", href="/consult_page")),
 
-            P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,
+            #P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,
 
+            Div(
+                P("Choose a center:"),
+                form
+            ) if len(user_centers) >= 1 else None,
 
 
 

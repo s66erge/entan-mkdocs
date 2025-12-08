@@ -10,41 +10,22 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 # @rt('/planning_page')
-def planning_page(session, db_central):
-    # Main consult page: select a center and show its coming_periods.
-    planners = db_central.t.planners
-    sessemail = session['auth']
-    user_planners = planners("user_email = ?", (sessemail,))
-    center_names = [(p.center_name) for p in user_planners] 
+def planning_page(session, request, db_central):
 
-    select = Select(
-        Option("Select a center", value="", selected=True, disabled=True),
-        *[Option(name, value=name) for name in center_names],
-        name="selected_name",
-        id="planning-db-select"
-    )
-    form = Form(
-        select,
-        Button("Open", type="submit"),
-        hx_get="/planning/get_dhamma_db",
-        hx_target="#planning-periods"
-    )
+    params = dict(request.query_params)
+    selected_name = params.get("selected_name")
+
     return Main(
         top_menu(session['role']),
-        H1("Change Gong Planning"),
-        Div(
-            P("Choose a center:"),
-            form,
-            id="consult-db"
-        ) if len(center_names) > 1 else None,
-        Button(
-            f"{str(center_names[0])}", 
-            hx_get=f"/planning/get_dhamma_db?selected_name={str(center_names[0])}",
+        H1(f"Change Gong Planning - {selected_name}"),
+
+        Div(hx_get=f"/planning/load_dhamma_db?selected_name={selected_name}",
             hx_target="#planning-periods",
-            hx_trigger="load"
-        ) if len(center_names) == 1 else None,
+            hx_trigger="load",
+            style="display: none;"),
+
         H2("Plan with 'www.google.org' added for 12 month from current course start"),
-        Div(id="planning-periods"),          # filled by /planning/get_dhamma_db
+        Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
         cls="container"
     )
 
@@ -75,8 +56,8 @@ def create_draft_plan_table(draft_plan):
     )
     return table
 
-# @rt('/planning/get_dhamma_db')
-def get_dhamma_db(session, request, db, db_path):
+# @rt('/planning/load_dhamma_db')
+def load_dhamma_db(session, request, db):
     centers = db.t.centers
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
@@ -87,21 +68,39 @@ def get_dhamma_db(session, request, db, db_path):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-
     # use SQL db commit for the following 5 lines ?
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
-    else:
+    busy_user = centers[selected_name].current_user
+    timezone = centers[selected_name].timezone
+    if status_bef != "edit" or busy_user != this_user:
         return Div(
-            P("NOT AVAILABLE"),
-            A("Set status to 'free'",
+            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),
+            A("Force status to 'free' - ONLY FOR DEV !",
                 hx_get=f"/planning/set_free?center_name={q_center}",
                 hx_target="#planning-periods"
-            ))
+            ) 
+            )
 
+    return Div(
+        P(" Loading from dhamma.org ..."),
+        Div(hx_get=f"/planning/show_dhamma?selected_name={q_center}", 
+            hx_target="#planning-periods",
+            hx_trigger="load",  # Triggers when this div loads
+            style="display: none;"),
+        id="planning-periods"
+    )
+
+# @rt('/planning/show_dhamma')
+def show_dhamma(request, db, db_path):
+    centers = db.t.centers
+    params = dict(request.query_params)
+    selected_name = params.get("selected_name")
+    if not selected_name:
+        return Div(P("No center selected."))
+    Center = centers.dataclass()
     selected_db = centers[selected_name].gong_db_name
-
     dbfile_path = Path(db_path) / selected_db
     if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
@@ -115,9 +114,8 @@ def get_dhamma_db(session, request, db, db_path):
     table = create_draft_plan_table(new_draft_plan)
 
     return Div(
-        table
-        # Div("", hx_swap_oob="true", id="timetables"),
-        # Div("", hx_swap_oob="true", id="periods-struct")
+        table,
+        id="planning-periods"
     )
 
 #@rt('/planning/set_free')
@@ -128,9 +126,7 @@ def set_free(request, db):
     if not this_center:
         return Div(P("No center selected."))
     Center = centers.dataclass()
-    print(this_center)
     centers.update(center_name=this_center, status="free", current_user="")
-
     return Div("")
 # ~/~ end
 # ~/~ end

@@ -157,7 +157,7 @@ def delete_center(center_name, db, db_path):
 
 # @rt('/add_center')
 
-def add_center(new_center_name, new_center_location, new_gong_db_name, db_template, db, db_path):
+def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path):
     users = db.t.users
     centers = db.t.centers
     ## [1]
@@ -183,9 +183,12 @@ def add_center(new_center_name, new_center_location, new_gong_db_name, db_templa
             shutil.copy2(template_db, db_file_path)
             centers.insert(
                 center_name=new_center_name,
+                timezone=new_timezone,
                 gong_db_name=new_gong_db_name,
                 location=new_center_location,
-                other_course="{}"
+                other_course="{}",
+                status="free",
+                current_user=""
             )
             message = {'success': 'center_added'}
 

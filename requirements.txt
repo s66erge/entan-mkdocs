@@ -3,3 +3,8 @@ markdown2
 resend
 pandas
 tabulate
+pytest
+pytest-asyncio
+pytest-cov
+httpx
+pytest-mock

@@ -62,13 +62,15 @@ def show_centers_table(centers):
     return Main(
         Table(
             Thead(
-                Tr(Th("Center Name"), Th("Dhamma.org location"), Th("Gong DB Name"), Th("Actions"))
+                Tr(Th("Name"), Th("timezone"), Th("Gong DB Name"), Th("status"), Th("current user"), Th("Actions"))
             ),
             Tbody(
                 *[Tr(
                     Td(c.center_name),
-                    Td(c.location),
-                    Td(c.gong_db_name), 
+                    Td(c.timezone),
+                    Td(c.gong_db_name),
+                    Td(c.status),
+                    Td(c.current_user), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback", hx_confirm="Are you sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
@@ -82,8 +84,9 @@ def show_centers_form(centers):
         Div(
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
-                Input(type="text", placeholder="Center location number (dhamma.org)", name="new_center_location", required=True),
+                Input(type="text", placeholder="tz timezone (see: en.wikipedia.org/wiki/List_of_tz_database_time_zones)", name="new_timezone", required=True),
                 Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
+                Input(type="text", placeholder="Center location number (see: dhamma.org)", name="new_center_location", required=True),
                 Select(
                     Option("Center planning to copy", value="", selected=True, disabled=True),
                     *[Option(cdb, value=cdb) for cdb in center_dbs],

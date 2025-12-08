@@ -8,7 +8,9 @@ from libs.utils import isa_dev_computer
 def get_db_path():
     if isa_dev_computer():
         root = ""
-    else:   # Railway production computer
+    elif os.environ.get('Github_CI') == 'true': # Github CI actions
+        root = ""
+    else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
 

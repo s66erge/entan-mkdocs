@@ -69,8 +69,7 @@ def test_show_centers_table_multiple_centers(temp_db):
     assert "Center Z" in result
     assert "center_a.db" in result
     assert "center_b.db" in result
-    assert "Center Name" in result
-    assert "Dhamma.org location" in result
+    assert "Name" in result
     assert "Gong DB Name" in result
     assert "Actions" in result
     alpha_pos = result.find("Center A")

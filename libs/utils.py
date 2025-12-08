@@ -23,20 +23,6 @@ def isa_db_test(db):
 # ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
-    # old code via smtp
-    """
-    sender = os.environ.get('GOOGLE_SMTP_USER') 
-    password = os.environ.get('GOOGLE_SMTP_PASS')
-    # Create MIMEText email object with the email body
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ', '.join(recipients)
-    # Connect securely to Gmail SMTP server and login
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(sender, password)
-        smtp_server.sendmail(sender, recipients, msg.as_string())
-    """
     # using resend
     sender = "spegoff@authentica.eu" 
     resend.api_key = os.environ['RESEND_API_KEY']

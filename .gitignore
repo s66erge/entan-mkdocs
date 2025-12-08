@@ -2,6 +2,7 @@
 /*
 # Ignore hidden/work directories
 .*/
+.*
 site/*
 *.pyc
 __pycache__/*
@@ -17,4 +18,3 @@ __pycache__/*
 !md-text/
 !setup/
 !src/
-
