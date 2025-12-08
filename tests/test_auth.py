@@ -50,8 +50,8 @@ class TestSigninForm:
         assert 'Sign In with Email' in form_html
 
         # Check HTMX attributes
-        assert 'post="/create_magic_link"' in form_html
-        assert 'target="#error"' in form_html
+        assert 'hx-post="/create_magic_link"' in form_html
+        assert 'hx-target="#error"' in form_html
 
 
 class TestLogin:
