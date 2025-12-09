@@ -161,7 +161,7 @@ def db_error(session, etext: str):
     return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Head(Title("Database error")),
-        Body(Div(feedb.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        Body(Div(utils.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
         (A("Dashboard", href="/dashboard")),
         cls="container"
     )

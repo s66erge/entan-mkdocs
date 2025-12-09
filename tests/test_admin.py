@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from fasthtml.common import database, to_xml
 from libs.dbset import create_tables, init_data
-from libs.feedb import feed_text
+from libs.utils import feed_text
 
 from main import app
 from libs.admin import ( show_users_table, show_users_form,
