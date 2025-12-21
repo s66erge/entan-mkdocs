@@ -14,7 +14,7 @@ def dummy():
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework" ]
     hostname = socket.gethostname()
-    print('hostname: '+hostname)
+    # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
