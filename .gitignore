@@ -12,9 +12,10 @@ __pycache__/*
 # Except root files
 !/*
 # Except these folders
-!calendar-project/
 !data/
 !docs/
+!libs/
 !md-text/
 !setup/
-!src/
+!tests/
+!zkeep/

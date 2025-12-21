@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
 import textwrap
 import os
+import socket
 from fasthtml.common import database
 from libs.utils import isa_dev_computer
 
