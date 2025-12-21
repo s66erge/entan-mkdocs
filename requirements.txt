@@ -1,4 +1,5 @@
 python-fasthtml
+uvicorn
 markdown2
 resend
 pandas

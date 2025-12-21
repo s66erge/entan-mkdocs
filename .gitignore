@@ -5,6 +5,8 @@
 .*
 site/*
 *.pyc
+*.db-shm
+*.db-wal
 __pycache__/*
 .entangled/**/filedb.json
 .entangled/**/filedb.lock
