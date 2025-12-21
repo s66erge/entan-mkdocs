@@ -4,7 +4,6 @@ Will only be reachable for signed in admin users.
 
 ```{.python file=libs/admin.py}
 from fasthtml.common import *
-from libs.feedb import *
 from libs.utils import *
 
 <<show-users>>

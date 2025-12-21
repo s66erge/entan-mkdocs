@@ -2,7 +2,7 @@ import pytest
 import os
 from pathlib import Path
 from libs.dbset import create_tables, init_data
-from libs.feedb import feed_text
+from libs.utils import feed_text
 from fasthtml.common import database, to_xml
 
 from libs.adchan import add_user, delete_user, add_center, delete_center, add_planner, delete_planner
