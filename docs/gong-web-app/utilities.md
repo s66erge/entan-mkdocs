@@ -37,6 +37,7 @@ This function checks if the program runs on one of a predefined list of developm
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework" ]
     hostname = socket.gethostname()
+    # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
 ```
 

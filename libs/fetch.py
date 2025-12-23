@@ -80,7 +80,8 @@ def fetch_courses_from_dhamma(location, date_start, date_end):
 
 def get_period_type(anchor, course_type, list_of_types, other_dict):
     if anchor == "Other":
-        return other_dict.get(course_type.upper(), "UNKNOWN")
+        from_course_type = other_dict.get("from-center-course-type")
+        return from_course_type.get(course_type.upper(), "UNKNOWN")
     else:    
         for item in list_of_types:
             if  anchor == item.get('raw_course_type'):
@@ -93,6 +94,7 @@ def deduplicate(merged):
     i = 0
     while i < len(merged):
         current = merged[i]
+        # FIXME check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
         if i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
