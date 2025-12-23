@@ -89,13 +89,18 @@ def get_period_type(anchor, course_type, list_of_types, other_dict):
     return "UNKNOWN " + anchor
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
-def deduplicate(merged):
+def deduplicate(merged, other_dict):
     deduplicated = []
     i = 0
     while i < len(merged):
         current = merged[i]
-        # FIXME check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
-        if i + 1 < len(merged):
+        del_as_BETWEEN = other_dict.get("del-as-IN-BETWEEN")
+        # delete this period_type if it is replaced by IN-BETWEEN
+        if current["period_type"] in del_as_BETWEEN:
+            i += 1 # skip this item
+            continue
+        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
+        elif i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
                 current['period_type'] == next_item['period_type']):
@@ -213,7 +218,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
-    deduplicated = deduplicate(mer_sort)
+    deduplicated = deduplicate(mer_sort, other_dict)
 
     return deduplicated
 # ~/~ end
