@@ -58,7 +58,7 @@ def dashboard(session, db):
             #P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,
 
             Div(
-                P("Choose a center:"),
+                P("Choose one of the centers you can modify:"),
                 form
             ) if len(user_centers) >= 1 else None,
 
