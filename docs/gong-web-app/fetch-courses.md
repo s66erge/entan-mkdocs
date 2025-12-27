@@ -122,12 +122,11 @@ Remove duplicates: if consecutive items have identical start_date and period_typ
 keep only one with source='BOTH'
 
 ```{.python #deduplicate}
-def deduplicate(merged, other_dict):
+def deduplicate(merged, del_as_BETWEEN):
     deduplicated = []
     i = 0
     while i < len(merged):
         current = merged[i]
-        del_as_BETWEEN = other_dict.get("del-as-IN-BETWEEN")
         # delete this period_type if it is replaced by IN-BETWEEN
         if current["period_type"] in del_as_BETWEEN:
             i += 1 # skip this item
@@ -148,34 +147,48 @@ def deduplicate(merged, other_dict):
         i += 1
     return deduplicated
 
-def check_row(row, next_start_date, previous_end_date, types_with_duration):
+def check_row(row, next_type, next_start_date, previous_type, previous_end_date, types_with_duration):
     pt = row.get("period_type")
     if pt in [t.get("valid_types") for t in types_with_duration]:
         try:
-            d1 = date.fromisoformat(row.get("start_date"))
-            d2 = date.fromisoformat(next_start_date)
-            d0 = date.fromisoformat(previous_end_date) if previous_end_date else d1
-            number_of_days = (d2 - d1).days
+            s_this = date.fromisoformat(row.get("start_date"))
+            s_next = date.fromisoformat(next_start_date)
+            e_previous = date.fromisoformat(previous_end_date) if previous_end_date else s_this
+            days_s_next_s_this = (s_next - s_this).days
         except Exception:
             row["check"] = "InvalidDate"
         else:
             this_type = list(filter(lambda x: x.get("valid_types") == pt, types_with_duration))[0]
             #max_type = next((t for t in types_with_duration if t.get("valid_types") == pt), None)
-            if d1 < d0:
-                row["check"] = "Start in middle"
-            elif number_of_days < this_type.get("duration"):
-                row["check"] = f"Nok-{this_type.get('duration')}"
-            elif number_of_days > 1 + this_type.get("duration") and not this_type["var_period"]:
-                row["check"] = f"GAP of {number_of_days - this_type.get('duration')}"
-            elif number_of_days == 0:
-                row["check"] = "Same start"
+            if s_this < e_previous:
+                days_s_next_e_previous = (s_next - e_previous).days
+                if pt == "1 day" and days_s_next_e_previous > 1:
+                    row["check"] = f"Middle start + GAP of {days_s_next_e_previous - 1}"    
+                elif pt == "1 day" and days_s_next_e_previous < 0:
+                    row["check"] = f"Middle start + Overlap of {- days_s_next_e_previous}"    
+                elif previous_type in this_type.get("over_oth"):
+                    row["check"] = "OK middle start"
+                else:
+                    row["check"] = "Middle start"
+
+            elif days_s_next_s_this < this_type.get("duration"):
+                row["check"] = f"Overlap-{this_type.get('duration')}"
+            elif days_s_next_s_this > 1 + this_type.get("duration") and not this_type["var_period"]:
+                row["check"] = f"GAP of {days_s_next_s_this - this_type.get('duration')}"
+            elif days_s_next_s_this == 0:
+                if next_type in this_type.get("over_oth"):
+                    row["check"] = "OK same start"
+                else:
+                    row["check"] = "Same start"
             else:
                 row["check"] = "OK"
     else:
         row["check"] = "NoType"
     return row
 
-def check_plan(plan, db_center, var_periods):
+def check_plan(plan, db_center, other_course):
+    var_periods = other_course["variable-len"]
+    over_OK = other_course["override"]
     try:
         # build set of all period_types in db_center.t.periods_struct
         periods_struct = db_center.t.periods_struct()
@@ -189,14 +202,17 @@ def check_plan(plan, db_center, var_periods):
         days = [row.get("day") for row in periods_struct_rows if row.get("period_type") == vt and row.get("day") is not None]
         max_day = max(days) if days else None
         end_var = vt in var_periods
-        types_with_duration.append({'valid_types': vt, 'duration': max_day, 'var_period': end_var})
+        over_oth = over_OK.get(vt, [""])
+        types_with_duration.append({'valid_types': vt, 'duration': max_day, 'var_period': end_var, "over_oth":over_oth})
 
     for idx, item in enumerate(plan):
+        next_type = plan[idx + 1].get("period_type") if idx < len(plan) - 1 else "???AFTER"
         next_period_start = plan[idx + 1].get("start_date") if idx < len(plan) - 1 else \
                             plan[idx].get("end_date")
+        previous_type = plan[idx-1].get("period_type") if idx > 0 else "???BEFORE"
         previous_end_date = plan[idx-1].get("end_date") if idx > 0 else \
                             plan[idx].get("start_date") 
-        check_row(item, next_period_start, previous_end_date, types_with_duration)
+        check_row(item, next_type, next_period_start, previous_type, previous_end_date, types_with_duration)
     return plan
 ```
 
@@ -262,7 +278,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     mer_sort = sorted (merged,key=lambda x: x['start_date'])
-    deduplicated = deduplicate(mer_sort, other_dict)
+    deduplicated = deduplicate(mer_sort, other_dict.get("del-as-IN-BETWEEN"))
 
     return deduplicated
 ```
