@@ -108,7 +108,8 @@ def get_period_type(anchor, course_type: str, list_of_types, other_dict):
         course_type_dict = replacements[anchor]
         if course_type_dict.get("@ALL@"):
             return course_type_dict.get("@ALL@")
-        cleaned_course_type = ' '.join(course_type.upper().split())
+        cleaned_course_type_0 = ''.join(course_type.upper().split())
+        cleaned_course_type = ''.join(cleaned_course_type_0.split('-'))
         for key, value in course_type_dict.items():
             if key in cleaned_course_type:
                 return value
@@ -277,7 +278,11 @@ def fetch_dhamma_courses(center, num_months, num_days):
     ]                         
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
-    mer_sort = sorted (merged,key=lambda x: x['start_date'])
+    # Sort by start_date ascending, then end_date ascending
+    mer_sort = sorted(merged, key=lambda x: (
+        x['start_date'],  # Primary: start_date ascending
+        int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
+    ))
     deduplicated = deduplicate(mer_sort, other_dict.get("del-as-IN-BETWEEN"))
 
     return deduplicated
