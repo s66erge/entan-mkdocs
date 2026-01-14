@@ -11,6 +11,7 @@ import socket
 import calendar
 import resend
 import markdown2
+import os
 from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
@@ -35,8 +36,9 @@ This function checks if the program runs on one of a predefined list of developm
 
 ```{.python #isdev-computer}
 def isa_dev_computer():
-    DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework" ]
+    DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame" ]
     hostname = socket.gethostname()
+    # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
 ```
 
@@ -89,9 +91,13 @@ This function reads a markdown file name, without the extension '.md', then find
 ```{.python #display-markdown}
 
 def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
+    file_path = os.path.join('md-text', f"{file_name}.md")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            html_content = markdown2.markdown(f.read())
+        return NotStr(html_content)
+    else:
+        return f"!!! NO markdown file {file_name}.md IN md-text folder"
 ```
 
 ### Add months and days to an ISO date

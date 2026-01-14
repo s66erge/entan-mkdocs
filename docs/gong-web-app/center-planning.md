@@ -44,6 +44,7 @@ def create_draft_plan_table(draft_plan):
     rows = []
     for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
         start = plan_line.get("start_date")
+        end = plan_line.get("end_date")
         ptype = plan_line.get("period_type")
         source = plan_line.get("source")
         check = plan_line.get("check")
@@ -57,10 +58,10 @@ def create_draft_plan_table(draft_plan):
             check_cell = Td(check, style="background: red")
         else:
             check_cell = Td(check)
-        rows.append(Tr(Td(start), ptype_cell, Td(source), check_cell, Td(course)))
+        rows.append(Tr(Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course)))
 
     table = Table(
-        Thead(Tr(Th("Start date"), Th("Period type"), Th("source"), Th("check"),
+        Thead(Tr(Th("Start date"), Th("End date"), Th("Period type"), Th("source"), Th("check"),
         Th("Dhamma.org center course"))),
         Tbody(*rows)
     )
@@ -115,9 +116,9 @@ def show_dhamma(request, db, db_path):
     if not dbfile_path.exists():
         return Div(P(f"Database not found: {selected_db}"))
     db_center = database(str(dbfile_path))
-
+    other_course = json.loads(centers[selected_name].other_course)
     new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-    new_draft_plan = check_plan(new_merged_plan, db_center)
+    new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
     # CONTINOW start timer, save temp db with draft plan
