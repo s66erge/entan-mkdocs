@@ -158,7 +158,7 @@ def show_page(request, db):
             ), 
             Button("Logout", hx_post="/logout"),
         ),
-        Div(display_markdown("admin-show")),
+        Div(display_markdown("admin-t")),
         # feedback_to_user(params),
 
         H2("Users"),

@@ -52,7 +52,7 @@ def get(session, token: str):
 @rt('/')
 def home():
     return Main(
-        Div(utils.display_markdown("home")),
+        Div(utils.display_markdown("home-t")),
         A("Login",href="/login", class_="button"),
         cls="container"
     )

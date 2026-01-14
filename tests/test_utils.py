@@ -42,12 +42,6 @@ def test_display_markdown_basic(tmp_path):
     finally:
         os.chdir(original_cwd)
 
-def test_display_markdown_file_not_found():
-    """Test that FileNotFoundError is raised for missing file."""
-    with pytest.raises(FileNotFoundError):
-        display_markdown("nonexistent_file")
-
-
 class TestFeedbackToUser:
     """Test feedback_to_user function."""
 

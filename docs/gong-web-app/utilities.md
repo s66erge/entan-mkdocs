@@ -11,6 +11,7 @@ import socket
 import calendar
 import resend
 import markdown2
+import os
 from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
@@ -90,9 +91,13 @@ This function reads a markdown file name, without the extension '.md', then find
 ```{.python #display-markdown}
 
 def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
+    file_path = os.path.join('md-text', f"{file_name}.md")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            html_content = markdown2.markdown(f.read())
+        return NotStr(html_content)
+    else:
+        return f"!!! NO markdown file {file_name}.md IN md-text folder"
 ```
 
 ### Add months and days to an ISO date

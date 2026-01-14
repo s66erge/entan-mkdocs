@@ -3,6 +3,7 @@ import socket
 import calendar
 import resend
 import markdown2
+import os
 from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
@@ -39,9 +40,13 @@ def send_email(subject, body, recipients):
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_name:str):
-    with open(f'md-text/{file_name}.md', "r") as f:
-        html_content = markdown2.markdown(f.read())
-    return NotStr(html_content)
+    file_path = os.path.join('md-text', f"{file_name}.md")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            html_content = markdown2.markdown(f.read())
+        return NotStr(html_content)
+    else:
+        return f"!!! NO markdown file {file_name}.md IN md-text folder"
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 

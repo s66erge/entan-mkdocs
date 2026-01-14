@@ -1,5 +1,5 @@
 import pytest
-from libs.feedb import feedback_to_user, feed_text
+from libs.utils import feedback_to_user, feed_text
 from fasthtml.common import *
 
 class TestFeedbackToUser:

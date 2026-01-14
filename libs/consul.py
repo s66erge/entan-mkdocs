@@ -5,6 +5,7 @@ from fasthtml.common import *
 from fasthtml.common import database
 
 from libs.cdash import top_menu
+from libs.utils import display_markdown
 
 # ~/~ begin <<docs/gong-web-app/center-consult.md#consult-page>>[init]
 
@@ -27,7 +28,7 @@ def consult_page(session, centers):
     )
     return Main(
         top_menu(session['role']),
-        H1("Consult Gong Planning"),
+        Div(display_markdown("consult-t")),
         Div(P("Choose a center:"), form, id="consult-db"),
         H2("Coming periods"),
         Div(id="coming-periods"),            # filled by /consult/select_db

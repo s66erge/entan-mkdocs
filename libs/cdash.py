@@ -1,5 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from fasthtml.common import *
+from libs.utils import display_markdown
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -33,7 +34,7 @@ def dashboard(session, db):
     )
     form = Form(
         select,
-        Button("Open", type="submit"),
+        Button("MODIFY", type="submit"),
         action="/planning_page",
         method='get'
     )
@@ -41,20 +42,14 @@ def dashboard(session, db):
 
     return Main(
         top_menu(session['role']),
-        Div(H1("Dashboard"),
+        Div(Div(display_markdown("dashboard-t")),
             P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
-
-            P(A("To consult any center gong planning", href="/consult_page")),
-
-            #P(A(f"To modify the course planning for one of your centers:  {user_center_list}", href="/planning_page")) if user_centers else None,
-
+            P(""),
+            P(A("CONSULT", href="/consult_page")),
             Div(
                 P("Choose one of the centers you can modify:"),
                 form
             ) if len(user_centers) >= 1 else None,
-
-
-
             cls="container"
         ),
         cls="container",
