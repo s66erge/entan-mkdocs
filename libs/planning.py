@@ -69,7 +69,7 @@ def load_dhamma_db(session, request, db):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-    # use SQL db commit for the following 5 lines ?
+    # CONTINOW START TIMER + use SQL db commit for the following 5 lines 
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
@@ -111,8 +111,10 @@ def show_dhamma(request, db, db_path):
     new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
-    # CONTINOW start timer, save temp db with draft plan
     table = create_draft_plan_table(new_draft_plan)
+
+    # CONTINOW TEMPORARY free access to center planning
+    centers.update(center_name=selected_name, status="free", current_user="")
 
     return Div(
         table,
