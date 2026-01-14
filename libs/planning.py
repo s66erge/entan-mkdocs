@@ -75,7 +75,7 @@ def load_dhamma_db(session, request, db):
         centers.update(center_name=this_center, status="edit", current_user=this_user)
     busy_user = centers[selected_name].current_user
     timezone = centers[selected_name].timezone
-    if status_bef != "edit" or busy_user != this_user:
+    if status_bef != "free" or busy_user != this_user:
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),
             A("Force status to 'free' - ONLY FOR DEV !",
@@ -130,6 +130,6 @@ def set_free(request, db):
         return Div(P("No center selected."))
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
-    return Div("")
+    return Div("Status set to 'free'")
 # ~/~ end
 # ~/~ end
