@@ -108,6 +108,7 @@ def show_dhamma(request, db, db_path):
     db_center = database(str(dbfile_path))
     other_course = json.loads(centers[selected_name].other_course)
     new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
+    print(other_course)
     new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
