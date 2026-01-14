@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 from tabulate import tabulate
 from fasthtml.common import *
 
-from libs.cdash import top_menu
+from libs.utils import display_markdown
 from libs.fetch import fetch_dhamma_courses, check_plan
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
@@ -15,16 +15,21 @@ def planning_page(session, request, db_central):
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
 
+    # CONTINOW START TIMER
+
     return Main(
-        top_menu(session['role']),
-        H1(f"Change Gong Planning - {selected_name}"),
-
-        Div(hx_get=f"/planning/load_dhamma_db?selected_name={selected_name}",
-            hx_target="#planning-periods",
-            hx_trigger="load",
-            style="display: none;"),
-
-        H2("Plan with 'www.google.org' added for 12 month from current course start"),
+        Div(display_markdown("planning-t")),
+        Span(
+            Button(f"Modify {selected_name} planning",
+                hx_get=f"/planning/load_dhamma_db?selected_name={selected_name}",
+                hx_target="#planning-periods"),
+                Span(style="display: inline-block; width: 20px;"),
+            Button(f"Modify {selected_name} course types / timetables",
+                #hx_get=f"/planning/load_courses?selected_name={selected_name}",
+                hx_get="/unfinished",
+                hx_target="#planning-periods"),
+        ),    
+        P(""),       
         Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
         cls="container"
     )
@@ -69,7 +74,7 @@ def load_dhamma_db(session, request, db):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-    # CONTINOW START TIMER + use SQL db commit for the following 5 lines 
+    # CONTINOW use SQL db commit for the following 5 lines 
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
@@ -117,6 +122,7 @@ def show_dhamma(request, db, db_path):
     centers.update(center_name=selected_name, status="free", current_user="")
 
     return Div(
+        H2("Plan with 'www.google.org' added for 12 month from current course start"),
         table,
         id="planning-periods"
     )

@@ -46,7 +46,7 @@ def display_markdown(file_name:str):
             html_content = markdown2.markdown(f.read())
         return NotStr(html_content)
     else:
-        return f"!!! NO markdown file {file_name}.md IN md-text folder"
+        return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 

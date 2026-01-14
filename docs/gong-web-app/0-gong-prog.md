@@ -152,7 +152,7 @@ def get():
 def get():
     return Main(
         Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(H1("This feature is not yet implemented.")),
+        Div(H2("This feature is not yet implemented.")),
         cls="container"
     )
 
