@@ -79,13 +79,13 @@ def load_dhamma_db(session, request, db):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-    # use SQL db commit for the following 5 lines ?
+    # CONTINOW START TIMER + use SQL db commit for the following 5 lines 
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
     busy_user = centers[selected_name].current_user
     timezone = centers[selected_name].timezone
-    if status_bef != "edit" or busy_user != this_user:
+    if status_bef != "free" or busy_user != this_user:
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),
             A("Force status to 'free' - ONLY FOR DEV !",
@@ -121,8 +121,10 @@ def show_dhamma(request, db, db_path):
     new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
 
-    # CONTINOW start timer, save temp db with draft plan
     table = create_draft_plan_table(new_draft_plan)
+
+    # CONTINOW TEMPORARY free access to center planning
+    centers.update(center_name=selected_name, status="free", current_user="")
 
     return Div(
         table,
@@ -138,6 +140,6 @@ def set_free(request, db):
         return Div(P("No center selected."))
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
-    return Div("")
+    return Div("Status set to 'free'")
 ```
 
