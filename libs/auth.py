@@ -86,7 +86,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if False:  # isa_dev_computer():
+   if False: # isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])
