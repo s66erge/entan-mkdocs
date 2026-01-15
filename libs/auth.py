@@ -104,6 +104,7 @@ def verify_link(session, token, users):
        session['auth'] = user.email
        session['role'] = user.role_name
        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+       print(f"{user.email} just got connected")
        return RedirectResponse('/dashboard')
    except IndexError:
        return "Invalid or expired magic link"
