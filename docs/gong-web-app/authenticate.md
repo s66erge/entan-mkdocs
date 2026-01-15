@@ -148,8 +148,8 @@ def send_magic_link_email(email_address: str, magic_link: str):
 
    Click this link to sign in to The App: {magic_link}
 
-   If you have a @dhamma.org address, add 'https://' before the link before clicking:
-   {magic_link[9:]}
+   If you have a @dhamma.org address, add 'https:' before the link before clicking:
+   {magic_link[6:]}
    
    If you didn't request this, just ignore this email.
 
