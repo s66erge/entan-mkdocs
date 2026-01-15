@@ -146,9 +146,14 @@ def send_magic_link_email(email_address: str, magic_link: str):
    email_text = f"""
    Hey there,
 
-   Click this link to sign in to The App: {magic_link}
+   If you have a @dhamma.org address, do not click the long link but see instructions below.
+   
+   Otherwise click this link to sign in to The App: {magic_link}
 
-   If you have a @dhamma.org address, add 'https:' before the link before clicking:
+   If you have a @dhamma.org address:
+   1. copy the link fragment here below starting with '//entan...'
+   2. paste into the address bar of a new tab in your browser - do not ENTER yet
+   3. add 'https:' at the start of the link fragment, then ENTER
    {magic_link[6:]}
    
    If you didn't request this, just ignore this email.
