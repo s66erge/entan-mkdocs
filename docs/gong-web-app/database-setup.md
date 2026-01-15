@@ -56,6 +56,7 @@ def create_tables(db):
         magic_link_token TEXT,
         magic_link_expiry TIMESTAMP,
         is_active BOOLEAN DEFAULT FALSE,
+        number_link_touched INT,
         FOREIGN KEY (role_name) REFERENCES roles(role_name)
     );
 

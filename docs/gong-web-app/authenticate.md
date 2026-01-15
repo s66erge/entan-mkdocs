@@ -106,7 +106,7 @@ def create_link(email,users):
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
     try:
        user = users[email]
-       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry)
+       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
     except NotFoundError:
         return Div(
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
@@ -153,7 +153,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if isa_dev_computer():
+   if False:  # isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])
@@ -176,16 +176,22 @@ def get(session, token: str):
     return auth.verify_link(session, token, users) 
 """
 def verify_link(session, token, users):
-   nowstr = f"'{datetime.now()}'"
-   try:
-       user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-       session['auth'] = user.email
-       session['role'] = user.role_name
-       users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-       print(f"{user.email} just got connected")
-       return RedirectResponse('/dashboard')
-   except IndexError:
-       return "Invalid or expired magic link"
+    nowstr = f"'{datetime.now()}'"
+    try:
+        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
+        usermail = user.email
+        num_link_touch = user.number_link_touched + 1
+        users.update(email= user.email, number_link_touched= num_link_touch)
+        session['auth'] = usermail
+        session['role'] = user.role_name
+        if (not usermail.endswith("dhamma.org") and num_link_touch == 1) or (usermail.endswith("dhamma.org") and num_link_touch == 2):
+            users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+            print(f"{usermail} just got connected")
+            return RedirectResponse('/dashboard')
+        print(f"{usermail} link 'cliqued' first time")
+        return "dhamma.org link 'cliqued' first time"
+    except IndexError:
+        return "Invalid or expired magic link"
 ```
 
 
