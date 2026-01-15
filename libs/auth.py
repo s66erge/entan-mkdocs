@@ -84,7 +84,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Otherwise click this link to sign in to The App: {magic_link}
 
    If you have a @dhamma.org address:
-   1. copy the link fragment here below starting with '://entan...'
+   1. copy the link fragment here below starting with '://entan...' until the last character on the same line
    2. paste into the address bar of a new tab in your browser - do not ENTER yet
    3. add these 5 letters 'https' at the start of the link fragment, then ENTER
    {magic_link[5:]}
