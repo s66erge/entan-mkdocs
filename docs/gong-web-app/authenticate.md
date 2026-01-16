@@ -195,7 +195,8 @@ def verify_link(session, request, token, users):
             users.update(email= user.email, number_link_touched= num_get_link_touch)
             session['auth'] = usermail
             session['role'] = user.role_name
-            if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
+            #if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
+            if cookie.startswith("session_="):
                 users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
