@@ -13,7 +13,7 @@ from fasthtml.common import *
 from libs import * 
 from libs.auth import admin_required
 
-css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Pacifico, cursive;}')
+css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
