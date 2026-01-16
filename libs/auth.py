@@ -79,19 +79,19 @@ def send_magic_link_email(email_address: str, magic_link: str):
    email_text = f"""
    Hey there,
 
-   If you have a @dhamma.org address, do not click the long link but see instructions below.
+   If you have a @dhamma.org address and clicking the long link does not connect you to the app, re-enter your email on the login screen and follow the instructions under the link.
 
-   Otherwise click this link to sign in to The App: {magic_link}
+   Click this link to sign in to The App: {magic_link}
 
-   If you have a @dhamma.org address:
-   1. copy the link fragment here below starting with '://entan...' until the last character on the same line
+   Instructions for @dhamma.org address when clicking the link does not work:
+   1. copy the link fragment here below starting with 'ttps://entan...' until the last character on the same line
    2. paste into the address bar of a new tab in your browser - do not ENTER yet
-   3. add these 5 letters 'https' at the start of the link fragment, then ENTER
-   {magic_link[5:]}
+   3. add the letter 'h' at the start of the link fragment, then ENTER
+   {magic_link[1:]}
 
    If you didn't request this, just ignore this email.
 
-   Cheers,
+   With Metta
    The App Team
    """
    if isa_dev_computer():
@@ -119,6 +119,7 @@ def verify_link(session, request, token, users):
                 users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
+            print("dhamma.org link cliqued first time")
             return "dhamma.org link cliqued first time"
         else:
             print("ignoring non GET (HEAD) html method")
