@@ -49,8 +49,8 @@ def post(email: str):
     return auth.create_link(email, users)
 
 @rt('/verify_magic_link/{token}')
-def get(session, token: str):
-    return auth.verify_link(session, token, users) 
+def get(session, request, token: str):
+    return auth.verify_link(session, request, token, users) 
 
 # client = TestClient(app)
 

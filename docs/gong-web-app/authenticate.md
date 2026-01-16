@@ -147,7 +147,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Hey there,
 
    If you have a @dhamma.org address, do not click the long link but see instructions below.
-   
+
    Otherwise click this link to sign in to The App: {magic_link}
 
    If you have a @dhamma.org address:
@@ -155,7 +155,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    2. paste into the address bar of a new tab in your browser - do not ENTER yet
    3. add these 5 letters 'https' at the start of the link fragment, then ENTER
    {magic_link[5:]}
-   
+
    If you didn't request this, just ignore this email.
 
    Cheers,
@@ -183,23 +183,24 @@ We do this to keep our database clean. Imagine a hacker enters thousands of rand
 def get(session, token: str):
     return auth.verify_link(session, token, users) 
 """
-def verify_link(session, token, users):
+def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
-        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-        usermail = user.email
-        num_link_touch = user.number_link_touched + 1
-        users.update(email= user.email, number_link_touched= num_link_touch)
-        session['auth'] = usermail
-        session['role'] = user.role_name
-        if (not usermail.endswith("dhamma.org") and num_link_touch == 1):
-            users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-            print(f"{usermail} just got connected")
-            return RedirectResponse('/dashboard')
-        if usermail.endswith("dhamma.org"):
-            print(f"{usermail} link clicked {num_link_touch} times")
-            return RedirectResponse('/dashboard')
-        return "dhamma.org link 'cliqued' first time"
+        if request.method == "GET":
+            user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
+            usermail = user.email
+            num_get_link_touch = user.number_link_touched + 1
+            users.update(email= user.email, number_link_touched= num_get_link_touch)
+            session['auth'] = usermail
+            session['role'] = user.role_name
+            if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
+                users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+                print(f"{usermail} just got connected")
+                return RedirectResponse('/dashboard')
+            return "dhamma.org link cliqued first time"
+        else:
+            print("ignoring non GET html method")
+            return "ignoring non GET html method"
     except IndexError:
         return "Invalid or expired magic link"
 ```
