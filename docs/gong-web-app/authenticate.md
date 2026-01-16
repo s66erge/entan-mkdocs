@@ -161,7 +161,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    Cheers,
    The App Team
    """
-   if False:  # isa_dev_computer():
+   if isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])
@@ -192,11 +192,13 @@ def verify_link(session, token, users):
         users.update(email= user.email, number_link_touched= num_link_touch)
         session['auth'] = usermail
         session['role'] = user.role_name
-        if (not usermail.endswith("dhamma.org") and num_link_touch == 1) or (usermail.endswith("dhamma.org") and num_link_touch == 2):
+        if (not usermail.endswith("dhamma.org") and num_link_touch == 1):
             users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
             print(f"{usermail} just got connected")
             return RedirectResponse('/dashboard')
-        print(f"{usermail} link 'cliqued' first time")
+        if usermail.endswith("dhamma.org"):
+            print(f"{usermail} link clicked {num_link_touch} times")
+            return RedirectResponse('/dashboard')
         return "dhamma.org link 'cliqued' first time"
     except IndexError:
         return "Invalid or expired magic link"
