@@ -121,7 +121,7 @@ def verify_link(session, request, token, users):
                 return RedirectResponse('/dashboard')
             return "dhamma.org link cliqued first time"
         else:
-            print("ignoring non GET html method")
+            print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
     except IndexError:
         return "Invalid or expired magic link"
