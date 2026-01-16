@@ -187,16 +187,16 @@ def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         if request.method == "GET":
-            cookie = dict(request.headers).get("cookie", "NO cookie")[0:9]
-            print(f"cookie: {cookie}")
+            # cookie = dict(request.headers).get("cookie", "NO cookie")[0:9]
+            # print(f"cookie: {cookie}")
             user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
             usermail = user.email
-            # num_get_link_touch = user.number_link_touched + 1
-            # users.update(email= user.email, number_link_touched= num_get_link_touch)
+            num_get_link_touch = user.number_link_touched + 1
+            users.update(email= user.email, number_link_touched= num_get_link_touch)
             session['auth'] = usermail
             session['role'] = user.role_name
-            #if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
-            if cookie == "session_=":
+            if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
+            # if cookie == "session_=":
                 users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
