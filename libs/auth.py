@@ -113,13 +113,17 @@ def is_bot_request(request):
     # Full request context
     headers = dict(request.headers)
     headers['REQUEST_METHOD'] = request.method
+    # cross-site request
+    if headers.get('sec-fetch-site',"") == 'cross-site':
+        print('cross-site request')
+        return True
     # Primary detection
     crawler = CrawlerDetect(headers=headers) 
     if crawler.isCrawler():
         print(f"bot detected: {crawler.getMatches()}")
         return True
     # Additional Safe Links heuristics
-    user_agent = request.headers.get('User-Agent',"")
+    user_agent = request.headers.get('user-agent',"")
     if 'safelinks' in user_agent.lower():
         print("safelinks in User-Agent")
         return True
