@@ -175,62 +175,10 @@ We do this to keep our database clean. Imagine a hacker enters thousands of rand
 def get(session, request, token: str):
     return auth.verify_link(session, request, token, users) 
 """
-def is_bot_request(request):
-    if request.method == 'HEAD':
-        print("request.method = HEAD")
-        return True
-    # Additional Safe Links heuristics
-    user_agent = request.headers.get('user-agent',"")
-    if 'safelinks' in user_agent.lower():
-        print("safelinks in User-Agent")
-        return True
-    return False
-
-
-def magic_button(session, token, users):
-    nowstr = f"'{datetime.now()}'"
-    try:
-        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-        usermail = user.email
-        session['auth'] = usermail
-        session['role'] = user.role_name
-        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-        print(f"{usermail} just got connected")
-        return RedirectResponse('/dashboard')
-    except IndexError:
-        return "Invalid or expired magic link"
-
-def verify_link2(session, request, token, users):
-    print(f"{request.method} {request.url}")
-    print(request.headers)
-    print(request.body)
-    if is_bot_request(request):
-        print("bot detected")  # UA + method checks
-        return "Nothing"  # Bots + non-JS clients
-        # Real user gets full landing page
-    print("NOT a bot")
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <body>
-    <h1>🔐 Sign in to YourApp</h1>
-    <p>Click the button below to securely sign in.</p>
-    <button onclick="signIn()">Sign In</button>
-    <script>
-    function signIn() {{ window.location.href = '/magic_button/{token}'; }}
-    // Auto-redirect after 3s as backup
-    // setTimeout(signIn, 3000);
-    </script>
-    </body>
-    </html>
-    """
-
 def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         if request.method == "GET":
-            # cookie = dict(request.headers).get("cookie", "NO cookie")[0:9]
-            # print(f"cookie: {cookie}")
             user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
             usermail = user.email
             num_get_link_touch = user.number_link_touched + 1
@@ -238,16 +186,18 @@ def verify_link(session, request, token, users):
             session['auth'] = usermail
             session['role'] = user.role_name
             if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
-            # if cookie == "session_=":
                 users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
             print("dhamma.org link cliqued first time")
-            return """
-            Dhamma.org link cliqued first time.
-            Reload your browser page to sign in: click on ↻ at the top left.
-            """
-        else:
+            return Div(
+                Script(
+                    """
+                    {window.location.reload()}
+                    """
+                )
+            )
+            else:
             print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
     except IndexError:
