@@ -52,6 +52,10 @@ def post(email: str):
 def get(session, request, token: str):
     return auth.verify_link(session, request, token, users) 
 
+@rt('/magic_button/{token}')
+def get(session, request, token: str):
+    return auth.magic_button(session, token, users) 
+
 # client = TestClient(app)
 
 @rt('/')

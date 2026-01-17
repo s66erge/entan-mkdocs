@@ -4,6 +4,7 @@ import socket
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
+from crawlerdetect import CrawlerDetect
 from fasthtml.common import *
 from libs.utils import isa_dev_computer, send_email, feedback_to_user
 
@@ -83,7 +84,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
 
    Click this link to sign in to The App: {magic_link}
 
-   Instructions for @dhamma.org address when clicking the link does not work:
+   Instructions for ...@dhamma.org address when clicking the link does not work:
    1. copy the link fragment here below starting with 'ttps://entan...' until the last character on the same line
    2. paste into the address bar of a new tab in your browser - do not ENTER yet
    3. add the letter 'h' at the start of the link fragment, then ENTER
@@ -102,10 +103,52 @@ def send_magic_link_email(email_address: str, magic_link: str):
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
 """
 @rt('/verify_magic_link/{token}')
-def get(session, token: str):
-    return auth.verify_link(session, token, users) 
+def get(session, request, token: str):
+    return auth.verify_link(session, request, token, users) 
 """
+def is_bot_request(request):
+    if request.method == 'HEAD':
+        print("request.method = HEAD")
+        return True
+    # Full request context
+    headers = dict(request.headers)
+    headers['REQUEST_METHOD'] = request.method
+    # Primary detection
+    crawler = CrawlerDetect(headers=headers) 
+    if crawler.isCrawler():
+        print(f"bot detected: {crawler.getMatches()}")
+        return True
+    # Additional Safe Links heuristics
+    user_agent = request.headers.get('User-Agent',"")
+    if 'safelinks' in user_agent.lower():
+        print("safelinks in User-Agent")
+        return True
+    return False
+
+
+def magic_button(session, token, users):
+    nowstr = f"'{datetime.now()}'"
+    user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
+    usermail = user.email
+    session['auth'] = usermail
+    session['role'] = user.role_name
+    users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+    print(f"{usermail} just got connected")
+    return RedirectResponse('/dashboard')
+
 def verify_link(session, request, token, users):
+    if is_bot_request(request):  # UA + method checks
+        return '', 204  # Bots + non-JS clients
+        # Real user gets full landing page
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <script>window.location.href='/magic_button/{token}'</script>
+    <button onclick="window.location.href='/magic_button/{token}'">Sign In</button>
+    </html>
+    """
+
+def verify_link2(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         if request.method == "GET":

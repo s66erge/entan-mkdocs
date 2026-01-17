@@ -36,10 +36,11 @@ def dashboard(session, db):
     user_center_list = ", ".join(user_centers)
 
     select = Select(
-        Option("Select a center", value="", selected=True, disabled=True),
+        Option("Select a center", value="", selected=True),
         *[Option(name, value=name) for name in user_centers],
         name="selected_name",
-        id="planning-db-select"
+        id="planning-db-select",
+        required=True
     )
     form = Form(
         select,
