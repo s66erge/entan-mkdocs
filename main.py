@@ -44,11 +44,11 @@ def post(email: str):
     return auth.create_link(email, users)
 
 @rt('/verify_magic_link/{token}')
-def get(session, request, token: str):
-    return auth.verify_link(session, request, token, users) 
+def get(request, token: str):
+    return auth.verify_link(request, token) 
 
 @rt('/magic_button/{token}')
-def get(session, request, token: str):
+def get(session, token: str):
     return auth.magic_button(session, token, users) 
 
 # client = TestClient(app)

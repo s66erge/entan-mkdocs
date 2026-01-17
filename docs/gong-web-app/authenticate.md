@@ -186,43 +186,23 @@ def magic_button(session, token, users):
         print(f"{usermail} just got connected")
         return RedirectResponse('/dashboard')
     except IndexError:
-        print("from magic: Invalid or expired magic link")
+        print("Invalid or expired magic link")
         return "Invalid or expired magic link"
 
-
-def verify_link(session, request, token, users):
-    nowstr = f"'{datetime.now()}'"
-    try:
-        if request.method == "GET":
-            skip = """
-            user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-            usermail = user.email
-            num_get_link_touch = user.number_link_touched + 1
-            users.update(email= user.email, number_link_touched= num_get_link_touch)
-            session['auth'] = usermail
-            session['role'] = user.role_name
-            if (not usermail.endswith("dhamma.org") and num_get_link_touch == 1) or (usermail.endswith("dhamma.org") and num_get_link_touch >= 2):
-                users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-                print(f"{usermail} just got connected")
-                return RedirectResponse('/dashboard')
-            """
-            print("dhamma.org link cliqued first time")
-            return f"""
-            <!DOCTYPE html> <html> <body>
-            <script> {{setTimeout(() =>
-            {{ window.location.href = '/magic_button/{token}'; }},
-            100);}}
-            </script> </body> </html>
-            """
-        else:
-            print("ignoring non GET (HEAD) html method")
-            return "ignoring non GET html method"
-    except IndexError:
-        print("from verify: Invalid or expired magic link")
-        return "Invalid or expired magic link"
+def verify_link(request, token):
+    if request.method == "GET":
+        print("link was visited")
+        return f"""
+        <!DOCTYPE html> <html> <body>
+        <script> {{setTimeout(() =>
+        {{ window.location.href = '/magic_button/{token}'; }},
+        100);}}
+        </script> </body> </html>
+        """
+    else:
+        print("ignoring non GET (HEAD) html method")
+        return "ignoring non GET html method"
 ```
-
-
 
 ```{.python #admin_required}
 
