@@ -192,8 +192,8 @@ def is_bot_request(request):
     headers = dict(request.headers)
     headers['REQUEST_METHOD'] = request.method
     # cross-site request
-    if headers.get('sec-fetch-site',"") == 'cross-site':
-        print('cross-site request')
+    if headers.get('sec-fetch-site',"") != 'cross-site':
+        print('not the cross-site request')
         return True
     # Primary detection
     crawler = CrawlerDetect(headers=headers) 
