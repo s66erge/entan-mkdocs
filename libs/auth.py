@@ -128,15 +128,11 @@ def verify_link(session, request, token, users):
                 return RedirectResponse('/dashboard')
             print("dhamma.org link cliqued first time")
             return f"""
-            <!DOCTYPE html>
-            <html>
-            <body>
+            <!DOCTYPE html> <html> <body>
             <script> {{setTimeout(() =>
             {{ window.location.href = '/magic_button/{token}'; }},
             100);}}
-            </script>
-            </body>
-            </html>
+            </script> </body> </html>
             """
         else:
             print("ignoring non GET (HEAD) html method")
