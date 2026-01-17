@@ -79,15 +79,9 @@ def send_magic_link_email(email_address: str, magic_link: str):
    email_text = f"""
    Hey there,
 
-   If you have a @dhamma.org address and clicking the long link does not connect you to the app, re-enter your email on the login screen and follow the instructions under the link.
+   If you have a @dhamma.org address and after clicking the link below you see this message 'dhamma.org link cliqued first time', then reload your browser page (click on : ↻ ).
 
    Click this link to sign in to The App: {magic_link}
-
-   Instructions for ...@dhamma.org address when clicking the link does not work:
-   1. copy the link fragment here below starting with 'ttps://entan...' until the last character on the same line
-   2. paste into the address bar of a new tab in your browser - do not ENTER yet
-   3. add the letter 'h' at the start of the link fragment, then ENTER
-   {magic_link[1:]}
 
    If you didn't request this, just ignore this email.
 
