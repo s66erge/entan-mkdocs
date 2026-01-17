@@ -15,7 +15,6 @@ import socket
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
-from crawlerdetect import CrawlerDetect
 from fasthtml.common import *
 from libs.utils import isa_dev_computer, send_email, feedback_to_user
 
@@ -188,18 +187,6 @@ def is_bot_request(request):
     if request.method == 'HEAD':
         print("request.method = HEAD")
         return True
-    # Full request context
-    headers = dict(request.headers)
-    headers['REQUEST_METHOD'] = request.method
-    # cross-site request
-    #if headers.get('sec-fetch-site',"") != 'cross-site':
-    #    print('not the cross-site request')
-    #    return True
-    # Primary detection
-    crawler = CrawlerDetect(headers=headers) 
-    if crawler.isCrawler():
-        print(f"bot detected: {crawler.getMatches()}")
-        return True
     # Additional Safe Links heuristics
     user_agent = request.headers.get('user-agent',"")
     if 'safelinks' in user_agent.lower():
@@ -221,7 +208,7 @@ def magic_button(session, token, users):
     except IndexError:
         return "Invalid or expired magic link"
 
-def verify_link(session, request, token, users):
+def verify_link2(session, request, token, users):
     print(f"{request.method} {request.url}")
     print(request.headers)
     print(request.body)
@@ -243,9 +230,10 @@ def verify_link(session, request, token, users):
     // setTimeout(signIn, 3000);
     </script>
     </body>
-    </html>    """
+    </html>
+    """
 
-def verify_link2(session, request, token, users):
+def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         if request.method == "GET":
