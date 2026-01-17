@@ -175,18 +175,6 @@ We do this to keep our database clean. Imagine a hacker enters thousands of rand
 def get(session, request, token: str):
     return auth.verify_link(session, request, token, users) 
 """
-def is_bot_request(request):
-    if request.method == 'HEAD':
-        print("request.method = HEAD")
-        return True
-    # Additional Safe Links heuristics
-    user_agent = request.headers.get('user-agent',"")
-    if 'safelinks' in user_agent.lower():
-        print("safelinks in User-Agent")
-        return True
-    return False
-
-
 def magic_button(session, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
@@ -200,30 +188,6 @@ def magic_button(session, token, users):
     except IndexError:
         return "Invalid or expired magic link"
 
-def verify_link2(session, request, token, users):
-    print(f"{request.method} {request.url}")
-    print(request.headers)
-    print(request.body)
-    if is_bot_request(request):
-        print("bot detected")  # UA + method checks
-        return "Nothing"  # Bots + non-JS clients
-        # Real user gets full landing page
-    print("NOT a bot")
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <body>
-    <h1>🔐 Sign in to YourApp</h1>
-    <p>Click the button below to securely sign in.</p>
-    <button onclick="signIn()">Sign In</button>
-    <script>
-    function signIn() {{ window.location.href = '/magic_button/{token}'; }}
-    // Auto-redirect after 3s as backup
-    // setTimeout(signIn, 3000);
-    </script>
-    </body>
-    </html>
-    """
 
 def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
@@ -254,6 +218,7 @@ def verify_link(session, request, token, users):
             print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
     except IndexError:
+        print("Invalid or expired magic link")
         return "Invalid or expired magic link"
 ```
 
