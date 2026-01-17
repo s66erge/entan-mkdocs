@@ -206,13 +206,16 @@ def is_bot_request(request):
 
 def magic_button(session, token, users):
     nowstr = f"'{datetime.now()}'"
-    user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-    usermail = user.email
-    session['auth'] = usermail
-    session['role'] = user.role_name
-    users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-    print(f"{usermail} just got connected")
-    return RedirectResponse('/dashboard')
+    try:
+        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
+        usermail = user.email
+        session['auth'] = usermail
+        session['role'] = user.role_name
+        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
+        print(f"{usermail} just got connected")
+        return RedirectResponse('/dashboard')
+    except IndexError:
+        return "Invalid or expired magic link"
 
 def verify_link(session, request, token, users):
     print(f"{request.method} {request.url}")
