@@ -146,14 +146,12 @@ def send_magic_link_email(email_address: str, magic_link: str):
    email_text = f"""
    Hey there,
 
-   If you have a @dhamma.org address and after clicking the link below you see this message 'dhamma.org link cliqued first time', then reload your browser page (click on : ↻ ).
-
-   Click this link to sign in to The App: {magic_link}
+   Click this link to sign in to the Gong App: {magic_link}
 
    If you didn't request this, just ignore this email.
 
    With Metta
-   The App Team
+   The Gong App Team
    """
    if isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
@@ -245,7 +243,10 @@ def verify_link(session, request, token, users):
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
             print("dhamma.org link cliqued first time")
-            return "Dhamma.org link cliqued first time. Reload your browser page (click on : ↻ )."
+            return """
+            Dhamma.org link cliqued first time.
+            Reload your browser page to sign in: click on ↻ at the top left.
+            """
         else:
             print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
