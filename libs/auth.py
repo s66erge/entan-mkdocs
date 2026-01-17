@@ -65,7 +65,7 @@ def create_link(email,users):
         print(" machine name: " + socket.gethostname())
         base_url = 'http://localhost:5001'
 
-    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
+    magic_link = f"{base_url}/check_click_from_browser/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
     return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
@@ -92,12 +92,22 @@ def send_magic_link_email(email_address: str, magic_link: str):
        send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
-"""
-@rt('/verify_magic_link/{token}')
-def get(session, request, token: str):
-    return auth.verify_link(session, request, token, users) 
-"""
-def magic_button(session, token, users):
+
+def check_click_from_browser(request, token):
+    if request.method == "GET":
+        print("link was visited")
+        return f"""
+        <!DOCTYPE html> <html> <body>
+        <script> {{setTimeout(() =>
+        {{ window.location.href = '/authenticate_link/{token}'; }},
+        100);}}
+        </script> </body> </html>
+        """
+    else:
+        print("ignoring non GET (HEAD) html method")
+        return "ignoring non GET html method"
+
+def authenticate_link(session, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
@@ -110,20 +120,6 @@ def magic_button(session, token, users):
     except IndexError:
         print("Invalid or expired magic link")
         return "Invalid or expired magic link"
-
-def verify_link(request, token):
-    if request.method == "GET":
-        print("link was visited")
-        return f"""
-        <!DOCTYPE html> <html> <body>
-        <script> {{setTimeout(() =>
-        {{ window.location.href = '/magic_button/{token}'; }},
-        100);}}
-        </script> </body> </html>
-        """
-    else:
-        print("ignoring non GET (HEAD) html method")
-        return "ignoring non GET html method"
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#admin_required>>[init]
 

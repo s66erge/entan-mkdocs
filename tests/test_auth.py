@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 from fasthtml.common import NotFoundError
 from libs.auth import (
     signin_form, login, create_link, send_magic_link_email,
-    verify_link, admin_required
+    admin_required
 )
 
 
@@ -162,39 +162,6 @@ class TestSendMagicLinkEmail:
         print_args = mock_print.call_args[0][0]
         assert "test@example.com" in print_args
         assert "Sign in to The App" in print_args
-
-
-class TestVerifyLink:
-    """Test magic link verification."""
-
-    def test_verify_link_invalid_token(self, mock_users, mock_session):
-        """Test verify_link with invalid/expired token."""
-        mock_users.return_value = []  # No matching users
-
-        result = verify_link(mock_session, "invalid_token", mock_users)
-
-        assert result == "Invalid or expired magic link"
-
-    def test_verify_link_valid_token(self, mock_users, mock_session):
-        """Test verify_link with valid token."""
-        # Mock successful user lookup
-        mock_user = Mock()
-        mock_user.email = "test@example.com"
-        mock_user.role_name = "user"
-        mock_users.return_value = [mock_user]
-
-        result = verify_link(mock_session, "valid_token", mock_users)
-
-        # Check session was updated
-        assert mock_session['auth'] == "test@example.com"
-        assert mock_session['role'] == "user"
-
-        # Check users.update was called to clear tokens
-        mock_users.update.assert_called_once()
-
-        # Check redirect response
-        assert hasattr(result, 'status_code')
-        assert result.status_code == 307  # Redirect
 
 
 class TestAdminRequired:

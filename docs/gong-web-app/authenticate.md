@@ -121,7 +121,7 @@ def create_link(email,users):
         print(" machine name: " + socket.gethostname())
         base_url = 'http://localhost:5001'
 
-    magic_link = f"{base_url}/verify_magic_link/{magic_link_token}"
+    magic_link = f"{base_url}/check_click_from_browser/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
     return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
@@ -161,6 +161,13 @@ def send_magic_link_email(email_address: str, magic_link: str):
 
 ### Authenticate the user
 
+#### Check click comes from a browser
+
+When a GET request arrives with a magic link token, this function returns a minimal HTML page containing a short JavaScript redirect to "/authenticate_link/{token}". This indirection ensures the link is opened from a real browser (not an email scanner or bot), helping verify genuine user interaction before proceeding with authentication.
+Non‑GET methods like HEAD are ignored to prevent unintended triggers by email scanners.
+
+#### Authenticate the link
+
 We save the current time into the variable now, because we need to look whether the token is already expired. Then we retrieve the first item with the specified token and an expiration date that lies in the future from the users table.
 
 There should only be one or no user coming back from this query, so we wrap this whole code in a try/catch block.
@@ -170,12 +177,22 @@ If a user has been found using this query, we will save his or hers email in the
 We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.
 
 ```{.python #verify-link}
-"""
-@rt('/verify_magic_link/{token}')
-def get(session, request, token: str):
-    return auth.verify_link(session, request, token, users) 
-"""
-def magic_button(session, token, users):
+
+def check_click_from_browser(request, token):
+    if request.method == "GET":
+        print("link was visited")
+        return f"""
+        <!DOCTYPE html> <html> <body>
+        <script> {{setTimeout(() =>
+        {{ window.location.href = '/authenticate_link/{token}'; }},
+        100);}}
+        </script> </body> </html>
+        """
+    else:
+        print("ignoring non GET (HEAD) html method")
+        return "ignoring non GET html method"
+
+def authenticate_link(session, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
@@ -188,20 +205,6 @@ def magic_button(session, token, users):
     except IndexError:
         print("Invalid or expired magic link")
         return "Invalid or expired magic link"
-
-def verify_link(request, token):
-    if request.method == "GET":
-        print("link was visited")
-        return f"""
-        <!DOCTYPE html> <html> <body>
-        <script> {{setTimeout(() =>
-        {{ window.location.href = '/magic_button/{token}'; }},
-        100);}}
-        </script> </body> </html>
-        """
-    else:
-        print("ignoring non GET (HEAD) html method")
-        return "ignoring non GET html method"
 ```
 
 ```{.python #admin_required}

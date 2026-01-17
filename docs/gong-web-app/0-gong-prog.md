@@ -48,13 +48,13 @@ def get():
 def post(email: str):
     return auth.create_link(email, users)
 
-@rt('/verify_magic_link/{token}')
+@rt('/check_click_from_browser/{token}')
 def get(request, token: str):
-    return auth.verify_link(request, token) 
+    return auth.check_click_from_browser(request, token) 
 
-@rt('/magic_button/{token}')
+@rt('/authenticate_link/{token}')
 def get(session, token: str):
-    return auth.magic_button(session, token, users) 
+    return auth.authenticate_link(session, token, users) 
 
 # client = TestClient(app)
 
