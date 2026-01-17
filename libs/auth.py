@@ -131,8 +131,9 @@ def verify_link(session, request, token, users):
             <!DOCTYPE html>
             <html>
             <body>
-            <script>
-            {{ window.location.href = '/magic_button/{token}'; }}
+            <script> {{setTimeout(() =>
+            {{ window.location.href = '/magic_button/{token}'; }},
+            100);}}
             </script>
             </body>
             </html>
