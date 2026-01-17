@@ -149,7 +149,7 @@ def verify_link(session, request, token, users):
     print(request.body)
     if is_bot_request(request):
         print("bot detected")  # UA + method checks
-        return FastHtmlResponse('',status_code=204)  # Bots + non-JS clients
+        return "Nothing"  # Bots + non-JS clients
         # Real user gets full landing page
     print("NOT a bot")
     return f"""
