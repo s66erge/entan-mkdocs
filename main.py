@@ -14,7 +14,7 @@ def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return RedirectResponse('/login', status_code=303)
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/verify_magic_link/.*', r'/magic_button/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/authenticate_link/.*', r'/check_click_from_browser/.*'])
 
 app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
                    before=bware, hdrs=(picolink,css),)
