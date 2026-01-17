@@ -114,9 +114,9 @@ def is_bot_request(request):
     headers = dict(request.headers)
     headers['REQUEST_METHOD'] = request.method
     # cross-site request
-    if headers.get('sec-fetch-site',"") != 'cross-site':
-        print('not the cross-site request')
-        return True
+    #if headers.get('sec-fetch-site',"") != 'cross-site':
+    #    print('not the cross-site request')
+    #    return True
     # Primary detection
     crawler = CrawlerDetect(headers=headers) 
     if crawler.isCrawler():
@@ -155,10 +155,17 @@ def verify_link(session, request, token, users):
     return f"""
     <!DOCTYPE html>
     <html>
-    <script>window.location.href='/magic_button/{token}'</script>
-    <button onclick="window.location.href='/magic_button/{token}'">Sign In</button>
-    </html>
-    """
+    <body>
+    <h1>🔐 Sign in to YourApp</h1>
+    <p>Click the button below to securely sign in.</p>
+    <button onclick="signIn()">Sign In</button>
+    <script>
+    function signIn() {{ window.location.href = '/magic_button/{token}'; }}
+    // Auto-redirect after 3s as backup
+    // setTimeout(signIn, 3000);
+    </script>
+    </body>
+    </html>    """
 
 def verify_link2(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
