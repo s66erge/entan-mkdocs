@@ -220,10 +220,20 @@ wheels = [
 ]
 
 [[package]]
+name = "crawlerdetect"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/97/f33c16f3ececdfb98582ef0559aee745bcc9fe00d9873fbdb74ad06d7b8b/crawlerdetect-0.3.2.tar.gz", hash = "sha256:1c2f9ccbb786c756c4f5bce62503ac0792b88b0291df6dbd5633f3e9c8a7f432", size = 16775, upload-time = "2025-07-09T16:54:18.415Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e6/47/1be5b2bc4ce8ab32e592817946017efb89f65957c0d17aa346b97c023f18/crawlerdetect-0.3.2-py3-none-any.whl", hash = "sha256:42e53a1fca1f99fc9459d5c699300e94e02d0a23d1cec4750fe37ce61e6e8441", size = 16507, upload-time = "2025-07-09T16:54:16.573Z" },
+]
+
+[[package]]
 name = "entan-mkdocs"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "crawlerdetect" },
     { name = "httpx" },
     { name = "markdown2" },
     { name = "pandas" },
@@ -239,6 +249,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "crawlerdetect", specifier = ">=0.3.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "markdown2", specifier = ">=2.5.4" },
     { name = "pandas", specifier = ">=2.3.3" },
