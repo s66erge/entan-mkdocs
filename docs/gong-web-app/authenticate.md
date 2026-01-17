@@ -248,7 +248,7 @@ def verify_link(session, request, token, users):
             <html>
             <body>
             <script>
-            {{ window.location.href = '/magic_button/{token}'; }}
+            {{ window.location.reload()}}
             </script>
             </body>
             </html>
