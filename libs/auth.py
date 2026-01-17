@@ -167,7 +167,7 @@ def verify_link(session, request, token, users):
                 print(f"{usermail} just got connected")
                 return RedirectResponse('/dashboard')
             print("dhamma.org link cliqued first time")
-            return "dhamma.org link cliqued first time"
+            return "Dhamma.org link cliqued first time. Reload your browser page (click on : ↻ )."
         else:
             print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
