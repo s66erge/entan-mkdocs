@@ -116,6 +116,8 @@ def verify_link(session, request, token, users):
     nowstr = f"'{datetime.now()}'"
     try:
         if request.method == "GET":
+            cookie = dict(request.headers).get("cookie", "NO cookie")[0:9]
+            print(f"cookie: {cookie}")
             user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
             usermail = user.email
             num_get_link_touch = user.number_link_touched + 1
