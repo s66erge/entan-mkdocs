@@ -186,7 +186,7 @@ def magic_button(session, token, users):
         print(f"{usermail} just got connected")
         return RedirectResponse('/dashboard')
     except IndexError:
-        print("Invalid or expired magic link")
+        print("from magic: Invalid or expired magic link")
         return "Invalid or expired magic link"
 
 
@@ -220,7 +220,7 @@ def verify_link(session, request, token, users):
             print("ignoring non GET (HEAD) html method")
             return "ignoring non GET html method"
     except IndexError:
-        print("Invalid or expired magic link")
+        print("from verify: Invalid or expired magic link")
         return "Invalid or expired magic link"
 ```
 
