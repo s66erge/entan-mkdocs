@@ -215,7 +215,7 @@ def magic_button(session, token, users):
     return RedirectResponse('/dashboard')
 
 def verify_link(session, request, token, users):
-    print(request)
+    print(request.headers)
     if is_bot_request(request):
         print("bot detected")  # UA + method checks
         return '', 204  # Bots + non-JS clients
