@@ -163,8 +163,8 @@ def send_magic_link_email(email_address: str, magic_link: str):
 
 #### Check click comes from a browser
 
-When a GET request arrives with a magic link token, this function returns a minimal HTML page containing a short JavaScript redirect to "/authenticate_link/{token}". This indirection ensures the link is opened from a real browser (not an email scanner or bot), helping verify genuine user interaction before proceeding with authentication.
-Non‑GET methods like HEAD are ignored to prevent unintended triggers by email scanners.
+When a GET request arrives with a magic link token, this function returns a HTML page containing a JavaScript asking the user to click a button twice before redirecting to "/authenticate_link/{token}". This verifies genuine user interaction before proceeding with authentication.
+Non‑GET methods like HEAD are also ignored to prevent unintended triggers by email scanners.
 
 #### Authenticate the link
 
@@ -183,35 +183,25 @@ def check_click_from_browser(request, token):
         headers = dict(request.headers)
         sec_fetch_site = headers["sec-fetch-site"]
         print(f"link visited with GET + sec-fetch-site: {sec_fetch_site}")
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <title>Human Verification</title>
-        </head>
-        <body>
-        <h2>Please confirm you're human</h2>
-        <p>Click below to proceed (bots can't do this):</p>
-        <button onclick="humanProceed()" style="font-size: 18px; padding: 12px;">
-            ✅ Yes, I'm human - Continue
-        </button>
-        <script>
-            let clickCount = 0;
-            function humanProceed() {{
-            clickCount++;
-            if (clickCount === 1) {{
-                // First click: show confirmation
-                document.querySelector('p').innerHTML = 'Great! One more click to verify.';
-                return;
-            }}
-            // Second deliberate click: proceed
-            window.location.href = '/authenticate_link/{token}';
-            }}
-            // No auto-redirect - requires two intentional clicks
-        </script>
-        </body>
-        </html>
-        """
+        return Title("Human verification"), Main(
+            P("Click below to proceed (bots can't do this):"),
+            Button("✅ Yes, I'm human - Continue", 
+                onclick="humanProceed()",
+                style="font-size: 18px; padding: 12px;"),
+            Script(f"""
+                let clickCount = 0;
+                function humanProceed() {{
+                    clickCount++;
+                    if (clickCount === 1) {{
+                        // First click: show confirmation
+                        document.querySelector('p').innerHTML = 'Great! One more click to verify.';
+                        return;
+                    }}
+                    // Second deliberate click: proceed
+                    window.location.href = '/authenticate_link/{token}';
+                }} """ 
+            ),
+            cls="container")
     else:
         print("ignoring non GET (HEAD) html method")
         return "ignoring non GET html method"
