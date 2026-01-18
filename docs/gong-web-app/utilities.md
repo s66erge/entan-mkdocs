@@ -81,7 +81,7 @@ def send_email(subject, body, recipients):
         "text": body,
     }
     email = resend.Emails.send(params)
-    print(f'Message sent: {email}')
+    print(f'Message sent: {email} to {recipients}')
 ```
 
 ### Displaying the content of a markdown file

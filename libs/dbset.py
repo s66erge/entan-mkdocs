@@ -42,6 +42,7 @@ def create_tables(db):
         email TEXT PRIMARY KEY,
         name TEXT,
         role_name TEXT,
+        password TEXT,
         magic_link_token TEXT,
         magic_link_expiry TIMESTAMP,
         is_active BOOLEAN DEFAULT FALSE,

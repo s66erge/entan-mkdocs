@@ -13,16 +13,22 @@ from fasthtml.common import *
 from libs import * 
 from libs.auth import admin_required
 
+custom_styles = Style("""
+.mw-960 { max-width: 960px; }
+.mw-480 { max-width: 480px; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+""")
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
    if not auth: return RedirectResponse('/login', status_code=303)
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login','/', '/create_magic_link', r'/authenticate_link/.*', r'/check_click_from_browser/.*'])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', r'/authenticate_link/.*', r'/check_click_from_browser/.*', '/register','/registercheck','/logincheck'])
 
 app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
-                   before=bware, hdrs=(picolink,css),)
+                   before=bware, hdrs=(picolink,css,custom_styles),)
 
 db_path = dbset.get_db_path()
 db = dbset.get_central_db()
@@ -40,6 +46,23 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
+@rt('/register')
+def get():
+    return authpass.register_get()
+
+@rt('/registercheck')
+def post(email:str, password:str):
+    return authpass.register_post(email, password, users)
+
+@rt('/login')
+def get():
+    return authpass.login_get()
+
+@rt('/logincheck')
+def post(session, email:str, password:str):
+    return authpass.logincheck(session, email, password, users)
+
+"""
 @rt('/login')
 def get():
     return auth.login()
@@ -55,6 +78,8 @@ def get(request, token: str):
 @rt('/authenticate_link/{token}')
 def get(session, token: str):
     return auth.authenticate_link(session, token, users) 
+"""
+
 
 # client = TestClient(app)
 

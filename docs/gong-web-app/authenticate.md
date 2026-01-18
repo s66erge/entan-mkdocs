@@ -1,4 +1,4 @@
-# Authentication
+# Authentication 2
 
 This is a passwordless authentication:
 
@@ -153,7 +153,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    With Metta
    The Gong App Team
    """
-   if isa_dev_computer():
+   if False: #isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])

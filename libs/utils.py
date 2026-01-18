@@ -35,7 +35,7 @@ def send_email(subject, body, recipients):
         "text": body,
     }
     email = resend.Emails.send(params)
-    print(f'Message sent: {email}')
+    print(f'Message sent: {email} to {recipients}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 

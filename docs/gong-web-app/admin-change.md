@@ -13,6 +13,7 @@ import shutil
 from fasthtml.common import *
 from libs.admin import *
 from libs.utils import isa_db_test, feedback_to_user
+from libs.authpass import get_password_hash
 
 <<delete-user>>
 <<add-user>>
@@ -83,6 +84,7 @@ def add_user(new_user_email, name ,role_name, db):
             email=new_user_email,
             name=name,
             role_name=role_name,
+            password = get_password_hash("behappy"),
             is_active=False,
             magic_link_token=None,
             magic_link_expiry=None

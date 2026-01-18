@@ -86,7 +86,7 @@ def send_magic_link_email(email_address: str, magic_link: str):
    With Metta
    The Gong App Team
    """
-   if isa_dev_computer():
+   if False: #isa_dev_computer():
        print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
    else:
        send_email(email_subject, email_text, [email_address])
@@ -136,6 +136,19 @@ def authenticate_link(session, token, users):
         return "Invalid or expired magic link"
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#admin_required>>[init]
+
+def admin_required(handler):
+    @wraps(handler)
+    def wrapper(session, *args, **kwargs):
+        role = session['role']
+        if not role or not role == "admin":
+            # Redirect to unauthorized page if not admin
+            return RedirectResponse('/no_access_right')
+        # Proceed if user is admin
+        return handler(session, *args, **kwargs)
+    return wrapper
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/authentipass.md#admin_required>>[0]
 
 def admin_required(handler):
     @wraps(handler)
