@@ -189,7 +189,7 @@ def check_click_from_browser(request, token):
         function toAuthLink() {{
             window.location.href = '/authenticate_link/{token}';
         }}
-        // setTimeout(toAuthLink, 4000);
+        setTimeout(toAuthLink, 100);
         </script>
         <button onclick="toAuthLink()">
             Click to sign in securely
