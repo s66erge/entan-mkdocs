@@ -13,7 +13,7 @@ def dummy():
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#isdev-computer>>[init]
 def isa_dev_computer():
-    DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame" ]
+    DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
     # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
