@@ -180,48 +180,38 @@ We do this to keep our database clean. Imagine a hacker enters thousands of rand
 
 def check_click_from_browser(request, token):
     if request.method == "GET":
-        print("link was visited with GET")
         headers = dict(request.headers)
         sec_fetch_site = headers["sec-fetch-site"]
-        print(f"sec-fetch-site: {sec_fetch_site}")
-        if True: #isa_dev_computer() or sec_fetch_site == "cross-site":
-            return f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Human Verification</title>
-            </head>
-            <body>
-            <h2>Please confirm you're human</h2>
-            <p>Click below to proceed (bots can't do this):</p>
-            
-            <button onclick="humanProceed()" style="font-size: 18px; padding: 12px;">
-                ✅ Yes, I'm human - Continue
-            </button>
-
-            <script>
-                let clickCount = 0;
-                
-                function humanProceed() {{
-                clickCount++;
-                if (clickCount === 1) {{
-                    // First click: show confirmation
-                    document.querySelector('p').innerHTML = 'Great! One more click to verify.';
-                    return;
-                }}
-                
-                // Second deliberate click: proceed
-                window.location.href = '/authenticate_link/{token}';
-                }}
-
-                // No auto-redirect - requires two intentional clicks
-            </script>
-            </body>
-            </html>
-            """
-        else:
-            print("link visit ignored on production and NOT cross-site")
-            return ""
+        print(f"link visited with GET + sec-fetch-site: {sec_fetch_site}")
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <title>Human Verification</title>
+        </head>
+        <body>
+        <h2>Please confirm you're human</h2>
+        <p>Click below to proceed (bots can't do this):</p>
+        <button onclick="humanProceed()" style="font-size: 18px; padding: 12px;">
+            ✅ Yes, I'm human - Continue
+        </button>
+        <script>
+            let clickCount = 0;
+            function humanProceed() {{
+            clickCount++;
+            if (clickCount === 1) {{
+                // First click: show confirmation
+                document.querySelector('p').innerHTML = 'Great! One more click to verify.';
+                return;
+            }}
+            // Second deliberate click: proceed
+            window.location.href = '/authenticate_link/{token}';
+            }}
+            // No auto-redirect - requires two intentional clicks
+        </script>
+        </body>
+        </html>
+        """
     else:
         print("ignoring non GET (HEAD) html method")
         return "ignoring non GET html method"
