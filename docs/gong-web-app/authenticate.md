@@ -180,13 +180,20 @@ We do this to keep our database clean. Imagine a hacker enters thousands of rand
 
 def check_click_from_browser(request, token):
     if request.method == "GET":
+        headers = dict(request.headers)
+        print(f"sec-fetch-site: {headers["sec-fetch-site"]}")
         print("link was visited")
         return f"""
-        <!DOCTYPE html> <html> <body>
-        <script> {{setTimeout(() =>
-        {{ window.location.href = '/authenticate_link/{token}'; }},
-        100);}}
-        </script> </body> </html>
+        <!DOCTYPE html>
+        <html> <body> <script>
+        function toAuthLink() {{
+            window.location.href = '/authenticate_link/{token}';
+        }}
+        // setTimeout(toAuthLink, 4000);
+        </script>
+        <button onclick="toAuthLink()">
+            Click to sign in securely
+        </button> </body> </html>
         """
     else:
         print("ignoring non GET (HEAD) html method")
