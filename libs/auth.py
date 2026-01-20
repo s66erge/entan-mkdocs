@@ -2,6 +2,7 @@
 import os
 import socket
 import secrets
+import string
 from datetime import datetime, timedelta
 from functools import wraps
 from fasthtml.common import *
@@ -16,10 +17,21 @@ def signin_form():
            ),
        ),
        Button("Sign In with Email", type="submit", id="submit-btn"),
-       hx_post="/create_magic_link",
-       hx_target="#error",
+       hx_post="/create_code",
+       hx_target="#signin-error",
        hx_disabled_elt="#submit-btn"
    )
+
+def code_form():
+    return Form(
+        Div(
+            Div(Input(id='code', name='code', type='text', placeholder='Enter your code')),
+        ),
+        Button("Verify code", type="submit", id="verify-btn"),
+        hx_post="/verify_code",
+        hx_target="#code-error",
+        hx_disabled_elt="#verify-btn"
+    )
 
 """
 @rt('/login')
@@ -27,113 +39,106 @@ def get():
     return auth.login()
 """    
 def login():
-   return Main(
-       Div(
-           H1("Sign In"),
-           P("Enter your email to sign in to The App."),
-           Div(signin_form(), id='login_form'),
-           P(id="error")
-       ), cls="container"
+    return Main(
+        Div(
+            H1("Sign In"),
+            P("Enter your email to sign in to The App."),
+            Div(signin_form(), id='login_form'),
+            P(id="signin-error"),
+            Hr(),
+            P("Already have a code? Enter it below."),
+            Div(code_form(), id='code_form'),
+            P(id="code-error"),    
+        ), cls="container"
    )
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#handling-form>>[init]
+def _generate_login_code(length: int = 6) -> str:
+    # e.g. 6-digit numeric code
+    digits = string.digits
+    return ''.join(secrets.choice(digits) for _ in range(length))
+
 """
-@rt('/create_magic_link')
+@rt('/create_code')
 def post(email: str):
-    return auth.create_link(email, users)
+    return auth.create_code(email, users)
 """
-def create_link(email,users):
+def create_code(email, users):
     if not email:
        return (feedback_to_user({'error': 'missing_email'}))
-
-    magic_link_token = secrets.token_urlsafe(32)
+    User = users.dataclass()
+    login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
+    print(email, users[email])
     try:
        user = users[email]
-       users.update(email= email, magic_link_token= magic_link_token, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
+       users.update(email= email, magic_link_token= login_code, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
     except NotFoundError:
         return Div(
             (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
             Div(signin_form(), hx_swap_oob="true", id="login_form")
         )
-
-    domainame = os.environ.get('RAILWAY_PUBLIC_DOMAIN', None)
-
-    if (not isa_dev_computer()) and (domainame is not None):
-        base_url = 'https://' + os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    else: 
-        print(" machine name: " + socket.gethostname())
-        base_url = 'http://localhost:5001'
-
-    magic_link = f"{base_url}/check_click_from_browser/{magic_link_token}"
-    send_magic_link_email(email, magic_link)
-
-    return P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
-    HttpHeader('HX-Reswap', 'outerHTML'), Button("Magic link sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+    send_login_code_email(email, login_code)
+    return (
+        P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
+        HttpHeader('HX-Reswap', 'outerHTML'),
+        Button("Code sent", type="submit", id="submit-btn",
+               disabled=True, hx_swap_oob="true")
+    )
+    
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
 
-def send_magic_link_email(email_address: str, magic_link: str):
+def send_login_code_email(email_address: str, code: str):
+    email_subject = "Your sign-in code for The App"
+    email_text = f"""
+Hey there,
 
-   email_subject = "Sign in to The App"
-   email_text = f"""
-   Hey there,
+Use this code to sign in to The Gong App:
 
-   Click this link to sign in to the Gong App: {magic_link}
+    {code}
 
-   If you didn't request this, just ignore this email.
+This code is valid for 15 minutes and can be used only once.
 
-   With Metta
-   The Gong App Team
-   """
-   if False: #isa_dev_computer():
-       print(f'To: {email_address}\n Subject: {email_subject}\n\n{email_text}')
-   else:
-       send_email(email_subject, email_text, [email_address])
+If you didn't request this, you can safely ignore this email.
+
+With Metta
+The Gong App Team
+"""
+    # dev toggle if you like
+    if isa_dev_computer():
+        print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
+    else:
+        send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
 
-def check_click_from_browser(request, token):
-    if request.method == "GET":
-        headers = dict(request.headers)
-        sec_fetch_site = headers["sec-fetch-site"]
-        print(f"link visited with GET + sec-fetch-site: {sec_fetch_site}")
-        return Title("Human verification"), Main(
-            P("Click below to proceed (bots can't do this):"),
-            Button("✅ Yes, I'm human - Continue", 
-                onclick="humanProceed()",
-                style="font-size: 18px; padding: 12px;"),
-            Script(f"""
-                let clickCount = 0;
-                function humanProceed() {{
-                    clickCount++;
-                    if (clickCount === 1) {{
-                        // First click: show confirmation
-                        document.querySelector('p').innerHTML = 'Great! One more click to verify.';
-                        return;
-                    }}
-                    // Second deliberate click: proceed
-                    window.location.href = '/authenticate_link/{token}';
-                }} """ 
-            ),
-            cls="container")
-    else:
-        print("ignoring non GET (HEAD) html method")
-        return "ignoring non GET html method"
-
-def authenticate_link(session, token, users):
+"""
+@rt('/verify_code')
+def post(code: str, session):
+    return auth.verify_code(session, code, users)
+"""
+def verify_code(session, code, users):
     nowstr = f"'{datetime.now()}'"
     try:
-        user = users("magic_link_token = ? AND magic_link_expiry > ?", (token, nowstr))[0]
-        usermail = user.email
-        session['auth'] = usermail
-        session['role'] = user.role_name
-        users.update(email= user.email, magic_link_token= None, magic_link_expiry= None, is_active= True)
-        print(f"{usermail} just got connected")
-        return RedirectResponse('/dashboard')
+        user = users("magic_link_token = ? AND magic_link_expiry > ?", (code, nowstr))[0]
     except IndexError:
-        print("Invalid or expired magic link")
-        return "Invalid or expired magic link"
+        return feedback_to_user({'error': 'invalid_or_expired_code'})
+
+    User = users.dataclass()
+    usermail = user.email
+    session['auth'] = usermail
+    session['role'] = user.role_name
+
+    users.update(
+        email=user.email,
+        magic_link_token=None,
+        magic_link_expiry=None,
+        is_active=True
+    )
+    print(f"{usermail} just got connected via code")
+    #RedirectResponse('/dashboard', status_code=303)
+    return Script("window.location.href = '/dashboard';")
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#admin_required>>[init]
 

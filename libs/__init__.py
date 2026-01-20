@@ -1,2 +1,2 @@
-__all__ = ["utils", "dbset","authpass","admin", "adchan", "fetch",
+__all__ = ["utils", "dbset","auth","admin", "adchan", "fetch",
            "cdash", "consul", "planning"]
