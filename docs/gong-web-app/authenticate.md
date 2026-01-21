@@ -105,25 +105,26 @@ def post(email: str):
 def create_code(email, users):
     if not email:
        return (feedback_to_user({'error': 'missing_email'}))
-    User = users.dataclass()
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
-    print(email, users[email])
     try:
-       user = users[email]
-       users.update(email= email, magic_link_token= login_code, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
-    except NotFoundError:
-        return Div(
-            (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})),
-            Div(signin_form(), hx_swap_oob="true", id="login_form")
-        )
-    send_login_code_email(email, login_code)
-    return (
-        P(feedback_to_user({'success': 'magic_link_sent'}), id="success"),
-        HttpHeader('HX-Reswap', 'outerHTML'),
-        Button("Code sent", type="submit", id="submit-btn",
-               disabled=True, hx_swap_oob="true")
-    )
+        user_results = users("email = ?", (email,))
+        if user_results:
+            users.update(email= email, magic_link_token= login_code, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
+            send_login_code_email(email, login_code)
+            return (
+                P(feedback_to_user({'success': 'login_code_sent'}), id="success"),
+                HttpHeader('HX-Reswap', 'outerHTML'),
+                Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
+            )
+        else:
+            return Div(
+                (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})
+                ),
+            )
+    except Exception as e:
+        print(e)
+        return Redirect(f'/db_error?etext={e}')
     
 ```
 
@@ -154,7 +155,7 @@ With Metta
 The Gong App Team
 """
     # dev toggle if you like
-    if isa_dev_computer():
+    if False: #isa_dev_computer():
         print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
     else:
         send_email(email_subject, email_text, [email_address])
