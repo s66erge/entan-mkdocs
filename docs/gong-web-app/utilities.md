@@ -129,10 +129,10 @@ def feed_text(params):
     # query_params = dict(request.query_params)
     # Handle success and error messages
     success_messages = {
-        'magic_link_sent': "A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.",
+        'login_code_sent': "A code to sign in has been sent to your email. Please check your inbox and enter the code here below. The code will expire in 15 minutes.",
         'user_added': 'User added successfully!',
         'center_added': 'Center added successfully!',
-        'planner_added': 'Planner association added successfully!',
+        'planner_added': 'Planner association adSded successfully!',
         'user_deleted': 'User deleted successfully!',
         'center_deleted': 'Center and associated database deleted successfully!',
         'planner_deleted': 'Planner association deleted successfully!'
@@ -140,6 +140,7 @@ def feed_text(params):
     error_messages = {
         'missing_email':'Email is required.',
         'not_registered':f'Email "{params.get("email", "")}" is not registered, try again or send a message to xxx@xxx.xx to get registered',
+        'invalid_or_expired_code': 'The code is invalid ot expired. Check if if it is correct. Or refresh the page to ask for another code.',
         'missing_fields': 'Please fill in all required fields.',
         'user_exists': 'User with this email already exists.',
         'center_exists': 'Center with this name already exists.',

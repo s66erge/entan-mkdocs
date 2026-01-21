@@ -14,22 +14,21 @@ def consult_page(session, centers):
     # Main consult page: select a center and show its coming_periods.
     Center = centers.dataclass()
     center_names = [c.center_name for c in centers()]
-    select = Select(
-        Option("Select a center", value="", selected=True, disabled=True),
-        *[Option(name, value=name) for name in center_names],
-        name="selected_name",
-        id="consult-db-select"
-    )
     form = Form(
-        select,
+        Select(
+            Option("Select a center", value="", selected=True, disabled=True),
+            *[Option(name, value=name) for name in center_names],
+            name="selected_name",
+            id="consult-db-select"
+        ),
         Button("Open", type="submit"),
         hx_get="/consult/select_db",
         hx_target="#coming-periods"
     )
-    return Main(
+    return Main( 
         top_menu(session['role']),
         Div(display_markdown("consult-t")),
-        Div(P("Choose a center:"), form, id="consult-db"),
+        Div(form, id="consult-db"),
         H2("Coming periods"),
         Div(id="coming-periods"),            # filled by /consult/select_db
         Div(id="periods-struct"),            # filled by /consult/select_period 
