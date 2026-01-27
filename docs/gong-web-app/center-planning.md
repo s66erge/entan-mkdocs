@@ -47,7 +47,7 @@ def planning_page(session, request, db_central):
     )
 
 def create_draft_plan_table(draft_plan):
-    # Create an HTML table from a draft plan list of dictionaries.
+    # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
         start = plan_line.get("start_date")

@@ -101,11 +101,10 @@ def deduplicate(merged, del_as_BETWEEN):
     i = 0
     while i < len(merged):
         current = merged[i]
-        # delete this period_type if it is replaced by IN-BETWEEN
+        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
         if current["period_type"] in del_as_BETWEEN:
             i += 1 # skip this item
             continue
-        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
         elif i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
