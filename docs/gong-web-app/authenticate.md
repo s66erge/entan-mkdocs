@@ -100,7 +100,7 @@ def post(email: str):
 def create_code(email, users):
     if not email:
         return (feedback_to_user({'error': 'missing_email'}))
-    
+
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
     try:

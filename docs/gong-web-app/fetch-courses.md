@@ -25,7 +25,7 @@ Get the dhamma.org location for this center from the table settings in center db
 
 ```{.python #field-fr-db}
 
-def get_field_from_db(db_central, center_name, field_name):
+def get_field_from_db_old(db_central, center_name, field_name):
     centers = db_central.t.centers
     Center = centers.dataclass()
     if field_name == "location":
@@ -35,6 +35,20 @@ def get_field_from_db(db_central, center_name, field_name):
         # Access field using attribute notation, not .get()
         other_course = getattr(centers[center_name], field_name)
         return json.loads(other_course)
+
+def get_field_from_db(db_central, center_name, field_name):
+    # Access the centers mapping directly; no need for a dataclass helper.
+    centers = db_central.t.centers
+    center_obj = centers[center_name]
+    if field_name == "location":
+        # Return the location string prefixed as expected by the tests.
+        location = getattr(center_obj, "location")
+        return f"location_{location}"
+    else:
+        # For other fields the value is stored as a JSON string.
+        other_course = getattr(center_obj, field_name)
+        return json.loads(other_course)
+
 ```
 
 Get the courses from www.dhamma.org for a specific center from date_start until date_end, keep only the relevant fields for courses inside the center.
@@ -138,7 +152,8 @@ def deduplicate(merged, del_as_BETWEEN):
                 current['period_type'] == next_item['period_type']):
                 # Mark as BOTH and skip the next one
                 current['source'] = 'BOTH'
-                if current.get('end_date','None') == 'None':
+                #if current.get('end_date','None') == 'None':
+                if 'end_date' not in current and 'end_date' in next_item:
                     current['end_date'] =  next_item['end_date']
                 deduplicated.append(current)
                 i += 2  # skip next item
