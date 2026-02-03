@@ -1,21 +1,53 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 import json
 from pathlib import Path
+from asyncio import sleep
 from urllib.parse import quote_plus
 from tabulate import tabulate
 from fasthtml.common import *
 
-from libs.utils import display_markdown
+from libs.utils import display_markdown, isa_dev_computer
 from libs.fetch import fetch_dhamma_courses, check_plan
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 # @rt('/planning_page')
+
+DURATION = 0.5 # minute
+INTERVAL = 7 # seconds
+# Global variable to track countdown state
+countdown_active = True
+remaining_seconds = DURATION * 60  # 60 minutes in seconds
+
+# Countdown generator for SSE
+async def countdown_generator():
+    global remaining_seconds, countdown_active
+    while countdown_active and remaining_seconds > 0:
+        if remaining_seconds > 60:
+            messg = f"{int(remaining_seconds // 60)} min."
+        else:
+            messg = f"{int(remaining_seconds)} sec."
+        yield sse_message(messg)
+        remaining_seconds -= INTERVAL
+        await sleep(INTERVAL)
+
+    # When countdown finishes, send final message and call  callback only once
+    if remaining_seconds <= 0 and countdown_active:
+        countdown_active = False
+        yield sse_message("Time is up!")
+
+    # The generator will naturally end here, closing the connection properly
+    print("Countdown generator ending.")
+
+def countdown_stream():
+    return EventStream(countdown_generator())
+
 def planning_page(session, request, db_central):
+    global remaining_seconds, countdown_active
+    countdown_active = True
+    remaining_seconds = DURATION * 60  # 60 minutes in seconds
 
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
-
-    # CONTINOW START TIMER
 
     return Main(
         Div(display_markdown("planning-t")),
@@ -29,8 +61,34 @@ def planning_page(session, request, db_central):
                 hx_get="/unfinished",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            A(f"Return to dashboard WITHOUT SAVING CHANGES", href="/dashboard"),
-        ),    
+            A("Return NO CHANGES", href="/dashboard"),
+            Span(style="display: inline-block; width: 20px;"),
+            Span("Remainning time: "),
+            Span(id="timer", 
+                hx_ext="sse",
+                sse_connect="/countdown",
+                sse_swap="message",
+                cls="timer-display"
+                ),
+            Span(style="display: inline-block; width: 20px;"),
+            A("set FREE",href=f"/planning/set_free?center_name={quote_plus(selected_name)}",)
+                if isa_dev_computer() else None,
+            Script("""
+            function checkTimerAndRedirect() {
+                const timerDiv = document.getElementById('timer');
+                if (!timerDiv) return;            
+                const text = timerDiv.textContent || timerDiv.innerText;          
+                if (text === "Time is up!") {
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 3000); // Redirect after 3 seconds
+                }
+            }
+            // Start polling - STORE the interval ID
+            setInterval(checkTimerAndRedirect, 1000);
+            """)
+        ),
+
         P(""),       
         Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
         cls="container"
@@ -84,11 +142,7 @@ def load_dhamma_db(session, request, db):
     timezone = centers[selected_name].timezone
     if status_bef != "free" or busy_user != this_user:
         return Div(
-            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),
-            A("Force status to 'free' - ONLY FOR DEV !",
-                hx_get=f"/planning/set_free?center_name={q_center}",
-                hx_target="#planning-periods"
-            ) 
+            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),            
             )
 
     return Div(
@@ -117,12 +171,7 @@ def show_dhamma(request, db, db_path):
     new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
     new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-
     table = create_draft_plan_table(new_draft_plan)
-
-    # CONTINOW TEMPORARY free access to center planning
-    centers.update(center_name=selected_name, status="free", current_user="")
-
     return Div(
         H2("Plan with 'www.google.org' added for 12 month from current course start"),
         table,
@@ -138,6 +187,8 @@ def set_free(request, db):
         return Div(P("No center selected."))
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
-    return Div("Status set to 'free'")
+    global countdown_active
+    countdown_active = False
+    return RedirectResponse('/dashboard', status_code=303)
 # ~/~ end
 # ~/~ end

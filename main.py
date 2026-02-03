@@ -14,6 +14,7 @@ custom_styles = Style("""
 .mx-auto { margin-left: auto; margin-right: auto; }
 """)
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
+htmxsse = Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js")
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
@@ -21,8 +22,7 @@ def before(req, session):
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 
-app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico",
-                   before=bware, hdrs=(picolink,css,custom_styles),)
+app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 
 db_path = dbset.get_db_path()
 db = dbset.get_central_db()
@@ -99,6 +99,10 @@ def get(request):
 @rt('/consult/select_timetable')
 def get(request):
     return consul.consult_select_timetable(request, db_path)
+
+@rt('/countdown')
+async def get():
+    return planning.countdown_stream()
 
 @rt('/planning_page')
 def get(session, request):

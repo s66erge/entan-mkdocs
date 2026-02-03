@@ -10,17 +10,6 @@ from libs.dbset import get_db_path, get_central_db
 
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#field-fr-db>>[init]
 
-def get_field_from_db_old(db_central, center_name, field_name):
-    centers = db_central.t.centers
-    Center = centers.dataclass()
-    if field_name == "location":
-        location = centers[center_name].location
-        return f"location_{location}"
-    else:
-        # Access field using attribute notation, not .get()
-        other_course = getattr(centers[center_name], field_name)
-        return json.loads(other_course)
-
 def get_field_from_db(db_central, center_name, field_name):
     # Access the centers mapping directly; no need for a dataclass helper.
     centers = db_central.t.centers

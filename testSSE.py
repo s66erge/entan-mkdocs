@@ -1,56 +1,64 @@
 from fasthtml.common import *
 from asyncio import sleep
-from time import time
-import threading
 
-hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"),)
-app,rt = fast_app(hdrs=hdrs)
+# Create the FastHTML app
+app, rt = fast_app(hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"),))
 
-TOTAL_SECONDS = 60 * 60  # 60 minutes
-timer_start: float | None = None
-timer_lock = threading.Lock()
+DURATION = 1 # minute
+INTERVAL = 15 # seconds
+# Global variable to track countdown state
+countdown_active = True
+remaining_seconds = DURATION * 60  # 60 minutes in seconds
 
-def get_remaining() -> int:
-    with timer_lock:
-        if timer_start is None:
-            return TOTAL_SECONDS
-        elapsed = time() - timer_start
-        remaining = max(0, TOTAL_SECONDS - int(elapsed))
-        return remaining
+def countdown_callback():
+    """Function called when countdown completes"""
+    print("Countdown finished!")
+
+# Countdown generator for SSE
+async def countdown_generator():
+    global remaining_seconds, countdown_active
+    while countdown_active and remaining_seconds > 0:
+        yield sse_message(str(remaining_seconds))
+        remaining_seconds -= INTERVAL
+        await sleep(INTERVAL)
+    
+    # When countdown finishes, send final message and call callback only once
+    if remaining_seconds <= 0 and countdown_active:
+        countdown_active = False
+        yield sse_message("Time is up!")
+        countdown_callback()
+
+    # The generator will naturally end here, closing the connection properly
+    print("Countdown generator ending.")
 
 @rt("/")
 def get():
-    return Titled(
-        "A Countdown Timer",
-        Div(
-            "Remaining time: ",
-            Strong("60:00", id="timer-display"),  # Initial display[file:2]
-            hx_ext="sse",  # Enable SSE extension[file:2]
-            sse_connect="timer-stream",  # Connect to SSE endpoint[file:2]
-            hx_swap="outerHTML",  # Replace the strong tag[file:2]
-            sse_swap="timeupdate"  # Listen for 'timeupdate' event[file:2]
-        )
+    return Titled(f"{DURATION}-Minute Countdown",
+        Div(id="timer", 
+            hx_ext="sse",
+            sse_connect="/countdown",
+            sse_swap="message",
+            cls="timer-display"),
+        Script("""
+        let timerInterval;  // Global variable to store interval ID
+        function checkTimerAndRemove() {
+            const timerDiv = document.getElementById('timer');
+            //console.log('Checking timer div...');
+            if (!timerDiv) return;            
+            const text = timerDiv.textContent || timerDiv.innerText;          
+            if (text === "Time is up!") {
+                timerDiv.remove();
+                clearInterval(timerInterval);  // ✅ STOP POLLING
+                console.log('Timer div removed - polling STOPPED');
+            }
+        }
+        // Start polling - STORE the interval ID
+        timerInterval = setInterval(checkTimerAndRemove, 1000);
+        """)
     )
 
-async def timer_generator(shutdown_event):
-    """Server-side countdown: send every 20 sec, format MM:SS[file:2]"""
-    global timer_start
-    with timer_lock:
-        timer_start = time()
-    
-    while not shutdown_event.is_set():
-        remaining = get_remaining()
-        mins, secs = divmod(remaining, 60)
-        display = Strong(f"{mins:02d}:{secs:02d}", id="timer-display")
-        data = P(display)  # FT component for HTMX swap[file:2]
-        yield Strong(f"{mins:02d}:{secs:02d}", id="timer-display"), {"event": "timeupdate"}
-        
-        # Wait until next 20-min mark or end
-        next_update = TOTAL_SECONDS - ((TOTAL_SECONDS - remaining) // 10)
-        await sleep(max(1, next_update))  # Avoid busy loop if <1s
-
-@rt("/timer-stream")
-async def get():
-    return EventStream(timer_generator)  # Async SSE stream[file:2]
+@rt("/countdown")
+async def get(): 
+    return EventStream(countdown_generator())
 
 serve()

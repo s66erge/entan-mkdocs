@@ -37,7 +37,7 @@ def dashboard(session, db):
         select,
         Button("MODIFY", type="submit"),
         action="/planning_page",
-        method='get'
+        method ="get",
     )
 
 

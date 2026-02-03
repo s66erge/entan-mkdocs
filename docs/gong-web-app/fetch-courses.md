@@ -25,17 +25,6 @@ Get the dhamma.org location for this center from the table settings in center db
 
 ```{.python #field-fr-db}
 
-def get_field_from_db_old(db_central, center_name, field_name):
-    centers = db_central.t.centers
-    Center = centers.dataclass()
-    if field_name == "location":
-        location = centers[center_name].location
-        return f"location_{location}"
-    else:
-        # Access field using attribute notation, not .get()
-        other_course = getattr(centers[center_name], field_name)
-        return json.loads(other_course)
-
 def get_field_from_db(db_central, center_name, field_name):
     # Access the centers mapping directly; no need for a dataclass helper.
     centers = db_central.t.centers
