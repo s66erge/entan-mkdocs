@@ -29,9 +29,10 @@ countdown_active = True
 remaining_seconds = DURATION * 60  # 60 minutes in seconds
 
 # Countdown generator for SSE
-async def countdown_generator():
+async def countdown_generator(session):
     global remaining_seconds, countdown_active
     while countdown_active and remaining_seconds > 0:
+        print(session["center"])
         if remaining_seconds > 60:
             messg = f"{int(remaining_seconds // 60)} min."
         else:
@@ -48,8 +49,8 @@ async def countdown_generator():
     # The generator will naturally end here, closing the connection properly
     print("Countdown generator ending.")
 
-def countdown_stream():
-    return EventStream(countdown_generator())
+def countdown_stream(session):
+    return EventStream(countdown_generator(session))
 
 def planning_page(session, request, db_central):
     global remaining_seconds, countdown_active
@@ -58,6 +59,7 @@ def planning_page(session, request, db_central):
 
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
+    session["center"] = selected_name
 
     return Main(
         Div(display_markdown("planning-t")),
@@ -76,7 +78,7 @@ def planning_page(session, request, db_central):
             Span("Remainning time: "),
             Span(id="timer", 
                 hx_ext="sse",
-                sse_connect="/countdown",
+                sse_connect=f"/countdown",
                 sse_swap="message",
                 cls="timer-display"
                 ),

@@ -100,8 +100,8 @@ def get(request):
     return consul.consult_select_timetable(request, db_path)
 
 @rt('/countdown')
-async def get():
-    return planning.countdown_stream()
+async def get(session):
+    return planning.countdown_stream(session)
 
 @rt('/planning_page')
 def get(session, request):
