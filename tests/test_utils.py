@@ -45,12 +45,12 @@ def test_display_markdown_basic(tmp_path):
 class TestFeedbackToUser:
     """Test feedback_to_user function."""
 
-    def test_feedback_success_magic_link_sent(self):
-        """Test success feedback for magic link sent."""
-        result = feedback_to_user({'success': 'magic_link_sent'})
+    def test_feedback_success_login_code_sent(self):
+        """Test success feedback for login code sent."""
+        result = feedback_to_user({'success': 'login_code_sent'})
         assert 'sent' in to_xml(Html(result))
         assert 'email' in to_xml(Html(result))
-        assert 'link' in to_xml(Html(result))
+        assert 'code' in to_xml(Html(result))
 
     def test_feedback_error_missing_email(self):
         """Test error feedback for missing email."""

@@ -24,13 +24,6 @@ scoop install pandoc
 uv pip install entangled-cli
 ```
 
-### Linux Mint
-
-```{.bash file= setup/entangled.sh}
-sudo apt install pandoc
-uv pip install entangled-cli
-```
-
 ## Commands
 
 see: entangled --help  

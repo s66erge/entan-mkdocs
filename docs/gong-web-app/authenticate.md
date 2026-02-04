@@ -24,6 +24,7 @@ from libs.utils import isa_dev_computer, send_email, feedback_to_user
 <<send-link>>
 <<verify-link>>
 <<admin_required>>
+
 ```
 
 ### Login form
@@ -32,23 +33,17 @@ The actual form element is extracted into a MyForm() function. Its not really ne
 
 ```{.python #build-serve-login-form}
 def signin_form():
-   return Form(
-       Div(
-           Div(
-               Input(id='email', type='email', placeholder='foo@bar.com'),
-           ),
-       ),
-       Button("Sign In with Email", type="submit", id="submit-btn"),
-       hx_post="/create_code",
-       hx_target="#signin-error",
-       hx_disabled_elt="#submit-btn"
-   )
+    return Form(
+        Input(id='email', type='email', placeholder='foo@bar.com'),
+        Button("Sign In with Email", type="submit", id="submit-btn"),
+        hx_post="/create_code",
+        hx_target="#signin-error",
+        hx_disabled_elt="#submit-btn"
+    )
 
 def code_form():
     return Form(
-        Div(
-            Div(Input(id='code', name='code', type='text', placeholder='Enter your code')),
-        ),
+        Input(id='code', name='code', type='text', placeholder='Enter your code'),
         Button("Verify code", type="submit", id="verify-btn"),
         hx_post="/verify_code",
         hx_target="#code-error",
@@ -64,12 +59,11 @@ def login():
     return Main(
         Div(
             H1("Sign In"),
-            P("Enter your email to sign in to The App."),
+            P("Enter your email to sign in to the app."),
             Div(signin_form(), id='login_form'),
             P(id="signin-error"),
-            Hr(),
-            P("Already have a code? Enter it below."),
-            Div(code_form(), id='code_form'),
+            Hr(style="background-color: white;height: 3px;"),
+            Div(id='code_form'),
             P(id="code-error"),    
         ), cls="container"
    )
@@ -102,30 +96,35 @@ def _generate_login_code(length: int = 6) -> str:
 def post(email: str):
     return auth.create_code(email, users)
 """
+
 def create_code(email, users):
     if not email:
-       return (feedback_to_user({'error': 'missing_email'}))
+        return (feedback_to_user({'error': 'missing_email'}))
+
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
     try:
-        user_results = users("email = ?", (email,))
-        if user_results:
-            users.update(email= email, magic_link_token= login_code, magic_link_expiry= magic_link_expiry, number_link_touched= 0)
-            send_login_code_email(email, login_code)
-            return (
-                P(feedback_to_user({'success': 'login_code_sent'}), id="success"),
-                HttpHeader('HX-Reswap', 'outerHTML'),
-                Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true")
-            )
-        else:
-            return Div(
-                (feedback_to_user({'error': 'not_registered', 'email': f"{email}"})
-                ),
-            )
-    except Exception as e:
-        print(e)
-        return Redirect(f'/db_error?etext={e}')
-    
+        user_results = users("email = ?", (email,))[0]
+        # If we get here, user exists
+        users.update(
+            email=email,
+            magic_link_token=login_code,
+            magic_link_expiry=magic_link_expiry,
+            number_link_touched=0
+        )
+        send_login_code_email(email, login_code)
+        return (
+            P(feedback_to_user({'success': 'login_code_sent'}), id="success"),
+            HttpHeader('HX-Reswap', 'outerHTML'),
+            Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true"),
+            Div(code_form(), id='code_form', hx_swap_oob="true")
+        )
+    except IndexError:
+        # Handle case when no user is found
+        return Div(
+            feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
+        )
+
 ```
 
 ### Send the code
@@ -155,7 +154,7 @@ With Metta
 The Gong App Team
 """
     # dev toggle if you like
-    if False: #isa_dev_computer():
+    if isa_dev_computer():
         print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
     else:
         send_email(email_subject, email_text, [email_address])

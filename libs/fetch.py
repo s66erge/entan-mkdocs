@@ -11,15 +11,18 @@ from libs.dbset import get_db_path, get_central_db
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#field-fr-db>>[init]
 
 def get_field_from_db(db_central, center_name, field_name):
+    # Access the centers mapping directly; no need for a dataclass helper.
     centers = db_central.t.centers
-    Center = centers.dataclass()
+    center_obj = centers[center_name]
     if field_name == "location":
-        location = centers[center_name].location
+        # Return the location string prefixed as expected by the tests.
+        location = getattr(center_obj, "location")
         return f"location_{location}"
     else:
-        # Access field using attribute notation, not .get()
-        other_course = getattr(centers[center_name], field_name)
+        # For other fields the value is stored as a JSON string.
+        other_course = getattr(center_obj, field_name)
         return json.loads(other_course)
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
 
@@ -101,18 +104,18 @@ def deduplicate(merged, del_as_BETWEEN):
     i = 0
     while i < len(merged):
         current = merged[i]
-        # delete this period_type if it is replaced by IN-BETWEEN
+        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
         if current["period_type"] in del_as_BETWEEN:
             i += 1 # skip this item
             continue
-        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
         elif i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
                 current['period_type'] == next_item['period_type']):
                 # Mark as BOTH and skip the next one
                 current['source'] = 'BOTH'
-                if current.get('end_date','None') == 'None':
+                #if current.get('end_date','None') == 'None':
+                if 'end_date' not in current and 'end_date' in next_item:
                     current['end_date'] =  next_item['end_date']
                 deduplicated.append(current)
                 i += 2  # skip next item

@@ -1,0 +1,36 @@
+  - name: Local llama-Qwen3
+    provider: openai
+    model: Qwen3-Coder-30B-A3B-Instruct-Q8_0
+    apiKey: dummy
+    apiBase: http://localhost:8080/v1
+    defaultCompletionOptions:
+      contextLength: 65536
+    requestOptions:
+      stream: true
+  - name: Local llama4-scout
+    provider: openai
+    model: Llama-4-Scout-17B-16E-Instruct-Q4_K_S-00001-of-00002
+    apiKey: dummy
+    apiBase: http://localhost:8080/v1
+    defaultCompletionOptions:
+      contextLength: 65536
+    requestOptions:
+      stream: true
+  - name: Local llama-mistral
+    provider: openai
+    model: Mistral-Small-3.2-24B-Instruct-2506-Q8_0
+    apiKey: dummy
+    apiBase: http://localhost:8080/v1
+    defaultCompletionOptions:
+      contextLength: 65536
+    requestOptions:
+      stream: true
+  - name: Local llama-gpt-oss
+    provider: openai
+    model: gpt-oss-120b-mxfp4-00001-of-00003
+    apiKey: dummy
+    apiBase: http://localhost:8080/v1
+    defaultCompletionOptions:
+      contextLength: 65536
+    requestOptions:
+      stream: true

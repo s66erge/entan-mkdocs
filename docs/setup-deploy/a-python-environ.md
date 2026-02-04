@@ -23,23 +23,6 @@ uv pip install -r requirements.txt
 ```{.pwsh file= setup/startup.ps1}
 .venv\Scripts\activate.ps1
 ```
-
-## Linux Mint
-
-### Initial installation
-
-```{.bash file= setup/environ.sh}
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv python install
-uv venv
-uv pip install -r requirements.txt
-```
-### VSCode startup
-
-``` bash
-source .venv/bin/activate
-```
-
 ## command
 
 python main.py
