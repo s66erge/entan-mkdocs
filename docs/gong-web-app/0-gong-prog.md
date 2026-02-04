@@ -61,7 +61,6 @@ def get():
 @rt('/logincheck')
 def post(session, email:str, password:str):
     return authpass.logincheck(session, email, password, users)
-
 """
 @rt('/login')
 def get():
