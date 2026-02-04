@@ -2,7 +2,7 @@
 name = "entan-mkdocs"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = "==3.13.9"
+requires-python = "==3.12.8"
 dependencies = [
 
     "python-fasthtml==0.12.37",
