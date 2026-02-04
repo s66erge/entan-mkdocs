@@ -106,7 +106,7 @@ def get(request):
 
 @rt('/countdown')
 async def get(session):
-    return planning.countdown_stream(session)
+    return planning.countdown_stream(session, db)
 
 @rt('/planning_page')
 def get(session, request):

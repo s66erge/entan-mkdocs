@@ -19,10 +19,13 @@ countdown_active = True
 remaining_seconds = DURATION * 60  # 60 minutes in seconds
 
 # Countdown generator for SSE
-async def countdown_generator(session):
+async def countdown_generator(session, db):
     global remaining_seconds, countdown_active
     while countdown_active and remaining_seconds > 0:
-        print(session["center"])
+        center_name = session["center"]
+        centers = db.t.centers
+        Center = centers.dataclass()
+        print(centers[center_name].gong_db_name)
         if remaining_seconds > 60:
             messg = f"{int(remaining_seconds // 60)} min."
         else:
@@ -39,8 +42,8 @@ async def countdown_generator(session):
     # The generator will naturally end here, closing the connection properly
     print("Countdown generator ending.")
 
-def countdown_stream(session):
-    return EventStream(countdown_generator(session))
+def countdown_stream(session, db):
+    return EventStream(countdown_generator(session, db))
 
 def planning_page(session, request, db_central):
     global remaining_seconds, countdown_active
