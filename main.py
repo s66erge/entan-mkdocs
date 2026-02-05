@@ -117,7 +117,7 @@ def get(session, request):
 
 @rt('/planning/set_free')
 def get(session, request):
-    return planning.set_free(request, db)
+    return planning.set_free(session, request, db)
 
 @rt('/admin_page')
 @admin_required

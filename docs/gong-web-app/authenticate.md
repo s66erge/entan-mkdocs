@@ -189,6 +189,7 @@ def verify_code(session, code, users):
     session['auth'] = usermail
     session['role'] = user.role_name
 
+
     users.update(
         email=user.email,
         magic_link_token=None,

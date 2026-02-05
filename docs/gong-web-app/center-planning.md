@@ -22,8 +22,8 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 ```{.python #planning-page}
 # @rt('/planning_page')
 
-DURATION = 0.5 # minute
-INTERVAL = 7 # seconds
+DURATION = 60 # minute
+INTERVAL = 15 # seconds
 # Global variable to track countdown state
 countdown_active = True
 remaining_seconds = DURATION * 60  # 60 minutes in seconds
@@ -63,6 +63,9 @@ def planning_page(session, request, db_central):
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
     session["center"] = selected_name
+    # CONTINOW 
+    #if session["countdown"] == 0:
+    #    session["countdown"] = DURATION * 60
 
     return Main(
         Div(display_markdown("planning-t")),
@@ -149,7 +152,7 @@ def load_dhamma_db(session, request, db):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-    # CONTINOW use SQL db commit for the following 5 lines 
+    # FIXME use SQL db commit for the following 5 lines 
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
@@ -194,7 +197,7 @@ def show_dhamma(request, db, db_path):
     )
 
 #@rt('/planning/set_free')
-def set_free(request, db):
+def set_free(session, request, db):
     centers = db.t.centers
     params = dict(request.query_params)
     this_center = params.get("center_name")
@@ -202,6 +205,8 @@ def set_free(request, db):
         return Div(P("No center selected."))
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
+    session["countdown"] = 0
+    session["center"] = ""
     global countdown_active
     countdown_active = False
     return RedirectResponse('/dashboard', status_code=303)
