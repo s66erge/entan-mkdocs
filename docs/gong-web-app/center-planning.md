@@ -22,16 +22,20 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 ```{.python #planning-page}
 # @rt('/planning_page')
 
-DURATION = 0.5 # minute
-INTERVAL = 7 # seconds
+DURATION = 60 # minute
+INTERVAL = 15 # seconds
 # Global variable to track countdown state
 countdown_active = True
 remaining_seconds = DURATION * 60  # 60 minutes in seconds
 
 # Countdown generator for SSE
-async def countdown_generator():
+async def countdown_generator(session, db):
     global remaining_seconds, countdown_active
     while countdown_active and remaining_seconds > 0:
+        center_name = session["center"]
+        centers = db.t.centers
+        Center = centers.dataclass()
+        print(centers[center_name].gong_db_name)
         if remaining_seconds > 60:
             messg = f"{int(remaining_seconds // 60)} min."
         else:
@@ -48,8 +52,8 @@ async def countdown_generator():
     # The generator will naturally end here, closing the connection properly
     print("Countdown generator ending.")
 
-def countdown_stream():
-    return EventStream(countdown_generator())
+def countdown_stream(session, db):
+    return EventStream(countdown_generator(session, db))
 
 def planning_page(session, request, db_central):
     global remaining_seconds, countdown_active
@@ -58,6 +62,10 @@ def planning_page(session, request, db_central):
 
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
+    session["center"] = selected_name
+    # CONTINOW 
+    #if session["countdown"] == 0:
+    #    session["countdown"] = DURATION * 60
 
     return Main(
         Div(display_markdown("planning-t")),
@@ -71,12 +79,12 @@ def planning_page(session, request, db_central):
                 hx_get="/unfinished",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            A("Return NO CHANGES", href="/dashboard"),
+            A("Return NO CHANGES", href=f"/planning/set_free?center_name={quote_plus(selected_name)}"),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span(id="timer", 
                 hx_ext="sse",
-                sse_connect="/countdown",
+                sse_connect=f"/countdown",
                 sse_swap="message",
                 cls="timer-display"
                 ),
@@ -144,7 +152,7 @@ def load_dhamma_db(session, request, db):
     this_center = centers[selected_name].center_name
     q_center = quote_plus(this_center)
     this_user= session['auth']
-    # CONTINOW use SQL db commit for the following 5 lines 
+    # FIXME use SQL db commit for the following 5 lines 
     status_bef = centers[selected_name].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
@@ -189,7 +197,7 @@ def show_dhamma(request, db, db_path):
     )
 
 #@rt('/planning/set_free')
-def set_free(request, db):
+def set_free(session, request, db):
     centers = db.t.centers
     params = dict(request.query_params)
     this_center = params.get("center_name")
@@ -197,6 +205,8 @@ def set_free(request, db):
         return Div(P("No center selected."))
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
+    session["countdown"] = 0
+    session["center"] = ""
     global countdown_active
     countdown_active = False
     return RedirectResponse('/dashboard', status_code=303)
