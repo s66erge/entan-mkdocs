@@ -79,7 +79,7 @@ def planning_page(session, request, db_central):
                 hx_get="/unfinished",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            A("Return NO CHANGES", href="/dashboard"),
+            A("Return NO CHANGES", href=f"/planning/set_free?center_name={quote_plus(selected_name)}"),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span(id="timer", 
