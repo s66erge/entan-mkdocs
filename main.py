@@ -117,9 +117,9 @@ def get(session, request):
 @rt('/planning/set_free')
 def get(session):
     return planning.abandon_edit(session)
-@rt('/planning/set_free')
-def post(session):
-    return planning.abandon_edit(session, db)
+#@rt('/planning/set_free')
+# def post(session):
+#    return planning.abandon_edit(session, db)
 
 @rt('/admin_page')
 @admin_required

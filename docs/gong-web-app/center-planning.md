@@ -23,7 +23,7 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 ```{.python #planning-page}
 
 DURAT = 0.3 * 60 # seconds
-INTERVAL = 5 # seconds
+INTERVAL = 6 # seconds
 SHUTDOWN = False
 
 def abandon_edit(session):
@@ -57,7 +57,11 @@ async def countdown_generator(session, db):
             messg = f"{int(remaining_seconds)} sec."
         yield sse_message(messg)
         session["countdown"] = remaining_seconds - INTERVAL
-        await sleep(INTERVAL)
+        if remaining_seconds > INTERVAL:
+            sleep_time = INTERVAL
+        else:
+            sleep_time = 3
+        await sleep(sleep_time)
 
     # When countdown finishes, send final message and call callback only once
     if session["countdown"] <= 0 and not SHUTDOWN:
@@ -88,6 +92,8 @@ def planning_page(session, request, db):
     busy_user = centers[selected_name].current_user
     timezone = centers[selected_name].timezone
     if status_bef != "free" or busy_user != this_user:
+        session["center"] = selected_name
+        Globals.CENTER = session["center"]
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezone}"),
             P("If you want to consult any centerIn the mean time, go to the dashboard. Otherwise please logout."),
@@ -96,7 +102,7 @@ def planning_page(session, request, db):
                 Span(style="display: inline-block; width: 20px;"),
                 Button("Logout", hx_post="/logout"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("set FREE",href=f"/planning/set_free",) if isa_dev_computer() else None,        
+                A("set FREE",href="/planning/set_free") if isa_dev_computer() else None,        
             )
         )
 
@@ -104,7 +110,7 @@ def planning_page(session, request, db):
     global SHUTDOWN
     SHUTDOWN = False
     if session["countdown"] == 0:
-        session["countdown"] = DURAT 
+        session["countdown"] = DURAT
     return Main(
         Div(display_markdown("planning-t")),
         Span(
@@ -133,7 +139,7 @@ def planning_page(session, request, db):
                 if (text === "Time is up!") {
                     setTimeout(() => {
                         window.location.href = '/dashboard';
-                    }, 3000); // Redirect after 3 seconds
+                    }, 1000); // Redirect after 1 second
                 }
             }
             // Start polling - STORE the interval ID
