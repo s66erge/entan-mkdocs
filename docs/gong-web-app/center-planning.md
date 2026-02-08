@@ -10,8 +10,9 @@ from urllib.parse import quote_plus
 from tabulate import tabulate
 from fasthtml.common import *
 
-from libs.utils import display_markdown, isa_dev_computer
+from libs.utils import display_markdown, isa_dev_computer, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
+
 
 <<planning-page>>
 ```
@@ -20,33 +21,48 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 ### Planning page
 
 ```{.python #planning-page}
-# @rt('/planning_page')
 
-DURATION = 60 # minute
+DURAT = 60 # minutes
 INTERVAL = 15 # seconds
-# Global variable to track countdown state
-countdown_active = True
-remaining_seconds = DURATION * 60  # 60 minutes in seconds
+SHUTDOWN = False
+
+def abandon_edit(session):
+    global SHUTDOWN
+    SHUTDOWN = True
+    Globals.CENTER = session["center"]
+    """
+    this_center = session["center"]
+    session["center"] = ""
+    from libs.dbset import get_central_db
+    db = get_central_db()
+    centers = db.t.centers
+    Center = centers.dataclass()
+    centers.update(center_name=this_center, status="free", current_user="")
+    """
+    return RedirectResponse('/dashboard')
 
 # Countdown generator for SSE
 async def countdown_generator(session, db):
-    global remaining_seconds, countdown_active
-    while countdown_active and remaining_seconds > 0:
-        center_name = session["center"]
-        centers = db.t.centers
-        Center = centers.dataclass()
-        print(centers[center_name].gong_db_name)
+    global SHUTDOWN
+    while session["countdown"] > 0 and not SHUTDOWN:
+        #center_name = session["center"]
+        #centers = db.t.centers
+        #Center = centers.dataclass()
+        remaining_seconds = session["countdown"]
+        print(f"remaining seconds: {remaining_seconds}")
+        print(session)
         if remaining_seconds > 60:
             messg = f"{int(remaining_seconds // 60)} min."
         else:
             messg = f"{int(remaining_seconds)} sec."
         yield sse_message(messg)
-        remaining_seconds -= INTERVAL
+        session["countdown"] = remaining_seconds - INTERVAL
         await sleep(INTERVAL)
 
-    # When countdown finishes, send final message and call  callback only once
-    if remaining_seconds <= 0 and countdown_active:
-        countdown_active = False
+    # When countdown finishes, send final message and call callback only once
+    if session["countdown"] <= 0 and not SHUTDOWN:
+        SHUTDOWN = True
+        abandon_edit(session, db)
         yield sse_message("Time is up!")
 
     # The generator will naturally end here, closing the connection properly
@@ -55,18 +71,41 @@ async def countdown_generator(session, db):
 def countdown_stream(session, db):
     return EventStream(countdown_generator(session, db))
 
-def planning_page(session, request, db_central):
-    global remaining_seconds, countdown_active
-    countdown_active = True
-    remaining_seconds = DURATION * 60  # 60 minutes in seconds
-
+# @rt('/planning_page')
+def planning_page(session, request, db):
+    print("plan")
+    print(session)
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
-    session["center"] = selected_name
-    # CONTINOW 
-    #if session["countdown"] == 0:
-    #    session["countdown"] = DURATION * 60
+    centers = db.t.centers
+    Center = centers.dataclass()
+    q_center = quote_plus(selected_name)
+    this_user= session['auth']
+    # FIXME use SQL db commit for the following 5 lines 
+    status_bef = centers[selected_name].status
+    if status_bef == "free":
+        centers.update(center_name=selected_name, status="edit", current_user=this_user)
+    busy_user = centers[selected_name].current_user
+    timezone = centers[selected_name].timezone
+    if status_bef != "free" or busy_user != this_user:
+        return Div(
+            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezone}"),
+            P("If you want to consult any centerIn the mean time, go to the dashboard. Otherwise please logout."),
+            Span(
+                A("dashboard", href="/dashboard"),
+                Span(style="display: inline-block; width: 20px;"),
+                Button("Logout", hx_post="/logout"),
+                Span(style="display: inline-block; width: 20px;"),
+                A("set FREE",href=f"/planning/set_free",) if isa_dev_computer() else None,        
+            )
+        )
 
+    session["center"] = selected_name
+    global SHUTDOWN
+    SHUTDOWN = False
+    if session["countdown"] == 0:
+        #remaining_seconds = DURAT * 60  # 60 minutes in seconds
+        session["countdown"] = DURAT * 60
     return Main(
         Div(display_markdown("planning-t")),
         Span(
@@ -75,11 +114,10 @@ def planning_page(session, request, db_central):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Modify {selected_name} course types / timetables",
-                #hx_get=f"/planning/load_courses?selected_name={selected_name}",
-                hx_get="/unfinished",
+                hx_get="/unfinished?goto_dash=NO",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            A("Return NO CHANGES", href=f"/planning/set_free?center_name={quote_plus(selected_name)}"),
+            A("return NO CHANGES",href=f"/planning/set_free",),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span(id="timer", 
@@ -88,9 +126,6 @@ def planning_page(session, request, db_central):
                 sse_swap="message",
                 cls="timer-display"
                 ),
-            Span(style="display: inline-block; width: 20px;"),
-            A("set FREE",href=f"/planning/set_free?center_name={quote_plus(selected_name)}",)
-                if isa_dev_computer() else None,
             Script("""
             function checkTimerAndRedirect() {
                 const timerDiv = document.getElementById('timer');
@@ -104,6 +139,28 @@ def planning_page(session, request, db_central):
             }
             // Start polling - STORE the interval ID
             setInterval(checkTimerAndRedirect, 1000);
+
+            let leavingViaLink = false;
+
+            document.querySelectorAll('a[href]').forEach(link => {
+                link.addEventListener('click', () => {
+                    leavingViaLink = true;
+                    // Reset after short delay (click -> beforeunload timing)
+                    setTimeout(() => leavingViaLink = false, 200);
+                });
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                // Silently accept if link click detected
+                if (leavingViaLink) {
+                    return;  // No prompt
+                }
+                
+                // Show browser dialog for other cases
+                e.preventDefault();
+                e.returnValue = 'Save session state before leaving?';
+            });
+
             """)
         ),
 
@@ -142,27 +199,28 @@ def create_draft_plan_table(draft_plan):
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session, request, db):
-    centers = db.t.centers
-    params = dict(request.query_params)
-    selected_name = params.get("selected_name")
-    if not selected_name:
-        return Div(P("No center selected."))
-    Center = centers.dataclass()
-
-    this_center = centers[selected_name].center_name
+    #centers = db.t.centers
+    #params = dict(request.query_params)
+    #selected_name = params.get("selected_name")
+    #if not selected_name:
+    #    return Div(P("No center selected."))
+    #Center = centers.dataclass()
+    # this_center = centers[selected_name].center_name
+    this_center = session["center"]
     q_center = quote_plus(this_center)
+    """
     this_user= session['auth']
     # FIXME use SQL db commit for the following 5 lines 
-    status_bef = centers[selected_name].status
+    status_bef = centers[this_center].status
     if status_bef == "free":
         centers.update(center_name=this_center, status="edit", current_user=this_user)
-    busy_user = centers[selected_name].current_user
-    timezone = centers[selected_name].timezone
+    busy_user = centers[this_center].current_user
+    timezone = centers[this_center].timezone
     if status_bef != "free" or busy_user != this_user:
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),            
             )
-
+    """
     return Div(
         P(" Loading from dhamma.org ..."),
         Div(hx_get=f"/planning/show_dhamma?selected_name={q_center}", 
@@ -173,12 +231,13 @@ def load_dhamma_db(session, request, db):
     )
 
 # @rt('/planning/show_dhamma')
-def show_dhamma(request, db, db_path):
+def show_dhamma(session, request, db, db_path):
     centers = db.t.centers
-    params = dict(request.query_params)
-    selected_name = params.get("selected_name")
-    if not selected_name:
-        return Div(P("No center selected."))
+    #params = dict(request.query_params)
+    #selected_name = params.get("selected_name")
+    #if not selected_name:
+    #    return Div(P("No center selected."))
+    selected_name = session["center"]
     Center = centers.dataclass()
     selected_db = centers[selected_name].gong_db_name
     dbfile_path = Path(db_path) / selected_db
@@ -196,19 +255,5 @@ def show_dhamma(request, db, db_path):
         id="planning-periods"
     )
 
-#@rt('/planning/set_free')
-def set_free(session, request, db):
-    centers = db.t.centers
-    params = dict(request.query_params)
-    this_center = params.get("center_name")
-    if not this_center:
-        return Div(P("No center selected."))
-    Center = centers.dataclass()
-    centers.update(center_name=this_center, status="free", current_user="")
-    session["countdown"] = 0
-    session["center"] = ""
-    global countdown_active
-    countdown_active = False
-    return RedirectResponse('/dashboard', status_code=303)
 ```
 

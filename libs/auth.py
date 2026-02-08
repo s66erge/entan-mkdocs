@@ -128,7 +128,8 @@ def verify_code(session, code, users):
     usermail = user.email
     session['auth'] = usermail
     session['role'] = user.role_name
-
+    session['center'] = ""
+    session['countdown'] = 0
 
     users.update(
         email=user.email,

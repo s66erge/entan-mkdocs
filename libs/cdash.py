@@ -1,6 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from fasthtml.common import *
-from libs.utils import display_markdown
+from libs.utils import display_markdown, Globals
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -17,6 +17,8 @@ def top_menu(role):
 
 # @rt('/dashboard')
 def dashboard(session, db): 
+    print("dash ")
+    print(session)
     users = db.t.users
     planners = db.t.planners
     Planner = planners.dataclass()
@@ -25,7 +27,6 @@ def dashboard(session, db):
     user_planners = planners("user_email = ?", (u.email,))
     user_centers = [(p.center_name) for p in user_planners] 
     user_center_list = ", ".join(user_centers)
-
     select = Select(
         Option("Select a center", value="", selected=True),
         *[Option(name, value=name) for name in user_centers],
@@ -39,7 +40,21 @@ def dashboard(session, db):
         action="/planning_page",
         method ="get",
     )
+    
 
+    print("dashboard")
+    print(f"Globals.CENTER: {Globals.CENTER}")
+    print(session)
+    if Globals.CENTER != "":
+        this_center = Globals.CENTER
+        Globals.CENTER = ""
+        session["countdown"] = 0
+        session["center"] = ""
+        centers = db.t.centers
+        Center = centers.dataclass()
+        centers.update(center_name=this_center, status="free", current_user="")
+    print(f"Globals.CENTER: {Globals.CENTER}")
+    print(session)
 
     return Main(
         top_menu(session['role']),
