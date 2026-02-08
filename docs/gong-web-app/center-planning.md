@@ -140,27 +140,6 @@ def planning_page(session, request, db):
             // Start polling - STORE the interval ID
             setInterval(checkTimerAndRedirect, 1000);
 
-            let leavingViaLink = false;
-
-            document.querySelectorAll('a[href]').forEach(link => {
-                link.addEventListener('click', () => {
-                    leavingViaLink = true;
-                    // Reset after short delay (click -> beforeunload timing)
-                    setTimeout(() => leavingViaLink = false, 200);
-                });
-            });
-
-            window.addEventListener('beforeunload', (e) => {
-                // Silently accept if link click detected
-                if (leavingViaLink) {
-                    return;  // No prompt
-                }
-                
-                // Show browser dialog for other cases
-                e.preventDefault();
-                e.returnValue = 'Save session state before leaving?';
-            });
-
             """)
         ),
 
@@ -170,7 +149,7 @@ def planning_page(session, request, db):
     )
 
 def create_draft_plan_table(draft_plan):
-    # Create an HTML table from a draft plan list of dictionaries
+    # Create an HTML table from a draft plan list of  dictionaries
     rows = []
     for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
         start = plan_line.get("start_date")
