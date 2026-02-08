@@ -12,6 +12,7 @@ from fasthtml.common import *
 
 from libs.utils import display_markdown, isa_dev_computer, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
+from libs.dbset import get_central_db
 
 
 <<planning-page>>
@@ -30,24 +31,18 @@ def abandon_edit(session):
     global SHUTDOWN
     SHUTDOWN = True
     Globals.CENTER = session["center"]
-    """
     this_center = session["center"]
     session["center"] = ""
-    from libs.dbset import get_central_db
     db = get_central_db()
     centers = db.t.centers
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
-    """
     return RedirectResponse('/dashboard')
 
 # Countdown generator for SSE
 async def countdown_generator(session, db):
     global SHUTDOWN
     while session["countdown"] > 0 and not SHUTDOWN:
-        #center_name = session["center"]
-        #centers = db.t.centers
-        #Center = centers.dataclass()
         remaining_seconds = session["countdown"]
         print(f"remaining seconds: {remaining_seconds}")
         print(session)
@@ -56,11 +51,11 @@ async def countdown_generator(session, db):
         else:
             messg = f"{int(remaining_seconds)} sec."
         yield sse_message(messg)
-        session["countdown"] = remaining_seconds - INTERVAL
-        if remaining_seconds > INTERVAL:
+        if remaining_seconds >= INTERVAL:
             sleep_time = INTERVAL
         else:
             sleep_time = 3
+        session["countdown"] = remaining_seconds - sleep_time
         await sleep(sleep_time)
 
     # When countdown finishes, send final message and call callback only once
@@ -96,7 +91,7 @@ def planning_page(session, request, db):
         Globals.CENTER = session["center"]
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezone}"),
-            P("If you want to consult any centerIn the mean time, go to the dashboard. Otherwise please logout."),
+            P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
             Span(
                 A("dashboard", href="/dashboard"),
                 Span(style="display: inline-block; width: 20px;"),

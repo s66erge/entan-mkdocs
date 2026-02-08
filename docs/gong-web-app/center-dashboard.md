@@ -50,21 +50,6 @@ def dashboard(session, db):
         method ="get",
     )
     
-
-    print("dashboard")
-    print(f"Globals.CENTER: {Globals.CENTER}")
-    print(session)
-    if Globals.CENTER != "":
-        this_center = Globals.CENTER
-        Globals.CENTER = ""
-        session["countdown"] = 0
-        session["center"] = ""
-        centers = db.t.centers
-        Center = centers.dataclass()
-        centers.update(center_name=this_center, status="free", current_user="")
-    print(f"Globals.CENTER: {Globals.CENTER}")
-    print(session)
-
     return Main(
         top_menu(session['role']),
         Div(Div(display_markdown("dashboard-t")),
