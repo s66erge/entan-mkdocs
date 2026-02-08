@@ -12,8 +12,8 @@ from libs.fetch import fetch_dhamma_courses, check_plan
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
-DURAT = 60 # minutes
-INTERVAL = 15 # seconds
+DURAT = 0.3 * 60 # seconds
+INTERVAL = 5 # seconds
 SHUTDOWN = False
 
 def abandon_edit(session):
@@ -52,7 +52,7 @@ async def countdown_generator(session, db):
     # When countdown finishes, send final message and call callback only once
     if session["countdown"] <= 0 and not SHUTDOWN:
         SHUTDOWN = True
-        abandon_edit(session, db)
+        abandon_edit(session)
         yield sse_message("Time is up!")
 
     # The generator will naturally end here, closing the connection properly
@@ -94,8 +94,7 @@ def planning_page(session, request, db):
     global SHUTDOWN
     SHUTDOWN = False
     if session["countdown"] == 0:
-        #remaining_seconds = DURAT * 60  # 60 minutes in seconds
-        session["countdown"] = DURAT * 60
+        session["countdown"] = DURAT 
     return Main(
         Div(display_markdown("planning-t")),
         Span(
