@@ -19,7 +19,10 @@ Given a simple on/off machine for resource management.
 
 from abc import ABC
 from abc import abstractmethod
+from asyncio import sleep
 from fastlite import *
+import time
+from datetime import datetime, timezone
 from statemachine import State
 from statemachine import StateMachine
 from libs import dbset
@@ -103,18 +106,26 @@ class DBPersistentModel(AbstractPersistentModel):
     def __init__(self, center_name):
         super().__init__()
         self.center_name = center_name
+        self.statustart = None  # Cache for the timestamp of the last state change
 
     def _read_state(self):
         db = dbset.get_central_db()
         centers = db.t.centers
         Center = centers.dataclass()
-        state = centers[self.center_name].status
-        return state if state else None
+        row = centers[self.center_name]
+        return row.status if row.status else None
 
     def _write_state(self, value):
         db = dbset.get_central_db()
         centers = db.t.centers
-        centers.update(center_name=self.center_name, status=value)
+        # Write BOTH state AND current timestamp
+        now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
+        self.statustart = now_utc      
+        centers.update(
+            center_name=self.center_name, 
+            status=value,
+            status_start=now_utc
+        )
 
 
 # %%
@@ -141,29 +152,35 @@ if utils.isa_dev_computer():
     from statemachine.contrib.diagram import quickchart_write_svg
     quickchart_write_svg(sm, "images/center_machines.svg") 
 
+print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 print(f"Initial state: {sm.current_state.id}")
+time.sleep(3)
 
+print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm.send("starts_editing")
 
-print(f"State after transition: {sm.current_state.id}")
+print(f"new state: {sm.current_state.id}, started at: {sm.model.statustart}")
 
-# %%
 # Remove the instances from memory.
-
 del sm
 
+time.sleep(3)
+print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 db = dbset.get_central_db()
 centers = db.t.centers
 Center = centers.dataclass()
-print(f"in database: {centers['Mahi'].status}")
+print(f"in database: {centers['Mahi'].status}", centers['Mahi'].status_start)
 
-# %%
 # Restore the previous state from db.
 
+time.sleep(3)
+print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm = csm["Mahi"]
 
-print(f"State restored from database: {sm.current_state.id}")
+print(f"State restored from database: {sm.current_state.id}, started at: {sm.model.statustart}")
 
+time.sleep(3)
+print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm.send("abandon_changes")
 
-print(f"State after last transition: {sm.current_state.id}")
+print(f"State after last transition: {sm.current_state.id}, started at: {sm.model.statustart}")
