@@ -100,7 +100,7 @@ class AbstractPersistentModel(ABC):
 
 class DBPersistentModel(AbstractPersistentModel):
     """A concrete implementation of a storage strategy for a Model
-    that reads and writes to a file.
+    that reads and writes to a file with a timestamp.
     """
 
     def __init__(self, center_name):
@@ -127,8 +127,16 @@ class DBPersistentModel(AbstractPersistentModel):
             status_start=now_utc
         )
 
+    def get_start_time(self):
+        if self.statustart is None:
+            # If statustart is not cached, read it from the database
+            db = dbset.get_central_db()
+            centers = db.t.centers
+            Center = centers.dataclass()
+            row = centers[self.center_name]
+            self.statustart = row.status_start if row.status_start else None
+        return self.statustart
 
-# %%
 # Let's create instances and test the persistence.
 
 def create_center_state_machines():
@@ -141,7 +149,7 @@ def create_center_state_machines():
         center_state = DBPersistentModel(center_name=name)
         sm = CenterState(model=center_state)
         csm[name] = sm
-        print(f"Center: {name}, State: {sm.current_state.id}")
+        print(f"Center: {name}, State: {sm.current_state.id}, start: {sm.model.get_start_time()} ")
     return csm
 
 csm = create_center_state_machines()
@@ -159,7 +167,7 @@ time.sleep(3)
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm.send("starts_editing")
 
-print(f"new state: {sm.current_state.id}, started at: {sm.model.statustart}")
+print(f"new state: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
 
 # Remove the instances from memory.
 del sm
@@ -177,10 +185,10 @@ time.sleep(3)
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm = csm["Mahi"]
 
-print(f"State restored from database: {sm.current_state.id}, started at: {sm.model.statustart}")
+print(f"State restored from database: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
 
 time.sleep(3)
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm.send("abandon_changes")
 
-print(f"State after last transition: {sm.current_state.id}, started at: {sm.model.statustart}")
+print(f"State after last transition: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
