@@ -23,8 +23,6 @@ from libs.dbset import get_central_db
 
 ```{.python #planning-page}
 
-INTERVAL = 6 # seconds
-
 def abandon_edit(session):
     session['shutdown'] = True
     this_center = session["center"]
@@ -46,12 +44,10 @@ async def countdown_generator(session, db):
         else:
             messg = f"{int(remaining_seconds)} sec."
         yield sse_message(messg)
-        if remaining_seconds >= INTERVAL:
-            sleep_time = INTERVAL
-        else:
-            sleep_time = 3
-        session["countdown"] = remaining_seconds - sleep_time
-        await sleep(sleep_time)
+        if remaining_seconds < 2 * session['interval'] and session['interval'] >= 4:
+            session['interval'] = session['interval'] // 4
+        session["countdown"] = remaining_seconds - session['interval']
+        await sleep(session['interval'])
 
     # When countdown finishes, send final message and call callback only once
     if session["countdown"] <= 0 and not session['shutdown']:
@@ -92,7 +88,7 @@ def planning_page(session, request, db):
                 Span(style="display: inline-block; width: 20px;"),
                 Button("Logout", hx_post="/logout"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("set FREE",href="/planning/set_free") if isa_dev_computer() else None,        
+                A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
             )
         )
 
@@ -112,7 +108,7 @@ def planning_page(session, request, db):
                 hx_get="/unfinished?goto_dash=NO",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            A("return NO CHANGES",href=f"/planning/set_free",),
+            A("return NO CHANGES",href=f"/planning/abandon_edit",),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span(id="timer", 

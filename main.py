@@ -114,14 +114,9 @@ def get(session, request):
 def get(session, request):
     return planning.show_dhamma(session,request, db, db_path)
 
-@rt('/planning/set_free')
+@rt('/planning/abandon_edit')
 def get(session):
     return planning.abandon_edit(session)
-"""
-@rt('/planning/set_free')
-def post(session):
-    return planning.abandon_edit(session)
-"""
 
 @rt('/admin_page')
 @admin_required

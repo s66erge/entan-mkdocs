@@ -6,7 +6,7 @@
                 e.returnValue = 'Save session state before leaving?';
 
                 // Store fetch for later (can't execute during dialog)
-                pendingFetch = () => fetch('/planning/set_free', {method: 'GET'});
+                pendingFetch = () => fetch('/planning/abandon_edit', {method: 'GET'});
             });
 
             // Listen for user response via visibilitychange (works after dialog)
@@ -20,7 +20,7 @@
             // Fallback: pagehide (more reliable)
             window.addEventListener('pagehide', () => {
                 if (pendingFetch) {
-                    navigator.sendBeacon('/planning/set_free', '');  // Guaranteed delivery
+                    navigator.sendBeacon('/planning/abandon_edit', '');  // Guaranteed delivery
                     pendingFetch = null;
                 }
 

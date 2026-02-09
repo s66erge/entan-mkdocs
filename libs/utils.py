@@ -8,8 +8,8 @@ from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
 class Globals:
-    INITIAL_COUNTDOWN = 16 # seconds
-    INITIAL_INTERVAL = INITIAL_COUNTDOWN // 4 # seconds
+    INITIAL_COUNTDOWN = 8 # seconds, must be 2**N, >=8 (2**11 = 2048 = 34 min.)
+    INITIAL_INTERVAL = min(INITIAL_COUNTDOWN // 4, 32) # seconds
 
     @classmethod
     def get(cls, name, default=None):
