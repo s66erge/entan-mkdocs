@@ -13,8 +13,6 @@ Original `issue <https://github.com/fgmacedo/python-statemachine/issues/358>`_.
 Resource management state machine
 ---------------------------------
 
-Given a simple on/off machine for resource management.
-
 """
 
 from abc import ABC
@@ -47,7 +45,6 @@ class CenterState(StateMachine):
     db_not_prod = wait03_prod.to(reco_prod)         # at 3am: db in production NOT done
     reco_prod_done = reco_prod.to(free)             # recovery of db in production done
 
-# %%
 # Abstract model with persistency protocol
 # ----------------------------------------
 #
@@ -90,8 +87,6 @@ class AbstractPersistentModel(ABC):
     @abstractmethod
     def _write_state(self, value): ...
 
-
-# %%
 # DBPersistentModel: Concrete model strategy
 # --------------------------------------------
 #
@@ -103,16 +98,20 @@ class DBPersistentModel(AbstractPersistentModel):
     that reads and writes to a file with a timestamp.
     """
 
-    def __init__(self, center_name):
+    def __init__(self, center_name, user=None):
         super().__init__()
         self.center_name = center_name
+        self.user = user
         self.statustart = None  # Cache for the timestamp of the last state change
+        
 
     def _read_state(self):
         db = dbset.get_central_db()
         centers = db.t.centers
         Center = centers.dataclass()
         row = centers[self.center_name]
+        self.statustart = row.status_start
+        self.user = row.current_user
         return row.status if row.status else None
 
     def _write_state(self, value):
@@ -124,7 +123,8 @@ class DBPersistentModel(AbstractPersistentModel):
         centers.update(
             center_name=self.center_name, 
             status=value,
-            status_start=now_utc
+            status_start=now_utc,
+            current_user=self.user
         )
 
     def get_start_time(self):
@@ -136,6 +136,15 @@ class DBPersistentModel(AbstractPersistentModel):
             row = centers[self.center_name]
             self.statustart = row.status_start if row.status_start else None
         return self.statustart
+    
+    def get_user(self):
+        if self.user is None:
+            db = dbset.get_central_db()
+            centers = db.t.centers
+            Center = centers.dataclass()
+            row = centers[self.center_name]
+            self.user = row.current_user
+        return self.user
 
 # Let's create instances and test the persistence.
 
@@ -149,7 +158,7 @@ def create_center_state_machines():
         center_state = DBPersistentModel(center_name=name)
         sm = CenterState(model=center_state)
         csm[name] = sm
-        print(f"Center: {name}, State: {sm.current_state.id}, start: {sm.model.get_start_time()} ")
+        print(f"Center: {name}, State: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()} ")
     return csm
 
 csm = create_center_state_machines()
@@ -161,13 +170,14 @@ if utils.isa_dev_computer():
     quickchart_write_svg(sm, "images/center_machines.svg") 
 
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-print(f"Initial state: {sm.current_state.id}")
+print(f"Initial state: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
 time.sleep(3)
 
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
+sm.model.user = "abc@mail.com"
 sm.send("starts_editing")
 
-print(f"new state: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
+print(f"new state: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
 
 # Remove the instances from memory.
 del sm
@@ -177,7 +187,7 @@ print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 db = dbset.get_central_db()
 centers = db.t.centers
 Center = centers.dataclass()
-print(f"in database: {centers['Mahi'].status}", centers['Mahi'].status_start)
+print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].current_user}")
 
 # Restore the previous state from db.
 
@@ -185,10 +195,11 @@ time.sleep(3)
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
 sm = csm["Mahi"]
 
-print(f"State restored from database: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
+print(f"State restored from database: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
 
 time.sleep(3)
 print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
+sm.model.user = None
 sm.send("abandon_changes")
 
-print(f"State after last transition: {sm.current_state.id}, started at: {sm.model.get_start_time()}")
+print(f"State after last transition: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")

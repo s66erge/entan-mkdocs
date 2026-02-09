@@ -52,6 +52,7 @@ def countdown_stream(session, db):
 def planning_page(session, request, db):
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
+    session["center"] = selected_name
     centers = db.t.centers
     Center = centers.dataclass()
     q_center = quote_plus(selected_name)
@@ -63,8 +64,6 @@ def planning_page(session, request, db):
     busy_user = centers[selected_name].current_user
     timezone = centers[selected_name].timezone
     if status_bef != "free" or busy_user != this_user:
-        session["center"] = selected_name
-        Globals.CENTER = session["center"]
         return Div(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezone}"),
             P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
@@ -77,7 +76,6 @@ def planning_page(session, request, db):
             )
         )
 
-    session["center"] = selected_name
     session['shutdown'] = False
     if session["countdown"] == 0:
         session["countdown"] = Globals.INITIAL_COUNTDOWN
