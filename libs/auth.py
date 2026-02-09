@@ -130,6 +130,8 @@ def verify_code(session, code, users):
     session['role'] = user.role_name
     session['center'] = ""
     session['countdown'] = 0
+    session['shutdown'] = False
+    session['interval'] = 0
 
     users.update(
         email=user.email,

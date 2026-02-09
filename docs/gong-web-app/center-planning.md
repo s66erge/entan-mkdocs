@@ -23,14 +23,10 @@ from libs.dbset import get_central_db
 
 ```{.python #planning-page}
 
-DURAT = 0.3 * 60 # seconds
 INTERVAL = 6 # seconds
-SHUTDOWN = False
 
 def abandon_edit(session):
-    global SHUTDOWN
-    SHUTDOWN = True
-    Globals.CENTER = session["center"]
+    session['shutdown'] = True
     this_center = session["center"]
     session["center"] = ""
     db = get_central_db()
@@ -41,8 +37,7 @@ def abandon_edit(session):
 
 # Countdown generator for SSE
 async def countdown_generator(session, db):
-    global SHUTDOWN
-    while session["countdown"] > 0 and not SHUTDOWN:
+    while session["countdown"] > 0 and not session['shutdown']:
         remaining_seconds = session["countdown"]
         print(f"remaining seconds: {remaining_seconds}")
         print(session)
@@ -59,8 +54,8 @@ async def countdown_generator(session, db):
         await sleep(sleep_time)
 
     # When countdown finishes, send final message and call callback only once
-    if session["countdown"] <= 0 and not SHUTDOWN:
-        SHUTDOWN = True
+    if session["countdown"] <= 0 and not session['shutdown']:
+        session['shutdown'] = True
         abandon_edit(session)
         yield sse_message("Time is up!")
 
@@ -102,10 +97,10 @@ def planning_page(session, request, db):
         )
 
     session["center"] = selected_name
-    global SHUTDOWN
-    SHUTDOWN = False
+    session['shutdown'] = False
     if session["countdown"] == 0:
-        session["countdown"] = DURAT
+        session["countdown"] = Globals.INITIAL_COUNTDOWN
+        session['interval'] = Globals.INITIAL_INTERVAL
     return Main(
         Div(display_markdown("planning-t")),
         Span(
