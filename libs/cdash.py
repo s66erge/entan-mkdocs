@@ -17,8 +17,6 @@ def top_menu(role):
 
 # @rt('/dashboard')
 def dashboard(session, db): 
-    print("dash ")
-    print(session)
     users = db.t.users
     planners = db.t.planners
     Planner = planners.dataclass()

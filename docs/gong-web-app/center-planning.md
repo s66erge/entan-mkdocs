@@ -23,11 +23,10 @@ from libs.dbset import get_central_db
 
 ```{.python #planning-page}
 
-def abandon_edit(session):
+def abandon_edit(session, db):
     session['shutdown'] = True
     this_center = session["center"]
     session["center"] = ""
-    db = get_central_db()
     centers = db.t.centers
     Center = centers.dataclass()
     centers.update(center_name=this_center, status="free", current_user="")
@@ -37,8 +36,6 @@ def abandon_edit(session):
 async def countdown_generator(session, db):
     while session["countdown"] > 0 and not session['shutdown']:
         remaining_seconds = session["countdown"]
-        print(f"remaining seconds: {remaining_seconds}")
-        print(session)
         if remaining_seconds > 60:
             messg = f"{int(remaining_seconds // 60)} min."
         else:
@@ -52,7 +49,7 @@ async def countdown_generator(session, db):
     # When countdown finishes, send final message and call callback only once
     if session["countdown"] <= 0 and not session['shutdown']:
         session['shutdown'] = True
-        abandon_edit(session)
+        abandon_edit(session, db)
         yield sse_message("Time is up!")
 
     # The generator will naturally end here, closing the connection properly
@@ -63,8 +60,6 @@ def countdown_stream(session, db):
 
 # @rt('/planning_page')
 def planning_page(session, request, db):
-    print("plan")
-    print(session)
     params = dict(request.query_params)
     selected_name = params.get("selected_name")
     centers = db.t.centers
@@ -97,6 +92,8 @@ def planning_page(session, request, db):
     if session["countdown"] == 0:
         session["countdown"] = Globals.INITIAL_COUNTDOWN
         session['interval'] = Globals.INITIAL_INTERVAL
+    print("at plan menu")
+    print(session)
     return Main(
         Div(display_markdown("planning-t")),
         Span(

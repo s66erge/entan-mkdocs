@@ -116,7 +116,7 @@ def get(session, request):
 
 @rt('/planning/abandon_edit')
 def get(session):
-    return planning.abandon_edit(session)
+    return planning.abandon_edit(session, db)
 
 @rt('/admin_page')
 @admin_required
