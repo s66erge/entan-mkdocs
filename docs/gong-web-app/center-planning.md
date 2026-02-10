@@ -26,37 +26,10 @@ from libs.dbset import get_central_db
 
 def abandon_edit(session, csms):
     this_center = session["center"]
-    session['shutdown'] = True
     session["center"] = ""
     csms[this_center].model.user = None
     csms[this_center].send("abandon_changes")
     return RedirectResponse('/dashboard')
-
-# Countdown generator for SSE
-async def countdown_generator(session, csms):
-    while session["countdown"] > 0 and not session['shutdown']:
-        remaining_seconds = session["countdown"]
-        if remaining_seconds > 60:
-            messg = f"{int(remaining_seconds // 60)} min."
-        else:
-            messg = f"{int(remaining_seconds)} sec."
-        yield sse_message(messg)
-        if remaining_seconds < 2 * session['interval'] and session['interval'] >= 4:
-            session['interval'] = session['interval'] // 4
-        session["countdown"] = remaining_seconds - session['interval']
-        await sleep(session['interval'])
-
-    # When countdown finishes, send final message and call callback only once
-    if session["countdown"] <= 0 and not session['shutdown']:
-        session['shutdown'] = True
-        abandon_edit(session, csms)
-        yield sse_message("Time is up!")
-
-    # The generator will naturally end here, closing the connection properly
-    print("Countdown generator ending.")
-
-def countdown_stream(session, csms):
-    return EventStream(countdown_generator(session, csms))
 
 # @rt('/planning_page')
 def planning_page(session, selected_name, db, csms):
@@ -68,21 +41,18 @@ def planning_page(session, selected_name, db, csms):
     past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
     tnow = datetime.now(timezone.utc)
     delta = (tnow-past).total_seconds()
-    print(f"state start: {start_state_time}, now: {tnow.strftime('%Y-%m-%dT%H:%M:%S+00:00')}, delta: {delta}")
+    # print(f"state start: {start_state_time}, now: {tnow.strftime('%Y-%m-%dT%H:%M:%S+00:00')}, delta: {delta}")
     if state_mach.current_state.id == "edit" and (
         delta > Globals.INITIAL_COUNTDOWN or this_user == state_mach.model.get_user()):
         state_mach.send("abandon_changes")
     if state_mach.current_state.id == "free":
         state_mach.model.user = this_user
         state_mach.send("starts_editing")
-        session['shutdown'] = False
         print(session)
-        if session["countdown"] == 0:
-            session["countdown"] = Globals.INITIAL_COUNTDOWN
-            session['interval'] = Globals.INITIAL_INTERVAL
         return Main(
             Div(display_markdown("planning-t")),
             Span(
+                Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
                 Button(f"Modify {selected_name} planning",
                     hx_get=f"/planning/load_dhamma_db?selected_name={quote_plus(selected_name)}",
                     hx_target="#planning-periods"),
@@ -91,30 +61,39 @@ def planning_page(session, selected_name, db, csms):
                     hx_get="/unfinished?goto_dash=NO",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("return NO CHANGES",href=f"/planning/abandon_edit",),
+                A("return NO CHANGES",href="/planning/abandon_edit",),
                 Span(style="display: inline-block; width: 20px;"),
                 Span("Remainning time: "),
-                Span(id="timer", 
-                    hx_ext="sse",
-                    sse_connect="/countdown",
-                    sse_swap="message",
-                    cls="timer-display"
-                    ),
-                Script("""
-                function checkTimerAndRedirect() {
-                    const timerDiv = document.getElementById('timer');
-                    if (!timerDiv) return;            
-                    const text = timerDiv.textContent || timerDiv.innerText;          
-                    if (text === "Time is up!") {
-                        setTimeout(() => {
-                            window.location.href = '/dashboard';
-                        }, 1000); // Redirect after 1 second
+                Span("", id="timer", cls="timer-display")
+            ),
+            Script("""
+                function startCountdown(seconds, elementId) {
+                const element = document.getElementById(elementId);
+                let timeLeft = seconds;
+
+                function updateDisplay() {
+                    if (timeLeft > 60) {
+                        const minutes = Math.floor(timeLeft / 60);
+                        element.textContent = `${minutes} min`;
+                    } else {
+                        element.textContent = `${timeLeft} sec`;
                     }
                 }
-                // Start polling - STORE the interval ID
-                setInterval(checkTimerAndRedirect, 1000);
-
-                """)
+                updateDisplay();
+                
+                const interval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();    
+                    if (timeLeft <= 0) {
+                        clearInterval(interval);
+                        window.location.href = '/planning/abandon_edit';
+                    }
+                }, 1000);
+                }
+                // Get starting time from #start-time element and START AUTOMATICALLY
+                const startSeconds = parseInt(document.getElementById('start-time').textContent);
+                startCountdown(startSeconds, 'timer');            
+                """
             ),
 
             P(""),       
@@ -181,10 +160,6 @@ def load_dhamma_db(session):
 # @rt('/planning/show_dhamma')
 def show_dhamma(session, request, db, db_path):
     centers = db.t.centers
-    #params = dict(request.query_params)
-    #selected_name = params.get("selected_name")
-    #if not selected_name:
-    #    return Div(P("No center selected."))
     selected_name = session["center"]
     Center = centers.dataclass()
     selected_db = centers[selected_name].gong_db_name

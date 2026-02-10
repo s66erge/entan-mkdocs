@@ -126,12 +126,10 @@ def verify_code(session, code, users):
 
     User = users.dataclass()
     usermail = user.email
+    session.clear()
     session['auth'] = usermail
     session['role'] = user.role_name
     session['center'] = ""
-    session['countdown'] = 0
-    session['shutdown'] = False
-    session['interval'] = 0
 
     users.update(
         email=user.email,
