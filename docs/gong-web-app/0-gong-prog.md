@@ -44,6 +44,8 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
+csms = states.create_center_state_machines()
+
 """
 @rt('/register')
 def get():
@@ -105,15 +107,17 @@ def get(request):
 
 @rt('/countdown')
 async def get(session):
-    return planning.countdown_stream(session, db)
+    return planning.countdown_stream(session, csms)
 
 @rt('/planning_page')
 def get(session, request):
-    return planning.planning_page(session, request, db)
+    params = dict(request.query_params)
+    center = params.get("selected_name")
+    return planning.planning_page(session, center, db, csms)
 
 @rt('/planning/load_dhamma_db')
-def get(session, request):
-    return planning.load_dhamma_db(session, request, db)
+def get(session):
+    return planning.load_dhamma_db(session)
 
 @rt('/planning/show_dhamma')
 def get(session, request):
@@ -121,7 +125,7 @@ def get(session, request):
 
 @rt('/planning/abandon_edit')
 def get(session):
-    return planning.abandon_edit(session, db)
+    return planning.abandon_edit(session, csms)
 
 @rt('/admin_page')
 @admin_required

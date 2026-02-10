@@ -47,7 +47,6 @@ def dashboard(session, db):
         action="/planning_page",
         method ="get",
     )
-    
     return Main(
         top_menu(session['role']),
         Div(Div(display_markdown("dashboard-t")),

@@ -1,5 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from asyncio import sleep
 from urllib.parse import quote_plus
@@ -13,17 +14,16 @@ from libs.dbset import get_central_db
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
-def abandon_edit(session, db):
-    session['shutdown'] = True
+def abandon_edit(session, csms):
     this_center = session["center"]
+    session['shutdown'] = True
     session["center"] = ""
-    centers = db.t.centers
-    Center = centers.dataclass()
-    centers.update(center_name=this_center, status="free", current_user="")
+    csms[this_center].model.user = None
+    csms[this_center].send("abandon_changes")
     return RedirectResponse('/dashboard')
 
 # Countdown generator for SSE
-async def countdown_generator(session, db):
+async def countdown_generator(session, csms):
     while session["countdown"] > 0 and not session['shutdown']:
         remaining_seconds = session["countdown"]
         if remaining_seconds > 60:
@@ -39,33 +39,84 @@ async def countdown_generator(session, db):
     # When countdown finishes, send final message and call callback only once
     if session["countdown"] <= 0 and not session['shutdown']:
         session['shutdown'] = True
-        abandon_edit(session, db)
+        abandon_edit(session, csms)
         yield sse_message("Time is up!")
 
     # The generator will naturally end here, closing the connection properly
     print("Countdown generator ending.")
 
-def countdown_stream(session, db):
-    return EventStream(countdown_generator(session, db))
+def countdown_stream(session, csms):
+    return EventStream(countdown_generator(session, csms))
 
 # @rt('/planning_page')
-def planning_page(session, request, db):
-    params = dict(request.query_params)
-    selected_name = params.get("selected_name")
+def planning_page(session, selected_name, db, csms):
     session["center"] = selected_name
-    centers = db.t.centers
-    Center = centers.dataclass()
-    q_center = quote_plus(selected_name)
+    state_mach = csms[selected_name]
     this_user= session['auth']
     # FIXME use SQL db commit for the following 5 lines 
-    status_bef = centers[selected_name].status
-    if status_bef == "free":
-        centers.update(center_name=selected_name, status="edit", current_user=this_user)
-    busy_user = centers[selected_name].current_user
-    timezone = centers[selected_name].timezone
-    if status_bef != "free" or busy_user != this_user:
+    start_state_time = state_mach.model.get_start_time()
+    past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
+    tnow = datetime.now(timezone.utc)
+    delta = (tnow-past).total_seconds()
+    print(f"state start: {start_state_time}, now: {tnow.strftime('%Y-%m-%dT%H:%M:%S+00:00')}, delta: {delta}")
+    if state_mach.current_state.id == "edit" and (
+        delta > Globals.INITIAL_COUNTDOWN or this_user == state_mach.model.get_user()):
+        state_mach.send("abandon_changes")
+    if state_mach.current_state.id == "free":
+        state_mach.model.user = this_user
+        state_mach.send("starts_editing")
+        session['shutdown'] = False
+        print(session)
+        if session["countdown"] == 0:
+            session["countdown"] = Globals.INITIAL_COUNTDOWN
+            session['interval'] = Globals.INITIAL_INTERVAL
+        return Main(
+            Div(display_markdown("planning-t")),
+            Span(
+                Button(f"Modify {selected_name} planning",
+                    hx_get=f"/planning/load_dhamma_db?selected_name={quote_plus(selected_name)}",
+                    hx_target="#planning-periods"),
+                Span(style="display: inline-block; width: 20px;"),
+                Button(f"Modify {selected_name} course types / timetables",
+                    hx_get="/unfinished?goto_dash=NO",
+                    hx_target="#planning-periods"),
+                Span(style="display: inline-block; width: 20px;"),
+                A("return NO CHANGES",href=f"/planning/abandon_edit",),
+                Span(style="display: inline-block; width: 20px;"),
+                Span("Remainning time: "),
+                Span(id="timer", 
+                    hx_ext="sse",
+                    sse_connect="/countdown",
+                    sse_swap="message",
+                    cls="timer-display"
+                    ),
+                Script("""
+                function checkTimerAndRedirect() {
+                    const timerDiv = document.getElementById('timer');
+                    if (!timerDiv) return;            
+                    const text = timerDiv.textContent || timerDiv.innerText;          
+                    if (text === "Time is up!") {
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1000); // Redirect after 1 second
+                    }
+                }
+                // Start polling - STORE the interval ID
+                setInterval(checkTimerAndRedirect, 1000);
+
+                """)
+            ),
+
+            P(""),       
+            Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
+            cls="container"
+        )
+    else: 
+        centers = db.t.centers
+        Center = centers.dataclass()
+        timezon = centers[selected_name].timezone
         return Div(
-            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezone}"),
+            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezon}"),
             P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
             Span(
                 A("dashboard", href="/dashboard"),
@@ -76,53 +127,6 @@ def planning_page(session, request, db):
             )
         )
 
-    session['shutdown'] = False
-    if session["countdown"] == 0:
-        session["countdown"] = Globals.INITIAL_COUNTDOWN
-        session['interval'] = Globals.INITIAL_INTERVAL
-    print("at plan menu")
-    print(session)
-    return Main(
-        Div(display_markdown("planning-t")),
-        Span(
-            Button(f"Modify {selected_name} planning",
-                hx_get=f"/planning/load_dhamma_db?selected_name={selected_name}",
-                hx_target="#planning-periods"),
-            Span(style="display: inline-block; width: 20px;"),
-            Button(f"Modify {selected_name} course types / timetables",
-                hx_get="/unfinished?goto_dash=NO",
-                hx_target="#planning-periods"),
-            Span(style="display: inline-block; width: 20px;"),
-            A("return NO CHANGES",href=f"/planning/abandon_edit",),
-            Span(style="display: inline-block; width: 20px;"),
-            Span("Remainning time: "),
-            Span(id="timer", 
-                hx_ext="sse",
-                sse_connect=f"/countdown",
-                sse_swap="message",
-                cls="timer-display"
-                ),
-            Script("""
-            function checkTimerAndRedirect() {
-                const timerDiv = document.getElementById('timer');
-                if (!timerDiv) return;            
-                const text = timerDiv.textContent || timerDiv.innerText;          
-                if (text === "Time is up!") {
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1000); // Redirect after 1 second
-                }
-            }
-            // Start polling - STORE the interval ID
-            setInterval(checkTimerAndRedirect, 1000);
-
-            """)
-        ),
-
-        P(""),       
-        Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
-        cls="container"
-    )
 
 def create_draft_plan_table(draft_plan):
     # Create an HTML table from a draft plan list of  dictionaries
@@ -153,32 +157,11 @@ def create_draft_plan_table(draft_plan):
     return table
 
 # @rt('/planning/load_dhamma_db')
-def load_dhamma_db(session, request, db):
-    #centers = db.t.centers
-    #params = dict(request.query_params)
-    #selected_name = params.get("selected_name")
-    #if not selected_name:
-    #    return Div(P("No center selected."))
-    #Center = centers.dataclass()
-    # this_center = centers[selected_name].center_name
+def load_dhamma_db(session):
     this_center = session["center"]
-    q_center = quote_plus(this_center)
-    """
-    this_user= session['auth']
-    # FIXME use SQL db commit for the following 5 lines 
-    status_bef = centers[this_center].status
-    if status_bef == "free":
-        centers.update(center_name=this_center, status="edit", current_user=this_user)
-    busy_user = centers[this_center].current_user
-    timezone = centers[this_center].timezone
-    if status_bef != "free" or busy_user != this_user:
-        return Div(
-            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen between 1am and 3am, local time of the center: {timezone}"),            
-            )
-    """
     return Div(
         P(" Loading from dhamma.org ..."),
-        Div(hx_get=f"/planning/show_dhamma?selected_name={q_center}", 
+        Div(hx_get=f"/planning/show_dhamma?selected_name={quote_plus(this_center)}", 
             hx_target="#planning-periods",
             hx_trigger="load",  # Triggers when this div loads
             style="display: none;"),
