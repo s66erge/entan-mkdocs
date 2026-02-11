@@ -1,6 +1,6 @@
-# Center consult page
+# Center planning page
 
-Will only be reachable for authenticated users.
+Will only be reachable for authenticated users and planner for the selected center.
 
 ```{.python file=libs/planning.py}
 import json
@@ -15,21 +15,26 @@ from libs.utils import display_markdown, isa_dev_computer, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
 from libs.dbset import get_central_db
 
-
+<<abandon-edit>>
+<<js-client-timer>>
 <<planning-page>>
 ```
 
 
 ### Planning page
 
-```{.python #planning-page}
+Check first if the center available for edits, either:
 
-def abandon_edit(session, csms):
-    this_center = session["center"]
-    session["center"] = ""
-    csms[this_center].model.user = None
-    csms[this_center].send("abandon_changes")
-    return RedirectResponse('/dashboard')
+-  state is "edit" and the state changes happenned more than 'max time' ago
+-  state is "edit" and the current user also the state change user
+-  state is "free"
+
+Then:
+
+- available: load the main menu for changing center planning
+- not available: explain to the user to wait for current changes to enter production at center 
+
+```{.python #planning-page}
 
 # @rt('/planning_page')
 def planning_page(session, selected_name, db, csms):
@@ -61,41 +66,12 @@ def planning_page(session, selected_name, db, csms):
                     hx_get="/unfinished?goto_dash=NO",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("return NO CHANGES",href="/planning/abandon_edit",),
+                A("return NO CHANGES",href="/planning/abandon_edit", _data_safe_nav="true"),
                 Span(style="display: inline-block; width: 20px;"),
                 Span("Remainning time: "),
                 Span("", id="timer", cls="timer-display")
             ),
-            Script("""
-                function startCountdown(seconds, elementId) {
-                const element = document.getElementById(elementId);
-                let timeLeft = seconds;
-
-                function updateDisplay() {
-                    if (timeLeft > 60) {
-                        const minutes = Math.floor(timeLeft / 60);
-                        element.textContent = `${minutes} min`;
-                    } else {
-                        element.textContent = `${timeLeft} sec`;
-                    }
-                }
-                updateDisplay();
-                
-                const interval = setInterval(() => {
-                    timeLeft--;
-                    updateDisplay();    
-                    if (timeLeft <= 0) {
-                        clearInterval(interval);
-                        window.location.href = '/planning/abandon_edit';
-                    }
-                }, 1000);
-                }
-                // Get starting time from #start-time element and START AUTOMATICALLY
-                const startSeconds = parseInt(document.getElementById('start-time').textContent);
-                startCountdown(startSeconds, 'timer');            
-                """
-            ),
-
+            Script(JS_CLIENT_TIMER),
             P(""),       
             Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
             cls="container"
@@ -104,7 +80,7 @@ def planning_page(session, selected_name, db, csms):
         centers = db.t.centers
         Center = centers.dataclass()
         timezon = centers[selected_name].timezone
-        return Div(
+        return Main(
             P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezon}"),
             P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
             Span(
@@ -113,7 +89,8 @@ def planning_page(session, selected_name, db, csms):
                 Button("Logout", hx_post="/logout"),
                 Span(style="display: inline-block; width: 20px;"),
                 A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
-            )
+            ),
+            cls="container"
         )
 
 
@@ -178,5 +155,64 @@ def show_dhamma(session, request, db, db_path):
         id="planning-periods"
     )
 
+```
+
+### Abandon center planning edit
+
+Check for the rare situation when arriving here on 'free' state instead of 'edit'.
+
+```{.python #abandon-edit}
+
+# @rt('/planning/abandon_edit')
+def abandon_edit(session, csms):
+    this_center = session["center"]
+    session["center"] = ""
+    if csms[this_center].current_state.id == "edit":
+        csms[this_center].model.user = None
+        csms[this_center].send("abandon_changes")
+    return RedirectResponse('/dashboard')
+
+```
+
+### Javascript timer for center planning usage + preventing unwanted page unload
+
+```{.python #js-client-timer}
+
+JS_CLIENT_TIMER = """
+function startCountdown(seconds, elementId) {
+    const element = document.getElementById(elementId);
+    let timeLeft = seconds;
+
+    function updateDisplay() {
+        if (timeLeft > 60) {
+            const minutes = Math.floor(timeLeft / 60);
+            element.textContent = `${minutes} min`;
+        } else {
+            element.textContent = `${timeLeft} sec`;
+        }
+    }
+    updateDisplay();
+    
+    const interval = setInterval(() => {
+        timeLeft--;
+        updateDisplay();    
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            window.onbeforeunload = null;
+            window.location.href = '/planning/abandon_edit';
+        }
+    }, 1000);
+}
+// Get starting time from #start-time element and START AUTOMATICALLY
+const startSeconds = parseInt(document.getElementById('start-time').textContent);
+startCountdown(startSeconds, 'timer');
+
+document.querySelectorAll('[data-safe-nav="true"]').forEach(link => {
+    link.addEventListener('click', function() {
+        window.onbeforeunload = null;  // Disable for this navigation
+    });
+});
+window.onbeforeunload = function() { return "Unsaved changes!";};
+"""
 ```
 

@@ -35,6 +35,7 @@ class CenterState(StateMachine):
 
     starts_editing = free.to(edit)                  # user starts editing       
     abandon_changes = edit.to(free)                 # user abandon changes
+                                                     # ... just in case ...
     change_timer_done = edit.to(free)               # 1 hour countdown finished
     saving_changes = edit.to(wait00_trans)          # user saves changes
     file_trans_done = wait00_trans.to(wait03_prod)  # at 0am: file transfer by PI done
