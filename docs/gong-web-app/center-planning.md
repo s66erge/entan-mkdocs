@@ -110,23 +110,10 @@ def show_draft_plan_table(draft_plan):
         source = plan_line.get("source")
         check = plan_line.get("check")
         course = plan_line.get("course_type")
-
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
         check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
-
         # Add delete link for removing this row
-        """
-        delete_link = A(
-            "✖",  # or "Delete" for text
-            href=f"/planning/delete_line?index={idx}",
-            _data_safe_nav="true",
-            # hx_delete=f"/planning/delete_line?index={idx}",
-            hx_target="#planning-periods",
-            hx_confirm="Are you sure you want to delete this entry?",
-            style="color: red; text-decoration: none; font-weight: bold; cursor: pointer;"
-        )
-        """
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
             hx_target="#planning-periods",
@@ -138,7 +125,7 @@ def show_draft_plan_table(draft_plan):
             )
         )
     table = Table(
-        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Dhamma.org center course"), Th("Action"),)),
+        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
         Tbody(*rows)
     )
     return Div(
@@ -156,7 +143,7 @@ def show_draft_plan_table(draft_plan):
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
-        P(" Loading from dhamma.org ..."),
+        P(" Loading this center planning from dhamma.org ..."),
         Div(hx_get=f"/planning/show_dhamma", 
             hx_target="#planning-periods",
             hx_trigger="load",  # Triggers when this div loads
@@ -165,37 +152,29 @@ def load_dhamma_db(session):
     )
 
 # @rt('/planning/show_dhamma')
-def show_dhamma(session, db, db_path):
-    centers = db.t.centers
+def show_dhamma(session, plan, db):
     selected_name = session["center"]
-    Center = centers.dataclass()
-    selected_db = centers[selected_name].gong_db_name
-    dbfile_path = Path(db_path) / selected_db
-    if not dbfile_path.exists():
-        return Div(P(f"Database not found: {selected_db}"))
-    db_center = database(str(dbfile_path))
-    other_course = json.loads(centers[selected_name].other_course)
-    new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-    new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
+    if plan == []:
+        merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
+    else:
+        merged_plan = plan
+    new_draft_plan = check_plan(merged_plan, selected_name, db)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-
     # Save to db for future modifications
+    centers = db.t.centers
     centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
-
     return show_draft_plan_table(new_draft_plan)
 
 # @rt('/planning/delete_line')
 def delete_line(session, db, index: int):
-    centers = db.t.centers
     selected_name = session["center"]
+    centers = db.t.centers
     Center = centers.dataclass()
     plan = json.loads(centers[selected_name].json_save)
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-
-        centers.update(center_name=selected_name, json_save=json.dumps(plan, default=str))
-    return show_draft_plan_table(plan)
+    return show_dhamma(session, plan, db)
 ```
 
 ### Abandon center planning edit

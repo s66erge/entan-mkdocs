@@ -1,5 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
-import requests
+from pathlib import Path
 import pandas as pd
 import json
 import asyncio
@@ -166,7 +166,16 @@ def check_row(row, next_type, next_start_date, previous_type, previous_end_date,
         row["check"] = "NoType"
     return row
 
-def check_plan(plan, db_center, other_course):
+def check_plan(plan, selected_name, db):
+    centers = db.t.centers
+    Center = centers.dataclass()
+    selected_db = centers[selected_name].gong_db_name
+    db_path = get_db_path()
+    dbfile_path = Path(db_path) / selected_db
+    if not dbfile_path.exists():
+        return Div(P(f"Database not found: {selected_db}"))
+    db_center = database(str(dbfile_path))
+    other_course = json.loads(centers[selected_name].other_course)
     var_periods = other_course["variable-len"]
     over_OK = other_course["override"]
     try:
