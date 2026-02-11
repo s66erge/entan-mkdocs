@@ -39,7 +39,7 @@ function startCountdown(seconds, elementId) {
         }
     }
     updateDisplay();
-    
+
     const interval = setInterval(() => {
         timeLeft--;
         updateDisplay();    
@@ -63,33 +63,52 @@ window.onbeforeunload = function() { return "Unsaved changes!";};
 """
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
-def create_draft_plan_table(draft_plan):
-    # Create an HTML table from a draft plan list of  dictionaries
+def show_draft_plan_table(draft_plan):
+    # Create an HTML table from a draft plan list of dictionaries
     rows = []
-    for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
+    for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
         start = plan_line.get("start_date")
         end = plan_line.get("end_date")
         ptype = plan_line.get("period_type")
         source = plan_line.get("source")
         check = plan_line.get("check")
         course = plan_line.get("course_type")
-        # Color period_type red if it's starting with UNKNOWN
-        if ptype.startswith("UNKNOWN"):
-            ptype_cell = Td(ptype, style="background: red")
-        else:
-            ptype_cell = Td(ptype)
-        if not check.startswith("OK"):
-            check_cell = Td(check, style="background: red")
-        else:
-            check_cell = Td(check)
-        rows.append(Tr(Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course)))
 
+        # Conditional coloring
+        ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
+        check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
+
+        # Add delete link for removing this row
+        """
+        delete_link = A(
+            "✖",  # or "Delete" for text
+            href=f"/planning/delete_line?index={idx}",
+            _data_safe_nav="true",
+            # hx_delete=f"/planning/delete_line?index={idx}",
+            hx_target="#planning-periods",
+            hx_confirm="Are you sure you want to delete this entry?",
+            style="color: red; text-decoration: none; font-weight: bold; cursor: pointer;"
+        )
+        """
+        delete_link = A("Delete",
+            hx_post=f"/planning/delete_line/{idx}",
+            hx_target="#planning-periods",
+            hx_confirm="Are you sure you want to delete this entry?",
+        )
+        rows.append(
+            Tr(
+                Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course), Td(delete_link)
+            )
+        )
     table = Table(
-        Thead(Tr(Th("Start date"), Th("End date"), Th("Period type"), Th("source"), Th("check"),
-        Th("Dhamma.org center course"))),
+        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Dhamma.org center course"), Th("Action"),)),
         Tbody(*rows)
     )
-    return table
+    return Div(
+        H2("Plan with 'www.google.org' added for 12 months from current course start"),
+        table,
+        id="planning-periods"
+    )
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#load-show-center-plan>>[init]
 
@@ -118,14 +137,24 @@ def show_dhamma(session, db, db_path):
     new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
     new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
     # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-    table = create_draft_plan_table(new_draft_plan)
-    return Div(
-        H2("Plan with 'www.google.org' added for 12 month from current course start"),
-        table,
-        id="planning-periods"
-    )
 
+    # Save to db for future modifications
+    centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
 
+    return show_draft_plan_table(new_draft_plan)
+
+# @rt('/planning/delete_line')
+def delete_line(session, db, index: int):
+    centers = db.t.centers
+    selected_name = session["center"]
+    Center = centers.dataclass()
+    plan = json.loads(centers[selected_name].json_save)
+    print(f"Deleting line {index} from draft plan with {len(plan)} entries")
+    if 0 <= index < len(plan):
+        plan.pop(index)
+
+        centers.update(center_name=selected_name, json_save=json.dumps(plan, default=str))
+    return show_draft_plan_table(plan)
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
