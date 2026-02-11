@@ -105,10 +105,6 @@ def get(request):
 def get(request):
     return consul.consult_select_timetable(request, db_path)
 
-@rt('/countdown')
-async def get(session):
-    return planning.countdown_stream(session, csms)
-
 @rt('/planning_page')
 def get(session, request):
     params = dict(request.query_params)
@@ -121,7 +117,7 @@ def get(session):
 
 @rt('/planning/show_dhamma')
 def get(session, request):
-    return planning.show_dhamma(session,request, db, db_path)
+    return planning.show_dhamma(session, db, db_path)
 
 @rt('/planning/abandon_edit')
 def get(session):

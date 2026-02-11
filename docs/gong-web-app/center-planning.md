@@ -17,9 +17,11 @@ from libs.dbset import get_central_db
 
 <<abandon-edit>>
 <<js-client-timer>>
+<<create-html-table>>
+<<load-show-center-plan>>
 <<planning-page>>
-```
 
+```
 
 ### Planning page
 
@@ -93,7 +95,11 @@ def planning_page(session, selected_name, db, csms):
             cls="container"
         )
 
+```
 
+### Create colored html table of current plan
+
+```{.python #create-html-table}
 def create_draft_plan_table(draft_plan):
     # Create an HTML table from a draft plan list of  dictionaries
     rows = []
@@ -121,13 +127,18 @@ def create_draft_plan_table(draft_plan):
         Tbody(*rows)
     )
     return table
+```
+
+### Load from dhamma.org and show the merged and checked center plan
+
+
+```{.python #load-show-center-plan}
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
-    this_center = session["center"]
     return Div(
         P(" Loading from dhamma.org ..."),
-        Div(hx_get=f"/planning/show_dhamma?selected_name={quote_plus(this_center)}", 
+        Div(hx_get=f"/planning/show_dhamma", 
             hx_target="#planning-periods",
             hx_trigger="load",  # Triggers when this div loads
             style="display: none;"),
@@ -135,7 +146,7 @@ def load_dhamma_db(session):
     )
 
 # @rt('/planning/show_dhamma')
-def show_dhamma(session, request, db, db_path):
+def show_dhamma(session, db, db_path):
     centers = db.t.centers
     selected_name = session["center"]
     Center = centers.dataclass()
@@ -154,6 +165,7 @@ def show_dhamma(session, request, db, db_path):
         table,
         id="planning-periods"
     )
+
 
 ```
 

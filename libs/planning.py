@@ -62,6 +62,71 @@ document.querySelectorAll('[data-safe-nav="true"]').forEach(link => {
 window.onbeforeunload = function() { return "Unsaved changes!";};
 """
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
+def create_draft_plan_table(draft_plan):
+    # Create an HTML table from a draft plan list of  dictionaries
+    rows = []
+    for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
+        start = plan_line.get("start_date")
+        end = plan_line.get("end_date")
+        ptype = plan_line.get("period_type")
+        source = plan_line.get("source")
+        check = plan_line.get("check")
+        course = plan_line.get("course_type")
+        # Color period_type red if it's starting with UNKNOWN
+        if ptype.startswith("UNKNOWN"):
+            ptype_cell = Td(ptype, style="background: red")
+        else:
+            ptype_cell = Td(ptype)
+        if not check.startswith("OK"):
+            check_cell = Td(check, style="background: red")
+        else:
+            check_cell = Td(check)
+        rows.append(Tr(Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course)))
+
+    table = Table(
+        Thead(Tr(Th("Start date"), Th("End date"), Th("Period type"), Th("source"), Th("check"),
+        Th("Dhamma.org center course"))),
+        Tbody(*rows)
+    )
+    return table
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-planning.md#load-show-center-plan>>[init]
+
+# @rt('/planning/load_dhamma_db')
+def load_dhamma_db(session):
+    return Div(
+        P(" Loading from dhamma.org ..."),
+        Div(hx_get=f"/planning/show_dhamma", 
+            hx_target="#planning-periods",
+            hx_trigger="load",  # Triggers when this div loads
+            style="display: none;"),
+        id="planning-periods"
+    )
+
+# @rt('/planning/show_dhamma')
+def show_dhamma(session, db, db_path):
+    centers = db.t.centers
+    selected_name = session["center"]
+    Center = centers.dataclass()
+    selected_db = centers[selected_name].gong_db_name
+    dbfile_path = Path(db_path) / selected_db
+    if not dbfile_path.exists():
+        return Div(P(f"Database not found: {selected_db}"))
+    db_center = database(str(dbfile_path))
+    other_course = json.loads(centers[selected_name].other_course)
+    new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
+    new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
+    # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
+    table = create_draft_plan_table(new_draft_plan)
+    return Div(
+        H2("Plan with 'www.google.org' added for 12 month from current course start"),
+        table,
+        id="planning-periods"
+    )
+
+
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
 # @rt('/planning_page')
@@ -121,67 +186,6 @@ def planning_page(session, selected_name, db, csms):
             cls="container"
         )
 
-
-def create_draft_plan_table(draft_plan):
-    # Create an HTML table from a draft plan list of  dictionaries
-    rows = []
-    for plan_line in sorted(draft_plan, key=lambda x: getattr(x, "start_date", "")):
-        start = plan_line.get("start_date")
-        end = plan_line.get("end_date")
-        ptype = plan_line.get("period_type")
-        source = plan_line.get("source")
-        check = plan_line.get("check")
-        course = plan_line.get("course_type")
-        # Color period_type red if it's starting with UNKNOWN
-        if ptype.startswith("UNKNOWN"):
-            ptype_cell = Td(ptype, style="background: red")
-        else:
-            ptype_cell = Td(ptype)
-        if not check.startswith("OK"):
-            check_cell = Td(check, style="background: red")
-        else:
-            check_cell = Td(check)
-        rows.append(Tr(Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course)))
-
-    table = Table(
-        Thead(Tr(Th("Start date"), Th("End date"), Th("Period type"), Th("source"), Th("check"),
-        Th("Dhamma.org center course"))),
-        Tbody(*rows)
-    )
-    return table
-
-# @rt('/planning/load_dhamma_db')
-def load_dhamma_db(session):
-    this_center = session["center"]
-    return Div(
-        P(" Loading from dhamma.org ..."),
-        Div(hx_get=f"/planning/show_dhamma?selected_name={quote_plus(this_center)}", 
-            hx_target="#planning-periods",
-            hx_trigger="load",  # Triggers when this div loads
-            style="display: none;"),
-        id="planning-periods"
-    )
-
-# @rt('/planning/show_dhamma')
-def show_dhamma(session, request, db, db_path):
-    centers = db.t.centers
-    selected_name = session["center"]
-    Center = centers.dataclass()
-    selected_db = centers[selected_name].gong_db_name
-    dbfile_path = Path(db_path) / selected_db
-    if not dbfile_path.exists():
-        return Div(P(f"Database not found: {selected_db}"))
-    db_center = database(str(dbfile_path))
-    other_course = json.loads(centers[selected_name].other_course)
-    new_merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-    new_draft_plan = check_plan(new_merged_plan, db_center, other_course)
-    # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-    table = create_draft_plan_table(new_draft_plan)
-    return Div(
-        H2("Plan with 'www.google.org' added for 12 month from current course start"),
-        table,
-        id="planning-periods"
-    )
-
 # ~/~ end
+
 # ~/~ end
