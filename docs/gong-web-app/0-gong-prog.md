@@ -8,10 +8,9 @@
 import sys
 from functools import wraps
 from fasthtml.common import *
-#  from starlette.testclient import TestClient
-
 from libs import * 
 from libs.auth import admin_required
+#  from starlette.testclient import TestClient
 
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
@@ -23,11 +22,11 @@ htmxsse = Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js")
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
-   if not auth: return RedirectResponse('/login', status_code=303)
+   if not auth: return Redirect('/login')
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 
-app, rt = fast_app(live=True, debug=True, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
+app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 
 db_path = dbset.get_db_path()
 db = dbset.get_central_db()
@@ -44,6 +43,8 @@ Role = roles.dataclass()
 Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
+
+csms = states.create_center_state_machines(db)
 
 """
 @rt('/register')
@@ -104,25 +105,27 @@ def get(request):
 def get(request):
     return consul.consult_select_timetable(request, db_path)
 
-@rt('/countdown')
-async def get(session):
-    return planning.countdown_stream(session, db)
-
 @rt('/planning_page')
 def get(session, request):
-    return planning.planning_page(session, request, db)
+    params = dict(request.query_params)
+    center = params.get("selected_name")
+    return planning.planning_page(session, center, db, csms)
 
 @rt('/planning/load_dhamma_db')
-def get(session, request):
-    return planning.load_dhamma_db(session, request, db)
+def get(session):
+    return planning.load_dhamma_db(session)
 
 @rt('/planning/show_dhamma')
 def get(session, request):
-    return planning.show_dhamma(request, db, db_path)
+    return planning.show_dhamma(session, [], db)
 
-@rt('/planning/set_free')
-def get(session, request):
-    return planning.set_free(session, request, db)
+@rt('/planning/delete_line/{idx}')
+def post(session, idx: int):
+    return planning.delete_line(session, db, idx)
+
+@rt('/planning/abandon_edit')
+def get(session):
+    return planning.abandon_edit(session, csms)
 
 @rt('/admin_page')
 @admin_required
@@ -175,11 +178,13 @@ def get():
     )
 
 @rt('/unfinished')
-def get():
-    return Main(
-        Nav(Li(A("Dashboard", href="/dashboard"))),
-        Div(H2("This feature is not yet implemented.")),
-        cls="container"
+def get(request):
+    params = dict(request.query_params)
+    goto_dash = params.get("goto_dash", "YES")
+    return Div(
+        Nav(Li(A("Dashboard", href="/dashboard"))) if goto_dash == "YES" else None,
+        Div(H3("This feature is not yet implemented."))
+        #cls="container"
     )
 
 @rt('/db_error')

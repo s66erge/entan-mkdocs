@@ -1,0 +1,50 @@
+            let pendingFetch = null;
+
+            window.addEventListener('beforeunload', (e) => {
+                // Show browser dialog FIRST
+                e.preventDefault();
+                e.returnValue = 'Save session state before leaving?';
+
+                // Store fetch for later (can't execute during dialog)
+                pendingFetch = () => fetch('/planning/abandon_edit', {method: 'GET'});
+            });
+
+            // Listen for user response via visibilitychange (works after dialog)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && pendingFetch) {
+                    pendingFetch();
+                    pendingFetch = null;
+                }
+            });
+
+            // Fallback: pagehide (more reliable)
+            window.addEventListener('pagehide', () => {
+                if (pendingFetch) {
+                    navigator.sendBeacon('/planning/abandon_edit', '');  // Guaranteed delivery
+                    pendingFetch = null;
+                }
+
+            });
+
+
+
+            let leavingViaLink = false;
+
+            document.querySelectorAll('a[href]').forEach(link => {
+                link.addEventListener('click', () => {
+                    leavingViaLink = true;
+                    // Reset after short delay (click -> beforeunload timing)
+                    setTimeout(() => leavingViaLink = false, 200);
+                });
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                // Silently accept if link click detected
+                if (leavingViaLink) {
+                    return;  // No prompt
+                }
+                
+                // Show browser dialog for other cases
+                e.preventDefault();
+                e.returnValue = 'Save session state before leaving?';
+            });

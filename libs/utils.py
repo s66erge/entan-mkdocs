@@ -7,6 +7,13 @@ import os
 from datetime import datetime, date, timedelta
 from fasthtml.common import *
 
+class Globals:
+    INITIAL_COUNTDOWN = 4000 # seconds
+
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
+
 # ~/~ begin <<docs/gong-web-app/utilities.md#dummy>>[init]
 def dummy():
     return "dummy"

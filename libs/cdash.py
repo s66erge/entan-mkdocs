@@ -1,6 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from fasthtml.common import *
-from libs.utils import display_markdown
+from libs.utils import display_markdown, Globals
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -25,7 +25,6 @@ def dashboard(session, db):
     user_planners = planners("user_email = ?", (u.email,))
     user_centers = [(p.center_name) for p in user_planners] 
     user_center_list = ", ".join(user_centers)
-
     select = Select(
         Option("Select a center", value="", selected=True),
         *[Option(name, value=name) for name in user_centers],
@@ -39,8 +38,6 @@ def dashboard(session, db):
         action="/planning_page",
         method ="get",
     )
-
-
     return Main(
         top_menu(session['role']),
         Div(Div(display_markdown("dashboard-t")),
