@@ -20,7 +20,7 @@ def abandon_edit(session, csms):
     if csms[this_center].current_state.id == "edit":
         csms[this_center].model.user = None
         csms[this_center].send("abandon_changes")
-    return RedirectResponse('/dashboard')
+    return Redirect('/dashboard')
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#js-client-timer>>[init]

@@ -17,7 +17,7 @@ htmxsse = Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js")
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
-   if not auth: return RedirectResponse('/login', status_code=303)
+   if not auth: return Redirect('/login')
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 

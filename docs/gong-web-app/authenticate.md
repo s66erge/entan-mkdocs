@@ -197,8 +197,8 @@ def verify_code(session, code, users):
         is_active=True
     )
     print(f"{user.email} just got connected via code")
-    #RedirectResponse('/dashboard', status_code=303)
-    return Script("window.location.href = '/dashboard';")
+    return Redirect('/dashboard')
+    # return Script("window.location.href = '/dashboard';")
 ```
 
 ```{.python #admin_required}
@@ -209,7 +209,7 @@ def admin_required(handler):
         role = session['role']
         if not role or not role == "admin":
             # Redirect to unauthorized page if not admin
-            return RedirectResponse('/no_access_right')
+            return Redirect('/no_access_right')
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper
