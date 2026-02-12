@@ -3,9 +3,9 @@
 import sys
 from functools import wraps
 from fasthtml.common import *
-#  from starlette.testclient import TestClient
 from libs import * 
 from libs.auth import admin_required
+#  from starlette.testclient import TestClient
 
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
@@ -39,7 +39,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
-csms = states.create_center_state_machines()
+csms = states.create_center_state_machines(db)
 
 """
 @rt('/register')

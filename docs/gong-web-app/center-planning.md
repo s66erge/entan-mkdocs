@@ -25,7 +25,7 @@ from libs.dbset import get_central_db
 
 ### Planning page
 
-Check first if the center available for edits, either:
+Check first if the center is available for edits, either:
 
 -  state is "edit" and the state changes happenned more than 'max time' ago
 -  state is "edit" and the current user also the state change user

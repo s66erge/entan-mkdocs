@@ -31,16 +31,16 @@ class AbstractPersistentModel(ABC):
     def _write_state(self, value): ...
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#db-persistent-model>>[init]
-class DBPersistentModel(AbstractPersistentModel):
-    def __init__(self, center_name, user=None):
+class CenterDataModel(AbstractPersistentModel):
+    def __init__(self, center_name, db, user=None):
         super().__init__()
         self.center_name = center_name
+        self.db = db
         self.user = user
         self.statustart = None  # Cache for the timestamp of the last state change
 
     def _read_state(self):
-        db = get_central_db()
-        centers = db.t.centers
+        centers = self.db.t.centers
         Center = centers.dataclass()
         row = centers[self.center_name]
         self.statustart = row.status_start
@@ -48,8 +48,7 @@ class DBPersistentModel(AbstractPersistentModel):
         return row.status if row.status else None
 
     def _write_state(self, value):
-        db = get_central_db()
-        centers = db.t.centers
+        centers = self.db.t.centers
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
@@ -63,8 +62,7 @@ class DBPersistentModel(AbstractPersistentModel):
     def get_start_time(self):
         if self.statustart is None:
             # If statustart is not cached, read it from the database
-            db = get_central_db()
-            centers = db.t.centers
+            centers = self.db.t.centers
             Center = centers.dataclass()
             row = centers[self.center_name]
             self.statustart = row.status_start if row.status_start else None
@@ -72,8 +70,7 @@ class DBPersistentModel(AbstractPersistentModel):
 
     def get_user(self):
         if self.user is None:
-            db = get_central_db()
-            centers = db.t.centers
+            centers = self.db.t.centers
             Center = centers.dataclass()
             row = centers[self.center_name]
             self.user = row.current_user
@@ -103,13 +100,13 @@ class CenterState(StateMachine):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 
-def create_center_state_machines():
+def create_center_state_machines(db):
     csm = {}
-    db = get_central_db()
-    centers = db.t.centers()
+    db2 = get_central_db()
+    centers = db2.t.centers()
     names = [c.get("center_name") for c in centers]
     for name in names:
-        center_state = DBPersistentModel(center_name=name)
+        center_state = CenterDataModel(center_name=name, db=db)
         sm = CenterState(model=center_state)
         csm[name] = sm
         #print(f"Center: {name}, State: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()} ")

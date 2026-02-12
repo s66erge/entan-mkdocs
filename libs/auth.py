@@ -125,9 +125,8 @@ def verify_code(session, code, users):
         return feedback_to_user({'error': 'invalid_or_expired_code'})
 
     User = users.dataclass()
-    usermail = user.email
     session.clear()
-    session['auth'] = usermail
+    session['auth'] = user.email
     session['role'] = user.role_name
     session['center'] = ""
 
@@ -137,7 +136,7 @@ def verify_code(session, code, users):
         magic_link_expiry=None,
         is_active=True
     )
-    print(f"{usermail} just got connected via code")
+    print(f"{user.email} just got connected via code")
     #RedirectResponse('/dashboard', status_code=303)
     return Script("window.location.href = '/dashboard';")
 # ~/~ end
