@@ -118,6 +118,10 @@ def get(session, request):
 def post(session, idx: int):
     return planning.delete_line(session, db, idx)
 
+@rt('/planning/add_line')
+def post(session, start: str, end: str, ptype: str):
+    return planning.add_line(session, db, start, end, ptype)
+
 @rt('/planning/abandon_edit')
 def get(session):
     return planning.abandon_edit(session, csms)

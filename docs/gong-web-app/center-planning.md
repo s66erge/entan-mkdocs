@@ -4,7 +4,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 ```{.python file=libs/planning.py}
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from asyncio import sleep
 from urllib.parse import quote_plus
@@ -113,6 +113,7 @@ def show_draft_plan_table(draft_plan):
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
         check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
+        source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
         # Add delete link for removing this row
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
@@ -121,9 +122,47 @@ def show_draft_plan_table(draft_plan):
         )
         rows.append(
             Tr(
-                Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course), Td(delete_link)
+                Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(delete_link)
             )
         )
+
+
+    today = datetime.now().date()
+    #end_date = today + timedelta(days=18*30)  # ~18 months
+    #cal = HTMLCalendar(firstweekday=6)  # **Monday start (0=Monday)**
+    form = Form(
+        Div(
+            Label("Start date:"),
+            Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), hx_target="#calendar"), # hx_post="/planning/highlight", 
+            Label("End date:"),
+            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), hx_target="#calendar"),  # hx_post="/planning/highlight", 
+            Label("Period type:"),
+            Input(type="text", name="ptype", placeholder="e.g. '10 days'"),
+            Button("Add Period", type="submit")
+        ),
+        hx_post="/planning/add_line",
+        hx_target="#planning-periods",
+        hx_swap="outerHTML",
+        #style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;"
+        ),
+
+    """
+    form = Form(
+        Div(
+            Label("Start date:"),
+            Input(type="date", name="start", placeholder="YYYY-MM-DD"),
+            Label("End date:"),
+            Input(type="date", name="end", placeholder="YYYY-MM-DD"),
+            Label("Period type:"),
+            Input(type="text", name="ptype", placeholder="e.g. 'Monthly'"),
+            Button("Add Period", type="submit")
+        ),
+        hx_post="/planning/add_line",
+        hx_target="#planning-periods",
+        hx_swap="outerHTML"
+    )
+    """
+
     table = Table(
         Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
         Tbody(*rows)
@@ -131,8 +170,13 @@ def show_draft_plan_table(draft_plan):
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
         table,
+        form,
+        # Calendar container
+        # Div(id="calendar", *months_html, style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"),
+
         id="planning-periods"
     )
+
 ```
 
 ### Load from dhamma.org and show the merged and checked center plan
@@ -175,6 +219,27 @@ def delete_line(session, db, index: int):
     if 0 <= index < len(plan):
         plan.pop(index)
     return show_dhamma(session, plan, db)
+
+def add_line(session, db, start: str, end: str, ptype: str):
+    selected_name = session["center"]
+    centers = db.t.centers
+    Center = centers.dataclass()
+    plan = json.loads(centers[selected_name].json_save)
+    # Create new plan line with user input
+    new_line = {
+        "start_date": start,
+        "end_date": end,
+        "period_type": ptype,
+        "source": "new input",
+        "check": "",
+        "course_type": ""
+    }    
+    # Add the new line to the plan
+    plan.append(new_line)    
+    # Sort plan by start_date
+    plansor = sorted(plan, key=lambda x: x["start_date"])
+    return show_dhamma(session, plansor, db)
+
 ```
 
 ### Abandon center planning edit
