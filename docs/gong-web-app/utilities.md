@@ -142,7 +142,9 @@ def feed_text(params):
         'planner_added': 'Planner association adSded successfully!',
         'user_deleted': 'User deleted successfully!',
         'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
+        'planner_deleted': 'Planner association deleted successfully!',
+        'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
+        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.'
     }
     error_messages = {
         'missing_email':'Email is required.',
@@ -176,6 +178,7 @@ def feedback_to_user(params):
     # query_params = dict(request.query_params)
     # Handle success and error messages
     mess_dict = feed_text(params)
+    print(mess_dict)
     message_div = Div(P(""))
     if mess_dict["res"] == 'success':
         message_div = Div(

@@ -117,15 +117,15 @@ def get(session):
 
 @rt('/planning/show_dhamma')
 def get(session, request):
-    return planning.show_dhamma(session, [], db)
+    return planning.show_dhamma(session, [], db, {})
 
 @rt('/planning/delete_line/{idx}')
 def post(session, idx: int):
     return planning.delete_line(session, db, idx)
 
 @rt('/planning/add_line')
-def post(session, start: str, end: str, ptype: str):
-    return planning.add_line(session, db, start, end, ptype)
+def post(session, ptype: str, start: str, end: str):
+    return planning.add_line(session, db, ptype, start, end, ptype)
 
 @rt('/planning/abandon_edit')
 def get(session):

@@ -7,9 +7,9 @@ from urllib.parse import quote_plus
 from tabulate import tabulate
 from fasthtml.common import *
 
-from libs.utils import display_markdown, isa_dev_computer, Globals
+from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
-from libs.dbset import get_central_db
+from libs.utilsJS import JS_BLOCK_NAV
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
 
@@ -17,7 +17,7 @@ from libs.dbset import get_central_db
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if csms[this_center].current_state.id == "edit":
+    if this_center and csms[this_center].current_state.id == "edit":
         csms[this_center].model.user = None
         csms[this_center].send("abandon_changes")
     return Redirect('/dashboard')
@@ -54,16 +54,10 @@ function startCountdown(seconds, elementId) {
 const startSeconds = parseInt(document.getElementById('start-time').textContent);
 startCountdown(startSeconds, 'timer');
 
-document.querySelectorAll('[data-safe-nav="true"]').forEach(link => {
-    link.addEventListener('click', function() {
-        window.onbeforeunload = null;  // Disable for this navigation
-    });
-});
-window.onbeforeunload = function() { return "Unsaved changes!";};
 """
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
-def show_draft_plan_table(draft_plan):
+def show_draft_plan_table(draft_plan, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
@@ -89,54 +83,31 @@ def show_draft_plan_table(draft_plan):
             )
         )
 
-
     today = datetime.now().date()
-    #end_date = today + timedelta(days=18*30)  # ~18 months
-    #cal = HTMLCalendar(firstweekday=6)  # **Monday start (0=Monday)**
     form = Form(
         Div(
-            Label("Start date:"),
-            Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), hx_target="#calendar"), # hx_post="/planning/highlight", 
-            Label("End date:"),
-            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), hx_target="#calendar"),  # hx_post="/planning/highlight", 
             Label("Period type:"),
-            Input(type="text", name="ptype", placeholder="e.g. '10 days'"),
+            Input(type="text", name="ptype", placeholder="e.g. '10 days'", style="width: 200px"),
+            Label("Start date:"),
+            Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
+            Label("End date:"),
+            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), style="width: 200px"),
             Button("Add Period", type="submit")
         ),
         hx_post="/planning/add_line",
         hx_target="#planning-periods",
-        hx_swap="outerHTML",
-        #style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;"
         ),
-
-    """
-    form = Form(
-        Div(
-            Label("Start date:"),
-            Input(type="date", name="start", placeholder="YYYY-MM-DD"),
-            Label("End date:"),
-            Input(type="date", name="end", placeholder="YYYY-MM-DD"),
-            Label("Period type:"),
-            Input(type="text", name="ptype", placeholder="e.g. 'Monthly'"),
-            Button("Add Period", type="submit")
-        ),
-        hx_post="/planning/add_line",
-        hx_target="#planning-periods",
-        hx_swap="outerHTML"
-    )
-    """
 
     table = Table(
         Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
         Tbody(*rows)
     )
+    print(mess)
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
         table,
+        Div(feedback_to_user(mess), id="line-feedback"),
         form,
-        # Calendar container
-        # Div(id="calendar", *months_html, style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"),
-
         id="planning-periods"
     )
 
@@ -155,7 +126,7 @@ def load_dhamma_db(session):
     )
 
 # @rt('/planning/show_dhamma')
-def show_dhamma(session, plan, db):
+def show_dhamma(session, plan, db, mess):
     selected_name = session["center"]
     if plan == []:
         merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
@@ -166,7 +137,7 @@ def show_dhamma(session, plan, db):
     # Save to db for future modifications
     centers = db.t.centers
     centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
-    return show_draft_plan_table(new_draft_plan)
+    return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
 def delete_line(session, db, index: int):
@@ -177,9 +148,9 @@ def delete_line(session, db, index: int):
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return show_dhamma(session, plan, db)
+    return show_dhamma(session, plan, db, {"success": "line_deleted"})
 
-def add_line(session, db, start: str, end: str, ptype: str):
+def add_line(session, db, ptype, start, end):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
@@ -197,7 +168,7 @@ def add_line(session, db, start: str, end: str, ptype: str):
     plan.append(new_line)    
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x["start_date"])
-    return show_dhamma(session, plansor, db)
+    return show_dhamma(session, plansor, db, {"success" : "new_course"})
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
@@ -238,7 +209,8 @@ def planning_page(session, selected_name, db, csms):
                 Span("", id="timer", cls="timer-display")
             ),
             Script(JS_CLIENT_TIMER),
-            P(""),       
+            Script(JS_BLOCK_NAV),
+            P(""), 
             Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
             cls="container"
         )
