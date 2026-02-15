@@ -1,10 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from asyncio import sleep
 from urllib.parse import quote_plus
-from tabulate import tabulate
 from fasthtml.common import *
 
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals

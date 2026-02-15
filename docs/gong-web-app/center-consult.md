@@ -43,9 +43,9 @@ def consult_page(session, centers):
         Div(display_markdown("consult-t")),
         Div(form, id="consult-db"),
         H2("Coming periods"),
-        Div(id="coming-periods"),            # filled by /consult/select_db
-        Div(id="periods-struct"),            # filled by /consult/select_period 
-        Div(id="timetables"),                # filled by /consult/select_timetable
+        Div(id="coming-periods"),      # filled by /consult/select_db
+        Div(id="periods-struct"),      # filled by /consult/select_period 
+        Div(id="timetables"),          # filled by /consult/select_timetable
         cls="container"
     )
 ```

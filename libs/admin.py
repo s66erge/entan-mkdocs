@@ -23,7 +23,6 @@ def show_users_table(users):
         )
     )
 
-
 def show_users_form(roles):
     Role = roles.dataclass()
     role_names = [r.role_name for r in roles()]
@@ -144,7 +143,6 @@ def show_page(request, db):
             Button("Logout", hx_post="/logout"),
         ),
         Div(display_markdown("admin-t")),
-        # feedback_to_user(params),
 
         H2("Users"),
         Div(feedback_to_user(params), id="users-feedback"),

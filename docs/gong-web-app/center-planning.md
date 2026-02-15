@@ -5,10 +5,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```{.python file=libs/planning.py}
 import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from asyncio import sleep
 from urllib.parse import quote_plus
-from tabulate import tabulate
 from fasthtml.common import *
 
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
@@ -158,7 +155,6 @@ def show_draft_plan_table(draft_plan, mess):
 ```
 
 ### Load from dhamma.org and show the merged and checked center plan
-
 
 ```{.python #load-show-center-plan}
 
