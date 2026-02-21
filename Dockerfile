@@ -23,7 +23,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY . .
 
 # Bytecode compile (from log)
-# RUN python -m compileall .
+RUN python -m compileall .
 
 EXPOSE 8000
 CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
