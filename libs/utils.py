@@ -22,7 +22,6 @@ def dummy():
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
-    # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
@@ -118,7 +117,6 @@ def feedback_to_user(params):
     # query_params = dict(request.query_params)
     # Handle success and error messages
     mess_dict = feed_text(params)
-    print(mess_dict)
     message_div = Div(P(""))
     if mess_dict["res"] == 'success':
         message_div = Div(

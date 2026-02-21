@@ -99,7 +99,6 @@ def show_draft_plan_table(draft_plan, mess):
         Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
         Tbody(*rows)
     )
-    print(mess)
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
         table,
@@ -187,7 +186,6 @@ def planning_page(session, selected_name, db, csms):
     if state_mach.current_state.id == "free":
         state_mach.model.user = this_user
         state_mach.send("starts_editing")
-        print(session)
         return Main(
             Div(display_markdown("planning-t")),
             Span(

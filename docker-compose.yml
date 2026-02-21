@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    hostname: Solaris  # Container sees this as hostname
+    container_name: entan-mkdocs  # Docker CLI name (optional)
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - .:/app
+      - /app/.venv
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
