@@ -22,7 +22,6 @@ def dummy():
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
-    # print('hostname: '+hostname)
     return hostname in DEV_COMPUTERS
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
@@ -82,7 +81,9 @@ def feed_text(params):
         'planner_added': 'Planner association adSded successfully!',
         'user_deleted': 'User deleted successfully!',
         'center_deleted': 'Center and associated database deleted successfully!',
-        'planner_deleted': 'Planner association deleted successfully!'
+        'planner_deleted': 'Planner association deleted successfully!',
+        'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
+        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.'
     }
     error_messages = {
         'missing_email':'Email is required.',

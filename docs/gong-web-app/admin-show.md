@@ -11,8 +11,49 @@ from libs.utils import *
 <<show-planners>>
 <<admin-page>>
 ```
-
 TODO document admin-show
+
+```{.python #admin-page}
+
+# @rt('/admin_page')
+def show_page(request, db):
+    params = dict(request.query_params)
+    users = db.t.users
+    roles = db.t.roles
+    centers = db.t.centers
+    planners = db.t.planners
+    return Main(
+        Nav(
+            Ul(
+                Li(A("Dashboard", href="/dashboard")),
+                Li(A("Contact", href="/unfinished")),
+                Li(A("About", href="/unfinished")),
+            ), 
+            Button("Logout", hx_post="/logout"),
+        ),
+        Div(display_markdown("admin-t")),
+
+        H2("Users"),
+        Div(feedback_to_user(params), id="users-feedback"),
+        Div(show_users_table(users), id="users-table"),
+        H4("Add New User"),
+        Div(show_users_form(roles), id="users-form"),
+
+        H2("Centers"),
+        Div(feedback_to_user(params), id="centers-feedback"),
+        Div(show_centers_table(centers), id="centers-table"),
+        H4("Add New Center"),
+        Div(show_centers_form(centers), id="centers-form"),
+
+        H2("Planners"),
+        Div(feedback_to_user(params), id="planners-feedback"),
+        Div(show_planners_table(planners), id="planners-table"),
+        H4("Add New Planner"),
+        Div(show_planners_form(users, centers), id="planners-form"),
+
+        cls="container",
+    )
+```
 
 ```{.python #show-users}
 
@@ -34,7 +75,6 @@ def show_users_table(users):
             )
         )
     )
-
 
 def show_users_form(roles):
     Role = roles.dataclass()
@@ -137,48 +177,5 @@ def show_planners_form(users, centers):
                 Button("Add Planner", type="submit"), hx_post="/add_planner", hx_target="#planners-feedback"
             )
         )
-    )
-```
-
-```{.python #admin-page}
-
-# @rt('/admin_page')
-def show_page(request, db):
-    params = dict(request.query_params)
-    users = db.t.users
-    roles = db.t.roles
-    centers = db.t.centers
-    planners = db.t.planners
-    return Main(
-        Nav(
-            Ul(
-                Li(A("Dashboard", href="/dashboard")),
-                Li(A("Contact", href="/unfinished")),
-                Li(A("About", href="/unfinished")),
-            ), 
-            Button("Logout", hx_post="/logout"),
-        ),
-        Div(display_markdown("admin-t")),
-        # feedback_to_user(params),
-
-        H2("Users"),
-        Div(feedback_to_user(params), id="users-feedback"),
-        Div(show_users_table(users), id="users-table"),
-        H4("Add New User"),
-        Div(show_users_form(roles), id="users-form"),
-
-        H2("Centers"),
-        Div(feedback_to_user(params), id="centers-feedback"),
-        Div(show_centers_table(centers), id="centers-table"),
-        H4("Add New Center"),
-        Div(show_centers_form(centers), id="centers-form"),
-
-        H2("Planners"),
-        Div(feedback_to_user(params), id="planners-feedback"),
-        Div(show_planners_table(planners), id="planners-table"),
-        H4("Add New Planner"),
-        Div(show_planners_form(users, centers), id="planners-form"),
-
-        cls="container",
     )
 ```

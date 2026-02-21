@@ -4,16 +4,13 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 ```{.python file=libs/planning.py}
 import json
-from datetime import datetime, timezone
-from pathlib import Path
-from asyncio import sleep
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
-from tabulate import tabulate
 from fasthtml.common import *
 
-from libs.utils import display_markdown, isa_dev_computer, Globals
+from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
-from libs.dbset import get_central_db
+from libs.utilsJS import JS_BLOCK_NAV
 
 <<abandon-edit>>
 <<js-client-timer>>
@@ -55,7 +52,6 @@ def planning_page(session, selected_name, db, csms):
     if state_mach.current_state.id == "free":
         state_mach.model.user = this_user
         state_mach.send("starts_editing")
-        print(session)
         return Main(
             Div(display_markdown("planning-t")),
             Span(
@@ -74,7 +70,8 @@ def planning_page(session, selected_name, db, csms):
                 Span("", id="timer", cls="timer-display")
             ),
             Script(JS_CLIENT_TIMER),
-            P(""),       
+            Script(JS_BLOCK_NAV),
+            P(""), 
             Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
             cls="container"
         )
@@ -100,7 +97,7 @@ def planning_page(session, selected_name, db, csms):
 ### Create colored html table of current plan
 
 ```{.python #create-html-table}
-def show_draft_plan_table(draft_plan):
+def show_draft_plan_table(draft_plan, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
@@ -113,6 +110,7 @@ def show_draft_plan_table(draft_plan):
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
         check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
+        source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
         # Add delete link for removing this row
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
@@ -121,9 +119,25 @@ def show_draft_plan_table(draft_plan):
         )
         rows.append(
             Tr(
-                Td(start), Td(end), ptype_cell, Td(source), check_cell, Td(course), Td(delete_link)
+                Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(delete_link)
             )
         )
+
+    today = datetime.now().date()
+    form = Form(
+        Div(
+            Label("Period type:"),
+            Input(type="text", name="ptype", placeholder="e.g. '10 days'", style="width: 200px"),
+            Label("Start date:"),
+            Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
+            Label("End date:"),
+            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), style="width: 200px"),
+            Button("Add Period", type="submit")
+        ),
+        hx_post="/planning/add_line",
+        hx_target="#planning-periods",
+        ),
+
     table = Table(
         Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
         Tbody(*rows)
@@ -131,12 +145,14 @@ def show_draft_plan_table(draft_plan):
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
         table,
+        Div(feedback_to_user(mess), id="line-feedback"),
+        form,
         id="planning-periods"
     )
+
 ```
 
 ### Load from dhamma.org and show the merged and checked center plan
-
 
 ```{.python #load-show-center-plan}
 
@@ -152,7 +168,7 @@ def load_dhamma_db(session):
     )
 
 # @rt('/planning/show_dhamma')
-def show_dhamma(session, plan, db):
+def show_dhamma(session, plan, db, mess):
     selected_name = session["center"]
     if plan == []:
         merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
@@ -163,7 +179,7 @@ def show_dhamma(session, plan, db):
     # Save to db for future modifications
     centers = db.t.centers
     centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
-    return show_draft_plan_table(new_draft_plan)
+    return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
 def delete_line(session, db, index: int):
@@ -174,7 +190,28 @@ def delete_line(session, db, index: int):
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return show_dhamma(session, plan, db)
+    return show_dhamma(session, plan, db, {"success": "line_deleted"})
+
+def add_line(session, db, ptype, start, end):
+    selected_name = session["center"]
+    centers = db.t.centers
+    Center = centers.dataclass()
+    plan = json.loads(centers[selected_name].json_save)
+    # Create new plan line with user input
+    new_line = {
+        "start_date": start,
+        "end_date": end,
+        "period_type": ptype,
+        "source": "new input",
+        "check": "",
+        "course_type": ""
+    }    
+    # Add the new line to the plan
+    plan.append(new_line)    
+    # Sort plan by start_date
+    plansor = sorted(plan, key=lambda x: x["start_date"])
+    return show_dhamma(session, plansor, db, {"success" : "new_course"})
+
 ```
 
 ### Abandon center planning edit
@@ -187,7 +224,7 @@ Check for the rare situation when arriving here on 'free' state instead of 'edit
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if csms[this_center].current_state.id == "edit":
+    if this_center and csms[this_center].current_state.id == "edit":
         csms[this_center].model.user = None
         csms[this_center].send("abandon_changes")
     return Redirect('/dashboard')
@@ -227,12 +264,6 @@ function startCountdown(seconds, elementId) {
 const startSeconds = parseInt(document.getElementById('start-time').textContent);
 startCountdown(startSeconds, 'timer');
 
-document.querySelectorAll('[data-safe-nav="true"]').forEach(link => {
-    link.addEventListener('click', function() {
-        window.onbeforeunload = null;  // Disable for this navigation
-    });
-});
-window.onbeforeunload = function() { return "Unsaved changes!";};
 """
 ```
 

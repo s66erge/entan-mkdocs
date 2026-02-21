@@ -170,7 +170,6 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-planner>>[init]
 
 # @rt('/delete_planner/{user_email}/{center_name}')
-
 def delete_planner(user_email, center_name, db):
     planners = db.t.planners
     try:
