@@ -52,7 +52,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
-csms = create_center_state_machines(db)
+csms, clocks = create_center_state_machines(db)
 
 """
 @rt('/register')
@@ -117,7 +117,7 @@ def get(request):
 def get(session, request):
     params = dict(request.query_params)
     center = params.get("selected_name")
-    return planning_page(session, center, db, csms)
+    return planning_page(session, center, db, csms, clocks)
 
 @rt('/planning/load_dhamma_db')
 def get(session):

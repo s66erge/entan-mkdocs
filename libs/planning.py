@@ -170,22 +170,25 @@ def add_line(session, db, ptype, start, end):
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
 # @rt('/planning_page')
-def planning_page(session, selected_name, db, csms):
+def planning_page(session, selected_name, db, csms, clocks):
     session["center"] = selected_name
-    state_mach = csms[selected_name]
     this_user= session['auth']
-    # FIXME use SQL db commit for the following 5 lines 
-    start_state_time = state_mach.model.get_start_time()
-    past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
-    tnow = datetime.now(timezone.utc)
-    delta = (tnow-past).total_seconds()
-    # print(f"state start: {start_state_time}, now: {tnow.strftime('%Y-%m-%dT%H:%M:%S+00:00')}, delta: {delta}")
-    if state_mach.current_state.id == "edit" and (
-        delta > Globals.INITIAL_COUNTDOWN or this_user == state_mach.model.get_user()):
-        state_mach.send("abandon_changes")
-    if state_mach.current_state.id == "free":
-        state_mach.model.user = this_user
-        state_mach.send("starts_editing")
+    state_mach = csms[selected_name]
+    center_lock = clocks[selected_name]
+    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
+    center_was_free = False
+    with center_lock:
+        tnow = datetime.now(timezone.utc)
+        start_state_time = state_mach.model.get_start_time()
+        past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
+        delta = (tnow-past).total_seconds()
+        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
+            state_mach.send("abandon_changes")
+        if state_mach.current_state.id == "free":
+            state_mach.model.user = this_user
+            state_mach.send("starts_editing")
+            center_was_free = True
+    if center_was_free:
         return Main(
             Div(display_markdown("planning-t")),
             Span(
@@ -214,8 +217,8 @@ def planning_page(session, selected_name, db, csms):
         Center = centers.dataclass()
         timezon = centers[selected_name].timezone
         return Main(
-            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezon}"),
-            P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
+            Div(display_markdown("planning-busy-t")),
+            P(f"timezone: {timezon}"),
             Span(
                 A("dashboard", href="/dashboard"),
                 Span(style="display: inline-block; width: 20px;"),

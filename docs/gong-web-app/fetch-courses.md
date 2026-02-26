@@ -8,11 +8,9 @@ fetch_dhamma_courses("Pajjota", 6, 0)
 from pathlib import Path
 import pandas as pd
 import json
-import asyncio
-import aiohttp
 from datetime import date
 from fasthtml.common import *
-
+import requests
 from libs.utils import add_months_days
 from libs.dbset import get_db_path, get_central_db
 
@@ -44,51 +42,44 @@ def get_field_from_db(db_central, center_name, field_name):
 
 Get the courses from www.dhamma.org for a specific center from date_start until date_end, keep only the relevant fields for courses inside the center.
 
-Call to this async function from sync code with:
-courses = asyncio.run(fetch_courses_from_dhamma(location, date_start, date_end))
 
 ```{.python #fetch-api}
 
-async def fetch_courses_from_dhamma(location, date_start, date_end):
+def fetch_courses_from_dhamma(location, date_start, date_end):
     url = "https://www.dhamma.org/en-US/courses/do_search"
     headers = {"User-Agent": "entan-mkdocs-fetcher/1.0"}
     all_courses = []
 
     page = 1
 
-    async with aiohttp.ClientSession(headers=headers) as session:
-        while True:
-            data = {
-                "current_state": "OldStudents",
-                "regions[]": location,
-                "daterange": f"{date_start} - {date_end}",
-                "page": str(page),
-            }
+    while True:
+        data = {
+            "current_state": "OldStudents",
+            "regions[]": location,
+            "daterange": f"{date_start} - {date_end}",
+            "page": str(page),
+        }
 
-            print(f"Fetching courses Dhamma {location} - Page {page}...")
-            try:
-                async with session.post(url, data=data, timeout=15) as resp:
-                    resp.raise_for_status()
-                    payload = await resp.json()
-            except aiohttp.ClientError as e:
-                print("Request error:", e)
-                return []
-            except asyncio.TimeoutError as e:
-                print("Request timeout:", e)
-                return []
-            except ValueError as e:
-                # JSON decode error
-                print("Invalid JSON:", e)
-                return []
+        print(f"Fetching courses Dhamma {location} - Page {page}...")
+        try:
+            resp = requests.post(url, data=data, headers=headers, timeout=15)
+            resp.raise_for_status()
+            payload = resp.json()
+        except requests.RequestException as e:
+            print("Request error:", e)
+            return []
+        except ValueError as e:
+            print("Invalid JSON:", e)
+            return []
 
-            courses = payload.get("courses", [])
-            all_courses.extend(courses)
+        courses = payload.get("courses", [])
+        all_courses.extend(courses)
 
-            total_pages = payload.get("pages", 0)
-            if page >= total_pages:
-                break
+        total_pages = payload.get("pages", 0)
+        if page >= total_pages:
+            break
 
-            page += 1
+        page += 1
 
     extracted = [
         {
@@ -269,7 +260,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
     location = get_field_from_db(db_central, center, "location")
     end_date = add_months_days(date_current_course, num_months, num_days)
 
-    extracted = asyncio.run(fetch_courses_from_dhamma(location, date_current_course, end_date))  ## [4]
+    extracted = fetch_courses_from_dhamma(location, date_current_course, end_date)  ## [4]
 
     # one day courses are possible in some centers !!!
     # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
