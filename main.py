@@ -9,7 +9,8 @@ from libs.auth import admin_required, verify_code, create_code, login
 from libs.cdash import dashboard
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
 from libs.dbset import init_data, create_tables, get_central_db, get_db_path
-from libs.planning import planning_page, load_dhamma_db, show_dhamma, delete_line, add_line, abandon_edit
+from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
+from libs.fetch import fetch_dhamma_courses
 from libs.states import create_center_state_machines
 from libs.utils import feedback_to_user, display_markdown
 
@@ -109,26 +110,27 @@ def get(request):
     return consult_select_timetable(request, db_path)
 
 @rt('/planning_page')
-def get(session, request):
+async def get(session, request):
     params = dict(request.query_params)
     center = params.get("selected_name")
-    return planning_page(session, center, db, csms, clocks)
+    return await planning_page(session, center, db, csms, clocks)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
     return load_dhamma_db(session)
 
 @rt('/planning/show_dhamma')
-def get(session, request):
-    return show_dhamma(session, [], db, {})
+async def get(session, request):
+    merged_plan = await fetch_dhamma_courses(session["center"], 12, 0)
+    return await check_save_show_plan(session, merged_plan, db, {})
 
 @rt('/planning/delete_line/{idx}')
-def post(session, idx: int):
-    return delete_line(session, db, idx)
+async def post(session, idx: int):
+    return await delete_line(session, db, idx)
 
 @rt('/planning/add_line')
-def post(session, ptype: str, start: str, end: str):
-    return add_line(session, db, ptype, start, end, ptype)
+async def post(session, ptype: str, start: str, end: str):
+    return await add_line(session, db, ptype, start, end)
 
 @rt('/planning/abandon_edit')
 def get(session):

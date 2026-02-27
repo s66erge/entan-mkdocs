@@ -1,0 +1,197 @@
+
+@Current File @states.py replace the use of threading with asyncio for the threading.Lock() in function create_center_state_machines and the 'with center_lock:' in function planning_page
+
+
+Chat
+
+qwen3-coder-30b-a3b-instruct
+⏎
+2 context items
+I'll modify the code to replace threading locks with asyncio locks. Here are the changes:
+
+states.py
+
+Apply
+# ~/~ begin <<docs/gong-web-app/center_machines.md#libs/states.py>>[init]
+from abc import ABC
+from abc import abstractmethod
+import asyncio
+from fastlite import *
+import time
+import threading
+
+...
+
+# ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
+
+async def create_center_state_machines(db):
+    csms = {}
+    clocks = {}
+    db2 = get_central_db()
+    centers = db2.t.centers()
+    names = [c.get("center_name") for c in centers]
+    for name in names:
+        center_state = CenterDataModel(center_name=name, db=db)
+        sm = CenterState(model=center_state)
+        csms[name] = sm
+        clocks[name] = asyncio.Lock()  # Using asyncio.Lock instead of threading.Lock
+        #print(f"Center: {name}, State: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()} ")
+    return csms, clocks
+# ~/~ end
+
+...
+
+planning.py
+
+...
+
+# ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
+
+# @rt('/planning_page')
+async def planning_page(session, selected_name, db, csms, clocks):
+    session["center"] = selected_name
+    this_user= session['auth']
+    state_mach = csms[selected_name]
+    center_lock = clocks[selected_name]
+    
+    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
+    center_was_free = False
+    async with center_lock:  # Using async context manager for asyncio.Lock
+        tnow = datetime.now(timezone.utc)
+        start_state_time = state_mach.model.get_start_time()
+        past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
+        delta = (tnow-past).total_seconds()
+        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
+            state_mach.send("abandon_changes")
+        if state_mach.current_state.id == "free":
+            state_mach.model.user = this_user
+            state_mach.send("starts_editing")
+            center_was_free = True
+    if center_was_free:
+        return Main(
+            Div(display_markdown("planning-t")),
+            Span(
+                Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
+                Button(f"Modify {selected_name} planning",
+                    hx_get=f"/planning/load_dhamma_db?selected_name={quote_plus(selected_name)}",
+                    hx_target="#planning-periods"),
+                Span(style="display: inline-block; width: 20px;"),
+                Button(f"Modify {selected_name} course types / timetables",
+                    hx_get="/unfinished?goto_dash=NO",
+                    hx_target="#planning-periods"),
+                Span(style="display: inline-block; width: 20px;"),
+                A("return NO CHANGES",href="/planning/abandon_edit", _data_safe_nav="true"),
+                Span(style="display: inline-block; width: 20px;"),
+                Span("Remainning time: "),
+                Span("", id="timer", cls="timer-display")
+            ),
+            Script(JS_CLIENT_TIMER),
+            Script(JS_BLOCK_NAV),
+            P(""), 
+            Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
+            cls="container"
+        )
+    else: 
+        centers = db.t.centers
+        Center = centers.dataclass()
+        timezon = centers[selected_name].timezone
+        return Main(
+            Div(display_markdown("planning-busy-t")),
+            P(f"timezone: {timezon}"),
+            Span(
+                A("dashboard", href="/dashboard"),
+                Span(style="display: inline-block; width: 20px;"),
+                Button("Logout", hx_post="/logout"),
+                Span(style="display: inline-block; width: 20px;"),
+                A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
+            ),
+            cls="container"
+        )
+
+# ~/~ end
+
+# ~/~ end
+Key changes made:
+
+In 
+states.py
+:
+
+Replaced threading.Lock() with asyncio.Lock()
+Made the 
+create_center_state_machines
+ function asynchronous (async def)
+Updated imports to include asyncio
+In 
+planning.py
+:
+
+Made the 
+planning_page
+ function asynchronous (async def)
+Changed with center_lock: to async with center_lock: to properly handle the asyncio lock
+These changes enable proper async/await handling for concurrent access control in an asyncio-based application, replacing the thread-based locking mechanism.
+
+
+
+should then calls to planning_page be asyncio.run ?
+
+
+Chat
+
+⏎
+No, you shouldn't use asyncio.run() directly to call 
+planning_page
+. In a FastHTML/HTMX application, route handlers like 
+planning_page
+ are called by the framework itself when handling HTTP requests. The framework handles the async execution context for you.
+
+The changes I made ensure that:
+
+Your lock mechanism properly works with asyncio
+The routing system can handle async functions
+The application will work correctly within the FastHTML async framework
+If 
+planning_page
+ is being called as a route handler (which it appears to be from your code), then you don't need to manually call asyncio.run() - the framework will properly execute the async function for you.
+
+However, if you're calling this function directly in your application code somewhere else (not through FastHTML routes), then yes, you would need to use await planning_page(...) or wrap it with asyncio.run() but that's not typical usage for route handlers. The normal case is that these async functions are called by the framework when handling HTTP requests.
+
+The key point: your route handlers should be declared as async functions and the FastHTML framework handles their execution properly - you don't need to manually run them with asyncio.run() in regular application flow.
+
+
+
+planning_page is only called from another module this way:
+
+@rt('/planning_page')
+
+def get(session, request):
+
+	params = dict(request.query_params)
+
+	center = params.get("selected_name")
+
+	return planning_page(session, center, db, csms, clocks)
+
+
+
+so the async should be declared there : async def get ... ?
+
+
+Chat
+
+You're absolutely right! I need to fix that. The route handler itself needs to be async since it's calling an async function. Here's the corrected code:
+
+
+@rt('/planning_page')
+async def get(session, request):
+    params = dict(request.query_params)
+    center = params.get("selected_name")
+    return await planning_page(session, center, db, csms, clocks)
+
+# ~/~ end
+
+# ~/~ end
+I've updated the route handler to be async and properly await the call to 
+planning_page
+. This ensures that when your application receives a request to /planning_page, it will correctly handle the async nature of both the route handler and the underlying function.

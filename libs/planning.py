@@ -1,4 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
+import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
@@ -101,8 +102,8 @@ def show_draft_plan_table(draft_plan, mess):
     )
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
-        table,
         Div(feedback_to_user(mess), id="line-feedback"),
+        table,
         form,
         id="planning-periods"
     )
@@ -121,36 +122,37 @@ def load_dhamma_db(session):
         id="planning-periods"
     )
 
-# @rt('/planning/show_dhamma')
-def show_dhamma(session, plan, db, mess):
+def get_plan(centers, center):
+    return json.loads(centers[center].json_save)
+
+def save_plan(centers, center, plan):
+    centers.update(
+        center_name=center, json_save=json.dumps(plan, default=str))
+
+async def check_save_show_plan(session, plan, db, mess):
     selected_name = session["center"]
-    if plan == []:
-        merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-    else:
-        merged_plan = plan
-    new_draft_plan = check_plan(merged_plan, selected_name, db)
-    # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-    # Save to db for future modifications
+    new_draft_plan = check_plan(plan, selected_name, db)
     centers = db.t.centers
-    centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
+    await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
-def delete_line(session, db, index: int):
+async def delete_line(session, db, index: int):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
-    plan = json.loads(centers[selected_name].json_save)
+    plan = get_plan(centers, selected_name)
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return show_dhamma(session, plan, db, {"success": "line_deleted"})
+    return await check_save_show_plan(session, plan, db, {"success": "line_deleted"})
 
-def add_line(session, db, ptype, start, end):
+#@rt('/planning/add_line')
+async def add_line(session, db, ptype, start, end):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
-    plan = json.loads(centers[selected_name].json_save)
+    plan = get_plan(centers, selected_name)
     # Create new plan line with user input
     new_line = {
         "start_date": start,
@@ -164,13 +166,13 @@ def add_line(session, db, ptype, start, end):
     plan.append(new_line)    
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x["start_date"])
-    return show_dhamma(session, plansor, db, {"success" : "new_course"})
+    return await check_save_show_plan(session, plansor, db, {"success" : "new_course"})
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
 # @rt('/planning_page')
-def planning_page(session, selected_name, db, csms, clocks):
+async def planning_page(session, selected_name, db, csms, clocks):
     session["center"] = selected_name
     this_user= session['auth']
     state_mach = csms[selected_name]

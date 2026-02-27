@@ -242,7 +242,7 @@ Get a merged list of courses from the current courses in the center db and the f
 
 ```{.python #fetch-courses}
 
-def fetch_dhamma_courses(center, num_months, num_days):
+async def fetch_dhamma_courses(center, num_months, num_days):
     db_path = get_db_path()  ## [1]
     db_central = get_central_db()
     centers = db_central.t.centers
@@ -269,7 +269,7 @@ def fetch_dhamma_courses(center, num_months, num_days):
     location = get_field_from_db(db_central, center, "location")
     end_date = add_months_days(date_current_course, num_months, num_days)
 
-    extracted = asyncio.run(fetch_courses_from_dhamma(location, date_current_course, end_date))  ## [4]
+    extracted = await fetch_courses_from_dhamma(location, date_current_course, end_date)  ## [4]
 
     # one day courses are possible in some centers !!!
     # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]

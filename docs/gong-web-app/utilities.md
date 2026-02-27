@@ -180,13 +180,11 @@ def feedback_to_user(params):
     message_div = Div(P(""))
     if mess_dict["res"] == 'success':
         message_div = Div(
-            Div(P(mess_dict['mess']), style="color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
-            Small("To clear this message and/or update the tables, reload the page")
+            Div(P(mess_dict['mess']), style="color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
         )
     elif mess_dict["res"] == 'error':
         message_div = Div(
-            Div(P(mess_dict['mess']), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;"),
-            Small("To clear this message, reload the page")
+            Div(P(mess_dict['mess']), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
         )
     return message_div
 ```
