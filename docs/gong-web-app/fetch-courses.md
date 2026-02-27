@@ -16,30 +16,10 @@ from fasthtml.common import *
 from libs.utils import add_months_days
 from libs.dbset import get_db_path, get_central_db
 
-<<field-fr-db>>
 <<fetch-api>>
 <<period-type>>
 <<deduplicate>>
 <<fetch-courses>>
-```
-
-Get the dhamma.org location for this center from the table settings in center db
-
-```{.python #field-fr-db}
-
-def get_field_from_db(db_central, center_name, field_name):
-    # Access the centers mapping directly; no need for a dataclass helper.
-    centers = db_central.t.centers
-    center_obj = centers[center_name]
-    if field_name == "location":
-        # Return the location string prefixed as expected by the tests.
-        location = getattr(center_obj, "location")
-        return f"location_{location}"
-    else:
-        # For other fields the value is stored as a JSON string.
-        other_course = getattr(center_obj, field_name)
-        return json.loads(other_course)
-
 ```
 
 Get the courses from www.dhamma.org for a specific center from date_start until date_end, keep only the relevant fields for courses inside the center.
@@ -96,8 +76,7 @@ async def fetch_courses_from_dhamma(location, date_start, date_end):
             "course_end_date": c.get("course_end_date"),
             "raw_course_type": c.get("raw_course_type"),
             "course_type_anchor": c.get("course_type_anchor"),
-            "course_type": c.get("course_type"),
-            "sub_location": c.get("location", {}).get("sub_location"),
+            "course_type": c.get("course_type")
         }
         for c in all_courses
         if c.get("location", {}).get("center_noncenter") != "noncenter"
@@ -242,13 +221,10 @@ Get a merged list of courses from the current courses in the center db and the f
 
 ```{.python #fetch-courses}
 
-async def fetch_dhamma_courses(center, num_months, num_days):
-    db_path = get_db_path()  ## [1]
-    db_central = get_central_db()
-    centers = db_central.t.centers
-    Center = centers.dataclass()
-    selected_db = centers[center].gong_db_name
-    db_center = database(db_path + selected_db)
+def coming_center_courses(center_obj):
+    #center = center_obj.center_name
+    selected_db = center_obj.gong_db_name
+    db_center = database(get_db_path() + selected_db)
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
@@ -257,33 +233,26 @@ async def fetch_dhamma_courses(center, num_months, num_days):
 
     periods_db_center_obj = periods()[count_past-1:]  ## [3]
     periods_db_center = [
-    {
-        'start_date': p.start_date,
-        'period_type': p.period_type,
-        'source' : f"{center.lower()}_db"
+        {
+            'start_date': p.start_date,
+            'period_type': p.period_type,
+            'source' : f"{center_obj.center_name.lower()}_db"
 
-    }
-    for p in periods_db_center_obj  ## [3]
+        }
+        for p in periods_db_center_obj  ## [3]
     ]
+    return periods_db_center, date_current_course
 
-    location = get_field_from_db(db_central, center, "location")
-    end_date = add_months_days(date_current_course, num_months, num_days)
-
-    extracted = await fetch_courses_from_dhamma(location, date_current_course, end_date)  ## [4]
-
-    # one day courses are possible in some centers !!!
-    # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
-
+def clean_dhamma_courses(extracted, center_obj):
     for course in extracted:   ## [5]
-        course.pop('sub_location', None)
-        course.pop('center_non', None)
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
 
-    # course_type_map in .csv file
+    db_path = get_db_path()
     df = pd.read_csv(db_path + 'course_type_map.csv')
     list_of_types = df.to_dict(orient='records')         ## [6]
-    other_dict = get_field_from_db(db_central, center, "other_course")
+
+    other_dict = json.loads(center_obj.other_course)  ## [6.1]
     periods_dhamma_org = [
         {
             "start_date": c.get("course_start_date"),
@@ -294,6 +263,22 @@ async def fetch_dhamma_courses(center, num_months, num_days):
         }
         for c in extracted     ## [7]
     ]                         
+    return periods_dhamma_org, other_dict
+
+async def fetch_dhamma_courses(center, num_months, num_days):
+    db_central = get_central_db()
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    center_obj = centers[center]
+
+    periods_db_center, date_current_course = coming_center_courses(center_obj)  ## [1-3]
+
+    dhamma_location = f"location_{center_obj.location}"
+    end_date = add_months_days(date_current_course, num_months, num_days)
+
+    extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+
+    periods_dhamma_org, other_dict = clean_dhamma_courses(extracted, center_obj)  ## [5]
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     # Sort by start_date ascending, then end_date ascending
