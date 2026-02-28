@@ -6,10 +6,10 @@ fetch_dhamma_courses("Pajjota", 6, 0)
 
 ```{.python file=libs/fetch.py}
 from pathlib import Path
-import pandas as pd
+# import pandas as pd  # moved to "myFasthtml.py"
+# import aiohttp  # moved to "myFasthtml.py"
 import json
 import asyncio
-import aiohttp
 from datetime import date
 from myFasthtml import *
 

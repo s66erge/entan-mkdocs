@@ -1,9 +1,9 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
 from pathlib import Path
-import pandas as pd
+# import pandas as pd  # moved to "myFasthtml.py"
+# import aiohttp  # moved to "myFasthtml.py"
 import json
 import asyncio
-import aiohttp
 from datetime import date
 from myFasthtml import *
 
