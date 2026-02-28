@@ -7,7 +7,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
-from fasthtml.common import *
+from myFasthtml import *
 
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
@@ -35,15 +35,9 @@ Then:
 
 ```{.python #planning-page}
 
-# @rt('/planning_page')
-async def planning_page(session, selected_name, db, csms, clocks):
-    session["center"] = selected_name
-    this_user= session['auth']
-    state_mach = csms[selected_name]
-    center_lock = clocks[selected_name]
-    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
-    center_was_free = False
-    with center_lock:
+async def check_center_free(state_mach, center_lock, this_user):
+    async with center_lock:
+        center_is_free = False
         tnow = datetime.now(timezone.utc)
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
@@ -53,8 +47,15 @@ async def planning_page(session, selected_name, db, csms, clocks):
         if state_mach.current_state.id == "free":
             state_mach.model.user = this_user
             state_mach.send("starts_editing")
-            center_was_free = True
-    if center_was_free:
+            center_is_free = True
+        return center_is_free
+
+# @rt('/planning_page')
+async def planning_page(session, selected_name, db, csms, clocks):
+    session["center"] = selected_name
+    center_lock = clocks[selected_name]
+    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
+    if await check_center_free(csms[selected_name], center_lock, session['auth']):
         return Main(
             Div(display_markdown("planning-t")),
             Span(

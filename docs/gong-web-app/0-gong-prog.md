@@ -5,9 +5,7 @@
 
 ```{.python file=main.py}
 
-from functools import wraps
-from fasthtml.common import *
-
+from myFasthtml import *
 from libs.admin import show_page
 from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
 from libs.auth import admin_required, verify_code, create_code, login

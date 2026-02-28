@@ -3,7 +3,7 @@
 Will only be reachable for authenticated users.
 
 ```{.python file=libs/cdash.py}
-from fasthtml.common import *
+from myFasthtml import *
 from libs.utils import display_markdown, Globals
 
 <<dashboard>>

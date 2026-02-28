@@ -1,8 +1,8 @@
 # ~/~ begin <<docs/gong-web-app/center-consult.md#libs/consul.py>>[init]
 from pathlib import Path
 from urllib.parse import quote_plus
-from fasthtml.common import *
-from fasthtml.common import database
+from myFasthtml import *
+from myFasthtml import database
 
 from libs.cdash import top_menu
 from libs.utils import display_markdown
@@ -56,8 +56,8 @@ def consult_select_db(request, centers, db_path):
     db = database(str(dbfile_path))
 
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
-    cps = list(db.t.coming_periods())
-    pers = list(db.t.periods_struct())
+    cps = db.t.coming_periods()
+    pers = db.t.periods_struct()
 
     # Get all period_types from periods_struct and find those not in current rows
     try:

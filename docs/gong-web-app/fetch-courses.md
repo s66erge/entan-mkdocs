@@ -11,7 +11,7 @@ import json
 import asyncio
 import aiohttp
 from datetime import date
-from fasthtml.common import *
+from myFasthtml import *
 
 from libs.utils import add_months_days
 from libs.dbset import get_db_path, get_central_db

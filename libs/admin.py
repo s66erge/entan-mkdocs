@@ -1,5 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/admin-show.md#libs/admin.py>>[init]
-from fasthtml.common import *
+from myFasthtml import *
 from libs.utils import *
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]

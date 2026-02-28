@@ -3,7 +3,7 @@
 ```{.python file=libs/dbset.py}
 import textwrap
 import os
-from fasthtml.common import database
+from myFasthtml import database
 from libs.utils import isa_dev_computer
 
 <<getdb-path>>

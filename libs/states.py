@@ -1,12 +1,11 @@
 # ~/~ begin <<docs/gong-web-app/center_machines.md#libs/states.py>>[init]
 from abc import ABC
 from abc import abstractmethod
-from fastlite import *
+import asyncio
+from myFasthtml import *
 import time
-import threading
 from datetime import datetime, timezone
-from statemachine import State
-from statemachine import StateMachine
+from statemachine import State, StateMachine
 from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
@@ -110,7 +109,7 @@ def create_center_state_machines(db):
         center_state = CenterDataModel(center_name=name, db=db)
         sm = CenterState(model=center_state)
         csms[name] = sm
-        clocks[name] = threading.Lock()
+        clocks[name] = asyncio.Lock()
         #print(f"Center: {name}, State: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()} ")
     return csms, clocks
 # ~/~ end

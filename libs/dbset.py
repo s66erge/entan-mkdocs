@@ -1,7 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
 import textwrap
 import os
-from fasthtml.common import database
+from myFasthtml import database
 from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]

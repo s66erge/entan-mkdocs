@@ -13,7 +13,7 @@ import resend
 import markdown2
 import os
 from datetime import datetime, date, timedelta
-from fasthtml.common import *
+from myFasthtml import *
 
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds
