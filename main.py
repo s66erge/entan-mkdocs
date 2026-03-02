@@ -10,7 +10,7 @@ from libs.dbset import init_data, create_tables, get_central_db, get_db_path
 from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
 from libs.fetch import fetch_dhamma_courses
 from libs.states import create_center_state_machines
-from libs.utils import feedback_to_user, display_markdown
+from libs.utils import feedback_to_user, display_markdown, Globals
 
 #  from starlette.testclient import TestClient
 
@@ -117,9 +117,9 @@ async def get(session, request):
 def get(session):
     return load_dhamma_db(session)
 
-@rt('/planning/show_dhamma')
+@rt('/planning/check_show_dhamma')
 async def get(session, request):
-    merged_plan = await fetch_dhamma_courses(session["center"], 12, 0)
+    merged_plan = await fetch_dhamma_courses(session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
     return await check_save_show_plan(session, merged_plan, db, {})
 
 @rt('/planning/delete_line/{idx}')

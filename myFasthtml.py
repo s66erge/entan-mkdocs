@@ -2,6 +2,8 @@ from fasthtml.common import *
 from statemachine import State, StateMachine
 import pandas as pd
 import aiohttp
+import resend
+import markdown2
 # You can add custom aliases too
 A = A
 Beforeware = Beforeware

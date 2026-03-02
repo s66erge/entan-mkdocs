@@ -243,7 +243,7 @@ def coming_center_courses(center_obj):
     ]
     return periods_db_center, date_current_course
 
-def clean_dhamma_courses(extracted, center_obj):
+def get_dhamma_courses_types(extracted, center_obj):
     for course in extracted:   ## [5]
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
@@ -262,7 +262,9 @@ def clean_dhamma_courses(extracted, center_obj):
             "course_type": c.get("course_type")
         }
         for c in extracted     ## [7]
-    ]                         
+    ]
+
+
     return periods_dhamma_org, other_dict
 
 async def fetch_dhamma_courses(center, num_months, num_days):
@@ -277,8 +279,7 @@ async def fetch_dhamma_courses(center, num_months, num_days):
     end_date = add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
-
-    periods_dhamma_org, other_dict = clean_dhamma_courses(extracted, center_obj)  ## [5]
+    periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj)  ## [5]
 
     merged = periods_db_center + periods_dhamma_org            ## [8]
     # Sort by start_date ascending, then end_date ascending

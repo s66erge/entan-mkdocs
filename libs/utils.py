@@ -1,14 +1,17 @@
 # ~/~ begin <<docs/gong-web-app/utilities.md#libs/utils.py>>[init]
 import socket
 import calendar
-import resend
-import markdown2
+from myFasthtml import *
+# import resend # moved to "myFasthtml.py"
+# import markdown2 # moved to "myFasthtml.py"
 import os
 from datetime import datetime, date, timedelta
-from myFasthtml import *
+import json
 
 class Globals:
-    INITIAL_COUNTDOWN = 4000 # seconds
+    INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
+    MONTHS_TO_FETCH = 12 # when fetching dharma courses from dhamma.org, how many months to fetch starting from current month
+    DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
 
     @classmethod
     def get(cls, name, default=None):

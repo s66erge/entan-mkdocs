@@ -8,7 +8,6 @@ import json
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 from myFasthtml import *
-
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.fetch import fetch_dhamma_courses, check_plan
 from libs.utilsJS import JS_BLOCK_NAV
@@ -164,7 +163,7 @@ def show_draft_plan_table(draft_plan, mess):
 def load_dhamma_db(session):
     return Div(
         P(" Loading this center planning from dhamma.org ..."),
-        Div(hx_get=f"/planning/show_dhamma", 
+        Div(hx_get=f"/planning/check_show_dhamma", 
             hx_target="#planning-periods",
             hx_trigger="load",  # Triggers when this div loads
             style="display: none;"),
