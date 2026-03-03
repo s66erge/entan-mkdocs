@@ -85,6 +85,24 @@ def get_period_type(anchor, course_type: str, list_of_types, other_dict):
     return "UNKNOWN " + anchor
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
+def get_list_of_types():
+    db_path = get_db_path()
+    df = pd.read_csv(db_path + 'course_type_map.csv')
+    return df.to_dict(orient='records')
+
+def get_types_with_duration(center_obj):
+    list_of_types = get_list_of_types()
+    selected_db = center_obj.gong_db_name
+    db_center = database(get_db_path() + selected_db)
+    for item in list_of_types:
+        vt = item.get("period_type")
+        days = [row.get("day") for row in list(db_center.t.periods_struct()) if row.get("period_type") == vt and row.get("day") is not None]
+        if item["tags"] == "F":
+            item["duration"] = max(days)
+        else:
+            item["duration"] = 0
+    return list_of_types
+
 def deduplicate(merged, del_as_BETWEEN):
     deduplicated = []
     i = 0
@@ -150,6 +168,7 @@ def check_row(row, next_type, next_start_date, previous_type, previous_end_date,
     return row
 
 def check_plan(plan, selected_name, db):
+    # CONTINOW moving to chech plan
     centers = db.t.centers
     Center = centers.dataclass()
     selected_db = centers[selected_name].gong_db_name
@@ -159,8 +178,8 @@ def check_plan(plan, selected_name, db):
         return Div(P(f"Database not found: {selected_db}"))
     db_center = database(str(dbfile_path))
     other_course = json.loads(centers[selected_name].other_course)
-    var_periods = other_course["variable-len"]
-    over_OK = other_course["override"]
+    var_periods = []
+    over_OK = {}
     try:
         # build set of all period_types in db_center.t.periods_struct
         periods_struct = db_center.t.periods_struct()
@@ -211,14 +230,10 @@ def coming_center_courses(center_obj):
     ]
     return periods_db_center, date_current_course
 
-def get_dhamma_courses_types(extracted, center_obj):
+def get_dhamma_courses_types(extracted, center_obj, list_of_types):
     for course in extracted:   ## [5]
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
-
-    db_path = get_db_path()
-    df = pd.read_csv(db_path + 'course_type_map.csv')
-    list_of_types = df.to_dict(orient='records')         ## [6]
 
     other_dict = json.loads(center_obj.other_course)  ## [6.1]
     periods_dhamma_org = [
@@ -231,15 +246,41 @@ def get_dhamma_courses_types(extracted, center_obj):
         }
         for c in extracted     ## [7]
     ]
-
-
     return periods_dhamma_org, other_dict
+
+def check_within(deletion_check, this_row, other_row):
+    if other_row.get("period_type", "") != deletion_check:
+        return False
+    this_start = date.fromisoformat(this_row.get("start_date"))
+    other_start = date.fromisoformat(other_row.get("start_date"))
+    other_end = date.fromisoformat(other_row.get("end_date"))
+    if this_start >= other_start and this_start < other_end:
+        return True
+    return False
+
+def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
+    cleaned = []
+    default_type = next((x for x in list_of_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    delete_list = other_dict.get("delete", {})
+    for i, row in enumerate(periods_dhamma_org):
+        row_bef = cleaned[-1] if len(cleaned) > 0 else {}
+        row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
+        deletion_check = delete_list.get(row["period_type"], "@TOKEEP@")
+        if row["period_type"] == default_type or \
+            deletion_check == "@ALL@":
+            continue
+        elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
+            continue
+        else:
+            cleaned.append(row)
+    return cleaned
 
 async def fetch_dhamma_courses(center, num_months, num_days):
     db_central = get_central_db()
     centers = db_central.t.centers
     Center = centers.dataclass()
     center_obj = centers[center]
+    list_of_types = get_list_of_types()
 
     periods_db_center, date_current_course = coming_center_courses(center_obj)  ## [1-3]
 
@@ -247,15 +288,16 @@ async def fetch_dhamma_courses(center, num_months, num_days):
     end_date = add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
-    periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj)  ## [5]
+    periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj, list_of_types)  ## [5]
+    cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict)
 
-    merged = periods_db_center + periods_dhamma_org            ## [8]
+    merged = periods_db_center + cleaned_dhamma_org            ## [8]
     # Sort by start_date ascending, then end_date ascending
     mer_sort = sorted(merged, key=lambda x: (
         x['start_date'],  # Primary: start_date ascending
         int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
     ))
-    deduplicated = deduplicate(mer_sort, other_dict.get("del-as-IN-BETWEEN"))
+    deduplicated = deduplicate(mer_sort, {})
 
     return deduplicated
 # ~/~ end
