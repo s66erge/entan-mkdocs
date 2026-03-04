@@ -156,7 +156,7 @@ def deduplicate(merged, del_as_BETWEEN):
 
 def check_row(row, next_type, next_start_date, previous_type, previous_end_date, types_with_duration):
     pt = row.get("period_type")
-    if pt in [t.get("valid_types") for t in types_with_duration]:
+    if pt in [t.get("period_type") for t in types_with_duration]:
         try:
             s_this = date.fromisoformat(row.get("start_date"))
             s_next = date.fromisoformat(next_start_date)
@@ -165,28 +165,22 @@ def check_row(row, next_type, next_start_date, previous_type, previous_end_date,
         except Exception:
             row["check"] = "InvalidDate"
         else:
-            this_type = list(filter(lambda x: x.get("valid_types") == pt, types_with_duration))[0]
+            this_type = list(filter(lambda x: x.get("period_type") == pt, types_with_duration))[0]
             #max_type = next((t for t in types_with_duration if t.get("valid_types") == pt), None)
             if s_this < e_previous:
                 days_s_next_e_previous = (s_next - e_previous).days
-                if pt == "1 day" and days_s_next_e_previous > 1:
+                if days_s_next_e_previous > 1:
                     row["check"] = f"Middle start + GAP of {days_s_next_e_previous - 1}"    
-                elif pt == "1 day" and days_s_next_e_previous < 0:
+                elif days_s_next_e_previous < 0:
                     row["check"] = f"Middle start + Overlap of {- days_s_next_e_previous}"    
-                elif previous_type in this_type.get("over_oth"):
-                    row["check"] = "OK middle start"
                 else:
                     row["check"] = "Middle start"
-
             elif days_s_next_s_this < this_type.get("duration"):
                 row["check"] = f"Overlap-{this_type.get('duration')}"
-            elif days_s_next_s_this > 1 + this_type.get("duration") and not this_type["var_period"]:
-                row["check"] = f"GAP of {days_s_next_s_this - this_type.get('duration')}"
+            elif days_s_next_s_this > 1 + this_type.get("duration") and this_type["tags"] == "F":
+                row["check"] = f"OK + default {days_s_next_s_this - this_type.get('duration')}"
             elif days_s_next_s_this == 0:
-                if next_type in this_type.get("over_oth"):
-                    row["check"] = "OK same start"
-                else:
-                    row["check"] = "Same start"
+                row["check"] = "Same start"
             else:
                 row["check"] = "OK"
     else:
@@ -194,33 +188,8 @@ def check_row(row, next_type, next_start_date, previous_type, previous_end_date,
     return row
 
 def check_plan(plan, selected_name, db):
-    # CONTINOW moving to chech plan
     centers = db.t.centers
-    Center = centers.dataclass()
-    selected_db = centers[selected_name].gong_db_name
-    db_path = get_db_path()
-    dbfile_path = Path(db_path) / selected_db
-    if not dbfile_path.exists():
-        return Div(P(f"Database not found: {selected_db}"))
-    db_center = database(str(dbfile_path))
-    other_course = json.loads(centers[selected_name].other_course)
-    var_periods = []
-    over_OK = {}
-    try:
-        # build set of all period_types in db_center.t.periods_struct
-        periods_struct = db_center.t.periods_struct()
-        valid_types = {row.get("period_type") for row in periods_struct}
-    except Exception:
-        valid_types = set()
-    # Build a list of dicts: {"valid_types": <valid_type>, "duration": max_day}
-    periods_struct_rows = list(db_center.t.periods_struct())
-    types_with_duration = []
-    for vt in valid_types:
-        days = [row.get("day") for row in periods_struct_rows if row.get("period_type") == vt and row.get("day") is not None]
-        max_day = max(days) if days else None
-        end_var = vt in var_periods
-        over_oth = over_OK.get(vt, [""])
-        types_with_duration.append({'valid_types': vt, 'duration': max_day, 'var_period': end_var, "over_oth":over_oth})
+    types_with_duration = get_types_with_duration(centers[selected_name])    
 
     for idx, item in enumerate(plan):
         next_type = plan[idx + 1].get("period_type") if idx < len(plan) - 1 else "???AFTER"
