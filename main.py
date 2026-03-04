@@ -127,8 +127,8 @@ async def post(session, idx: int):
     return await delete_line(session, db, idx)
 
 @rt('/planning/add_line')
-async def post(session, ptype: str, start: str, end: str):
-    return await add_line(session, db, ptype, start, end)
+async def post(session, ptype: str, start: str):
+    return await add_line(session, db, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):

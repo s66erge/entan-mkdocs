@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import fetch_dhamma_courses, check_plan
+from libs.fetch import check_plan, get_list_of_types
 from libs.utilsJS import JS_BLOCK_NAV
 
 <<abandon-edit>>
@@ -127,14 +127,18 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_list_of_types()]
     form = Form(
         Div(
             Label("Period type:"),
-            Input(type="text", name="ptype", placeholder="e.g. '10 days'", style="width: 200px"),
+            Select(
+                Option("", value="", selected=True, disabled=True, text="Select period type..."),
+                *period_options,
+                name="ptype",
+                style="width: 200px"
+            ),
             Label("Start date:"),
             Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
-            Label("End date:"),
-            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), style="width: 200px"),
             Button("Add Period", type="submit")
         ),
         hx_post="/planning/add_line",
@@ -196,7 +200,7 @@ async def delete_line(session, db, index: int):
     return await check_save_show_plan(session, plan, db, {"success": "line_deleted"})
 
 #@rt('/planning/add_line')
-async def add_line(session, db, ptype, start, end):
+async def add_line(session, db, ptype, start):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
@@ -204,7 +208,7 @@ async def add_line(session, db, ptype, start, end):
     # Create new plan line with user input
     new_line = {
         "start_date": start,
-        "end_date": end,
+        "end_date": None,
         "period_type": ptype,
         "source": "new input",
         "check": "",
