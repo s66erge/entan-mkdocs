@@ -122,11 +122,22 @@ def get_types_with_duration(center_obj):
     db_center = database(get_db_path() + selected_db)
     for item in list_of_types:
         vt = item.get("period_type")
-        days = [row.get("day") for row in list(db_center.t.periods_struct()) if row.get("period_type") == vt and row.get("day") is not None]
+        days = [row.get("day") for row in list(db_center.t.periods_struct())
+                if row.get("period_type") == vt and row.get("day") is not None]
         if item["tags"] == "F":
-            item["duration"] = max(days)
+            item["duration"] = max(days) + 1
         else:
             item["duration"] = 0
+        day_0_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+                 if row.get("period_type") == vt and row.get("day") == 0), None)
+        times_day_0 = [row.get("time") for row in list(db_center.t.timetables())
+                 if row.get("period_type") == vt and row.get("day_type") == day_0_type] 
+        item["time_start_first_day"] = min(times_day_0)
+        last_day_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+                 if row.get("period_type") == vt and row.get("day") == max(days)), None)
+        times_last_day = [row.get("time") for row in list(db_center.t.timetables())
+                 if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
+        item["time_end_last_day"] = max(times_last_day)
     return list_of_types
 
 def deduplicate(merged, del_as_BETWEEN):
@@ -154,33 +165,20 @@ def deduplicate(merged, del_as_BETWEEN):
         i += 1
     return deduplicated
 
-def check_row(row, next_type, next_start_date, previous_type, previous_end_date, types_with_duration):
+def check_row(row, next_start_date, types_with_duration):
     pt = row.get("period_type")
     if pt in [t.get("period_type") for t in types_with_duration]:
         try:
-            s_this = date.fromisoformat(row.get("start_date"))
-            s_next = date.fromisoformat(next_start_date)
-            e_previous = date.fromisoformat(previous_end_date) if previous_end_date else s_this
-            days_s_next_s_this = (s_next - s_this).days
+            e_this = date.fromisoformat(row.get("end_date"))
+            s_previous = date.fromisoformat(next_start_date) 
         except Exception:
             row["check"] = "InvalidDate"
         else:
-            this_type = list(filter(lambda x: x.get("period_type") == pt, types_with_duration))[0]
-            #max_type = next((t for t in types_with_duration if t.get("valid_types") == pt), None)
-            if s_this < e_previous:
-                days_s_next_e_previous = (s_next - e_previous).days
-                if days_s_next_e_previous > 1:
-                    row["check"] = f"Middle start + GAP of {days_s_next_e_previous - 1}"    
-                elif days_s_next_e_previous < 0:
-                    row["check"] = f"Middle start + Overlap of {- days_s_next_e_previous}"    
-                else:
-                    row["check"] = "Middle start"
-            elif days_s_next_s_this < this_type.get("duration"):
-                row["check"] = f"Overlap-{this_type.get('duration')}"
-            elif days_s_next_s_this > 1 + this_type.get("duration") and this_type["tags"] == "F":
-                row["check"] = f"OK + default {days_s_next_s_this - this_type.get('duration')}"
-            elif days_s_next_s_this == 0:
-                row["check"] = "Same start"
+            delta_days = (s_previous - e_this).days
+            if delta_days < 0:
+                row["check"] = f"Overlap of {- delta_days} day(s)"
+            elif delta_days > 1:
+                row["check"] = f"OK default {delta_days} days"
             else:
                 row["check"] = "OK"
     else:
@@ -190,15 +188,39 @@ def check_row(row, next_type, next_start_date, previous_type, previous_end_date,
 def check_plan(plan, selected_name, db):
     centers = db.t.centers
     types_with_duration = get_types_with_duration(centers[selected_name])    
-
-    for idx, item in enumerate(plan):
-        next_type = plan[idx + 1].get("period_type") if idx < len(plan) - 1 else "???AFTER"
-        next_period_start = plan[idx + 1].get("start_date") if idx < len(plan) - 1 else \
-                            plan[idx].get("end_date")
-        previous_type = plan[idx-1].get("period_type") if idx > 0 else "???BEFORE"
-        previous_end_date = plan[idx-1].get("end_date") if idx > 0 else \
-                            plan[idx].get("start_date") 
-        check_row(item, next_type, next_period_start, previous_type, previous_end_date, types_with_duration)
+    for idx, row in enumerate(plan):
+        if idx == len(plan) - 1:
+            row["check"] = "OK"
+            continue
+        next_start_date = plan[idx + 1].get("start_date")
+        #check_row(row, next_start_date, types_with_duration)
+        pt = row.get("period_type")
+        if pt in [t.get("period_type") for t in types_with_duration]:
+            try:
+                e_this = date.fromisoformat(row.get("end_date"))
+                s_previous = date.fromisoformat(next_start_date) 
+            except Exception:
+                row["check"] = "InvalidDate"
+            else:
+                delta_days = (s_previous - e_this).days
+                if delta_days < 0:
+                    row["check"] = f"Overlap of {- delta_days} day(s)"
+                elif delta_days == 0:
+                    this_end_time = next((t.get("time_end_last_day") for t in types_with_duration
+                                          if t.get("period_type") == pt), None)
+                    next_pt = plan[idx + 1].get("period_type")
+                    next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
+                                            if t.get("period_type") == next_pt), None)
+                    if this_end_time < next_start_time:
+                        row["check"] = "OK same day"
+                    else:
+                        row["check"] = "CHECK Time overlap"
+                elif delta_days > 1:
+                    row["check"] = f"OK default {delta_days} days"
+                else:
+                    row["check"] = "OK"
+        else:
+            row["check"] = "NoType"
     return plan
 ```
 
@@ -208,6 +230,24 @@ Get a merged list of courses from the current courses in the center db and the f
 - with a source field "dhamma.org", "center db" or "BOTH"
 
 ```{.python #fetch-courses}
+
+def sort_plan(plan):
+    return sorted(plan, key=lambda x: (
+        x['start_date'],  # Primary: start_date ascending
+        int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
+    ))
+
+def add_end_dates(plan, center_obj):
+    types_with_duration = get_types_with_duration(center_obj)
+    for i in range(len(plan)-1):
+        if 'end_date' not in plan[i] or plan[i]['end_date'] is None:
+            this_type = list(filter(lambda x: x.get("period_type") == plan[i]['period_type'], types_with_duration))[0]
+            next_start = plan[i+1].get('start_date')
+            if this_type["tags"] != "F":
+                plan[i]['end_date'] = add_months_days(next_start, 0, -1)
+            else:
+                plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, this_type.get("duration"))
+    return plan
 
 def coming_center_courses(center_obj):
     #center = center_obj.center_name
@@ -229,7 +269,9 @@ def coming_center_courses(center_obj):
         }
         for p in periods_db_center_obj  ## [3]
     ]
-    return periods_db_center, date_current_course
+    sorted_periods = sort_plan(periods_db_center)
+    sorted_periods_ends = add_end_dates(sorted_periods, center_obj)
+    return sorted_periods_ends, date_current_course
 
 def get_dhamma_courses_types(extracted, center_obj, list_of_types):
     for course in extracted:   ## [5]
@@ -294,10 +336,13 @@ async def fetch_dhamma_courses(center, num_months, num_days):
 
     merged = periods_db_center + cleaned_dhamma_org            ## [8]
     # Sort by start_date ascending, then end_date ascending
+    mer_sort = sort_plan(merged)
+    '''
     mer_sort = sorted(merged, key=lambda x: (
         x['start_date'],  # Primary: start_date ascending
         int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
     ))
+    '''
     deduplicated = deduplicate(mer_sort, {})
 
     return deduplicated

@@ -6,10 +6,11 @@ Will only be reachable for authenticated users and planner for the selected cent
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import check_plan, get_list_of_types
+from libs.fetch import check_plan, get_list_of_types, sort_plan, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 <<abandon-edit>>
@@ -112,8 +113,14 @@ def show_draft_plan_table(draft_plan, mess):
         course = plan_line.get("course_type")
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
-        check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
         source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
+        match check[0:2]:
+            case "OK":
+                check_cell = Td(check)
+            case "CH":
+                check_cell = Td(check, style="background: orange")
+            case _:
+                check_cell = Td(check, style="background: red")
         # Add delete link for removing this row
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
@@ -208,7 +215,6 @@ async def add_line(session, db, ptype, start):
     # Create new plan line with user input
     new_line = {
         "start_date": start,
-        "end_date": None,
         "period_type": ptype,
         "source": "new input",
         "check": "",
@@ -217,8 +223,9 @@ async def add_line(session, db, ptype, start):
     # Add the new line to the plan
     plan.append(new_line)    
     # Sort plan by start_date
-    plansor = sorted(plan, key=lambda x: x["start_date"])
-    return await check_save_show_plan(session, plansor, db, {"success" : "new_course"})
+    plansor = sort_plan(plan)
+    plancomp = add_end_dates(plansor, centers[selected_name])
+    return await check_save_show_plan(session, plancomp, db, {"success" : "new_course"})
 
 ```
 
