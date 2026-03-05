@@ -82,7 +82,7 @@ def get_period_type(anchor, course_type: str, list_of_types, other_dict):
     for item in list_of_types:
         if  anchor == item.get('raw_course_type'):
             return item.get('period_type')
-    return "UNKNOWN " + anchor
+    return anchor
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
 def get_list_of_types():
@@ -114,50 +114,25 @@ def get_types_with_duration(center_obj):
         item["time_end_last_day"] = max(times_last_day)
     return list_of_types
 
-def deduplicate(merged, del_as_BETWEEN):
+def deduplicate(merged):
     deduplicated = []
     i = 0
-    while i < len(merged):
+    while i < len(merged) -1:
         current = merged[i]
-        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
-        if current["period_type"] in del_as_BETWEEN:
-            i += 1 # skip this item
-            continue
-        elif i + 1 < len(merged):
+        if i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
-                current['period_type'] == next_item['period_type']):
+                current['period_type'] == next_item['period_type'] and
+                current['end_date'] == next_item['end_date'] and
+                current['source'] != next_item['source']):
                 # Mark as BOTH and skip the next one
                 current['source'] = 'BOTH'
-                #if current.get('end_date','None') == 'None':
-                if 'end_date' not in current and 'end_date' in next_item:
-                    current['end_date'] =  next_item['end_date']
                 deduplicated.append(current)
                 i += 2  # skip next item
                 continue
         deduplicated.append(current)
         i += 1
     return deduplicated
-
-def check_row(row, next_start_date, types_with_duration):
-    pt = row.get("period_type")
-    if pt in [t.get("period_type") for t in types_with_duration]:
-        try:
-            e_this = date.fromisoformat(row.get("end_date"))
-            s_previous = date.fromisoformat(next_start_date) 
-        except Exception:
-            row["check"] = "InvalidDate"
-        else:
-            delta_days = (s_previous - e_this).days
-            if delta_days < 0:
-                row["check"] = f"Overlap of {- delta_days} day(s)"
-            elif delta_days > 1:
-                row["check"] = f"OK default {delta_days} days"
-            else:
-                row["check"] = "OK"
-    else:
-        row["check"] = "NoType"
-    return row
 
 def check_plan(plan, selected_name, db):
     centers = db.t.centers
@@ -199,22 +174,19 @@ def check_plan(plan, selected_name, db):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
 
-def sort_plan(plan):
-    return sorted(plan, key=lambda x: (
-        x['start_date'],  # Primary: start_date ascending
-        int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
-    ))
-
 def add_end_dates(plan, center_obj):
     types_with_duration = get_types_with_duration(center_obj)
-    for i in range(len(plan)-1):
+    for i in range(len(plan)):
         if 'end_date' not in plan[i] or plan[i]['end_date'] is None:
             this_type = list(filter(lambda x: x.get("period_type") == plan[i]['period_type'], types_with_duration))[0]
-            next_start = plan[i+1].get('start_date')
             if this_type["tags"] != "F":
-                plan[i]['end_date'] = add_months_days(next_start, 0, -1)
+                if i < len(plan) - 1:
+                    next_start = plan[i+1].get('start_date')
+                    plan[i]['end_date'] = add_months_days(next_start, 0, -1)
+                else:
+                    plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, 1)
             else:
-                plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, this_type.get("duration"))
+                plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, this_type.get("duration") -1)
     return plan
 
 def coming_center_courses(center_obj):
@@ -237,7 +209,7 @@ def coming_center_courses(center_obj):
         }
         for p in periods_db_center_obj  ## [3]
     ]
-    sorted_periods = sort_plan(periods_db_center)
+    sorted_periods = sorted(periods_db_center, key=lambda x: x['start_date'])
     sorted_periods_ends = add_end_dates(sorted_periods, center_obj)
     return sorted_periods_ends, date_current_course
 
@@ -277,8 +249,7 @@ def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
         row_bef = cleaned[-1] if len(cleaned) > 0 else {}
         row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
         deletion_check = delete_list.get(row["period_type"], "@TOKEEP@")
-        if row["period_type"] == default_type or \
-            deletion_check == "@ALL@":
+        if row["period_type"] == default_type or deletion_check == "@ALL@":
             continue
         elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
             continue
@@ -302,16 +273,12 @@ async def fetch_dhamma_courses(center, num_months, num_days):
     periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj, list_of_types)  ## [5]
     cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict)
 
-    merged = periods_db_center + cleaned_dhamma_org            ## [8]
-    # Sort by start_date ascending, then end_date ascending
-    mer_sort = sort_plan(merged)
-    '''
-    mer_sort = sorted(merged, key=lambda x: (
-        x['start_date'],  # Primary: start_date ascending
-        int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
-    ))
-    '''
-    deduplicated = deduplicate(mer_sort, {})
+    merged = periods_db_center + cleaned_dhamma_org
+    # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
+    # this keeps the first sorting order ok for identical start_dates
+    mer_sort = sorted(sorted(merged, key=lambda x: x['end_date'], reverse=True),
+                      key=lambda x: x['start_date'])
+    deduplicated = deduplicate(mer_sort)
 
     return deduplicated
 # ~/~ end

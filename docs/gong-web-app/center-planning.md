@@ -10,7 +10,7 @@ from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import check_plan, get_list_of_types, sort_plan, add_end_dates
+from libs.fetch import check_plan, get_list_of_types, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 <<abandon-edit>>
@@ -223,7 +223,7 @@ async def add_line(session, db, ptype, start):
     # Add the new line to the plan
     plan.append(new_line)    
     # Sort plan by start_date
-    plansor = sort_plan(plan)
+    plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = add_end_dates(plansor, centers[selected_name])
     return await check_save_show_plan(session, plancomp, db, {"success" : "new_course"})
 
@@ -242,7 +242,7 @@ def abandon_edit(session, csms):
     if this_center and csms[this_center].current_state.id == "edit":
         csms[this_center].model.user = None
         csms[this_center].send("abandon_changes")
-    return Redirect('/dashboard')
+    return  Redirect('/dashboard')
 
 ```
 
