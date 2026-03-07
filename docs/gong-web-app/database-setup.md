@@ -23,7 +23,7 @@ def get_db_path():
     return root + "data/"
 
 def get_central_db():
-    return database (get_db_path() + "gongUsers.db")
+    return database(get_db_path() + "gongUsers.db")
 ```
 
 ### Database setup

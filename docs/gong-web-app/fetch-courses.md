@@ -12,9 +12,10 @@ import json
 import asyncio
 from datetime import date
 from myFasthtml import *
-
 from libs.utils import add_months_days
 from libs.dbset import get_db_path, get_central_db
+
+# CONTINOW split this long file
 
 <<fetch-api>>
 <<period-type>>
@@ -168,34 +169,34 @@ def check_plan(plan, selected_name, db):
             row["check"] = "OK"
             continue
         next_start_date = plan[idx + 1].get("start_date")
-        #check_row(row, next_start_date, types_with_duration)
         pt = row.get("period_type")
-        if pt in [t.get("period_type") for t in types_with_duration]:
-            try:
-                e_this = date.fromisoformat(row.get("end_date"))
-                s_previous = date.fromisoformat(next_start_date) 
-            except Exception:
-                row["check"] = "InvalidDate"
-            else:
-                delta_days = (s_previous - e_this).days
-                if delta_days < 0:
-                    row["check"] = f"Overlap of {- delta_days} day(s)"
-                elif delta_days == 0:
-                    this_end_time = next((t.get("time_end_last_day") for t in types_with_duration
-                                          if t.get("period_type") == pt), None)
-                    next_pt = plan[idx + 1].get("period_type")
-                    next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
-                                            if t.get("period_type") == next_pt), None)
-                    if this_end_time < next_start_time:
-                        row["check"] = "OK same day"
-                    else:
-                        row["check"] = "CHECK Time overlap"
-                elif delta_days > 1:
-                    row["check"] = f"OK default {delta_days} days"
-                else:
-                    row["check"] = "OK"
+        try:
+            e_this = date.fromisoformat(row.get("end_date"))
+            s_next = date.fromisoformat(next_start_date) 
+            delta_days = (s_next - e_this).days 
+        except Exception:
+            row["check"] = "InvalidDate"
         else:
-            row["check"] = "NoType"
+            if row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
+                row["check"] = "Duplicated periods"
+            elif not pt in [t.get("period_type") for t in types_with_duration]:
+                row["check"] = "NoType"
+            elif delta_days < 0:
+                row["check"] = f"Overlap of {- delta_days} day(s)"
+            elif delta_days == 0:
+                this_end_time = next((t.get("time_end_last_day") for t in types_with_duration
+                                    if t.get("period_type") == pt), None)
+                next_pt = plan[idx + 1].get("period_type")
+                next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
+                                        if t.get("period_type") == next_pt), None)
+                if this_end_time > next_start_time:
+                    row["check"] = "CHECK Time overlap"
+                else:
+                    row["check"] = "OK same day"
+            elif delta_days > 1:
+                row["check"] = f"OK default {delta_days} days"
+            else:
+                row["check"] = "OK"
     return plan
 ```
 
