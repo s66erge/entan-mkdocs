@@ -10,7 +10,7 @@ from myFasthtml import *
 import time
 from datetime import datetime, timezone
 # from statemachine import State, StateMachine # moved to "myFasthtml.py"
-from libs.dbset import get_central_db, db, Center, centers
+from libs.dbset import Center, centers, get_central_db
 from libs.utils import isa_dev_computer
 
 <<abstract-with-persistency>>
@@ -54,14 +54,14 @@ To access the sm for one center: sm = csms["Mahi"]
 
 ```{.python #create-centers-sms}
 
-def create_center_state_machines(db):
+def create_center_state_machines():
     csms = {}
     clocks = {}
     db2 = get_central_db()
-    centers = db2.t.centers()
-    names = [c.get("center_name") for c in centers]
+    centers_list = db2.t.centers()
+    names = [c.get("center_name") for c in centers_list]
     for name in names:
-        center_state = CenterDataModel(center_name=name, db=db)
+        center_state = CenterDataModel(center_name=name)
         sm = CenterState(model=center_state)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
@@ -79,10 +79,10 @@ A concrete implementation of the generic storage protocol above, that reads and 
 
 ```{.python #db-persistent-model}
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, db, user=None):
+    def __init__(self, center_name, user=None):
         super().__init__()
         self.center_name = center_name
-        self.db = db
+        #self.db = db
         self.user = user
         self.statustart = None  # Cache for the timestamp of the last state change
 
@@ -177,11 +177,11 @@ def states_test():
     del sm
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    db = get_central_db()
-    centers = db.t.centers
-    Center = centers.dataclass()
+    #db = get_central_db()
+    #centers = db.t.centers
+    #Center = centers.dataclass()
     print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].current_user}")
-    # Restore the previous state from db.
+    # Restore the previous state from db
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm = csm["Mahi"]

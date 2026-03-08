@@ -7,7 +7,7 @@ import asyncio
 from datetime import date
 from myFasthtml import *
 from libs.utils import add_months_days
-from libs.dbset import get_db_path, get_central_db
+from libs.dbset import get_db_path, get_central_db, Center, centers
 
 # CONTINOW split this long file
 
@@ -258,10 +258,10 @@ def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
             cleaned.append(row)
     return cleaned
 
-async def fetch_dhamma_courses(center, num_months, num_days):
-    db_central = get_central_db()
-    centers = db_central.t.centers
-    Center = centers.dataclass()
+async def fetch_dhamma_courses(centers, center, num_months, num_days):
+    #db_central = get_central_db()
+    #centers = db_central.t.centers
+    #Center = centers.dataclass()
     center_obj = centers[center]
     list_of_types = get_list_of_types()
 

@@ -6,7 +6,7 @@ from libs.adchan import add_planner, delete_planner, add_center, delete_center, 
 from libs.auth import admin_required, verify_code, create_code, login
 from libs.cdash import dashboard
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
-from libs.dbset import init_data, create_tables, get_central_db, get_db_path, roles, Role
+from libs.dbset import init_data, create_tables, get_central_db, get_db_path, roles, Role, db, centers, Center, users, User
 from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
 from libs.fetch import fetch_dhamma_courses
 from libs.states import create_center_state_machines
@@ -36,7 +36,7 @@ db = get_central_db()
 create_tables(db)
 init_data(db)
 
-users = db.t.users
+#users = db.t.users
 #roles = db.t.roles
 centers = db.t.centers
 planners = db.t.planners
@@ -46,7 +46,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
-csms, clocks = create_center_state_machines(db)
+csms, clocks = create_center_state_machines()
 
 """
 @rt('/register')
@@ -119,7 +119,7 @@ def get(session):
 
 @rt('/planning/check_show_dhamma')
 async def get(session, request):
-    merged_plan = await fetch_dhamma_courses(session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
+    merged_plan = await fetch_dhamma_courses(centers, session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
     return await check_save_show_plan(session, merged_plan, db, {})
 
 @rt('/planning/delete_line/{idx}')
