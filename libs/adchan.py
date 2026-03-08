@@ -4,13 +4,14 @@ from myFasthtml import *
 from libs.admin import *
 from libs.utils import isa_db_test, feedback_to_user
 from libs.authpass import get_password_hash
+from libs.dbset import db, Role, roles, User, users
 
 # ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
 
 # @rt('/delete_user/{email}')
 
-def delete_user(email, db):
-    users = db.t.users
+def delete_user(email, db2):
+    #users = db.t.users
     centers = db.t.centers
     planners = db.t.planners
     try:
@@ -41,9 +42,9 @@ def delete_user(email, db):
 # ~/~ begin <<docs/gong-web-app/admin-change.md#add-user>>[init]
 # @rt('/add_user')
 
-def add_user(new_user_email, name ,role_name, db):
-    users = db.t.users
-    roles = db.t.roles
+def add_user(new_user_email, name ,role_name, db2):
+    # users = db.t.users
+    # roles = db.t.roles
     centers = db.t.centers
     try:
         if new_user_email == "" or name == "" or role_name == "":

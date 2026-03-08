@@ -30,6 +30,16 @@ def get_central_db():
 
 ```{.python #setup-database}
 
+db = get_central_db()
+class Role: role_name: str; description: str
+roles = db.t.roles if db.t.roles.exists() else db.create(Role, pk='role_name')
+
+class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
+users = db.t.users if db.t.users.exists() else db.create(User, pk='email')
+
+class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; current_user: str; status_start: str; json_save: str
+centers = db.t.centers if db.t.centers.exists() else db.create(Center, pk='center_name')
+
 def create_tables(db):
     SQL_CREATE_ROLES = """
     CREATE TABLE IF NOT EXISTS roles (
@@ -71,9 +81,9 @@ def create_tables(db):
         FOREIGN KEY (center_name) REFERENCES centers(center_name)
     );
     """
-    db.execute(SQL_CREATE_ROLES)
-    db.execute(SQL_CREATE_CENTERS)
-    db.execute(SQL_CREATE_USERS)
+    #db.execute(SQL_CREATE_ROLES)
+    #db.execute(SQL_CREATE_CENTERS)
+    #db.execute(SQL_CREATE_USERS)
     db.execute(SQL_CREATE_PLANNERS)
 ```
 ### Database initialization
