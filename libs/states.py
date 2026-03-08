@@ -6,7 +6,7 @@ from myFasthtml import *
 import time
 from datetime import datetime, timezone
 # from statemachine import State, StateMachine # moved to "myFasthtml.py"
-from libs.dbset import Center, centers, get_central_db
+from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -31,17 +31,17 @@ class AbstractPersistentModel(ABC):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#db-persistent-model>>[init]
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, user=None):
+    def __init__(self, center_name, centers, user=None):
         super().__init__()
         self.center_name = center_name
-        #self.db = db
+        self.centers = centers
         self.user = user
         self.statustart = None  # Cache for the timestamp of the last state change
 
     def _read_state(self):
         #centers = self.db.t.centers
         #Center = centers.dataclass()
-        row = centers[self.center_name]
+        row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.current_user
         return row.status if row.status else None
@@ -51,7 +51,7 @@ class CenterDataModel(AbstractPersistentModel):
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
-        centers.update(
+        self.centers.update(
             center_name=self.center_name, 
             status=value,
             status_start=now_utc,
@@ -63,7 +63,7 @@ class CenterDataModel(AbstractPersistentModel):
             # If statustart is not cached, read it from the database
             #centers = self.db.t.centers
             #Center = centers.dataclass()
-            row = centers[self.center_name]
+            row = self.centers[self.center_name]
             self.statustart = row.status_start if row.status_start else None
         return self.statustart
 
@@ -71,7 +71,7 @@ class CenterDataModel(AbstractPersistentModel):
         if self.user is None:
             #centers = self.db.t.centers
             #Center = centers.dataclass()
-            row = centers[self.center_name]
+            row = self.centers[self.center_name]
             self.user = row.current_user
         return self.user
 # ~/~ end
@@ -99,14 +99,14 @@ class CenterState(StateMachine):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 
-def create_center_state_machines():
+def create_center_state_machines(centers):
     csms = {}
     clocks = {}
     db2 = get_central_db()
     centers_list = db2.t.centers()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
-        center_state = CenterDataModel(center_name=name)
+        center_state = CenterDataModel(center_name=name, centers=centers)
         sm = CenterState(model=center_state)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
@@ -114,7 +114,7 @@ def create_center_state_machines():
     return csms, clocks
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#manual-testing>>[init]
-def states_test():
+def states_test(centers):
     csm = create_center_state_machines()
     sm = csm["Mahi"]
 

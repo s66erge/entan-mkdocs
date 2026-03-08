@@ -25,10 +25,7 @@ def top_menu(role):
     )
 
 # @rt('/dashboard')
-def dashboard(session, db): 
-    users = db.t.users
-    planners = db.t.planners
-    Planner = planners.dataclass()
+def dashboard(session, users, planners):
     sessemail = session['auth']
     u = users[sessemail]
     user_planners = planners("user_email = ?", (u.email,))
