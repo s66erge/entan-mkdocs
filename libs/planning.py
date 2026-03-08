@@ -1,11 +1,12 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
+import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from re import match
 from urllib.parse import quote_plus
-from fasthtml.common import *
-
+from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import fetch_dhamma_courses, check_plan
+from libs.fetch import check_plan, get_list_of_types, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
@@ -17,7 +18,7 @@ def abandon_edit(session, csms):
     if this_center and csms[this_center].current_state.id == "edit":
         csms[this_center].model.user = None
         csms[this_center].send("abandon_changes")
-    return Redirect('/dashboard')
+    return  Redirect('/dashboard')
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#js-client-timer>>[init]
@@ -66,8 +67,14 @@ def show_draft_plan_table(draft_plan, mess):
         course = plan_line.get("course_type")
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
-        check_cell = Td(check, style="background: red") if not check.startswith("OK") else Td(check)
         source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
+        match check[0:2]:
+            case "OK":
+                check_cell = Td(check)
+            case "CH":
+                check_cell = Td(check, style="background: orange")
+            case _:
+                check_cell = Td(check, style="background: red")
         # Add delete link for removing this row
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
@@ -81,14 +88,18 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_list_of_types()]
     form = Form(
         Div(
             Label("Period type:"),
-            Input(type="text", name="ptype", placeholder="e.g. '10 days'", style="width: 200px"),
+            Select(
+                Option("", value="", selected=True, disabled=True, text="Select period type..."),
+                *period_options,
+                name="ptype",
+                style="width: 200px"
+            ),
             Label("Start date:"),
             Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
-            Label("End date:"),
-            Input(type="date", name="end", value=(today+timedelta(days=10)).strftime('%Y-%m-%d'), style="width: 200px"),
             Button("Add Period", type="submit")
         ),
         hx_post="/planning/add_line",
@@ -101,8 +112,8 @@ def show_draft_plan_table(draft_plan, mess):
     )
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
-        table,
         Div(feedback_to_user(mess), id="line-feedback"),
+        table,
         form,
         id="planning-periods"
     )
@@ -114,47 +125,47 @@ def show_draft_plan_table(draft_plan, mess):
 def load_dhamma_db(session):
     return Div(
         P(" Loading this center planning from dhamma.org ..."),
-        Div(hx_get=f"/planning/show_dhamma", 
+        Div(hx_get=f"/planning/check_show_dhamma", 
             hx_target="#planning-periods",
             hx_trigger="load",  # Triggers when this div loads
             style="display: none;"),
         id="planning-periods"
     )
 
-# @rt('/planning/show_dhamma')
-def show_dhamma(session, plan, db, mess):
+def get_plan(centers, center):
+    return json.loads(centers[center].json_save)
+
+def save_plan(centers, center, plan):
+    centers.update(
+        center_name=center, json_save=json.dumps(plan, default=str))
+
+async def check_save_show_plan(session, plan, db, mess):
     selected_name = session["center"]
-    if plan == []:
-        merged_plan = fetch_dhamma_courses(selected_name, 12, 0)
-    else:
-        merged_plan = plan
-    new_draft_plan = check_plan(merged_plan, selected_name, db)
-    # print(tabulate(new_draft_plan, headers="keys", tablefmt="grid"))
-    # Save to db for future modifications
+    new_draft_plan = check_plan(plan, selected_name, db)
     centers = db.t.centers
-    centers.update(center_name=selected_name, json_save=json.dumps(new_draft_plan, default=str))
+    await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
-def delete_line(session, db, index: int):
+async def delete_line(session, db, index: int):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
-    plan = json.loads(centers[selected_name].json_save)
+    plan = get_plan(centers, selected_name)
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return show_dhamma(session, plan, db, {"success": "line_deleted"})
+    return await check_save_show_plan(session, plan, db, {"success": "line_deleted"})
 
-def add_line(session, db, ptype, start, end):
+#@rt('/planning/add_line')
+async def add_line(session, db, ptype, start):
     selected_name = session["center"]
     centers = db.t.centers
     Center = centers.dataclass()
-    plan = json.loads(centers[selected_name].json_save)
+    plan = get_plan(centers, selected_name)
     # Create new plan line with user input
     new_line = {
         "start_date": start,
-        "end_date": end,
         "period_type": ptype,
         "source": "new input",
         "check": "",
@@ -163,29 +174,34 @@ def add_line(session, db, ptype, start, end):
     # Add the new line to the plan
     plan.append(new_line)    
     # Sort plan by start_date
-    plansor = sorted(plan, key=lambda x: x["start_date"])
-    return show_dhamma(session, plansor, db, {"success" : "new_course"})
+    plansor = sorted(plan, key=lambda x: x['start_date'])
+    plancomp = add_end_dates(plansor, centers[selected_name])
+    return await check_save_show_plan(session, plancomp, db, {"success" : "new_course"})
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
+async def check_center_free(state_mach, center_lock, this_user):
+    async with center_lock:
+        center_is_free = False
+        tnow = datetime.now(timezone.utc)
+        start_state_time = state_mach.model.get_start_time()
+        past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
+        delta = (tnow-past).total_seconds()
+        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
+            state_mach.send("abandon_changes")
+        if state_mach.current_state.id == "free":
+            state_mach.model.user = this_user
+            state_mach.send("starts_editing")
+            center_is_free = True
+        return center_is_free
+
 # @rt('/planning_page')
-def planning_page(session, selected_name, db, csms):
+async def planning_page(session, selected_name, db, csms, clocks):
     session["center"] = selected_name
-    state_mach = csms[selected_name]
-    this_user= session['auth']
-    # FIXME use SQL db commit for the following 5 lines 
-    start_state_time = state_mach.model.get_start_time()
-    past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
-    tnow = datetime.now(timezone.utc)
-    delta = (tnow-past).total_seconds()
-    # print(f"state start: {start_state_time}, now: {tnow.strftime('%Y-%m-%dT%H:%M:%S+00:00')}, delta: {delta}")
-    if state_mach.current_state.id == "edit" and (
-        delta > Globals.INITIAL_COUNTDOWN or this_user == state_mach.model.get_user()):
-        state_mach.send("abandon_changes")
-    if state_mach.current_state.id == "free":
-        state_mach.model.user = this_user
-        state_mach.send("starts_editing")
+    center_lock = clocks[selected_name]
+    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
+    if await check_center_free(csms[selected_name], center_lock, session['auth']):
         return Main(
             Div(display_markdown("planning-t")),
             Span(
@@ -214,8 +230,8 @@ def planning_page(session, selected_name, db, csms):
         Center = centers.dataclass()
         timezon = centers[selected_name].timezone
         return Main(
-            P(f"Anoher user has initiated a session to modify this center gong planning. To bring new changes, you must wait until the modified planning has been installed into the local center computer. This will happen at 3am, local time of the center: {timezon}"),
-            P("If you want to consult any center in the mean time, go to the dashboard. Otherwise please logout."),
+            Div(display_markdown("planning-busy-t")),
+            P(f"timezone: {timezon}"),
             Span(
                 A("dashboard", href="/dashboard"),
                 Span(style="display: inline-block; width: 20px;"),

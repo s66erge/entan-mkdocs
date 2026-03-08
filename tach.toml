@@ -1,0 +1,65 @@
+interfaces = []
+exclude = [
+    "**/*__pycache__",
+    "**/*egg-info",
+    "**/docs",
+    "**/tests",
+    "**/venv",
+]
+source_roots = [
+    ".",
+]
+
+[[modules ]]
+path = "libs.consul"
+depends_on = ["libs.cdash"]
+
+[[modules ]]
+path = "libs.auth"
+depends_on = []
+
+[[modules ]]
+path = "libs.planning"
+depends_on = ["libs.fetch"]
+
+[[modules ]]
+path = "libs.adchan"
+depends_on = ["libs.admin", "libs.authpass"]
+
+[[modules ]]
+path = "libs.authpass"
+depends_on = []
+
+[[modules ]]
+path = "libs.cdash"
+depends_on = []
+
+[[modules ]]
+path = "libs.dbset"
+depends_on = []
+
+[[modules ]]
+path = "libs.utils"
+depends_on = []
+utility = true
+
+[[modules ]]
+path = "libs.admin"
+depends_on = []
+
+[[modules ]]
+path = "libs.utilsJS"
+depends_on = []
+utility = true
+
+[[modules ]]
+path = "libs.states"
+depends_on = ["libs.dbset"]
+
+[[modules ]]
+path = "libs.fetch"
+depends_on = ["libs.dbset"]
+
+[[modules ]]
+path = "main"
+depends_on = ["libs.dbset", "libs.auth", "libs.adchan", "libs.planning", "libs.consul", "libs.cdash", "libs.admin", "libs.states"]

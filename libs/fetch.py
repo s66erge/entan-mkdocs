@@ -1,31 +1,16 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
 from pathlib import Path
-import pandas as pd
+# import pandas as pd  # moved to "myFasthtml.py"
+# import aiohttp  # moved to "myFasthtml.py"
 import json
 import asyncio
-import aiohttp
 from datetime import date
-from fasthtml.common import *
-
+from myFasthtml import *
 from libs.utils import add_months_days
 from libs.dbset import get_db_path, get_central_db
 
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#field-fr-db>>[init]
+# CONTINOW split this long file
 
-def get_field_from_db(db_central, center_name, field_name):
-    # Access the centers mapping directly; no need for a dataclass helper.
-    centers = db_central.t.centers
-    center_obj = centers[center_name]
-    if field_name == "location":
-        # Return the location string prefixed as expected by the tests.
-        location = getattr(center_obj, "location")
-        return f"location_{location}"
-    else:
-        # For other fields the value is stored as a JSON string.
-        other_course = getattr(center_obj, field_name)
-        return json.loads(other_course)
-
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
 
 async def fetch_courses_from_dhamma(location, date_start, date_end):
@@ -75,8 +60,7 @@ async def fetch_courses_from_dhamma(location, date_start, date_end):
             "course_end_date": c.get("course_end_date"),
             "raw_course_type": c.get("raw_course_type"),
             "course_type_anchor": c.get("course_type_anchor"),
-            "course_type": c.get("course_type"),
-            "sub_location": c.get("location", {}).get("sub_location"),
+            "course_type": c.get("course_type")
         }
         for c in all_courses
         if c.get("location", {}).get("center_noncenter") != "noncenter"
@@ -99,27 +83,51 @@ def get_period_type(anchor, course_type: str, list_of_types, other_dict):
     for item in list_of_types:
         if  anchor == item.get('raw_course_type'):
             return item.get('period_type')
-    return "UNKNOWN " + anchor
+    return anchor
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
-def deduplicate(merged, del_as_BETWEEN):
+def get_list_of_types():
+    db_path = get_db_path()
+    df = pd.read_csv(db_path + 'course_type_map.csv')
+    return df.to_dict(orient='records')
+
+def get_types_with_duration(center_obj):
+    list_of_types = get_list_of_types()
+    selected_db = center_obj.gong_db_name
+    db_center = database(get_db_path() + selected_db)
+    for item in list_of_types:
+        vt = item.get("period_type")
+        days = [row.get("day") for row in list(db_center.t.periods_struct())
+                if row.get("period_type") == vt and row.get("day") is not None]
+        if item["tags"] == "F":
+            item["duration"] = max(days) + 1
+        else:
+            item["duration"] = 0
+        day_0_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+                 if row.get("period_type") == vt and row.get("day") == 0), None)
+        times_day_0 = [row.get("time") for row in list(db_center.t.timetables())
+                 if row.get("period_type") == vt and row.get("day_type") == day_0_type] 
+        item["time_start_first_day"] = min(times_day_0)
+        last_day_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+                 if row.get("period_type") == vt and row.get("day") == max(days)), None)
+        times_last_day = [row.get("time") for row in list(db_center.t.timetables())
+                 if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
+        item["time_end_last_day"] = max(times_last_day)
+    return list_of_types
+
+def deduplicate(merged):
     deduplicated = []
     i = 0
-    while i < len(merged):
+    while i < len(merged) -1:
         current = merged[i]
-        # check if this period type is auto. replaced by "IN-BETWEEN" and must be removed 
-        if current["period_type"] in del_as_BETWEEN:
-            i += 1 # skip this item
-            continue
-        elif i + 1 < len(merged):
+        if i + 1 < len(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
-                current['period_type'] == next_item['period_type']):
+                current['period_type'] == next_item['period_type'] and
+                current['end_date'] == next_item['end_date'] and
+                current['source'] != next_item['source']):
                 # Mark as BOTH and skip the next one
                 current['source'] = 'BOTH'
-                #if current.get('end_date','None') == 'None':
-                if 'end_date' not in current and 'end_date' in next_item:
-                    current['end_date'] =  next_item['end_date']
                 deduplicated.append(current)
                 i += 2  # skip next item
                 continue
@@ -127,92 +135,65 @@ def deduplicate(merged, del_as_BETWEEN):
         i += 1
     return deduplicated
 
-def check_row(row, next_type, next_start_date, previous_type, previous_end_date, types_with_duration):
-    pt = row.get("period_type")
-    if pt in [t.get("valid_types") for t in types_with_duration]:
+def check_plan(plan, selected_name, db):
+    centers = db.t.centers
+    types_with_duration = get_types_with_duration(centers[selected_name])    
+    for idx, row in enumerate(plan):
+        if idx == len(plan) - 1:
+            row["check"] = "OK"
+            continue
+        next_start_date = plan[idx + 1].get("start_date")
+        pt = row.get("period_type")
         try:
-            s_this = date.fromisoformat(row.get("start_date"))
-            s_next = date.fromisoformat(next_start_date)
-            e_previous = date.fromisoformat(previous_end_date) if previous_end_date else s_this
-            days_s_next_s_this = (s_next - s_this).days
+            e_this = date.fromisoformat(row.get("end_date"))
+            s_next = date.fromisoformat(next_start_date) 
+            delta_days = (s_next - e_this).days 
         except Exception:
             row["check"] = "InvalidDate"
         else:
-            this_type = list(filter(lambda x: x.get("valid_types") == pt, types_with_duration))[0]
-            #max_type = next((t for t in types_with_duration if t.get("valid_types") == pt), None)
-            if s_this < e_previous:
-                days_s_next_e_previous = (s_next - e_previous).days
-                if pt == "1 day" and days_s_next_e_previous > 1:
-                    row["check"] = f"Middle start + GAP of {days_s_next_e_previous - 1}"    
-                elif pt == "1 day" and days_s_next_e_previous < 0:
-                    row["check"] = f"Middle start + Overlap of {- days_s_next_e_previous}"    
-                elif previous_type in this_type.get("over_oth"):
-                    row["check"] = "OK middle start"
+            if row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
+                row["check"] = "Duplicated periods"
+            elif not pt in [t.get("period_type") for t in types_with_duration]:
+                row["check"] = "NoType"
+            elif delta_days < 0:
+                row["check"] = f"Overlap of {- delta_days} day(s)"
+            elif delta_days == 0:
+                this_end_time = next((t.get("time_end_last_day") for t in types_with_duration
+                                    if t.get("period_type") == pt), None)
+                next_pt = plan[idx + 1].get("period_type")
+                next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
+                                        if t.get("period_type") == next_pt), None)
+                if this_end_time > next_start_time:
+                    row["check"] = "CHECK Time overlap"
                 else:
-                    row["check"] = "Middle start"
-
-            elif days_s_next_s_this < this_type.get("duration"):
-                row["check"] = f"Overlap-{this_type.get('duration')}"
-            elif days_s_next_s_this > 1 + this_type.get("duration") and not this_type["var_period"]:
-                row["check"] = f"GAP of {days_s_next_s_this - this_type.get('duration')}"
-            elif days_s_next_s_this == 0:
-                if next_type in this_type.get("over_oth"):
-                    row["check"] = "OK same start"
-                else:
-                    row["check"] = "Same start"
+                    row["check"] = "OK same day"
+            elif delta_days > 1:
+                row["check"] = f"OK default {delta_days} days"
             else:
                 row["check"] = "OK"
-    else:
-        row["check"] = "NoType"
-    return row
-
-def check_plan(plan, selected_name, db):
-    centers = db.t.centers
-    Center = centers.dataclass()
-    selected_db = centers[selected_name].gong_db_name
-    db_path = get_db_path()
-    dbfile_path = Path(db_path) / selected_db
-    if not dbfile_path.exists():
-        return Div(P(f"Database not found: {selected_db}"))
-    db_center = database(str(dbfile_path))
-    other_course = json.loads(centers[selected_name].other_course)
-    var_periods = other_course["variable-len"]
-    over_OK = other_course["override"]
-    try:
-        # build set of all period_types in db_center.t.periods_struct
-        periods_struct = db_center.t.periods_struct()
-        valid_types = {row.get("period_type") for row in periods_struct}
-    except Exception:
-        valid_types = set()
-    # Build a list of dicts: {"valid_types": <valid_type>, "duration": max_day}
-    periods_struct_rows = list(db_center.t.periods_struct())
-    types_with_duration = []
-    for vt in valid_types:
-        days = [row.get("day") for row in periods_struct_rows if row.get("period_type") == vt and row.get("day") is not None]
-        max_day = max(days) if days else None
-        end_var = vt in var_periods
-        over_oth = over_OK.get(vt, [""])
-        types_with_duration.append({'valid_types': vt, 'duration': max_day, 'var_period': end_var, "over_oth":over_oth})
-
-    for idx, item in enumerate(plan):
-        next_type = plan[idx + 1].get("period_type") if idx < len(plan) - 1 else "???AFTER"
-        next_period_start = plan[idx + 1].get("start_date") if idx < len(plan) - 1 else \
-                            plan[idx].get("end_date")
-        previous_type = plan[idx-1].get("period_type") if idx > 0 else "???BEFORE"
-        previous_end_date = plan[idx-1].get("end_date") if idx > 0 else \
-                            plan[idx].get("start_date") 
-        check_row(item, next_type, next_period_start, previous_type, previous_end_date, types_with_duration)
     return plan
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
 
-def fetch_dhamma_courses(center, num_months, num_days):
-    db_path = get_db_path()  ## [1]
-    db_central = get_central_db()
-    centers = db_central.t.centers
-    Center = centers.dataclass()
-    selected_db = centers[center].gong_db_name
-    db_center = database(db_path + selected_db)
+def add_end_dates(plan, center_obj):
+    types_with_duration = get_types_with_duration(center_obj)
+    for i in range(len(plan)):
+        if 'end_date' not in plan[i] or plan[i]['end_date'] is None:
+            this_type = list(filter(lambda x: x.get("period_type") == plan[i]['period_type'], types_with_duration))[0]
+            if this_type["tags"] != "F":
+                if i < len(plan) - 1:
+                    next_start = plan[i+1].get('start_date')
+                    plan[i]['end_date'] = add_months_days(next_start, 0, -1)
+                else:
+                    plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, 1)
+            else:
+                plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, this_type.get("duration") -1)
+    return plan
+
+def coming_center_courses(center_obj):
+    #center = center_obj.center_name
+    selected_db = center_obj.gong_db_name
+    db_center = database(get_db_path() + selected_db)
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
@@ -221,33 +202,24 @@ def fetch_dhamma_courses(center, num_months, num_days):
 
     periods_db_center_obj = periods()[count_past-1:]  ## [3]
     periods_db_center = [
-    {
-        'start_date': p.start_date,
-        'period_type': p.period_type,
-        'source' : f"{center.lower()}_db"
+        {
+            'start_date': p.start_date,
+            'period_type': p.period_type,
+            'source' : f"{center_obj.center_name.lower()}_db"
 
-    }
-    for p in periods_db_center_obj  ## [3]
+        }
+        for p in periods_db_center_obj  ## [3]
     ]
+    sorted_periods = sorted(periods_db_center, key=lambda x: x['start_date'])
+    sorted_periods_ends = add_end_dates(sorted_periods, center_obj)
+    return sorted_periods_ends, date_current_course
 
-    location = get_field_from_db(db_central, center, "location")
-    end_date = add_months_days(date_current_course, num_months, num_days)
-
-    extracted = asyncio.run(fetch_courses_from_dhamma(location, date_current_course, end_date))  ## [4]
-
-    # one day courses are possible in some centers !!!
-    # extracted = [course for course in extracted if not course['raw_course_type'].startswith("1-Day")]
-
+def get_dhamma_courses_types(extracted, center_obj, list_of_types):
     for course in extracted:   ## [5]
-        course.pop('sub_location', None)
-        course.pop('center_non', None)
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
 
-    # course_type_map in .csv file
-    df = pd.read_csv(db_path + 'course_type_map.csv')
-    list_of_types = df.to_dict(orient='records')         ## [6]
-    other_dict = get_field_from_db(db_central, center, "other_course")
+    other_dict = json.loads(center_obj.other_course)  ## [6.1]
     periods_dhamma_org = [
         {
             "start_date": c.get("course_start_date"),
@@ -257,15 +229,57 @@ def fetch_dhamma_courses(center, num_months, num_days):
             "course_type": c.get("course_type")
         }
         for c in extracted     ## [7]
-    ]                         
+    ]
+    return periods_dhamma_org, other_dict
 
-    merged = periods_db_center + periods_dhamma_org            ## [8]
-    # Sort by start_date ascending, then end_date ascending
-    mer_sort = sorted(merged, key=lambda x: (
-        x['start_date'],  # Primary: start_date ascending
-        int(x.get('end_date', '9999-12-31').replace('-', ''))  # Secondary: end_date ascending
-    ))
-    deduplicated = deduplicate(mer_sort, other_dict.get("del-as-IN-BETWEEN"))
+def check_within(deletion_check, this_row, other_row):
+    if other_row.get("period_type", "") != deletion_check:
+        return False
+    this_start = date.fromisoformat(this_row.get("start_date"))
+    other_start = date.fromisoformat(other_row.get("start_date"))
+    other_end = date.fromisoformat(other_row.get("end_date"))
+    if this_start >= other_start and this_start < other_end:
+        return True
+    return False
+
+def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
+    cleaned = []
+    default_type = next((x for x in list_of_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    delete_list = other_dict.get("delete", {})
+    for i, row in enumerate(periods_dhamma_org):
+        row_bef = cleaned[-1] if len(cleaned) > 0 else {}
+        row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
+        deletion_check = delete_list.get(row["period_type"], "@TOKEEP@")
+        if row["period_type"] == default_type or deletion_check == "@ALL@":
+            continue
+        elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
+            continue
+        else:
+            cleaned.append(row)
+    return cleaned
+
+async def fetch_dhamma_courses(center, num_months, num_days):
+    db_central = get_central_db()
+    centers = db_central.t.centers
+    Center = centers.dataclass()
+    center_obj = centers[center]
+    list_of_types = get_list_of_types()
+
+    periods_db_center, date_current_course = coming_center_courses(center_obj)  ## [1-3]
+
+    dhamma_location = f"location_{center_obj.location}"
+    end_date = add_months_days(date_current_course, num_months, num_days)
+
+    extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+    periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj, list_of_types)  ## [5]
+    cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict)
+
+    merged = periods_db_center + cleaned_dhamma_org
+    # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
+    # this keeps the first sorting order ok for identical start_dates
+    mer_sort = sorted(sorted(merged, key=lambda x: x['end_date'], reverse=True),
+                      key=lambda x: x['start_date'])
+    deduplicated = deduplicate(mer_sort)
 
     return deduplicated
 # ~/~ end

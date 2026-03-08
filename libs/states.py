@@ -1,12 +1,11 @@
 # ~/~ begin <<docs/gong-web-app/center_machines.md#libs/states.py>>[init]
 from abc import ABC
 from abc import abstractmethod
-from asyncio import sleep
-from fastlite import *
+import asyncio
+from myFasthtml import *
 import time
 from datetime import datetime, timezone
-from statemachine import State
-from statemachine import StateMachine
+# from statemachine import State, StateMachine # moved to "myFasthtml.py"
 from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
@@ -101,16 +100,18 @@ class CenterState(StateMachine):
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 
 def create_center_state_machines(db):
-    csm = {}
+    csms = {}
+    clocks = {}
     db2 = get_central_db()
     centers = db2.t.centers()
     names = [c.get("center_name") for c in centers]
     for name in names:
         center_state = CenterDataModel(center_name=name, db=db)
         sm = CenterState(model=center_state)
-        csm[name] = sm
+        csms[name] = sm
+        clocks[name] = asyncio.Lock()
         #print(f"Center: {name}, State: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()} ")
-    return csm
+    return csms, clocks
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#manual-testing>>[init]
 def states_test():

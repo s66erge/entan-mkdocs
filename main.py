@@ -1,10 +1,17 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
-import sys
-from functools import wraps
-from fasthtml.common import *
-from libs import * 
-from libs.auth import admin_required
+from myFasthtml import *
+from libs.admin import show_page
+from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
+from libs.auth import admin_required, verify_code, create_code, login
+from libs.cdash import dashboard
+from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
+from libs.dbset import init_data, create_tables, get_central_db, get_db_path
+from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
+from libs.fetch import fetch_dhamma_courses
+from libs.states import create_center_state_machines
+from libs.utils import feedback_to_user, display_markdown, Globals
+
 #  from starlette.testclient import TestClient
 
 custom_styles = Style("""
@@ -23,11 +30,11 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/l
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 
-db_path = dbset.get_db_path()
-db = dbset.get_central_db()
+db_path = get_db_path()
+db = get_central_db()
 
-dbset.create_tables(db)
-dbset.init_data(db)
+create_tables(db)
+init_data(db)
 
 users = db.t.users
 roles = db.t.roles
@@ -39,7 +46,7 @@ Center = centers.dataclass()
 Planner = planners.dataclass()
 User = users.dataclass()
 
-csms = states.create_center_state_machines(db)
+csms, clocks = create_center_state_machines(db)
 
 """
 @rt('/register')
@@ -60,106 +67,107 @@ def post(session, email:str, password:str):
 """
 @rt('/login')
 def get():
-    return auth.login()
+    return login()
 
 @rt('/create_code')
 def post(email: str):
-    return auth.create_code(email, users)
+    return create_code(email, users)
 
 @rt('/verify_code')
 def post(session, code: str):
-    return auth.verify_code(session, code, users) 
+    return verify_code(session, code, users) 
 
 # client = TestClient(app)
 
 @rt('/')
 def home():
     return Main(
-        Div(utils.display_markdown("home-t")),
+        Div(display_markdown("home-t")),
         A("Login",href="/login", class_="button"),
         cls="container"
     )
 
 @rt('/dashboard')
 def get(session):
-    return cdash.dashboard(session, db)
+    return dashboard(session, db)
 
 @rt('/consult_page')
 def get(session, request):
-    return consul.consult_page(session, centers)
+    return consult_page(session, centers)
 
 @rt('/consult/select_db')
 def get(request):
-    return consul.consult_select_db(request, centers, db_path)
+    return consult_select_db(request, centers, db_path)
 
 @rt('/consult/select_period')
 def get(request):
-    return consul.consult_select_period(request, db_path)
+    return consult_select_period(request, db_path)
 
 @rt('/consult/select_timetable')
 def get(request):
-    return consul.consult_select_timetable(request, db_path)
+    return consult_select_timetable(request, db_path)
 
 @rt('/planning_page')
-def get(session, request):
+async def get(session, request):
     params = dict(request.query_params)
     center = params.get("selected_name")
-    return planning.planning_page(session, center, db, csms)
+    return await planning_page(session, center, db, csms, clocks)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
-    return planning.load_dhamma_db(session)
+    return load_dhamma_db(session)
 
-@rt('/planning/show_dhamma')
-def get(session, request):
-    return planning.show_dhamma(session, [], db, {})
+@rt('/planning/check_show_dhamma')
+async def get(session, request):
+    merged_plan = await fetch_dhamma_courses(session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
+    return await check_save_show_plan(session, merged_plan, db, {})
 
 @rt('/planning/delete_line/{idx}')
-def post(session, idx: int):
-    return planning.delete_line(session, db, idx)
+async def post(session, idx: int):
+    return await delete_line(session, db, idx)
 
 @rt('/planning/add_line')
-def post(session, ptype: str, start: str, end: str):
-    return planning.add_line(session, db, ptype, start, end, ptype)
+async def post(session, ptype: str, start: str):
+    return await add_line(session, db, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):
-    return planning.abandon_edit(session, csms)
+    return abandon_edit(session, csms)
 
 @rt('/admin_page')
 @admin_required
 def get(session, request):
-    return admin.show_page(request, db)
+    return show_page(request, db)
 
 @rt('/delete_user/{email}')
 @admin_required
 def post(session, email: str):
-    return adchan.delete_user(email, db)
+    return delete_user(email, db)
 
 @rt('/add_user')
 @admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
-    return adchan.add_user(new_user_email, name ,role_name, db)
+    return add_user(new_user_email, name ,role_name, db)
 
 @rt('/delete_center/{center_name}')
 @admin_required
 def post(session, center_name: str):
-    return adchan.delete_center(center_name, db, db_path)
+    return delete_center(center_name, db, db_path)
 
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
-    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path)
+    return add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
-    return adchan.delete_planner(user_email, center_name, db)
+    return delete_planner(user_email, center_name, db)
 
 @rt('/add_planner')
 @admin_required
 def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
-    return adchan.add_planner(new_planner_user_email, new_planner_center_name, db)
+    return add_planner(new_planner_user_email, new_planner_center_name, db)
 
 @rt('/logout')
 def post(session):
@@ -191,7 +199,7 @@ def db_error(session, etext: str):
     return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Head(Title("Database error")),
-        Body(Div(utils.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        Body(Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
         (A("Dashboard", href="/dashboard")),
         cls="container"
     )

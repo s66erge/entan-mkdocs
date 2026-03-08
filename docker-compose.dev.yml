@@ -1,8 +1,10 @@
 services:
   app:
-    build: .
-    hostname: Solaris  # Container sees this as hostname
-    container_name: entan-mkdocs  # Docker CLI name (optional)
+    build:
+      context: .
+      dockerfile: Dockerfile.dev   # Use a different Dockerfile for development
+    hostname: Solaris              # Container sees this as hostname
+    container_name: entan-mkdocs   # Docker CLI name (optional)
     ports:
       - "8000:8000"
     environment:

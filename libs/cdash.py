@@ -1,5 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
-from fasthtml.common import *
+from myFasthtml import *
 from libs.utils import display_markdown, Globals
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]

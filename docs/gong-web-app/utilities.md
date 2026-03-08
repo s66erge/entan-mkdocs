@@ -9,14 +9,17 @@
 ```{.python file = libs/utils.py}
 import socket
 import calendar
-import resend
-import markdown2
+from myFasthtml import *
+# import resend # moved to "myFasthtml.py"
+# import markdown2 # moved to "myFasthtml.py"
 import os
 from datetime import datetime, date, timedelta
-from fasthtml.common import *
+import json
 
 class Globals:
-    INITIAL_COUNTDOWN = 4000 # seconds
+    INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
+    MONTHS_TO_FETCH = 12 # when fetching dharma courses from dhamma.org, how many months to fetch starting from current month
+    DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
 
     @classmethod
     def get(cls, name, default=None):
@@ -180,13 +183,11 @@ def feedback_to_user(params):
     message_div = Div(P(""))
     if mess_dict["res"] == 'success':
         message_div = Div(
-            Div(P(mess_dict['mess']), style="color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;"),
-            Small("To clear this message and/or update the tables, reload the page")
+            Div(P(mess_dict['mess']), style="color: #daecdaff; background: #187449ff; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #198754; font-weight: 500;")
         )
     elif mess_dict["res"] == 'error':
         message_div = Div(
-            Div(P(mess_dict['mess']), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;"),
-            Small("To clear this message, reload the page")
+            Div(P(mess_dict['mess']), style="color: #f8d7da; background: #842029; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #dc3545; font-weight: 500;")
         )
     return message_div
 ```

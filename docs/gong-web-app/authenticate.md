@@ -16,7 +16,7 @@ import secrets
 import string
 from datetime import datetime, timedelta
 from functools import wraps
-from fasthtml.common import *
+from myFasthtml import *
 from libs.utils import isa_dev_computer, send_email, feedback_to_user
 
 <<build-serve-login-form>>

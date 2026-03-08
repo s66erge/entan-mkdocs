@@ -1,6 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/admin-change.md#libs/adchan.py>>[init]
 import shutil
-from fasthtml.common import *
+from myFasthtml import *
 from libs.admin import *
 from libs.utils import isa_db_test, feedback_to_user
 from libs.authpass import get_password_hash

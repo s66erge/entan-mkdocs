@@ -3,7 +3,7 @@
 ```{.python file=libs/dbset.py}
 import textwrap
 import os
-from fasthtml.common import database
+from myFasthtml import database
 from libs.utils import isa_dev_computer
 
 <<getdb-path>>
@@ -23,7 +23,7 @@ def get_db_path():
     return root + "data/"
 
 def get_central_db():
-    return database (get_db_path() + "gongUsers.db")
+    return database(get_db_path() + "gongUsers.db")
 ```
 
 ### Database setup
@@ -90,14 +90,27 @@ def init_data(db):
         roles.insert(role_name="user", description="regular user")
 
     centers = db.t.centers
-    oc_pajj_mahi = textwrap.dedent("""\
-            {
-            "TRUST MEETING": "Trust WE"
-            }
-        """).strip('\n')
+    oc_mahi = textwrap.dedent("""\
+    {
+    "replacements": {"Other": {"TRUSTMEETING": "Trust WE"},
+                     "ServicePeriod": {"INBETWEEN": "IN BETWEEN"}},
+    "delete": {"IN BETWEEN": "@ALL@", "1 day": "Service",
+               "Children / teens": "Service"}
+    }    
+    """).strip('\n')
+    oc_pajj = textwrap.dedent("""\
+    {
+    "replacements": {"Other": {"TRUSTMEETING": "Trust WE"},
+                     "ServicePeriod": {"@ALL@": "IN BETWEEN"}},
+    "delete": {"IN BETWEEN": "@ALL@"}
+    }
+    """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_pajj_mahi,  status="free", current_user="")
-        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj_mahi, status="free", current_user="")
+        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_mahi,  status="free", current_user="", status_start="2026-01-01", json_save="")
+        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj, status="free", current_user="", status_start="2026-01-01", json_save="")
+    else:
+        centers.update(center_name="Mahi", other_course=oc_mahi)
+        centers.update(center_name="Pajjota", other_course=oc_pajj)
 
     users = db.t.users
     if not users():
