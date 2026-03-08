@@ -21,6 +21,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy app
 COPY . .
+COPY ./data ./data
 
 # Bytecode compile (from log)
 RUN python -m compileall .
