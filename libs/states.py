@@ -6,7 +6,7 @@ from myFasthtml import *
 import time
 from datetime import datetime, timezone
 # from statemachine import State, StateMachine # moved to "myFasthtml.py"
-from libs.dbset import get_central_db, Center, centers
+from libs.dbset import get_central_db, db, Center, centers
 from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
