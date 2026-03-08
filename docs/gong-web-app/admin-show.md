@@ -16,12 +16,8 @@ TODO document admin-show
 ```{.python #admin-page}
 
 # @rt('/admin_page')
-def show_page(request, db):
+def show_page(request, users, roles, centers, planners):
     params = dict(request.query_params)
-    users = db.t.users
-    roles = db.t.roles
-    centers = db.t.centers
-    planners = db.t.planners
     return Main(
         Nav(
             Ul(
@@ -58,7 +54,6 @@ def show_page(request, db):
 ```{.python #show-users}
 
 def show_users_table(users):
-    User = users.dataclass()
     return Main(
         Table(
             Thead(
@@ -77,7 +72,6 @@ def show_users_table(users):
     )
 
 def show_users_form(roles):
-    Role = roles.dataclass()
     role_names = [r.role_name for r in roles()]
     return Main(
         Div(
@@ -97,7 +91,6 @@ def show_users_form(roles):
 ```{.python #show-centers}
 
 def show_centers_table(centers):
-    Center = centers.dataclass()
     return Main(
         Table(
             Thead(
@@ -117,7 +110,6 @@ def show_centers_table(centers):
     )
 
 def show_centers_form(centers):
-    Center = centers.dataclass()
     center_dbs = sorted(c.gong_db_name for c in centers())
     return Main(
         Div(
@@ -140,7 +132,6 @@ def show_centers_form(centers):
 ```{.python #show-planners}
 
 def show_planners_table(planners):
-    Planner = planners.dataclass()
     return Main(
         Table(
             Thead(
@@ -157,8 +148,6 @@ def show_planners_table(planners):
     )
 
 def show_planners_form(users, centers):
-    Center = centers.dataclass()
-    User = users.dataclass()
     sorted_centers = sorted(centers(), key=lambda x: x.center_name)
     sorted_users = sorted(users(), key=lambda x: x.name)
     return Main(

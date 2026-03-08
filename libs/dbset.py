@@ -41,8 +41,8 @@ def init_data(roles, users, centers, planners):
     }
     """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_mahi,  status="free", current_user="", status_start="2026-01-01", json_save="")
-        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj, status="free", current_user="", status_start="2026-01-01", json_save="")
+        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_mahi,  status="free", current_user="", status_start="2026-01-08T16:35:42+00:00", json_save="")
+        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj, status="free", current_user="", status_start="2026-01-08T16:35:42+00:00", json_save="")
     else:
         centers.update(center_name="Mahi", other_course=oc_mahi)
         centers.update(center_name="Pajjota", other_course=oc_pajj)

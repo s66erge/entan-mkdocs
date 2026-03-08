@@ -58,7 +58,7 @@ def create_center_state_machines(centers):
     csms = {}
     clocks = {}
     db2 = get_central_db()
-    centers_list = db2.t.centers()
+    centers_list = db2.t.center()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
         center_state = CenterDataModel(center_name=name, centers=centers)

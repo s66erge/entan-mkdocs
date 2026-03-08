@@ -117,12 +117,21 @@ def get_list_of_types():
     df = pd.read_csv(db_path + 'course_type_map.csv')
     return df.to_dict(orient='records')
 
+def get_period_types_in_db(center_obj):
+    selected_db = center_obj.gong_db_name
+    db_center = database(get_db_path() + selected_db)
+    period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
+    return period_types_in_db
+
 def get_types_with_duration(center_obj):
     list_of_types = get_list_of_types()
     selected_db = center_obj.gong_db_name
     db_center = database(get_db_path() + selected_db)
+    period_types_in_db = get_period_types_in_db(center_obj)
     for item in list_of_types:
         vt = item.get("period_type")
+        if vt not in period_types_in_db:
+            continue
         days = [row.get("day") for row in list(db_center.t.periods_struct())
                 if row.get("period_type") == vt and row.get("day") is not None]
         if item["tags"] == "F":
@@ -161,8 +170,7 @@ def deduplicate(merged):
         i += 1
     return deduplicated
 
-def check_plan(plan, selected_name, db):
-    centers = db.t.centers
+def check_plan(plan, selected_name, centers):
     types_with_duration = get_types_with_duration(centers[selected_name])    
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
@@ -179,7 +187,7 @@ def check_plan(plan, selected_name, db):
         else:
             if row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
                 row["check"] = "Duplicated periods"
-            elif not pt in [t.get("period_type") for t in types_with_duration]:
+            elif not pt in get_period_types_in_db(centers[selected_name]):
                 row["check"] = "NoType"
             elif delta_days < 0:
                 row["check"] = f"Overlap of {- delta_days} day(s)"

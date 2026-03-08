@@ -116,7 +116,7 @@ def get(request):
 async def get(session, request):
     params = dict(request.query_params)
     center = params.get("selected_name")
-    return await planning_page(session, center, db, csms, clocks)
+    return await planning_page(session, center, centers, csms, clocks)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -125,15 +125,15 @@ def get(session):
 @rt('/planning/check_show_dhamma')
 async def get(session, request):
     merged_plan = await fetch_dhamma_courses(centers, session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
-    return await check_save_show_plan(session, merged_plan, db, {})
+    return await check_save_show_plan(session, merged_plan, centers, {})
 
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
-    return await delete_line(session, db, idx)
+    return await delete_line(session, centers, idx)
 
 @rt('/planning/add_line')
 async def post(session, ptype: str, start: str):
-    return await add_line(session, db, ptype, start)
+    return await add_line(session, centers, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):
@@ -142,7 +142,7 @@ def get(session):
 @rt('/admin_page')
 @admin_required
 def get(session, request):
-    return show_page(request, db)
+    return show_page(request, users, roles, centers, planners)
 
 @rt('/delete_user/{email}')
 @admin_required
