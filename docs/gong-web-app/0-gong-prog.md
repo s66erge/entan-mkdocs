@@ -40,7 +40,7 @@ db = get_central_db()
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
-class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; current_user: str; status_start: str; json_save: str
+class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
 class Planner: user_email: str; center_name: str
 
 roles = db.create(Role, pk='role_name')

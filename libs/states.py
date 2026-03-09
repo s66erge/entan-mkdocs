@@ -43,7 +43,7 @@ class CenterDataModel(AbstractPersistentModel):
         #Center = centers.dataclass()
         row = self.centers[self.center_name]
         self.statustart = row.status_start
-        self.user = row.current_user
+        self.user = row.created_by
         return row.status if row.status else None
 
     def _write_state(self, value):
@@ -55,7 +55,7 @@ class CenterDataModel(AbstractPersistentModel):
             center_name=self.center_name, 
             status=value,
             status_start=now_utc,
-            current_user=self.user
+            created_by=self.user
         )
 
     def get_start_time(self):
@@ -72,7 +72,7 @@ class CenterDataModel(AbstractPersistentModel):
             #centers = self.db.t.centers
             #Center = centers.dataclass()
             row = self.centers[self.center_name]
-            self.user = row.current_user
+            self.user = row.created_by
         return self.user
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
@@ -136,7 +136,7 @@ def states_test(centers):
     #db = get_central_db()
     #centers = db.t.centers
     #Center = centers.dataclass()
-    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].current_user}")
+    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].created_by}")
     # Restore the previous state from db
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))

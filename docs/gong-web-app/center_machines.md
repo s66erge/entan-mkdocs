@@ -74,7 +74,7 @@ def create_center_state_machines(centers):
 A concrete implementation of the generic storage protocol above, that reads and writes to the central database on table centers with center_name in fields:
 
 - status: the current state
-- current_user: the user who took ownership of this center database
+- created_by: the user who took ownership of this center database
 - status_start: date/time when the status changed (ISO UTC string)
 
 ```{.python #db-persistent-model}
@@ -91,7 +91,7 @@ class CenterDataModel(AbstractPersistentModel):
         #Center = centers.dataclass()
         row = self.centers[self.center_name]
         self.statustart = row.status_start
-        self.user = row.current_user
+        self.user = row.created_by
         return row.status if row.status else None
 
     def _write_state(self, value):
@@ -103,7 +103,7 @@ class CenterDataModel(AbstractPersistentModel):
             center_name=self.center_name, 
             status=value,
             status_start=now_utc,
-            current_user=self.user
+            created_by=self.user
         )
 
     def get_start_time(self):
@@ -120,7 +120,7 @@ class CenterDataModel(AbstractPersistentModel):
             #centers = self.db.t.centers
             #Center = centers.dataclass()
             row = self.centers[self.center_name]
-            self.user = row.current_user
+            self.user = row.created_by
         return self.user
 ```
 
@@ -180,7 +180,7 @@ def states_test(centers):
     #db = get_central_db()
     #centers = db.t.centers
     #Center = centers.dataclass()
-    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].current_user}")
+    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].created_by}")
     # Restore the previous state from db
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))

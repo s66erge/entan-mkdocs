@@ -139,7 +139,7 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
                 location=new_center_location,
                 other_course="{}",
                 status="free",
-                current_user=""
+                created_by=""
             )
             message = {'success': 'center_added'}
 

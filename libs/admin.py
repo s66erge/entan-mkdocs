@@ -52,7 +52,7 @@ def show_centers_table(centers):
                     Td(c.timezone),
                     Td(c.gong_db_name),
                     Td(c.status),
-                    Td(c.current_user), 
+                    Td(c.created_by), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback", hx_confirm="Are you sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
