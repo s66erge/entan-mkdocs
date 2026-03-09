@@ -3,7 +3,8 @@
 ```{.python file=libs/dbset.py}
 import textwrap
 import os
-from myFasthtml import database
+# from myFasthtml import database
+from fastsql import Database
 from libs.utils import isa_dev_computer
 
 <<getdb-path>>
@@ -22,7 +23,9 @@ def get_db_path():
     return root + "data/"
 
 def get_central_db():
-    return database(get_db_path() + "gongUsers.db")
+    return Database("postgresql://postgres:route66@localhost:5432/postgres")
+#    return database(get_db_path() + "gongUsers.db")
+
 ```
 
 ### Database setup
