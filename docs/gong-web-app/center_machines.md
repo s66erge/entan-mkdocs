@@ -54,14 +54,14 @@ To access the sm for one center: sm = csms["Mahi"]
 
 ```{.python #create-centers-sms}
 
-def create_center_state_machines(db):
+def create_center_state_machines(centers):
     csms = {}
     clocks = {}
     db2 = get_central_db()
-    centers = db2.t.centers()
-    names = [c.get("center_name") for c in centers]
+    centers_list = db2.t.center()
+    names = [c.get("center_name") for c in centers_list]
     for name in names:
-        center_state = CenterDataModel(center_name=name, db=db)
+        center_state = CenterDataModel(center_name=name, centers=centers)
         sm = CenterState(model=center_state)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
@@ -79,27 +79,27 @@ A concrete implementation of the generic storage protocol above, that reads and 
 
 ```{.python #db-persistent-model}
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, db, user=None):
+    def __init__(self, center_name, centers, user=None):
         super().__init__()
         self.center_name = center_name
-        self.db = db
+        self.centers = centers
         self.user = user
         self.statustart = None  # Cache for the timestamp of the last state change
 
     def _read_state(self):
-        centers = self.db.t.centers
-        Center = centers.dataclass()
-        row = centers[self.center_name]
+        #centers = self.db.t.centers
+        #Center = centers.dataclass()
+        row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.current_user
         return row.status if row.status else None
 
     def _write_state(self, value):
-        centers = self.db.t.centers
+        #centers = self.db.t.centers
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
-        centers.update(
+        self.centers.update(
             center_name=self.center_name, 
             status=value,
             status_start=now_utc,
@@ -109,17 +109,17 @@ class CenterDataModel(AbstractPersistentModel):
     def get_start_time(self):
         if self.statustart is None:
             # If statustart is not cached, read it from the database
-            centers = self.db.t.centers
-            Center = centers.dataclass()
-            row = centers[self.center_name]
+            #centers = self.db.t.centers
+            #Center = centers.dataclass()
+            row = self.centers[self.center_name]
             self.statustart = row.status_start if row.status_start else None
         return self.statustart
 
     def get_user(self):
         if self.user is None:
-            centers = self.db.t.centers
-            Center = centers.dataclass()
-            row = centers[self.center_name]
+            #centers = self.db.t.centers
+            #Center = centers.dataclass()
+            row = self.centers[self.center_name]
             self.user = row.current_user
         return self.user
 ```
@@ -158,7 +158,7 @@ class AbstractPersistentModel(ABC):
 To execute only when all center status are 'free'
 
 ```{.python #manual-testing}
-def states_test():
+def states_test(centers):
     csm = create_center_state_machines()
     sm = csm["Mahi"]
 
@@ -177,11 +177,11 @@ def states_test():
     del sm
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    db = get_central_db()
-    centers = db.t.centers
-    Center = centers.dataclass()
+    #db = get_central_db()
+    #centers = db.t.centers
+    #Center = centers.dataclass()
     print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].current_user}")
-    # Restore the previous state from db.
+    # Restore the previous state from db
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm = csm["Mahi"]

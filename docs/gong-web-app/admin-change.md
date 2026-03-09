@@ -9,6 +9,7 @@ All these functions are called with these htmx ([intro](../architecture/ui-archi
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
 
 ```{.python file=libs/adchan.py}
+import email
 import shutil
 from myFasthtml import *
 from libs.admin import *
@@ -26,11 +27,7 @@ from libs.authpass import get_password_hash
 ```{.python #delete-user}
 
 # @rt('/delete_user/{email}')
-
-def delete_user(email, db):
-    users = db.t.users
-    centers = db.t.centers
-    planners = db.t.planners
+def delete_user(email, users, planners, centers):
     try:
         user_info = users("email = ?",(email,))
         user_planners = planners("user_email = ?", (email,))  ## [1]
@@ -44,7 +41,7 @@ def delete_user(email, db):
             message = {"error": "user_has_planners", "centers": f"{centers_list}"}
 
         else:  ## [3]
-            db.execute("DELETE FROM users WHERE email = ?", (email,))
+            users.delete(email)
             message = {"success": "user_deleted"}
 
         return Div(
@@ -65,10 +62,7 @@ def delete_user(email, db):
 ```{.python #add-user}
 # @rt('/add_user')
 
-def add_user(new_user_email, name ,role_name, db):
-    users = db.t.users
-    roles = db.t.roles
-    centers = db.t.centers
+def add_user(new_user_email, name ,role_name, users, roles, centers):
     try:
         if new_user_email == "" or name == "" or role_name == "":
             message = {"error" : "missing_fields"}
@@ -109,13 +103,7 @@ def add_user(new_user_email, name ,role_name, db):
 
 # @rt('/delete_center/{center_name}')
 
-def delete_center(center_name, db, db_path):
-    users = db.t.users
-    User = users.dataclass()
-    centers = db.t.centers
-    Center = centers.dataclass()
-    planners = db.t.planners
-    Planner = planners.dataclass()
+def delete_center(center_name, users, centers, planners, db_path):
     try:
         center_info = centers("center_name = ?", (center_name,))
         if not center_info:
@@ -131,7 +119,7 @@ def delete_center(center_name, db, db_path):
                 message = {'error' : 'center_has_planners','users' : f'{users_list}'}
 
             else:  ## [4]
-                db.execute("DELETE FROM centers WHERE center_name = ?", (center_name,))
+                centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
                 message = {'success' : 'center_deleted'}
@@ -158,9 +146,7 @@ def delete_center(center_name, db, db_path):
 
 # @rt('/add_center')
 
-def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, db, db_path):
-    users = db.t.users
-    centers = db.t.centers
+def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path):
     ## [1]
     if not new_gong_db_name.endswith('.db'):
         new_gong_db_name += '.db'
@@ -211,15 +197,14 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
 ```{.python #delete-planner}
 
 # @rt('/delete_planner/{user_email}/{center_name}')
-def delete_planner(user_email, center_name, db):
-    planners = db.t.planners
+def delete_planner(user_email, center_name, planners):
     try:
         center_planners = planners("center_name = ?", (center_name,))
         if len(center_planners) == 1:  ## [1]
             message ={"error" : "last_planner_for_center", "center" : f"{center_name}"}
 
         else:  ## [2]
-            db.execute("DELETE FROM planners WHERE user_email = ? AND center_name = ?", (user_email, center_name))
+            planners.delete([user_email, center_name,])
             message = {"success" : "planner_deleted"}
 
         return Div(
@@ -238,10 +223,7 @@ def delete_planner(user_email, center_name, db):
 
 # @rt('/add_planner')
 
-def add_planner(new_planner_user_email, new_planner_center_name, db):
-    users = db.t.users
-    centers = db.t.centers
-    planners = db.t.planners
+def add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners):
     try:
         if new_planner_user_email == "" or new_planner_center_name == "":
             message = {"error" : "missing_fields"}

@@ -6,11 +6,10 @@ from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import check_plan, get_list_of_types, add_end_dates
+from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
-
 # @rt('/planning/abandon_edit')
 def abandon_edit(session, csms):
     this_center = session["center"]
@@ -88,7 +87,7 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_list_of_types()]
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_dhamm_org_types_list()]
     form = Form(
         Div(
             Label("Period type:"),
@@ -120,7 +119,6 @@ def show_draft_plan_table(draft_plan, mess):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#load-show-center-plan>>[init]
-
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
@@ -139,29 +137,24 @@ def save_plan(centers, center, plan):
     centers.update(
         center_name=center, json_save=json.dumps(plan, default=str))
 
-async def check_save_show_plan(session, plan, db, mess):
+async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
-    new_draft_plan = check_plan(plan, selected_name, db)
-    centers = db.t.centers
+    new_draft_plan = check_plan(plan, selected_name, centers)
     await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
-async def delete_line(session, db, index: int):
+async def delete_line(session, centers, index: int):
     selected_name = session["center"]
-    centers = db.t.centers
-    Center = centers.dataclass()
     plan = get_plan(centers, selected_name)
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return await check_save_show_plan(session, plan, db, {"success": "line_deleted"})
+    return await check_save_show_plan(session, plan, centers, {"success": "line_deleted"})
 
 #@rt('/planning/add_line')
-async def add_line(session, db, ptype, start):
+async def add_line(session, centers, ptype, start):
     selected_name = session["center"]
-    centers = db.t.centers
-    Center = centers.dataclass()
     plan = get_plan(centers, selected_name)
     # Create new plan line with user input
     new_line = {
@@ -176,11 +169,10 @@ async def add_line(session, db, ptype, start):
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = add_end_dates(plansor, centers[selected_name])
-    return await check_save_show_plan(session, plancomp, db, {"success" : "new_course"})
+    return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
-
 async def check_center_free(state_mach, center_lock, this_user):
     async with center_lock:
         center_is_free = False
@@ -197,7 +189,7 @@ async def check_center_free(state_mach, center_lock, this_user):
         return center_is_free
 
 # @rt('/planning_page')
-async def planning_page(session, selected_name, db, csms, clocks):
+async def planning_page(session, selected_name, centers, csms, clocks):
     session["center"] = selected_name
     center_lock = clocks[selected_name]
     # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
@@ -225,9 +217,7 @@ async def planning_page(session, selected_name, db, csms, clocks):
             Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
             cls="container"
         )
-    else: 
-        centers = db.t.centers
-        Center = centers.dataclass()
+    else:
         timezon = centers[selected_name].timezone
         return Main(
             Div(display_markdown("planning-busy-t")),
