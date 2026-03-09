@@ -6,11 +6,10 @@ from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import check_plan, get_list_of_types, add_end_dates
+from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
-
 # @rt('/planning/abandon_edit')
 def abandon_edit(session, csms):
     this_center = session["center"]
@@ -88,7 +87,7 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_list_of_types()]
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_dhamm_org_types_list()]
     form = Form(
         Div(
             Label("Period type:"),
@@ -120,7 +119,6 @@ def show_draft_plan_table(draft_plan, mess):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#load-show-center-plan>>[init]
-
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
@@ -175,7 +173,6 @@ async def add_line(session, centers, ptype, start):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
-
 async def check_center_free(state_mach, center_lock, this_user):
     async with center_lock:
         center_is_free = False

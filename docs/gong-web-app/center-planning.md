@@ -10,7 +10,7 @@ from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
-from libs.fetch import check_plan, get_list_of_types, add_end_dates
+from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.utilsJS import JS_BLOCK_NAV
 
 <<abandon-edit>>
@@ -34,7 +34,6 @@ Then:
 - not available: explain to the user to wait for current changes to enter production at center 
 
 ```{.python #planning-page}
-
 async def check_center_free(state_mach, center_lock, this_user):
     async with center_lock:
         center_is_free = False
@@ -132,7 +131,7 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_list_of_types()]
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_dhamm_org_types_list()]
     form = Form(
         Div(
             Label("Period type:"),
@@ -167,7 +166,6 @@ def show_draft_plan_table(draft_plan, mess):
 ### Load from dhamma.org and show the merged and checked center plan
 
 ```{.python #load-show-center-plan}
-
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
@@ -227,7 +225,6 @@ async def add_line(session, centers, ptype, start):
 Check for the rare situation when arriving here on 'free' state instead of 'edit'.
 
 ```{.python #abandon-edit}
-
 # @rt('/planning/abandon_edit')
 def abandon_edit(session, csms):
     this_center = session["center"]
