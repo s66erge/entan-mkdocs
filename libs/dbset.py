@@ -1,7 +1,8 @@
 # ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
+from myFasthtml import *
 import textwrap
 import os
-from fastsql import Database # for PostgreSQL
+# from myFasthtml import Database # for PostgreSQL
 # from myFasthtml import database # for SQLite
 from libs.utils import isa_dev_computer
 
@@ -18,7 +19,8 @@ def get_db_path():
 # on postgreSQL
 def get_central_db():
     if isa_dev_computer():
-        return Database("postgresql://postgres:route66@localhost:5432/postgres")
+        return database(get_db_path() + "gongUsers.db")
+        #return Database("postgresql://postgres:route66@localhost:5432/postgres")
     else:
         return Database(os.environ.get('DATABASE_URL'))
 

@@ -4,7 +4,9 @@ import pandas as pd
 import aiohttp
 import resend
 import markdown2
+from fastsql import Database
 # You can add custom aliases too
+Database = Database
 A = A
 Beforeware = Beforeware
 Body = Body

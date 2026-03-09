@@ -1,0 +1,114 @@
+from fasthtml.common import *, csv
+from io import StringIO
+import os
+
+app,rt = fast_app(live=True)
+
+# Sample CSV data (replace with your file)
+CSV_FILE = "data.csv"
+
+def load_csv():
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, 'r') as f:
+            return list(csv.DictReader(f))
+    return [{"id": 1, "name": "John", "email": "john@example.com"}]
+
+def save_csv(data):
+    with open(CSV_FILE, 'w', newline='') as f:
+        if data: writer = csv.DictWriter(f, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
+
+@rt("/")
+def get():
+    data = load_csv()
+    headers = list(data[0].keys()) if data else ["name", "email"]
+    
+    table = Table(
+        Thead(Tr(*[Th(h.title()) for h in headers] + [Th("Actions")])),
+        Tbody(*[
+            Tr(
+                *[Td(Input(value=row[h], name=h, cls="cell-edit")) for h in headers],
+                Td(
+                    Group(
+                        Button("💾 Save", hx_post=f"/save/{row['id']}", hx_target="closest tr", hx_swap="outerHTML"),
+                        Button("🗑 Delete", hx_post=f"/delete/{row['id']}", hx_target="#table", hx_swap="outerHTML")
+                    )
+                )
+            ) for row in data
+        ], id="table")
+    )
+    
+    return Titled("CSV Editor",
+        Div(
+            H1("CSV Editor"),
+            table,
+            Form(
+                Input(name="name", placeholder="Name"),
+                Input(name="email", placeholder="Email"),
+                Button("➕ Add Row", hx_post="/add", hx_target="#table", hx_swap="beforeend")
+            ),
+            A("📥 Download CSV", href="/download"),
+            style="max-width: 1200px; margin: 2rem auto; padding: 2rem;"
+        ),
+        hdrs=(Style("""
+            input { border: 1px solid #ddd; padding: 0.5rem; width: 150px; }
+            button { padding: 0.5rem 1rem; margin: 0 0.25rem; cursor: pointer; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
+            tr:nth-child(even) { background: #f9f9f9; }
+        """),)
+    )
+
+@rt("/add")
+def post(name:str, email:str):
+    data = load_csv()
+    new_id = max([int(row["id"]) for row in data], default=0) + 1
+    data.append({"id": new_id, "name": name, "email": email})
+    save_csv(data)
+    return Tr(
+        *[Td(Input(value=v, name=k, cls="cell-edit")) for k,v in [("name", name), ("email", email), ("id", new_id)]],
+        Td(Group(
+            Button("💾 Save", hx_post=f"/save/{new_id}", hx_target="closest tr", hx_swap="outerHTML"),
+            Button("🗑 Delete", hx_post=f"/delete/{new_id}", hx_target="#table", hx_swap="outerHTML")
+        ))
+    )
+
+@rt("/save/{row_id}")
+def post(row_id:int, **kwargs):
+    data = load_csv()
+    for row in data:
+        if int(row["id"]) == row_id:
+            row.update(kwargs)
+            break
+    save_csv(data)
+    return Tr(
+        *[Td(f"{v}", style="background: #d4edda;") for k,v in sorted(kwargs.items())],
+        Td(Group(
+            Button("✏️ Edit", hx_get="/", hx_target="#table", hx_swap="outerHTML"),
+            Button("🗑 Delete", hx_post=f"/delete/{row_id}", hx_target="#table", hx_swap="outerHTML")
+        ))
+    )
+
+@rt("/delete/{row_id}")
+def post(row_id:int):
+    data = load_csv()
+    data = [row for row in data if int(row["id"]) != row_id]
+    save_csv(data)
+    return ""  # HTMX will refresh table
+
+@rt("/download")
+def get():
+    data = load_csv()
+    io = StringIO()
+    writer = csv.DictWriter(io, fieldnames=data[0].keys() if data else [])
+    if data: 
+        writer.writeheader()
+        writer.writerows(data)
+    return Response(
+        io.getvalue(),
+        headers={"Content-Disposition": f'attachment; filename="{CSV_FILE}"'},
+        media_type="text/csv"
+    )
+
+serve()
