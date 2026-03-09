@@ -267,7 +267,6 @@ requires-dist = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-mock", specifier = ">=3.15.1" },
     { name = "python-fasthtml", specifier = ">=0.12.41" },
-    { name = "python-statemachine", specifier = ">=2.5.0" },
     { name = "python-statemachine", specifier = ">=3.0.0" },
     { name = "resend", specifier = ">=2.19.0" },
     { name = "tabulate", specifier = ">=0.9.0" },
