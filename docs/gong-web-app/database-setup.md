@@ -26,7 +26,9 @@ def get_db_path():
 # on postgreSQL
 def get_central_db():
     if isa_dev_computer():
+        # local sqlite3
         return database(get_db_path() + "gongUsers.db")
+        # local postgreSQL on docker
         #return Database("postgresql://postgres:route66@localhost:5432/postgres")
     else:
         return Database(os.environ.get('DATABASE_URL'))
