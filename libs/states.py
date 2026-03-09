@@ -9,6 +9,28 @@ from datetime import datetime, timezone
 from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
+# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+class CenterState(StateMachine):
+    free = State(initial=True)   # free to be edited
+    edit = State()               # being edited
+    wait01_trans = State()       # waiting for 1am to do/check transfer 
+    wait02_prod = State()        # waiting for 2am to check production 
+    reco_trans = State()         # waiting for file transfer recovery
+    reco_prod = State()          # waiting for file production recovery
+
+    starts_editing = free.to(edit)                  # user starts editing       
+    abandon_changes = edit.to(free)                 # user abandon changes
+                                                     # ... just in case ...
+    change_timer_done = edit.to(free)               # 1 hour countdown finished
+    saving_changes = edit.to(wait01_trans)          # user saves changes
+    file_trans_done = wait01_trans.to(wait02_prod)  # at 1am: file transfer by PI done
+    file_not_trans = wait01_trans.to(reco_trans)    # at 1am: file transfer by PI NOT done
+    reco_trans_done = reco_trans.to(wait02_prod)    # recovery of file transfer done
+    db_prod_done = wait02_prod.to(free)             # at 2am: db in production done
+    db_not_prod = wait02_prod.to(reco_prod)         # at 2am: db in production NOT done
+    reco_prod_done = reco_prod.to(free)             # recovery of db in production done
+
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
     def __init__(self):
@@ -74,28 +96,6 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
-class CenterState(StateMachine):
-    free = State(initial=True)   # free to be edited
-    edit = State()               # being edited
-    wait00_trans = State()       # waiting for 0am to check transfer 
-    wait03_prod = State()        # waiting for 3am to check production 
-    reco_trans = State()         # waiting for file transfer recovery
-    reco_prod = State()          # waiting for file production recovery
-
-    starts_editing = free.to(edit)                  # user starts editing       
-    abandon_changes = edit.to(free)                 # user abandon changes
-                                                     # ... just in case ...
-    change_timer_done = edit.to(free)               # 1 hour countdown finished
-    saving_changes = edit.to(wait00_trans)          # user saves changes
-    file_trans_done = wait00_trans.to(wait03_prod)  # at 0am: file transfer by PI done
-    file_not_trans = wait00_trans.to(reco_trans)    # at 0am: file transfer by PI NOT done
-    reco_trans_done = reco_trans.to(wait03_prod)    # recovery of file transfer done
-    db_prod_done = wait03_prod.to(free)             # at 3am: db in production done
-    db_not_prod = wait03_prod.to(reco_prod)         # at 3am: db in production NOT done
-    reco_prod_done = reco_prod.to(free)             # recovery of db in production done
-
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 

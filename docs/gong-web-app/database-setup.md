@@ -4,8 +4,8 @@
 from myFasthtml import *
 import textwrap
 import os
-# from myFasthtml import Database # for PostgreSQL
-# from myFasthtml import database # for SQLite
+# import Database # for PostgreSQL, moved to # from myFasthtml 
+# import database # for SQLite, moved to # from myFasthtml
 from libs.utils import isa_dev_computer
 
 <<getdb-path>>
