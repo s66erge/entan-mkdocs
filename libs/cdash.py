@@ -2,6 +2,7 @@
 from myFasthtml import *
 from pathlib import Path
 import shutil
+import json
 from libs.utils import display_markdown, Globals
 from libs.dbset import get_db_path
 
@@ -64,6 +65,15 @@ def save_center_db(session, centers, csms):
     shutil.copy2(source_db_file, dest_db_file)
     dest_db = database(dest_db_file)
     dest_db.execute("DELETE FROM coming_periods")
+    #for t in dest_db.t:
+    #    dest_db.execute(f"DELETE FROM {str(t)}")
+    coming_periods = dest_db.t.coming_periods
+    for record in json.loads(centers[center_name].json_save):
+        #coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
+        dest_db.execute("""
+        INSERT INTO coming_periods (start_date, period_type) 
+        VALUES (?, ?)
+        """, [record["start_date"], record["period_type"]])
 
     print(f"state: {state_mach.current_state.id}")
     state_mach.file_trans_done()
