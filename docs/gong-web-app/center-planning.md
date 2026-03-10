@@ -41,11 +41,11 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
-        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
-            state_mach.send("abandon_changes")
-        if state_mach.current_state.id == "free":
+        if state_mach.edit.is_active and delta > Globals.INITIAL_COUNTDOWN:
+            state_mach.abandon_changes()
+        if state_mach.free.is_active:
             state_mach.model.user = this_user
-            state_mach.send("starts_editing")
+            state_mach.starts_editing()
             center_is_free = True
         return center_is_free
 
@@ -60,7 +60,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             Span(
                 Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
                 Button(f"Modify {selected_name} planning",
-                    hx_get=f"/planning/load_dhamma_db?selected_name={quote_plus(selected_name)}",
+                    hx_get=f"/planning/load_dhamma_db",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
                 Button(f"Modify {selected_name} timetables",
@@ -69,7 +69,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
                 Span(style="display: inline-block; width: 20px;"),
                 A("return NO CHANGES",href="/planning/abandon_edit", _data_safe_nav="true"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("SAVE CHANGES to center", href=f"/save-center-db?selected_name={quote_plus(selected_name)}", _data_safe_nav="true"),
+                A("SAVE CHANGES to center", href=f"/save-center-db", _data_safe_nav="true"),
                 Span(style="display: inline-block; width: 20px;"),
                 Span("Remainning time: "),
                 Span("", id="timer", cls="timer-display")
@@ -219,7 +219,6 @@ async def add_line(session, centers, ptype, start):
     plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = add_end_dates(plansor, centers[selected_name])
     return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
-
 ```
 
 ### Abandon center planning edit
@@ -231,9 +230,9 @@ Check for the rare situation when arriving here on 'free' state instead of 'edit
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if this_center and csms[this_center].current_state.id == "edit":
+    if this_center and csms[this_center].edit.is_active:
         csms[this_center].model.user = None
-        csms[this_center].send("abandon_changes")
+        csms[this_center].abandon_changes()
     return  Redirect('/dashboard')
 
 ```
