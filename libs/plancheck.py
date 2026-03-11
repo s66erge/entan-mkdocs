@@ -88,8 +88,9 @@ def get_types_with_duration(center_obj):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
 
-def check_plan(plan, selected_name, centers):
+def check_plan(session, plan, selected_name, centers):
     types_with_duration = get_types_with_duration(centers[selected_name])    
+    session['planOK'] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
             row["check"] = "OK"
@@ -107,6 +108,8 @@ def check_plan(plan, selected_name, centers):
                 row["check"] = "NoType"
             elif row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
                 row["check"] = "Duplicated periods"
+            elif row.get("start_date") == next_start_date:
+                row["check"] = "Same starting date"
             elif delta_days < 0:
                 row["check"] = f"Overlap of {- delta_days} day(s)"
             elif delta_days == 0:
@@ -123,6 +126,8 @@ def check_plan(plan, selected_name, centers):
                 row["check"] = f"OK default {delta_days} days"
             else:
                 row["check"] = "OK"
+        if not (row["check"].startswith("OK") or row["check"].startswith("CHECK")):
+            session['planOK'] = False
     return plan
 # ~/~ end
 

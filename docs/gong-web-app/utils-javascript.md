@@ -10,6 +10,8 @@ JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation
     link.addEventListener('click', function(event) {
+        if (this.classList.contains('allow-navigation') {
+            return;}
         const willOpenNewTab =
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
             || event.button === 1

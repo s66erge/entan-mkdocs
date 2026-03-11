@@ -30,6 +30,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/l
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 # client = TestClient(app)
+setup_toasts(app)
 
 db_path = get_db_path()
 db = get_central_db()
@@ -173,6 +174,15 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#other-routes>>[init]
+
+@rt('/toasting/plan_not_OK')
+def get(session):
+    add_toast(session, "Cannot save a plan with lines not OK", "error")
+    add_toast(session, f"Toast is being cooked", "info")
+    add_toast(session, f"Toast is ready", "success")
+    add_toast(session, f"Toast is getting a bit crispy", "warning")
+    add_toast(session, f"Toast is burning!", "error")
+    return P("Cannot save plan")
 
 @rt('/no_access_right')
 def get():

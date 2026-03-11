@@ -18,7 +18,7 @@ class CenterState(StateMachine):
     reco_trans = State()         # waiting for file transfer recovery
     reco_prod = State()          # waiting for file production recovery
 
-    starts_editing = free.to(edit)                  # user starts editing       
+    start_editing = free.to(edit)                  # user starts editing       
     abandon_changes = edit.to(free)                 # user abandon changes
                                                      # ... just in case ...
     change_timer_done = edit.to(free)               # 1 hour countdown finished
@@ -29,7 +29,8 @@ class CenterState(StateMachine):
     db_prod_done = wait02_prod.to(free)             # at 2am: db in production done
     db_not_prod = wait02_prod.to(reco_prod)         # at 2am: db in production NOT done
     reco_prod_done = reco_prod.to(free)             # recovery of db in production done
-
+    # used only in dev mode
+    force_to_free = edit.to(free) |  wait01_trans.to(free) | wait02_prod.to(free)               # force to free state
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
@@ -127,7 +128,7 @@ def states_test(centers):
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm.model.user = "abc@mail.com"
-    sm.send("starts_editing")
+    sm.send("start_editing")
     print(f"new state: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
     # Remove the instances from memory.
     del sm
