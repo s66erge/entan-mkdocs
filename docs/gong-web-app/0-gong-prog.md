@@ -10,7 +10,7 @@ from libs.states import create_center_state_machines
 from libs.auth import admin_required, verify_code, create_code, login
 from libs.cdash import dashboard, save_center_db
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
-from libs.dbset import init_data, get_central_db, get_db_path
+from libs.dbset import Role, User, Center, Planner, init_data, get_central_db, get_db_path
 from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
 from libs.fetch import fetch_dhamma_courses
 from libs.admin import show_page
@@ -44,16 +44,16 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/l
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 # client = TestClient(app)
-setup_toasts(app)
 
 db_path = get_db_path()
 db = get_central_db()
 
+'''
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
 class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
 class Planner: user_email: str; center_name: str
-
+'''
 roles = db.create(Role, pk='role_name')
 users = db.create(User, pk='email')
 centers = db.create(Center, pk='center_name')
@@ -148,8 +148,8 @@ def get(session):
     return abandon_edit(session, csms)
 
 @rt('/save-center-db')
-def get(session):
-    return save_center_db(session, centers, csms)
+async def get(session):
+    return await save_center_db(session, centers, csms)
 
 ```
 
