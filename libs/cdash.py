@@ -4,7 +4,6 @@ from pathlib import Path
 import shutil
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-# from tzlocal import get_localzone # from myFasthtml
 import asyncio
 import json
 import os
@@ -85,7 +84,6 @@ async def save_center_db(session, centers, csms):
 
     center_tz = ZoneInfo(centers[center_name].timezone)
     now_center = datetime.now(center_tz)
-    now_here = datetime.now(get_localzone())
     if now_center.hour >= 1:
         # If it's already past 1 AM, schedule for tomorrow
         next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
