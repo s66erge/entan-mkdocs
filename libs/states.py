@@ -30,6 +30,10 @@ class CenterState(StateMachine):
     reco_prod_done    = Event(reco_prod.to(free), name='recovery of db in production done')
     # used only in dev mode: force to free transitions
     force_to_free = free.to(free) | edit.to(free) |  w01_trans.to(free) | w02_prod.to(free)
+
+    def on_enter_state(self, target, event):
+        print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
@@ -96,6 +100,7 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 

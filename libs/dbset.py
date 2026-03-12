@@ -13,11 +13,11 @@ class User: email: str; name: str; role_name: str; password: str; magic_link_tok
 class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
 class Planner: user_email: str; center_name: str
 
-class Coming_period: start_date: str; period_type: str
-class Period_struct: period_type: str; day: int; day_type: str
-class Timetable: period_type: str; day_type: str; time: str; gong_id: int; auto: int; targets: str; comment: str
-class Gong: sound_id: int; repeat: int; interval: float; length: float; comment: str  
-class Target: id: int; shortname: str; longname: str
+class Coming_periods: start_date: str; period_type: str
+class Periods_struct: period_type: str; day: int; day_type: str
+class Timetables: period_type: str; day_type: str; time: str; gong_id: int; auto: int; targets: str; comment: str
+class Gongs: sound_id: int; repeat: int; interval: float; length: float; comment: str  
+class Targets: id: int; shortname: str; longname: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]

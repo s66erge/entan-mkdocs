@@ -236,9 +236,11 @@ Check for the rare situation when arriving here on 'free' state instead of 'edit
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if this_center: #and csms[this_center].edit.is_active:
+    if csms[this_center].edit.is_active:
+        csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-        csms[this_center].force_to_free()
+    elif isa_dev_computer():
+        csms[this_center].force_to_free()    
     return  Redirect('/dashboard')
 
 ```
