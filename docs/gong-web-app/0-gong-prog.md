@@ -6,19 +6,28 @@
 ```{.python file=main.py}
 
 from myFasthtml import *
-from libs.admin import show_page
-from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
+from libs.states import create_center_state_machines
 from libs.auth import admin_required, verify_code, create_code, login
-from libs.cdash import dashboard
+from libs.cdash import dashboard, save_center_db
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
-from libs.dbset import init_data, get_central_db, get_db_path
+from libs.dbset import Role, User, Center, Planner, init_data, get_central_db, get_db_path
 from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
 from libs.fetch import fetch_dhamma_courses
-from libs.states import create_center_state_machines
+from libs.admin import show_page
+from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
 from libs.utils import feedback_to_user, display_markdown, Globals
-
 #  from starlette.testclient import TestClient
 
+<<initialize-program>>
+<<login-authenticate>>
+<<consult-centers-plans>>
+<<courses-planning>>
+<<users-admin>>
+<<other-routes>>
+
+```
+
+```{.python #initialize-program}
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }
@@ -34,15 +43,17 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
+# client = TestClient(app)
 
 db_path = get_db_path()
 db = get_central_db()
 
+'''
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
 class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
 class Planner: user_email: str; center_name: str
-
+'''
 roles = db.create(Role, pk='role_name')
 users = db.create(User, pk='email')
 centers = db.create(Center, pk='center_name')
@@ -50,26 +61,12 @@ planners = db.create(Planner, pk=('user_email', 'center_name'))
 
 init_data(roles, users, centers, planners)
 
-
 csms, clocks = create_center_state_machines(centers)
 
-"""
-@rt('/register')
-def get():
-    return authpass.register_get()
+```
 
-@rt('/registercheck')
-def post(email:str, password:str):
-    return authpass.register_post(email, password, users)
+```{.python #login-authenticate}
 
-@rt('/login')
-def get():
-    return authpass.login_get()
-
-@rt('/logincheck')
-def post(session, email:str, password:str):
-    return authpass.logincheck(session, email, password, users)
-"""
 @rt('/login')
 def get():
     return login()
@@ -82,8 +79,6 @@ def post(email: str):
 def post(session, code: str):
     return verify_code(session, code, users) 
 
-# client = TestClient(app)
-
 @rt('/')
 def home():
     return Main(
@@ -92,9 +87,18 @@ def home():
         cls="container"
     )
 
+@rt('/logout')
+def post(session):
+    del session['auth']
+    del session['role']
+    return Redirect('/login')
+
 @rt('/dashboard')
 def get(session):
     return dashboard(session, users, planners)
+```
+
+```{.python #consult-centers-plans}
 
 @rt('/consult_page')
 def get(session, request):
@@ -111,6 +115,10 @@ def get(request):
 @rt('/consult/select_timetable')
 def get(request):
     return consult_select_timetable(request, db_path)
+
+```
+
+```{.python #courses-planning}
 
 @rt('/planning_page')
 async def get(session, request):
@@ -138,6 +146,14 @@ async def post(session, ptype: str, start: str):
 @rt('/planning/abandon_edit')
 def get(session):
     return abandon_edit(session, csms)
+
+@rt('/save-center-db')
+async def get(session):
+    return await save_center_db(session, centers, csms)
+
+```
+
+```{.python #users-admin}
 
 @rt('/admin_page')
 @admin_required
@@ -174,11 +190,18 @@ def post(session, user_email: str, center_name: str):
 def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
     return add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
 
-@rt('/logout')
-def post(session):
-    del session['auth']
-    del session['role']
-    return Redirect('/login')
+```
+
+```{.python #other-routes}
+
+@rt('/toasting/plan_not_OK')
+def get(session):
+    add_toast(session, "Cannot save a plan with lines not OK", "error")
+    add_toast(session, f"Toast is being cooked", "info")
+    add_toast(session, f"Toast is ready", "success")
+    add_toast(session, f"Toast is getting a bit crispy", "warning")
+    add_toast(session, f"Toast is burning!", "error")
+    return P("Cannot save plan")
 
 @rt('/no_access_right')
 def get():

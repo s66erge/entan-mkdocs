@@ -153,6 +153,7 @@ def feed_text(params):
         'not_registered':f'Email "{params.get("email", "")}" is not registered, try again or send a message to xxx@xxx.xx to get registered',
         'invalid_or_expired_code': 'The code is invalid ot expired. Check if if it is correct. Or refresh the page to ask for another code.',
         'missing_fields': 'Please fill in all required fields.',
+        'plan_not_ok': 'Correct the planning errors before saving this plan',
         'user_exists': 'User with this email already exists.',
         'center_exists': 'Center with this name already exists.',
         'planner_exists': 'This planner association already exists.',

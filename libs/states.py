@@ -5,10 +5,36 @@ import asyncio
 from myFasthtml import *
 import time
 from datetime import datetime, timezone
-# from statemachine import State, StateMachine # moved to "myFasthtml.py"
+# from statemachine import State, Event,StateMachine # moved to "myFasthtml.py"
 from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
+# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+class CenterState(StateMachine):
+    free = State(initial=True)   # free to be edited
+    edit = State()               # being edited
+    w01_trans = State()          # waiting for 1am to do/check transfer 
+    w02_prod = State()           # waiting for 2am to check production 
+    reco_trans = State()         # waiting for file transfer recovery
+    reco_prod = State()          # waiting for file production recovery
+
+    start_editing     = Event(free.to(edit), name='user starts editing')       
+    abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    change_timer_done = Event(edit.to(w01_trans), name='1 hour countdown finished')
+    saving_changes    = Event(edit.to(w01_trans), name='user saves changes')
+    file_trans_done   = Event(w01_trans.to(w02_prod), name='at 1am: file transfer by PI done')
+    file_not_trans    = Event(w01_trans.to(reco_trans), name='at 1am: file transfer by PI NOT done')
+    reco_trans_done   = Event(reco_trans.to(w02_prod), name='recovery of file transfer done')
+    db_prod_done      = Event(w02_prod.to(free), name='at 2am: db in production done')
+    db_not_prod       = Event(w02_prod.to(reco_prod), name='at 2am: db in production NOT done')
+    reco_prod_done    = Event(reco_prod.to(free), name='recovery of db in production done')
+    # used only in dev mode: force to free transitions
+    force_to_free = free.to(free) | edit.to(free) |  w01_trans.to(free) | w02_prod.to(free)
+
+    def on_enter_state(self, target, event):
+        print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
+
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
     def __init__(self):
@@ -74,27 +100,6 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
-class CenterState(StateMachine):
-    free = State(initial=True)   # free to be edited
-    edit = State()               # being edited
-    wait00_trans = State()       # waiting for 0am to check transfer 
-    wait03_prod = State()        # waiting for 3am to check production 
-    reco_trans = State()         # waiting for file transfer recovery
-    reco_prod = State()          # waiting for file production recovery
-
-    starts_editing = free.to(edit)                  # user starts editing       
-    abandon_changes = edit.to(free)                 # user abandon changes
-                                                     # ... just in case ...
-    change_timer_done = edit.to(free)               # 1 hour countdown finished
-    saving_changes = edit.to(wait00_trans)          # user saves changes
-    file_trans_done = wait00_trans.to(wait03_prod)  # at 0am: file transfer by PI done
-    file_not_trans = wait00_trans.to(reco_trans)    # at 0am: file transfer by PI NOT done
-    reco_trans_done = reco_trans.to(wait03_prod)    # recovery of file transfer done
-    db_prod_done = wait03_prod.to(free)             # at 3am: db in production done
-    db_not_prod = wait03_prod.to(reco_prod)         # at 3am: db in production NOT done
-    reco_prod_done = reco_prod.to(free)             # recovery of db in production done
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
@@ -127,7 +132,7 @@ def states_test(centers):
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm.model.user = "abc@mail.com"
-    sm.send("starts_editing")
+    sm.send("start_editing")
     print(f"new state: {sm.current_state.id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
     # Remove the instances from memory.
     del sm

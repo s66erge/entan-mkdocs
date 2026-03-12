@@ -1,6 +1,15 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from myFasthtml import *
-from libs.utils import display_markdown, Globals
+from pathlib import Path
+import shutil
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+# from tzlocal import get_localzone
+import asyncio
+import json
+import os
+from libs.utils import display_markdown, feedback_to_user, Globals
+from libs.dbset import Coming_periods, get_db_path
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -48,5 +57,53 @@ def dashboard(session, users, planners):
         ),
         cls="container",
     )
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-dashboard.md#save-center-db>>[init]
+
+async def save_center_db(session, centers, csms):
+    center_name = session['center']
+    if not session["planOK"]:
+        return Div(feedback_to_user({"error": "plan_not_ok"})) 
+    state_mach = csms[center_name]
+
+    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
+    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
+    if os.path.exists(dest_db_file):
+        os.remove(dest_db_file)
+    shutil.copy2(Path(source_db_file), Path(dest_db_file))
+    dest_db = database(dest_db_file)
+    dest_db.execute("DROP TABLE coming_periods")
+    #for t in dest_db.t:
+    #    dest_db.execute(f"DROP TABLE {str(t)}")
+    coming_periods = dest_db.create(Coming_periods, pk='start_date')
+    for record in json.loads(centers[center_name].json_save):
+        coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
+        #dest_db.execute("""
+        #INSERT INTO coming_periods (start_date, period_type) 
+        #VALUES (?, ?)
+        #""", [record["start_date"], record["period_type"]])
+
+    center_tz = ZoneInfo(centers[center_name].timezone)
+    now_center = datetime.now(center_tz)
+    now_here = datetime.now(get_localzone())
+    if now_center.hour >= 1:
+        # If it's already past 1 AM, schedule for tomorrow
+        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    else:
+        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0)
+    next_2am = next_1am + timedelta(hours=1, minutes=10)
+
+    delay_s = (next_1am - now_center).total_seconds()
+    delay_h = delay_s / 3600  
+    print(f"now time at center {now_center}, will upload in {delay_h} hours")
+    state_mach.saving_changes()
+    #await asyncio.sleep(delay_s)
+    await asyncio.sleep(1)
+    #upload_db()
+
+    state_mach.file_trans_done()
+    state_mach.db_prod_done()
+    return  Redirect('/dashboard')
+
 # ~/~ end
 # ~/~ end

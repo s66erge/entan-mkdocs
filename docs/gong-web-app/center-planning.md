@@ -41,17 +41,18 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
-        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
-            state_mach.send("abandon_changes")
-        if state_mach.current_state.id == "free":
+        if state_mach.edit.is_active and delta > Globals.INITIAL_COUNTDOWN:
+            state_mach.abandon_changes()
+        if state_mach.free.is_active:
             state_mach.model.user = this_user
-            state_mach.send("starts_editing")
+            state_mach.start_editing()
             center_is_free = True
         return center_is_free
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
     session["center"] = selected_name
+    session['planOK'] = False
     center_lock = clocks[selected_name]
     # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
     if await check_center_free(csms[selected_name], center_lock, session['auth']):
@@ -60,18 +61,25 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             Span(
                 Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
                 Button(f"Modify {selected_name} planning",
-                    hx_get=f"/planning/load_dhamma_db?selected_name={quote_plus(selected_name)}",
+                    name='load-plan-btn',
+                    hx_get=f"/planning/load_dhamma_db",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
-                Button(f"Modify {selected_name} course types / timetables",
+                Button(f"Modify {selected_name} timetables",
                     hx_get="/unfinished?goto_dash=NO",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("return NO CHANGES",href="/planning/abandon_edit", _data_safe_nav="true"),
+                A("return NO CHANGES",href="/planning/abandon_edit", _class="allow-navigation"),
+                Span(style="display: inline-block; width: 20px;"),
+                Button("SAVE CHANGES to center", _class="allow-navigation",
+                    hx_get="/save-center-db",
+                    hx_target="#line-feedback"),
+                #A("SAVE CHANGES to center", href=f"/save-center-db", _data_safe_nav="true"),
                 Span(style="display: inline-block; width: 20px;"),
                 Span("Remainning time: "),
                 Span("", id="timer", cls="timer-display")
             ),
+            Div(id="line-feedback"),
             Script(JS_CLIENT_TIMER),
             Script(JS_BLOCK_NAV),
             P(""), 
@@ -155,7 +163,7 @@ def show_draft_plan_table(draft_plan, mess):
     )
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
-        Div(feedback_to_user(mess), id="line-feedback"),
+        Div(feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
         table,
         form,
         id="planning-periods"
@@ -186,7 +194,7 @@ def save_plan(centers, center, plan):
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
-    new_draft_plan = check_plan(plan, selected_name, centers)
+    new_draft_plan = check_plan(session, plan, selected_name, centers)
     await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
@@ -217,7 +225,6 @@ async def add_line(session, centers, ptype, start):
     plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = add_end_dates(plansor, centers[selected_name])
     return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
-
 ```
 
 ### Abandon center planning edit
@@ -229,9 +236,11 @@ Check for the rare situation when arriving here on 'free' state instead of 'edit
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if this_center and csms[this_center].current_state.id == "edit":
+    if csms[this_center].edit.is_active:
+        csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-        csms[this_center].send("abandon_changes")
+    elif isa_dev_computer():
+        csms[this_center].force_to_free()    
     return  Redirect('/dashboard')
 
 ```
