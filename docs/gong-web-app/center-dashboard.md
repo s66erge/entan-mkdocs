@@ -5,14 +5,17 @@ Will only be reachable for authenticated users.
 ```{.python file=libs/cdash.py}
 from myFasthtml import *
 from pathlib import Path
+from urllib.parse import quote_plus
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from zoneinfo import ZoneInfo
 import asyncio
 import json
 import os
-from libs.utils import display_markdown, feedback_to_user, Globals
+from libs.utils import isa_dev_computer, display_markdown, feedback_to_user, Globals
 from libs.dbset import Coming_periods, get_db_path
+from libs.send2pi import file_download, file_upload, session_connect
+
 
 <<dashboard>>
 <<save-center-db>>
@@ -71,12 +74,7 @@ def dashboard(session, users, planners):
 
 ```{.python #save-center-db}
 
-async def save_center_db(session, centers, csms):
-    center_name = session['center']
-    if not session["planOK"]:
-        return Div(feedback_to_user({"error": "plan_not_ok"})) 
-    state_mach = csms[center_name]
-
+def save_db_plan_timetable(center_name, centers):
     source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
     dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
     if os.path.exists(dest_db_file):
@@ -93,26 +91,81 @@ async def save_center_db(session, centers, csms):
         #INSERT INTO coming_periods (start_date, period_type) 
         #VALUES (?, ?)
         #""", [record["start_date"], record["period_type"]])
+    return Path(dest_db_file)
 
-    center_tz = ZoneInfo(centers[center_name].timezone)
+def get_event_delay(center_tz, hours, minutes, next_day):
     now_center = datetime.now(center_tz)
-    if now_center.hour >= 1:
-        # If it's already past 1 AM, schedule for tomorrow
-        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
-    else:
-        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0)
-    next_2am = next_1am + timedelta(hours=1, minutes=10)
+    next_event = now_center.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+    if next_day and now_center.hour >= hours and now_center.minute >= minutes:
+        # If it's already past the target time, schedule for tomorrow
+        next_event +=  timedelta(days=1)
+    next_date_iso = next_event.date().isoformat()
+    delay_s = (next_event - now_center).total_seconds()
+    return now_center, delay_s, next_date_iso  
 
-    delay_s = (next_1am - now_center).total_seconds()
-    delay_h = delay_s / 3600  
-    print(f"now time at center {now_center}, will upload in {delay_h} hours")
+def upload_test(localDBfilePath, port):
+    remoteDBpath = Path("/home/pi/test")
+    ssh_session = session_connect(port)
+    file_upload(localDBfilePath, remoteDBpath, ssh_session)
+
+def download_test(remoteDBfilePath, port):
+    localDBpath = Path(get_db_path())
+    ssh_session = session_connect(port)
+    file_download(remoteDBfilePath, localDBpath, ssh_session)
+
+def date_check(resu, next_date_iso):
+    # FIXME after discussion with Ivan
+    return True
+
+async def save_center_db(session, centers, csms):
+    center_name = session['center']
+    if not session["planOK"]:
+        return Div(feedback_to_user({"error": "plan_not_ok"})) 
+    state_mach = csms[center_name]
+    center_tz = ZoneInfo(centers[center_name].timezone)
+    # PROD-FIX new field in table 'center'
+    port = centers[center_name].routing_port
+    save_db_Path = save_db_plan_timetable(center_name, centers)
+    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0, next_day=True)
+    print(f"now time at center {now_center}, will upload in {delay_1_s/3600} hours")
     state_mach.saving_changes()
-    #await asyncio.sleep(delay_s)
-    await asyncio.sleep(1)
-    #upload_db()
+    try:
+        if isa_dev_computer():
+            await asyncio.sleep(Globals.SHORT_DELAY)
+            localDBfilePath = Path(get_db_path() + "/" + "test22.json")
+            upload_test(localDBfilePath, port)
+        else:
+            await asyncio.sleep(delay_1_s)
+            #upload_real(port)
+        state_mach.file_trans_done()
+    except Exception as e:
+        state_mach.file_not_trans()
+        #return Redirect(f'/transfer_failed?reason=trans&mess={quote_plus(e)}')
+        return Redirect('/unfinished')
+    else:
+        now_center, delay_2_s, next_date_iso = get_event_delay(center_tz, hours=2, minutes=10, next_day=False)
+        print(f"now time at center {now_center}, will upload in {delay_1_s/3600} hours")
 
-    state_mach.file_trans_done()
-    state_mach.db_prod_done()
-    return  Redirect('/dashboard')
+        try:
+            if isa_dev_computer():
+                await asyncio.sleep(Globals.SHORT_DELAY)
+                remoteDBfilePath = Path("/home/pi/test" + "/" + "test22.json")
+                resu = download_test(remoteDBfilePath, port)
+            else:
+                await asyncio.sleep(delay_2_s)
+                #resu = download_real(port)
+        except Exception as e:
+            state_mach.db_not_prod()
+            #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
+            return Redirect('/unfinished')
+        else:
+            if not date_check(resu, next_date_iso):
+                state_mach.db_not_prod()
+                #return Redirect('/transfer_failed?reason=wrong_date')
+                return Redirect('/unfinished')
+            else:
+                state_mach.db_prod_done()
+                return Redirect('/unfinished')
+                #return Redirect('/transfer_success')
 
 ```

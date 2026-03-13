@@ -201,7 +201,6 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             Span(
                 Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
                 Button(f"Modify {selected_name} planning",
-                    name='load-plan-btn',
                     hx_get=f"/planning/load_dhamma_db",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),

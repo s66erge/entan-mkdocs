@@ -16,7 +16,7 @@ class CenterState(StateMachine):
     w01_trans = State()          # waiting for 1am to do/check transfer 
     w02_prod = State()           # waiting for 2am to check production 
     reco_trans = State()         # waiting for file transfer recovery
-    reco_prod = State()          # waiting for file production recovery
+    reco_prod = State()          # waiting for production recovery
 
     start_editing     = Event(free.to(edit), name='user starts editing')       
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
