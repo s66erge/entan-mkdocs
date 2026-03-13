@@ -93,10 +93,10 @@ def save_db_plan_timetable(center_name, centers):
         #""", [record["start_date"], record["period_type"]])
     return Path(dest_db_file)
 
-def get_event_delay(center_tz, hours, minutes, next_day):
+def get_event_delay(center_tz, hours, minutes):
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-    if next_day and now_center.hour >= hours and now_center.minute >= minutes:
+    if now_center.hour >= hours and now_center.minute >= minutes:
         # If it's already past the target time, schedule for tomorrow
         next_event +=  timedelta(days=1)
     next_date_iso = next_event.date().isoformat()
@@ -126,7 +126,7 @@ async def save_center_db(session, centers, csms):
     # PROD-FIX new field in table 'center'
     port = centers[center_name].routing_port
     save_db_Path = save_db_plan_timetable(center_name, centers)
-    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0, next_day=True)
+    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     print(f"now time at center {now_center}, will upload in {delay_1_s/3600} hours")
     state_mach.saving_changes()
     try:
@@ -143,9 +143,7 @@ async def save_center_db(session, centers, csms):
         #return Redirect(f'/transfer_failed?reason=trans&mess={quote_plus(e)}')
         return Redirect('/unfinished')
     else:
-        now_center, delay_2_s, next_date_iso = get_event_delay(center_tz, hours=2, minutes=10, next_day=False)
-        print(f"now time at center {now_center}, will upload in {delay_1_s/3600} hours")
-
+        delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
         try:
             if isa_dev_computer():
                 await asyncio.sleep(Globals.SHORT_DELAY)
@@ -159,13 +157,13 @@ async def save_center_db(session, centers, csms):
             #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
             return Redirect('/unfinished')
         else:
-            if not date_check(resu, next_date_iso):
-                state_mach.db_not_prod()
-                #return Redirect('/transfer_failed?reason=wrong_date')
-                return Redirect('/unfinished')
-            else:
+            if date_check(resu, next_date_iso):
                 state_mach.db_prod_done()
                 return Redirect('/unfinished')
                 #return Redirect('/transfer_success')
+            else:
+                state_mach.db_not_prod()
+                #return Redirect('/transfer_failed?reason=wrong_date')
+                return Redirect('/unfinished')
 
 ```

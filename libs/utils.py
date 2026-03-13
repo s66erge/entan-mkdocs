@@ -12,7 +12,7 @@ class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     MONTHS_TO_FETCH = 12 # when fetching dharma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
-    SHORT_DELAY = 1 # seconds: waiting time before uploading file to Pi IN DEV MODE
+    SHORT_DELAY = 20 # seconds: waiting time before uploading file to Pi IN DEV MODE
 
     @classmethod
     def get(cls, name, default=None):

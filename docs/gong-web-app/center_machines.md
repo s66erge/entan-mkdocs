@@ -29,21 +29,21 @@ class CenterState(StateMachine):
     edit = State()               # being edited
     w01_trans = State()          # waiting for 1am to do/check transfer 
     w02_prod = State()           # waiting for 2am to check production 
-    reco_trans = State()         # waiting for file transfer recovery
-    reco_prod = State()          # waiting for production recovery
+    w_reco_trans = State()         # waiting for file transfer recovery
+    w_reco_prod = State()          # waiting for production recovery
 
     start_editing     = Event(free.to(edit), name='user starts editing')       
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     change_timer_done = Event(edit.to(w01_trans), name='1 hour countdown finished')
     saving_changes    = Event(edit.to(w01_trans), name='user saves changes')
     file_trans_done   = Event(w01_trans.to(w02_prod), name='at 1am: file transfer by PI done')
-    file_not_trans    = Event(w01_trans.to(reco_trans), name='at 1am: file transfer by PI NOT done')
-    reco_trans_done   = Event(reco_trans.to(w02_prod), name='recovery of file transfer done')
+    file_not_trans    = Event(w01_trans.to(w_reco_trans), name='at 1am: file transfer by PI NOT done')
+    reco_trans_done   = Event(w_reco_trans.to(w02_prod), name='recovery of file transfer done')
     db_prod_done      = Event(w02_prod.to(free), name='at 2am: db in production done')
-    db_not_prod       = Event(w02_prod.to(reco_prod), name='at 2am: db in production NOT done')
-    reco_prod_done    = Event(reco_prod.to(free), name='recovery of db in production done')
+    db_not_prod       = Event(w02_prod.to(w_reco_prod), name='at 2am: db in production NOT done')
+    reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
     # used only in dev mode: force to free transitions
-    force_to_free = free.to(free) | edit.to(free) |  w01_trans.to(free) | w02_prod.to(free)
+    force_to_free = free.to(free) | edit.to(free) |  w01_trans.to(free) | w02_prod.to(free) | w_reco_trans.to(free) | w_reco_prod.to(free)
 
     def on_enter_state(self, target, event):
         print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
