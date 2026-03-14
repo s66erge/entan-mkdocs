@@ -65,15 +65,12 @@ class CenterDataModel(AbstractPersistentModel):
         self.statustart = None  # Cache for the timestamp of the last state change
 
     def _read_state(self):
-        #centers = self.db.t.centers
-        #Center = centers.dataclass()
         row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.created_by
         return row.status if row.status else None
 
     def _write_state(self, value):
-        #centers = self.db.t.centers
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
@@ -87,16 +84,12 @@ class CenterDataModel(AbstractPersistentModel):
     def get_start_time(self):
         if self.statustart is None:
             # If statustart is not cached, read it from the database
-            #centers = self.db.t.centers
-            #Center = centers.dataclass()
             row = self.centers[self.center_name]
             self.statustart = row.status_start if row.status_start else None
         return self.statustart
 
     def get_user(self):
         if self.user is None:
-            #centers = self.db.t.centers
-            #Center = centers.dataclass()
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user

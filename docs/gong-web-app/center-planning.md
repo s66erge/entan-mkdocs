@@ -11,10 +11,9 @@ from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
-from libs.utilsJS import JS_BLOCK_NAV
+from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
 
 <<abandon-edit>>
-<<js-client-timer>>
 <<create-html-table>>
 <<load-show-center-plan>>
 <<planning-page>>
@@ -68,11 +67,30 @@ async def planning_page(session, selected_name, centers, csms, clocks):
                     hx_get="/unfinished?goto_dash=NO",
                     hx_target="#planning-periods"),
                 Span(style="display: inline-block; width: 20px;"),
-                A("return NO CHANGES",href="/planning/abandon_edit", _class="allow-navigation"),
+                A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
                 Span(style="display: inline-block; width: 20px;"),
-                Button("SAVE CHANGES to center", _class="allow-navigation",
-                    hx_get="/save-center-db",
-                    hx_target="#line-feedback"),
+
+                Input(name="offset", type="hidden"),
+                Button("SAVE CHANGES to center", cls="allownavigation", onclick="sendOffset()"),
+
+                Script("""
+                async function sendOffset() {
+                    const offset = new Date().getTimezoneOffset();
+                    const formData = new FormData();
+                    formData.append('offset', offset);
+                    const response = await fetch('/save-center-db', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.text();                    
+                    // Manually update the target (like hx_target="#result")
+                    document.getElementById("line-feedback").innerHTML = result;
+                }
+                """),
+                #Button("SAVE CHANGES to center", cls="allow-navigation",
+                #    hx_post="/save-center-db",
+                #    hx_target="#line-feedback"),
+
                 #A("SAVE CHANGES to center", href=f"/save-center-db", _data_safe_nav="true"),
                 Span(style="display: inline-block; width: 20px;"),
                 Span("Remainning time: "),
@@ -242,41 +260,5 @@ def abandon_edit(session, csms):
         csms[this_center].force_to_free()    
     return  Redirect('/dashboard')
 
-```
-
-### Javascript timer for center planning usage + preventing unwanted page unload
-
-```{.python #js-client-timer}
-
-JS_CLIENT_TIMER = """
-function startCountdown(seconds, elementId) {
-    const element = document.getElementById(elementId);
-    let timeLeft = seconds;
-
-    function updateDisplay() {
-        if (timeLeft > 60) {
-            const minutes = Math.floor(timeLeft / 60);
-            element.textContent = `${minutes} min`;
-        } else {
-            element.textContent = `${timeLeft} sec`;
-        }
-    }
-    updateDisplay();
-
-    const interval = setInterval(() => {
-        timeLeft--;
-        updateDisplay();    
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            window.onbeforeunload = null;
-            window.location.href = '/planning/abandon_edit';
-        }
-    }, 1000);
-}
-// Get starting time from #start-time element and START AUTOMATICALLY
-const startSeconds = parseInt(document.getElementById('start-time').textContent);
-startCountdown(startSeconds, 'timer');
-
-"""
 ```
 

@@ -5,8 +5,6 @@ JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation
     link.addEventListener('click', function(event) {
-        if (this.classList.contains('allow-navigation') {
-            return;}
         const willOpenNewTab =
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
             || event.button === 1
@@ -15,7 +13,7 @@ document.querySelectorAll('a').forEach(link => {
             || (event.ctrlKey && event.altKey)    // Ctrl+Alt
         ;
         // ONLY disable onbeforeunload for same-tab navigation
-        if (willOpenNewTab) {
+        if ((willOpenNewTab) && !this.classList.contains('allownavigation')) {
             console.log('Click intercepted:', this.href, { willOpenNewTab });
             window.onbeforeunload = function() { return "Unsaved changes!";};
             event.preventDefault();  // Prevent default navigation
@@ -26,9 +24,12 @@ document.querySelectorAll('a').forEach(link => {
     });
     // Context menu handler for right-click
     link.addEventListener('contextmenu', function(event) {
-            console.log('context menu intercepted:', this.href);
-            window.onbeforeunload = function() { return "Unsaved changes!";};
-            event.preventDefault();  // Prevent default navigation
+        if (this.classList.contains('allownavigation')) {
+            return
+        };
+        console.log('context menu intercepted:', this.href);
+        window.onbeforeunload = function() { return "Unsaved changes!";};
+        event.preventDefault();  // Prevent default navigation
     });
 });
 
@@ -45,6 +46,36 @@ document.addEventListener('DOMContentLoaded', function() {
 console.log("Planning page timer script loaded, onbeforeunload set to warn about unsaved changes.");
 window.onbeforeunload = function() { return "Unsaved changes!";};
 """
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/utils-javascript.md#client-timer>>[init]
+JS_CLIENT_TIMER = """
+function startCountdown(seconds, elementId) {
+    const element = document.getElementById(elementId);
+    let timeLeft = seconds;
 
+    function updateDisplay() {
+        if (timeLeft > 60) {
+            const minutes = Math.floor(timeLeft / 60);
+            element.textContent = `${minutes} min`;
+        } else {
+            element.textContent = `${timeLeft} sec`;
+        }
+    }
+    updateDisplay();
+
+    const interval = setInterval(() => {
+        timeLeft--;
+        updateDisplay();    
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            window.onbeforeunload = null;
+            window.location.href = '/planning/abandon_edit';
+        }
+    }, 1000);
+}
+// Get starting time from #start-time element and START AUTOMATICALLY
+const startSeconds = parseInt(document.getElementById('start-time').textContent);
+startCountdown(startSeconds, 'timer');
+"""
 # ~/~ end
 # ~/~ end

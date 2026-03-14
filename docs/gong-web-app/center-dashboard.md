@@ -7,7 +7,7 @@ from myFasthtml import *
 from pathlib import Path
 from urllib.parse import quote_plus
 import shutil
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import asyncio
 import json
@@ -117,18 +117,20 @@ def date_check(resu, next_date_iso):
     # FIXME after discussion with Ivan
     return True
 
-async def save_center_db(session, centers, csms):
+async def save_center_db(session, centers, csms, offset):
     center_name = session['center']
+    print(f'offset: {offset}')
     if not session["planOK"]:
-        return Div(feedback_to_user({"error": "plan_not_ok"})) 
+        return {"error": "plan_not_ok"}
     state_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
     # PROD-FIX new field in table 'center'
     port = centers[center_name].routing_port
     save_db_Path = save_db_plan_timetable(center_name, centers)
-    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
-    print(f"now time at center {now_center}, will upload in {delay_1_s/3600} hours")
     state_mach.saving_changes()
+    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
+    now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
+    print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
     try:
         if isa_dev_computer():
             await asyncio.sleep(Globals.SHORT_DELAY)
@@ -141,7 +143,7 @@ async def save_center_db(session, centers, csms):
     except Exception as e:
         state_mach.file_not_trans()
         #return Redirect(f'/transfer_failed?reason=trans&mess={quote_plus(e)}')
-        return Redirect('/unfinished')
+        return {'error': e}
     else:
         delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
         try:
@@ -155,15 +157,15 @@ async def save_center_db(session, centers, csms):
         except Exception as e:
             state_mach.db_not_prod()
             #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
-            return Redirect('/unfinished')
+            return {'error': e}
         else:
             if date_check(resu, next_date_iso):
                 state_mach.db_prod_done()
-                return Redirect('/unfinished')
+                return {"success": "something"}
                 #return Redirect('/transfer_success')
             else:
                 state_mach.db_not_prod()
                 #return Redirect('/transfer_failed?reason=wrong_date')
-                return Redirect('/unfinished')
+                return {"error": "something"}
 
 ```

@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
 from myFasthtml import *
+import json
 from libs.states import create_center_state_machines
 from libs.auth import admin_required, verify_code, create_code, login
 from libs.cdash import dashboard, save_center_db
@@ -131,8 +132,10 @@ def get(session):
     return abandon_edit(session, csms)
 
 @rt('/save-center-db')
-async def get(session):
-    return await save_center_db(session, centers, csms)
+async def post(session, offset: int):
+    mess = await save_center_db(session, centers, csms, offset)
+    print(mess)
+    return Div(feedback_to_user(mess))
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]
@@ -174,15 +177,6 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#other-routes>>[init]
-
-@rt('/toasting/plan_not_OK')
-def get(session):
-    add_toast(session, "Cannot save a plan with lines not OK", "error")
-    add_toast(session, f"Toast is being cooked", "info")
-    add_toast(session, f"Toast is ready", "success")
-    add_toast(session, f"Toast is getting a bit crispy", "warning")
-    add_toast(session, f"Toast is burning!", "error")
-    return P("Cannot save plan")
 
 @rt('/no_access_right')
 def get():
