@@ -99,7 +99,8 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
     print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
-
+    err = "no error"
+    reason = ""
     try:
         if isa_dev_computer():
             await asyncio.sleep(Globals.SHORT_DELAY)
@@ -109,10 +110,11 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
             await asyncio.sleep(delay_1_s)
             #upload_real(port)
         state_mach.file_trans_done()
+        reason = "OK_file_transfer"
     except Exception as e:
         state_mach.file_not_trans()
-        #return Redirect(f'/transfer_failed?reason=trans&mess={quote_plus(e)}')
-        return {'error': e}
+        reason = "file_transfer_failed"
+        err = e
     else:
         delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
         try:
@@ -125,17 +127,24 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
                 #resu = download_real(port)
         except Exception as e:
             state_mach.db_not_prod()
+            reason = "production access failed"
+            err = e
             #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
-            return {'error': e}
         else:
             if date_check(resu, next_date_iso):
                 state_mach.db_prod_done()
-                return {"success": "something"}
+                reason = "OK_db_prod"
                 #return Redirect('/transfer_success')
             else:
                 state_mach.db_not_prod()
                 #return Redirect('/transfer_failed?reason=wrong_date')
-                return {"error": "something"}
+                reason = "in_production_failed"
+                err = "wrong file date"
+        finally:
+            pass
+    finally:
+        state = state_mach.current_state.id
+        return state, reason, err
 
 # ~/~ end
 # ~/~ end

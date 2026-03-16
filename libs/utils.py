@@ -1,5 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/utilities.md#libs/utils.py>>[init]
 import socket
+import tempfile
 import calendar
 from myFasthtml import *
 # import resend # moved to "myFasthtml.py"
@@ -7,6 +8,17 @@ from myFasthtml import *
 import os
 from datetime import datetime, date, timedelta
 import json
+
+temp_paths = {}
+
+def create_temp_path(center):
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+        temp_paths[center] = tmp_file.name
+
+def delete_temp_path(center):
+    if center in temp_paths and os.path.exists(temp_paths[center]):
+        os.unlink(temp_paths[center])
+    temp_paths[center] = ""
 
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
