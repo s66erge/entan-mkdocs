@@ -125,13 +125,10 @@ def save_db_plan_timetable(center_name, centers):
 def get_plan(temp_path):
     with open(temp_path, 'r') as f:
         return json.loads(f.read())
-    #return json.loads(centers[center].json_save)
 
 def save_plan(temp_path, plan):
     with open(temp_path, "w") as f:
         f.write(json.dumps(plan, default=str))
-    #centers.update(
-    #    center_name=center, json_save=json.dumps(plan, default=str))
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]

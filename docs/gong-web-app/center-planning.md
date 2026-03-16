@@ -201,6 +201,7 @@ def save_db_plan_timetable(center_name, centers):
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
     shutil.copy2(Path(source_db_file), Path(dest_db_file))
+
     dest_db = database(dest_db_file)
     dest_db.execute("DROP TABLE coming_periods")
     #for t in dest_db.t:
@@ -208,22 +209,17 @@ def save_db_plan_timetable(center_name, centers):
     coming_periods = dest_db.create(Coming_periods, pk='start_date')
     for record in get_plan(temp_paths[center_name]):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
-    with sqlite3.connect(dest_db_file) as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        rows = cur.fetchall()
+    dest_db.close()
+
     return Path(dest_db_file)
 
 def get_plan(temp_path):
     with open(temp_path, 'r') as f:
         return json.loads(f.read())
-    #return json.loads(centers[center].json_save)
 
 def save_plan(temp_path, plan):
     with open(temp_path, "w") as f:
         f.write(json.dumps(plan, default=str))
-    #centers.update(
-    #    center_name=center, json_save=json.dumps(plan, default=str))
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
