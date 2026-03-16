@@ -8,6 +8,7 @@
 
 ```{.python file = libs/utils.py}
 import socket
+import tempfile
 import calendar
 from myFasthtml import *
 # import resend # moved to "myFasthtml.py"
@@ -16,10 +17,22 @@ import os
 from datetime import datetime, date, timedelta
 import json
 
+temp_paths = {}
+
+def create_temp_path(center):
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+        temp_paths[center] = tmp_file.name
+
+def delete_temp_path(center):
+    if center in temp_paths and os.path.exists(temp_paths[center]):
+        os.unlink(temp_paths[center])
+    temp_paths[center] = ""
+
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     MONTHS_TO_FETCH = 12 # when fetching dharma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
+    SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
 
     @classmethod
     def get(cls, name, default=None):

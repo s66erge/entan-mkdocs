@@ -1,59 +1,31 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 import asyncio
 import json
+import os
+import shutil
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
-from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
+from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals, temp_paths
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
-from libs.utilsJS import JS_BLOCK_NAV
+from libs.dbset import Coming_periods, get_db_path
+from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
+
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
 # @rt('/planning/abandon_edit')
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if csms[this_center].edit.is_active:
+    if this_center in csms and csms[this_center].edit.is_active:
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
     elif isa_dev_computer():
         csms[this_center].force_to_free()    
     return  Redirect('/dashboard')
 
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-planning.md#js-client-timer>>[init]
-
-JS_CLIENT_TIMER = """
-function startCountdown(seconds, elementId) {
-    const element = document.getElementById(elementId);
-    let timeLeft = seconds;
-
-    function updateDisplay() {
-        if (timeLeft > 60) {
-            const minutes = Math.floor(timeLeft / 60);
-            element.textContent = `${minutes} min`;
-        } else {
-            element.textContent = `${timeLeft} sec`;
-        }
-    }
-    updateDisplay();
-
-    const interval = setInterval(() => {
-        timeLeft--;
-        updateDisplay();    
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            window.onbeforeunload = null;
-            window.location.href = '/planning/abandon_edit';
-        }
-    }, 1000);
-}
-// Get starting time from #start-time element and START AUTOMATICALLY
-const startSeconds = parseInt(document.getElementById('start-time').textContent);
-startCountdown(startSeconds, 'timer');
-
-"""
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
 def show_draft_plan_table(draft_plan, mess):
@@ -132,23 +104,42 @@ def load_dhamma_db(session):
         id="planning-periods"
     )
 
-def get_plan(centers, center):
-    return json.loads(centers[center].json_save)
+def save_db_plan_timetable(center_name, centers):
+    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
+    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
+    if os.path.exists(dest_db_file):
+        os.remove(dest_db_file)
+    shutil.copy2(Path(source_db_file), Path(dest_db_file))
 
-def save_plan(centers, center, plan):
-    centers.update(
-        center_name=center, json_save=json.dumps(plan, default=str))
+    dest_db = database(dest_db_file)
+    dest_db.execute("DROP TABLE coming_periods")
+    #for t in dest_db.t:
+    #    dest_db.execute(f"DROP TABLE {str(t)}")
+    coming_periods = dest_db.create(Coming_periods, pk='start_date')
+    for record in get_plan(temp_paths[center_name]):
+        coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
+    dest_db.close()
+
+    return Path(dest_db_file)
+
+def get_plan(temp_path):
+    with open(temp_path, 'r') as f:
+        return json.loads(f.read())
+
+def save_plan(temp_path, plan):
+    with open(temp_path, "w") as f:
+        f.write(json.dumps(plan, default=str))
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
     new_draft_plan = check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
+    await asyncio.to_thread(save_plan, temp_paths[selected_name], new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
-async def delete_line(session, centers, index: int):
+async def delete_line(session, centers, index):
     selected_name = session["center"]
-    plan = get_plan(centers, selected_name)
+    plan = get_plan(temp_paths[selected_name])
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -157,7 +148,7 @@ async def delete_line(session, centers, index: int):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session["center"]
-    plan = get_plan(centers, selected_name)
+    plan = get_plan(temp_paths[selected_name])
     # Create new plan line with user input
     new_line = {
         "start_date": start,
@@ -187,59 +178,65 @@ async def check_center_free(state_mach, center_lock, this_user):
             state_mach.model.user = this_user
             state_mach.start_editing()
             center_is_free = True
-        return center_is_free
+        return center_is_free, state_mach.current_state.id
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
-    session["center"] = selected_name
     session['planOK'] = False
     center_lock = clocks[selected_name]
-    # only one thread at a time to check if center is free and to set it as "editing" if it is free or it SHOULD be free
-    if await check_center_free(csms[selected_name], center_lock, session['auth']):
-        return Main(
-            Div(display_markdown("planning-t")),
-            Span(
-                Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
-                Button(f"Modify {selected_name} planning",
-                    name='load-plan-btn',
-                    hx_get=f"/planning/load_dhamma_db",
-                    hx_target="#planning-periods"),
-                Span(style="display: inline-block; width: 20px;"),
-                Button(f"Modify {selected_name} timetables",
-                    hx_get="/unfinished?goto_dash=NO",
-                    hx_target="#planning-periods"),
-                Span(style="display: inline-block; width: 20px;"),
-                A("return NO CHANGES",href="/planning/abandon_edit", _class="allow-navigation"),
-                Span(style="display: inline-block; width: 20px;"),
-                Button("SAVE CHANGES to center", _class="allow-navigation",
-                    hx_get="/save-center-db",
-                    hx_target="#line-feedback"),
-                #A("SAVE CHANGES to center", href=f"/save-center-db", _data_safe_nav="true"),
-                Span(style="display: inline-block; width: 20px;"),
-                Span("Remainning time: "),
-                Span("", id="timer", cls="timer-display")
-            ),
-            Div(id="line-feedback"),
-            Script(JS_CLIENT_TIMER),
-            Script(JS_BLOCK_NAV),
-            P(""), 
-            Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
-            cls="container"
-        )
-    else:
-        timezon = centers[selected_name].timezone
-        return Main(
-            Div(display_markdown("planning-busy-t")),
-            P(f"timezone: {timezon}"),
-            Span(
-                A("dashboard", href="/dashboard"),
-                Span(style="display: inline-block; width: 20px;"),
-                Button("Logout", hx_post="/logout"),
-                Span(style="display: inline-block; width: 20px;"),
-                A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
-            ),
-            cls="container"
-        )
+    return Main(
+        Div(display_markdown("planning-t")),
+        Span(
+            Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
+            Button(f"Modify {selected_name} planning",
+                hx_get=f"/planning/load_dhamma_db",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button(f"Modify {selected_name} timetables",
+                hx_get="/unfinished?goto_dash=NO",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
+            Span(style="display: inline-block; width: 20px;"),
+            Span("", id="offset", type="hidden"),
+            A(f"SAVE CHANGES to {selected_name}", id="save-link", href="/save-center-db", cls="allownavigation"),
+            Script("""
+            const offset = new Date().getTimezoneOffset();
+            const link = document.getElementById("save-link"); //<a id="save-link">
+            const sep = link.href.includes("?") ? "&" : "?";
+            link.href = link.href + `${sep}offset=${offset}`;
+            """),
+            Span(style="display: inline-block; width: 20px;"),
+            Span("Remainning time: "),
+            Span("", id="timer", cls="timer-display")
+        ),
+        Div(id="line-feedback"),
+        Script(JS_CLIENT_TIMER),
+        Script(JS_BLOCK_NAV),
+        P(""), 
+        Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
+        cls="container"
+    )
+
+#@rt('/status_page')
+def status_page(center_name, centers, reason, state, err):
+    timezon = centers[center_name].timezone
+    return Main(
+        Div(display_markdown("planning-busy-t")),
+        P(f"timezone: {timezon}"),
+        P(f"state: {state}"),
+        P(f"reason: {reason}"),
+        P(f"error: {err}"),
+        Span(
+            A("dashboard", href="/dashboard"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button("Logout", hx_post="/logout"),
+            Span(style="display: inline-block; width: 20px;"),
+            A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
+        ),
+        cls="container"
+    )
+
 
 # ~/~ end
 

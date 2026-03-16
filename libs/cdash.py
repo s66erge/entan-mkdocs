@@ -1,14 +1,16 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 from myFasthtml import *
 from pathlib import Path
-import shutil
-from datetime import datetime, timedelta
+from urllib.parse import quote_plus
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import asyncio
+from libs.dbset import get_db_path
 import json
 import os
-from libs.utils import display_markdown, feedback_to_user, Globals
-from libs.dbset import Coming_periods, get_db_path
+from libs.utils import isa_dev_computer, display_markdown, feedback_to_user, Globals
+from libs.send2pi import file_download, file_upload, session_connect
+
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -59,49 +61,90 @@ def dashboard(session, users, planners):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#save-center-db>>[init]
 
-async def save_center_db(session, centers, csms):
-    center_name = session['center']
-    if not session["planOK"]:
-        return Div(feedback_to_user({"error": "plan_not_ok"})) 
-    state_mach = csms[center_name]
-
-    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
-    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
-    if os.path.exists(dest_db_file):
-        os.remove(dest_db_file)
-    shutil.copy2(Path(source_db_file), Path(dest_db_file))
-    dest_db = database(dest_db_file)
-    dest_db.execute("DROP TABLE coming_periods")
-    #for t in dest_db.t:
-    #    dest_db.execute(f"DROP TABLE {str(t)}")
-    coming_periods = dest_db.create(Coming_periods, pk='start_date')
-    for record in json.loads(centers[center_name].json_save):
-        coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
-        #dest_db.execute("""
-        #INSERT INTO coming_periods (start_date, period_type) 
-        #VALUES (?, ?)
-        #""", [record["start_date"], record["period_type"]])
-
-    center_tz = ZoneInfo(centers[center_name].timezone)
+def get_event_delay(center_tz, hours, minutes):
     now_center = datetime.now(center_tz)
-    if now_center.hour >= 1:
-        # If it's already past 1 AM, schedule for tomorrow
-        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
-    else:
-        next_1am = now_center.replace(hour=1, minute=0, second=0, microsecond=0)
-    next_2am = next_1am + timedelta(hours=1, minutes=10)
+    next_event = now_center.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+    if now_center.hour >= hours and now_center.minute >= minutes:
+        # If it's already past the target time, schedule for tomorrow
+        next_event +=  timedelta(days=1)
+    next_date_iso = next_event.date().isoformat()
+    delay_s = (next_event - now_center).total_seconds()
+    return now_center, delay_s, next_date_iso  
 
-    delay_s = (next_1am - now_center).total_seconds()
-    delay_h = delay_s / 3600  
-    print(f"now time at center {now_center}, will upload in {delay_h} hours")
+def upload_test(localDBfilePath, port):
+    remoteDBpath = Path("/home/pi/test")
+    ssh_session = session_connect(port)
+    file_upload(localDBfilePath, remoteDBpath, ssh_session)
+
+def download_test(remoteDBfilePath, port):
+    localDBpath = Path(get_db_path())
+    ssh_session = session_connect(port)
+    file_download(remoteDBfilePath, localDBpath, ssh_session)
+
+def date_check(resu, next_date_iso):
+    # FIXME after discussion with Ivan
+    return True
+
+async def send_check_center_db(session, centers, csms, offset, save_db_path):
+    center_name = session['center']
+    print(f'offset: {offset}')
+    if not session["planOK"]:
+        return {"error": "plan_not_ok"}
+    state_mach = csms[center_name]
+    center_tz = ZoneInfo(centers[center_name].timezone)
+    # PROD-FIX new field "port" in table 'center'
+    port = centers[center_name].routing_port
+    #save_db_Path = save_db_plan_timetable(center_name, centers)
     state_mach.saving_changes()
-    #await asyncio.sleep(delay_s)
-    await asyncio.sleep(1)
-    #upload_db()
-
-    state_mach.file_trans_done()
-    state_mach.db_prod_done()
-    return  Redirect('/dashboard')
+    now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
+    now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
+    print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
+    err = "no error"
+    reason = ""
+    try:
+        if isa_dev_computer():
+            await asyncio.sleep(Globals.SHORT_DELAY)
+            localDBfilePath = Path(get_db_path() + "/" + "test22.json")
+            upload_test(localDBfilePath, port)
+        else:
+            await asyncio.sleep(delay_1_s)
+            #upload_real(port)
+        state_mach.file_trans_done()
+        reason = "OK_file_transfer"
+    except Exception as e:
+        state_mach.file_not_trans()
+        reason = "file_transfer_failed"
+        err = e
+    else:
+        delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
+        try:
+            if isa_dev_computer():
+                await asyncio.sleep(Globals.SHORT_DELAY)
+                remoteDBfilePath = Path("/home/pi/test" + "/" + "test22.json")
+                resu = download_test(remoteDBfilePath, port)
+            else:
+                await asyncio.sleep(delay_2_s)
+                #resu = download_real(port)
+        except Exception as e:
+            state_mach.db_not_prod()
+            reason = "production access failed"
+            err = e
+            #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
+        else:
+            if date_check(resu, next_date_iso):
+                state_mach.db_prod_done()
+                reason = "OK_db_prod"
+                #return Redirect('/transfer_success')
+            else:
+                state_mach.db_not_prod()
+                #return Redirect('/transfer_failed?reason=wrong_date')
+                reason = "in_production_failed"
+                err = "wrong file date"
+        finally:
+            pass
+    finally:
+        state = state_mach.current_state.id
+        return state, reason, err
 
 # ~/~ end
 # ~/~ end

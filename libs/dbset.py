@@ -10,7 +10,7 @@ from libs.utils import isa_dev_computer
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
-class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
+class Center: center_name: str; timezone: str; gong_db_name: str; location: str; routing_port: int; other_course: str; status: str; created_by: str; status_start: str
 class Planner: user_email: str; center_name: str
 
 class Coming_periods: start_date: str; period_type: str
@@ -71,18 +71,23 @@ def init_data(roles, users, centers, planners):
     }
     """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00", json_save="")
-        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00", json_save="")
+        centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", routing_port= 7011, other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
     else:
         centers.update(center_name="Mahi", other_course=oc_mahi)
         centers.update(center_name="Pajjota", other_course=oc_pajj)
 
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
-        users.insert(email="spegoff@gmail.com", name="sp2", role_name="user", is_active=True)
+        users.insert(email="spegoff@gmail.com", name="sp2", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
+        users.insert(email="ivan.tadic@dhamma.org", name="Ivan Tadic", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
 
     if not planners():
         planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
+        planners.insert(user_email= "spegoff@authentica.eu", center_name= "Pajjota")
         planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
+        planners.insert(user_email= "spegoff@gmail.com", center_name= "Mahi")
+        planners.insert(user_email= "ivan.tadic@dhamma.org", center_name= "Pajjota")
+        planners.insert(user_email= "ivan.tadic@dhamma.org", center_name= "Mahi")
 # ~/~ end
 # ~/~ end

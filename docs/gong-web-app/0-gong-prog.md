@@ -6,16 +6,17 @@
 ```{.python file=main.py}
 
 from myFasthtml import *
+import json
 from libs.states import create_center_state_machines
 from libs.auth import admin_required, verify_code, create_code, login
-from libs.cdash import dashboard, save_center_db
+from libs.cdash import dashboard, send_check_center_db
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
 from libs.dbset import Role, User, Center, Planner, init_data, get_central_db, get_db_path
-from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
+from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit, save_db_plan_timetable, check_center_free, status_page
 from libs.fetch import fetch_dhamma_courses
 from libs.admin import show_page
 from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
-from libs.utils import feedback_to_user, display_markdown, Globals
+from libs.utils import feedback_to_user, display_markdown, Globals, create_temp_path, delete_temp_path
 #  from starlette.testclient import TestClient
 
 <<initialize-program>>
@@ -48,12 +49,6 @@ app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before
 db_path = get_db_path()
 db = get_central_db()
 
-'''
-class Role: role_name: str; description: str
-class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
-class Center: center_name: str; timezone: str; gong_db_name: str; location: str; other_course: str; status: str; created_by: str; status_start: str; json_save: str
-class Planner: user_email: str; center_name: str
-'''
 roles = db.create(Role, pk='role_name')
 users = db.create(User, pk='email')
 centers = db.create(Center, pk='center_name')
@@ -62,7 +57,6 @@ planners = db.create(Planner, pk=('user_email', 'center_name'))
 init_data(roles, users, centers, planners)
 
 csms, clocks = create_center_state_machines(centers)
-
 ```
 
 ```{.python #login-authenticate}
@@ -124,7 +118,17 @@ def get(request):
 async def get(session, request):
     params = dict(request.query_params)
     center = params.get("selected_name")
-    return await planning_page(session, center, centers, csms, clocks)
+    session["center"] = center
+    enter_edit_OK, state = await check_center_free(csms[center], clocks[center], session['auth'])
+    if enter_edit_OK:
+        create_temp_path(center)
+        return await planning_page(session, center, centers, csms, clocks)
+    else:
+        return Redirect(f"/status_page?center={center}&reason=not_free&state={state}&err=no_error")
+
+@rt('/status_page')
+def get(session, center: str, reason: str, state: str, err:str):
+    return status_page(center, centers, reason, state, err)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -145,11 +149,16 @@ async def post(session, ptype: str, start: str):
 
 @rt('/planning/abandon_edit')
 def get(session):
+    delete_temp_path(session["center"])
     return abandon_edit(session, csms)
 
 @rt('/save-center-db')
-async def get(session):
-    return await save_center_db(session, centers, csms)
+async def get(session, offset: int):
+    save_db_path = save_db_plan_timetable(session["center"], centers)
+    delete_temp_path(session["center"])
+    state, reason, err = await send_check_center_db(session, centers, csms, offset, save_db_path)
+    return Redirect(f"/status_page?center={session["center"]}&state={state}&reason={reason}&err={err}")
+
 
 ```
 
@@ -193,15 +202,6 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 ```
 
 ```{.python #other-routes}
-
-@rt('/toasting/plan_not_OK')
-def get(session):
-    add_toast(session, "Cannot save a plan with lines not OK", "error")
-    add_toast(session, f"Toast is being cooked", "info")
-    add_toast(session, f"Toast is ready", "success")
-    add_toast(session, f"Toast is getting a bit crispy", "warning")
-    add_toast(session, f"Toast is burning!", "error")
-    return P("Cannot save plan")
 
 @rt('/no_access_right')
 def get():
