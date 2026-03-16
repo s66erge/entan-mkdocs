@@ -5,13 +5,29 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```{.python file=libs/planning.py}
 import asyncio
 import json
+import os
+import shutil
+import tempfile
 from datetime import datetime, timedelta, timezone
 from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, Globals
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
+from libs.dbset import Coming_periods, get_db_path
 from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
+
+temp_paths = {}
+
+def create_temp_paths(centers):
+    names = [getattr(c, "center_name") for c in centers()]
+    for name in names:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+            temp_paths[name] = tmp_file.name
+
+#def delete_temp_path(center):
+    #os.unlink(temp_paths[center])
+    #temp_paths[center] = ""
 
 <<abandon-edit>>
 <<create-html-table>>
@@ -202,23 +218,42 @@ def load_dhamma_db(session):
         id="planning-periods"
     )
 
-def get_plan(centers, center):
-    return json.loads(centers[center].json_save)
+def save_db_plan_timetable(center_name, centers):
+    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
+    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
+    if os.path.exists(dest_db_file):
+        os.remove(dest_db_file)
+    shutil.copy2(Path(source_db_file), Path(dest_db_file))
+    dest_db = database(dest_db_file)
+    dest_db.execute("DROP TABLE coming_periods")
+    #for t in dest_db.t:
+    #    dest_db.execute(f"DROP TABLE {str(t)}")
+    coming_periods = dest_db.create(Coming_periods, pk='start_date')
+    for record in get_plan(temp_paths[center_name]):
+        coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
+    return Path(dest_db_file)
 
-def save_plan(centers, center, plan):
-    centers.update(
-        center_name=center, json_save=json.dumps(plan, default=str))
+def get_plan(temp_path):
+    with open(temp_path, 'r') as f:
+        return json.loads(f.read())
+    #return json.loads(centers[center].json_save)
+
+def save_plan(temp_path, plan):
+    with open(temp_path, "w") as f:
+        f.write(json.dumps(plan, default=str))
+    #centers.update(
+    #    center_name=center, json_save=json.dumps(plan, default=str))
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
     new_draft_plan = check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(save_plan, centers, selected_name, new_draft_plan)
+    await asyncio.to_thread(save_plan, temp_paths[selected_name], new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
-async def delete_line(session, centers, index: int):
+async def delete_line(session, centers, index):
     selected_name = session["center"]
-    plan = get_plan(centers, selected_name)
+    plan = get_plan(temp_paths[selected_name])
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -227,7 +262,7 @@ async def delete_line(session, centers, index: int):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session["center"]
-    plan = get_plan(centers, selected_name)
+    plan = get_plan(temp_paths[selected_name])
     # Create new plan line with user input
     new_line = {
         "start_date": start,

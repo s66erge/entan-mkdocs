@@ -2,14 +2,13 @@
 from myFasthtml import *
 from pathlib import Path
 from urllib.parse import quote_plus
-import shutil
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import asyncio
+from libs.dbset import get_db_path
 import json
 import os
 from libs.utils import isa_dev_computer, display_markdown, feedback_to_user, Globals
-from libs.dbset import Coming_periods, get_db_path
 from libs.send2pi import file_download, file_upload, session_connect
 
 
@@ -62,25 +61,6 @@ def dashboard(session, users, planners):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#save-center-db>>[init]
 
-def save_db_plan_timetable(center_name, centers):
-    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
-    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
-    if os.path.exists(dest_db_file):
-        os.remove(dest_db_file)
-    shutil.copy2(Path(source_db_file), Path(dest_db_file))
-    dest_db = database(dest_db_file)
-    dest_db.execute("DROP TABLE coming_periods")
-    #for t in dest_db.t:
-    #    dest_db.execute(f"DROP TABLE {str(t)}")
-    coming_periods = dest_db.create(Coming_periods, pk='start_date')
-    for record in json.loads(centers[center_name].json_save):
-        coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
-        #dest_db.execute("""
-        #INSERT INTO coming_periods (start_date, period_type) 
-        #VALUES (?, ?)
-        #""", [record["start_date"], record["period_type"]])
-    return Path(dest_db_file)
-
 def get_event_delay(center_tz, hours, minutes):
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=hours, minute=minutes, second=0, microsecond=0)
@@ -105,20 +85,21 @@ def date_check(resu, next_date_iso):
     # FIXME after discussion with Ivan
     return True
 
-async def save_center_db(session, centers, csms, offset):
+async def send_check_center_db(session, centers, csms, offset, save_db_path):
     center_name = session['center']
     print(f'offset: {offset}')
     if not session["planOK"]:
         return {"error": "plan_not_ok"}
     state_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
-    # PROD-FIX new field in table 'center'
+    # PROD-FIX new field "port" in table 'center'
     port = centers[center_name].routing_port
-    save_db_Path = save_db_plan_timetable(center_name, centers)
+    #save_db_Path = save_db_plan_timetable(center_name, centers)
     state_mach.saving_changes()
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
     print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
+
     try:
         if isa_dev_computer():
             await asyncio.sleep(Globals.SHORT_DELAY)

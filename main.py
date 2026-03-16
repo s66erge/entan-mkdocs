@@ -4,10 +4,10 @@ from myFasthtml import *
 import json
 from libs.states import create_center_state_machines
 from libs.auth import admin_required, verify_code, create_code, login
-from libs.cdash import dashboard, save_center_db
+from libs.cdash import dashboard, send_check_center_db
 from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
 from libs.dbset import Role, User, Center, Planner, init_data, get_central_db, get_db_path
-from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit
+from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit, create_temp_paths, save_db_plan_timetable
 from libs.fetch import fetch_dhamma_courses
 from libs.admin import show_page
 from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
@@ -49,7 +49,7 @@ planners = db.create(Planner, pk=('user_email', 'center_name'))
 init_data(roles, users, centers, planners)
 
 csms, clocks = create_center_state_machines(centers)
-
+create_temp_paths(centers)
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#login-authenticate>>[init]
 
@@ -133,7 +133,8 @@ def get(session):
 
 @rt('/save-center-db')
 async def post(session, offset: int):
-    mess = await save_center_db(session, centers, csms, offset)
+    save_db_path = save_db_plan_timetable(session["center"], centers)
+    mess = await send_check_center_db(session, centers, csms, offset, save_db_path)
     print(mess)
     return Div(feedback_to_user(mess))
 
