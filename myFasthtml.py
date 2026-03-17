@@ -1,5 +1,5 @@
 from fasthtml.common import *
-from statemachine import State, Event, StateMachine
+from statemachine import State, Event, StateMachine, StateChart
 import pandas as pd
 import aiohttp
 import resend

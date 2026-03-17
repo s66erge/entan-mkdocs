@@ -93,7 +93,7 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
     state_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
     port = centers[center_name].routing_port
-    state_mach.saving_changes()
+    state_mach.progress()
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
     print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
@@ -107,10 +107,11 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
         else:
             await asyncio.sleep(delay_1_s)
             #upload_real(port)
-        state_mach.file_trans_done()
+        state_mach.progress()
         reason = "OK_file_transfer"
+        print(reason)
     except Exception as e:
-        state_mach.file_not_trans()
+        state_mach.problem()
         reason = "file_transfer_failed"
         err = e
     else:
@@ -123,25 +124,31 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
             else:
                 await asyncio.sleep(delay_2_s)
                 #resu = download_real(port)
+            state_mach.progress()
+            reason = "OK received prod info"
+            print(reason)
         except Exception as e:
-            state_mach.db_not_prod()
-            reason = "production access failed"
+            state_mach.problem()
+            reason = "production info not received"
             err = e
             #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
         else:
             if date_check(resu, next_date_iso):
-                state_mach.db_prod_done()
-                reason = "OK_db_prod"
+                state_mach.progress()
+                reason = "OK db production version"
+                print(reason)
                 #return Redirect('/transfer_success')
             else:
-                state_mach.db_not_prod()
                 #return Redirect('/transfer_failed?reason=wrong_date')
+                state_mach.problem()
                 reason = "in_production_failed"
+                print(reason)
                 err = "wrong file date"
+                state_mach.problem()
         finally:
             pass
     finally:
-        state = state_mach.current_state.id
+        state = state_mach.configuration[0].id
         return state, reason, err
 
 # ~/~ end

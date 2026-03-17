@@ -18,7 +18,7 @@ from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if this_center in csms and csms[this_center].current_state == "edit":
+    if this_center in csms and csms[this_center].configuration[0].id == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
     elif bypass(session):
@@ -171,13 +171,13 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
-        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
+        if state_mach.configuration[0].id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
             state_mach.abandon_changes()
-        if state_mach.current_state.id == "free":
+        if state_mach.configuration[0].id == "free":
             state_mach.model.user = this_user
-            state_mach.start_editing()
+            state_mach.progress()
             center_is_free = True
-        return center_is_free, state_mach.current_state.id
+        return center_is_free, state_mach.configuration[0].id
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
@@ -187,6 +187,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
         Div(display_markdown("planning-t")),
         Span(
             Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
+            Span('/planning/abandon_edit', id="timer-redirect", style="display: none;"),
             Button(f"Modify {selected_name} planning",
                 hx_get=f"/planning/load_dhamma_db",
                 hx_target="#planning-periods"),

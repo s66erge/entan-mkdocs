@@ -69,12 +69,13 @@ function startCountdown(seconds, elementId) {
         if (timeLeft <= 0) {
             clearInterval(interval);
             window.onbeforeunload = null;
-            window.location.href = '/planning/abandon_edit';
+            window.location.href = `${timerRedirect}`;
         }
     }, 1000);
 }
 // Get starting time from #start-time element and START AUTOMATICALLY
 const startSeconds = parseInt(document.getElementById('start-time').textContent);
+const timerRedirect = parseInt(document.getElementById('timer-redirect').textContent);
 startCountdown(startSeconds, 'timer');
 """
 # ~/~ end
