@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
-from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, get_db_path, Globals, temp_paths
+from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, get_db_path, bypass, Globals, temp_paths
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.dbset import Coming_periods
 from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
@@ -71,7 +71,8 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("", id="offset", type="hidden"),
-            A(f"SAVE CHANGES to {selected_name}", id="save-link", href="/save-center-db", cls="allownavigation"),
+            A(f"SAVE CHANGES to {selected_name}", id="save-link", href="/save-center-db", 
+                cls="allownavigation") if bypass(session) else None,
             Script("""
             const offset = new Date().getTimezoneOffset();
             const link = document.getElementById("save-link"); //<a id="save-link">
@@ -93,7 +94,6 @@ async def planning_page(session, selected_name, centers, csms, clocks):
 #@rt('/status_page')
 def status_page(session, center_name, centers, reason, state, err):
     timezon = centers[center_name].timezone
-    bypass_state = True if isa_dev_computer() or session["auth"] == Globals.BYPASS_USER else False
     return Main(
         Div(display_markdown("planning-busy-t")),
         P(f"timezone: {timezon}"),
@@ -105,7 +105,7 @@ def status_page(session, center_name, centers, reason, state, err):
             Span(style="display: inline-block; width: 20px;"),
             Button("Logout", hx_post="/logout"),
             Span(style="display: inline-block; width: 20px;"),
-            A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() or bypass_state else None,        
+            A("set FREE",href="/planning/abandon_edit") if bypass(session) else None,        
         ),
         cls="container"
     )
@@ -268,7 +268,7 @@ def abandon_edit(session, csms):
     if this_center in csms and csms[this_center].current_state == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-    elif isa_dev_computer() or session["auth"] == Globals.BYPASS_USER:
+    elif bypass(session):
         csms[this_center].force_to_free()
     return  Redirect('/dashboard')
 

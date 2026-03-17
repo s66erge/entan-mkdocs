@@ -74,6 +74,10 @@ def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
+
+def bypass(session):
+    return isa_dev_computer() or session["auth"] == Globals.BYPASS_USER
+
 ```
 
 ### Check if current db is a teporary db in memory
