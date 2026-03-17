@@ -21,7 +21,7 @@ def abandon_edit(session, csms):
     if this_center in csms and csms[this_center].current_state == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-    elif isa_dev_computer() or session["user"] == Globals.BYPASS_USER:
+    elif isa_dev_computer() or session["auth"] == Globals.BYPASS_USER:
         csms[this_center].force_to_free()
     return  Redirect('/dashboard')
 
@@ -220,7 +220,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
 #@rt('/status_page')
 def status_page(session, center_name, centers, reason, state, err):
     timezon = centers[center_name].timezone
-    bypass_state = True if isa_dev_computer() or session["user"] == Globals.BYPASS_USER else False
+    bypass_state = True if isa_dev_computer() or session["auth"] == Globals.BYPASS_USER else False
     return Main(
         Div(display_markdown("planning-busy-t")),
         P(f"timezone: {timezon}"),
