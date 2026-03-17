@@ -9,7 +9,7 @@ from urllib.parse import quote_plus
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import asyncio
-from libs.dbset import get_db_path
+from libs.utils import get_db_path
 import json
 import os
 from libs.utils import isa_dev_computer, display_markdown, feedback_to_user, Globals
@@ -104,9 +104,7 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
         return {"error": "plan_not_ok"}
     state_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
-    # PROD-FIX new field "port" in table 'center'
     port = centers[center_name].routing_port
-    #save_db_Path = save_db_plan_timetable(center_name, centers)
     state_mach.saving_changes()
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)

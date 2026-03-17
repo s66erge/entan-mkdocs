@@ -5,8 +5,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```{.python file=libs/plancheck.py}
 from myFasthtml import *
 from datetime import date
-from libs.dbset import get_db_path
-from libs.utils import add_months_days
+from libs.utils import add_months_days, get_db_path
 
 <<this-center-courses>>
 <<obtain-durations>>

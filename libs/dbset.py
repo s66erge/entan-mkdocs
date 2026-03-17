@@ -4,7 +4,8 @@ import textwrap
 import os
 # import Database # for PostgreSQL, moved to # from myFasthtml 
 # import database # for SQLite, moved to # from myFasthtml
-from libs.utils import isa_dev_computer
+from libs.utils import isa_dev_computer, get_db_path
+
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#dataclasses>>[init]
 
@@ -21,6 +22,7 @@ class Targets: id: int; shortname: str; longname: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]
+"""
 def get_db_path():
     if isa_dev_computer():
         root = ""
@@ -29,6 +31,7 @@ def get_db_path():
     else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
+"""
 
 # on postgreSQL
 def get_central_db():

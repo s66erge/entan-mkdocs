@@ -7,12 +7,24 @@ from myFasthtml import *
 # import markdown2 # moved to "myFasthtml.py"
 import os
 from datetime import datetime, date, timedelta
-import json
 
 temp_paths = {}
 
+def get_db_path():
+    if isa_dev_computer():
+        root = ""
+    elif os.environ.get('Github_CI') == 'true': # Github CI actions
+        root = ""
+    else:   # Railway production permanent storage
+        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
+    return root + "data/"
+
 def create_temp_path(center):
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+    # FIXME create files inside a WRITABLE direcory : get_db_path !!!
+    # Create temp file in a specific directory
+    #with tempfile.NamedTemporaryFile(mode='w', delete=False, dir='/path/to/directory') as tmp_file:
+    temp_dir = get_db_path() + "temp/"
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
         temp_paths[center] = tmp_file.name
 
 def delete_temp_path(center):
