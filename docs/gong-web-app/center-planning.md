@@ -45,9 +45,10 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
+        print(f"current state: {state_mach.current_state.id}")
         if state_mach.edit.is_active and delta > Globals.INITIAL_COUNTDOWN:
             state_mach.abandon_changes()
-        if state_mach.free.is_active:
+        if state_mach.current_state.id == "free":
             state_mach.model.user = this_user
             state_mach.start_editing()
             center_is_free = True
