@@ -10,7 +10,28 @@ from libs.dbset import get_central_db
 from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+class HistoryListener:
+    def __init__(self):
+        self.max_size = 50
+        self.sm = None
+        self.entries = []
+
+    def setup(self, sm, max_size, **kwargs):
+        self.max_size = max_size
+        self.sm = sm
+
+    def after_transition(self, event, source, target):
+        log = f"At {self.sm.model.get_start_time()}, {self.sm.model.get_user()} moved {self.sm.model.center_name} from {source.id} -> {target.id} on {event}"
+        self.entries.append(log)
+        print(log)
+        if len(self.entries) > self.max_size:
+            self.entries.pop(0)
+
+
 class CenterState(StateMachine):
+
+    listeners = [HistoryListener]
+
     free = State(initial=True)   # free to be edited
     edit = State()               # next version being edited
     w01_transfer = State()       # db ready, waiting for 1am to do/check transfer 
@@ -32,12 +53,13 @@ class CenterState(StateMachine):
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
+    """
     def on_enter_state(self, target, event):
         if getattr(self.model, "user", None) :
             print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
         else:
             print(f"into '{target.id}' on '{event.name}'")
-
+    """
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
@@ -109,7 +131,7 @@ def create_center_state_machines(centers):
     names = [c.get("center_name") for c in centers_list]
     for name in names:
         center_state = CenterDataModel(center_name=name, centers=centers)
-        sm = CenterState(model=center_state)
+        sm = CenterState(model=center_state, max_size=25)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
     return csms, clocks

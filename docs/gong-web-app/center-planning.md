@@ -72,13 +72,19 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("", id="offset", type="hidden"),
-            A(f"SAVE CHANGES to {selected_name}", id="save-link", href="/save-center-db", 
+            Button(f"SAVE CHANGES to {selected_name}", id="save-btn",
+                hx_get="/save-center-db",
+                hx_target="#line-feedback",
                 cls="allownavigation") if bypass(session) else None,
             Script("""
             const offset = new Date().getTimezoneOffset();
-            const link = document.getElementById("save-link"); //<a id="save-link">
-            const sep = link.href.includes("?") ? "&" : "?";
-            link.href = link.href + `${sep}offset=${offset}`;
+            const btn = document.getElementById("save-btn"); // <button id="save-btn">
+            const current = btn.getAttribute("hx-get");
+            const sep = current.includes("?") ? "&" : "?";
+            btn.setAttribute("hx-get", current + `${sep}offset=${offset}`);
+            //const link = document.getElementById("save-link"); //<a id="save-link">
+            //const sep = link.href.includes("?") ? "&" : "?";
+            //link.href = link.href + `${sep}offset=${offset}`;
             """),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
@@ -93,7 +99,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
     )
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, reason, state, err):
+def status_page(session, center_name, centers, csms, reason, state, err):
     timezon = centers[center_name].timezone
     return Main(
         Div(display_markdown("planning-busy-t")),
@@ -101,6 +107,7 @@ def status_page(session, center_name, centers, reason, state, err):
         P(f"state: {state}"),
         P(f"reason: {reason}"),
         P(f"error: {err}"),
+        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries]),
         Span(
             A("dashboard", href="/dashboard"),
             Span(style="display: inline-block; width: 20px;"),
