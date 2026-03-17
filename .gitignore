@@ -20,3 +20,6 @@ __pycache__/*
 !md-text/
 !setup/
 !tests/
+
+# and ignore this
+/data/temp
