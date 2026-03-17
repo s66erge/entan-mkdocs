@@ -87,7 +87,7 @@ function startCountdown(seconds, elementId) {
 }
 // Get starting time from #start-time element and START AUTOMATICALLY
 const startSeconds = parseInt(document.getElementById('start-time').textContent);
-const timerRedirect = parseInt(document.getElementById('timer-redirect').textContent);
+const timerRedirect = document.getElementById('timer-redirect').textContent;
 startCountdown(startSeconds, 'timer');
 """
 ```
