@@ -37,7 +37,7 @@ class Globals:
     MONTHS_TO_FETCH = 12 # when fetching dharma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
-
+    BYPASS_USER = "spegoff@authentica.eu" # can force state to free IN PRODUCTION
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)

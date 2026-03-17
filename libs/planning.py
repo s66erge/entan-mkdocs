@@ -3,7 +3,6 @@ import asyncio
 import json
 import os
 import shutil
-import sqlite3
 from datetime import datetime, timedelta, timezone
 from re import match
 from urllib.parse import quote_plus
@@ -19,11 +18,11 @@ from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
 def abandon_edit(session, csms):
     this_center = session["center"]
     session["center"] = ""
-    if this_center in csms and csms[this_center].edit.is_active:
+    if this_center in csms and csms[this_center].current_state == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-    elif isa_dev_computer():
-        csms[this_center].force_to_free()    
+    elif isa_dev_computer() or session["user"] == Globals.BYPASS_USER:
+        csms[this_center].force_to_free()
     return  Redirect('/dashboard')
 
 # ~/~ end
@@ -172,8 +171,7 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
-        print(f"current state: {state_mach.current_state.id}")
-        if state_mach.edit.is_active and delta > Globals.INITIAL_COUNTDOWN:
+        if state_mach.current_state.id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
             state_mach.abandon_changes()
         if state_mach.current_state.id == "free":
             state_mach.model.user = this_user
@@ -220,8 +218,9 @@ async def planning_page(session, selected_name, centers, csms, clocks):
     )
 
 #@rt('/status_page')
-def status_page(center_name, centers, reason, state, err):
+def status_page(session, center_name, centers, reason, state, err):
     timezon = centers[center_name].timezone
+    bypass_state = True if isa_dev_computer() or session["user"] == Globals.BYPASS_USER else False
     return Main(
         Div(display_markdown("planning-busy-t")),
         P(f"timezone: {timezon}"),
@@ -233,7 +232,7 @@ def status_page(center_name, centers, reason, state, err):
             Span(style="display: inline-block; width: 20px;"),
             Button("Logout", hx_post="/logout"),
             Span(style="display: inline-block; width: 20px;"),
-            A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() else None,        
+            A("set FREE",href="/planning/abandon_edit") if isa_dev_computer() or bypass_state else None,        
         ),
         cls="container"
     )

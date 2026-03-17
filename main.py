@@ -111,7 +111,7 @@ async def get(session, request):
 
 @rt('/status_page')
 def get(session, center: str, reason: str, state: str, err:str):
-    return status_page(center, centers, reason, state, err)
+    return status_page(session, center, centers, reason, state, err)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
