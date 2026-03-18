@@ -7,25 +7,12 @@ from datetime import datetime, timedelta, timezone
 from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
-from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, get_db_path, bypass, Globals, temp_paths
+from libs.utils import display_markdown, feedback_to_user, get_db_path, bypass, Globals, temp_paths
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.dbset import Coming_periods
 from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
 
 
-# ~/~ begin <<docs/gong-web-app/center-planning.md#abandon-edit>>[init]
-# @rt('/planning/abandon_edit')
-def abandon_edit(session, csms):
-    this_center = session["center"]
-    session["center"] = ""
-    if this_center in csms and csms[this_center].configuration[0].id == "edit":
-        csms[this_center].abandon_changes()
-        csms[this_center].model.user = None
-    elif bypass(session):
-        csms[this_center].force_to_free()
-    return  Redirect('/dashboard')
-
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
 def show_draft_plan_table(draft_plan, mess):
     # Create an HTML table from a draft plan list of dictionaries
@@ -164,20 +151,6 @@ async def add_line(session, centers, ptype, start):
     return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
-async def check_center_free(state_mach, center_lock, this_user):
-    async with center_lock:
-        center_is_free = False
-        tnow = datetime.now(timezone.utc)
-        start_state_time = state_mach.model.get_start_time()
-        past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
-        delta = (tnow-past).total_seconds()
-        if state_mach.configuration[0].id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
-            state_mach.abandon_changes()
-        if state_mach.configuration[0].id == "free":
-            state_mach.model.user = this_user
-            state_mach.progress()
-            center_is_free = True
-        return center_is_free, state_mach.configuration[0].id
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):

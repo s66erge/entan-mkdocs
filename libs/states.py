@@ -3,11 +3,9 @@ from abc import ABC
 from abc import abstractmethod
 import asyncio
 from myFasthtml import *
-import time
 from datetime import datetime, timezone
-# from statemachine import State, Event, StateMachine, StateChart # moved to "myFasthtml.py"
+from statemachine import State, Event, StateMachine, StateChart
 from libs.dbset import get_central_db
-from libs.utils import isa_dev_computer
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
 class HistoryListener:
@@ -32,34 +30,30 @@ class CenterState(StateMachine):
 
     listeners = [HistoryListener]
 
-    free = State(initial=True)   # free to be edited
-    edit = State()               # next version being edited
-    w01_transfer = State()       # db ready, waiting for 1am to do/check transfer 
-    w02_prod = State()           # db sent, waiting for 2am to check prod start 
-    version_check = State()      # prod_info received, checking db version is OK
-    w_reco_trans = State()       # db send failed, waiting for file transfer recovery
-    w_reco_prod = State()        # getting prod info failed, waiting for production recovery
-    w_reco_version = State()     # wrong_db_version, waiting for recovery
+    free = State("Planning free to be edited", initial=True)
+    edit = State("Planning is being edited")
+    wait_01 = State("Waiting for 1am at center timezone")
+    transfer = State("Transferring planning to center") 
+    wait_02 = State("Waiting for 2am at center timezone")
+    started_prod = State("Getting production version after center restart")
+    version_check = State("Checking production version")
+    w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+    w_reco_prod = State("getting prod version failed, waiting for production recovery")
+    w_reco_version = State("wrong_db_version, waiting for recovery")
 
-    progress = free.to(edit) | edit.to(w01_transfer) | w01_transfer.to(w02_prod) | w02_prod.to(version_check) | version_check.to(free)
+    progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
+            | wait_02.to(started_prod) | started_prod.to(version_check) | version_check.to(free)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
-    reco_trans_done   = Event(w_reco_trans.to(w02_prod), name='recovery of file transfer done')
+    reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
 
-    problem  = w01_transfer.to(w_reco_trans) | w02_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = transfer.to(w_reco_trans) | started_prod.to(w_reco_prod) | version_check.to(w_reco_version)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
-    """
-    def on_enter_state(self, target, event):
-        if getattr(self.model, "user", None) :
-            print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
-        else:
-            print(f"into '{target.id}' on '{event.name}'")
-    """
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
@@ -136,45 +130,12 @@ def create_center_state_machines(centers):
         clocks[name] = asyncio.Lock()
     return csms, clocks
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#manual-testing>>[init]
+# ~/~ begin <<docs/gong-web-app/center_machines.md#print-graph>>[init]
 def states_print():
     from statemachine import State, Event, StateMachine, StateChart 
     from statemachine.contrib.diagram import quickchart_write_svg
     sm = CenterState(StateChart)
     quickchart_write_svg(sm, "images/center_machines.svg")
 
-def states_test(centers):
-    csm = create_center_state_machines()
-    sm = csm["Mahi"]
-
-    if isa_dev_computer():
-        from statemachine.contrib.diagram import quickchart_write_svg
-        quickchart_write_svg(sm, "images/center_machines.svg") 
-
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    print(f"Initial state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm.model.user = "abc@mail.com"
-    sm.send("start_editing")
-    print(f"new state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    # Remove the instances from memory.
-    del sm
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    #db = get_central_db()
-    #centers = db.t.centers
-    #Center = centers.dataclass()
-    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].created_by}")
-    # Restore the previous state from db
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm = csm["Mahi"]
-    print(f"State restored from database: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm.model.user = None
-    sm.send("abandon_changes")
-    print(f"State after last transition: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
 # ~/~ end
 # ~/~ end
