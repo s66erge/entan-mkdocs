@@ -42,6 +42,11 @@ class HistoryListener:
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
+def run_center_action(state_mach, action, *args, **kwargs):
+    task = asyncio.create_task(action(state_mach.model.center_name, *args, **kwargs))
+    transit.register_task(state_mach.model.center_name, task)
+    return task
+
 class CenterState(StateMachine):
 
     listeners = [HistoryListener]
@@ -70,12 +75,13 @@ class CenterState(StateMachine):
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
-    # ACTIONS
+    # ACTIONS ---------------------------------
 
     def on_enter_version_check(self):
-        center = self.model.center_name
-        task = asyncio.create_task(transit.check_prod_version(center, csms[center]))
-        transit.register_task(center, task)    
+        run_center_action(self, transit.check_prod_version, csms)
+
+
+
 ```
 
 

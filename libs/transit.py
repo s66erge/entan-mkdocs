@@ -4,6 +4,7 @@ from myFasthtml import *
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import libs.utils as utils
 from libs.send2pi import file_download, file_upload, session_connect
 from libs.utils import Globals, bypass, get_db_path, isa_dev_computer
 
@@ -65,12 +66,9 @@ async def check_and_advance(center: str, csms):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
 
-def date_check(prod_version):
+async def check_prod_version(center, csms):
     # FIXME after discussion with Ivan
-    return True
-
-async def check_prod_version(center, state_mach):
-    if date_check(prod_version[center]):
+    if utils.isa_dev_computer() and center == utils.Globals.TEST_CENTER:
         return True
     else:
         return False

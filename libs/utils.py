@@ -20,9 +20,6 @@ def get_db_path():
     return root + "data/"
 
 def create_temp_path(center):
-    # FIXME create files inside a WRITABLE direcory : get_db_path !!!
-    # Create temp file in a specific directory
-    #with tempfile.NamedTemporaryFile(mode='w', delete=False, dir='/path/to/directory') as tmp_file:
     temp_dir = get_db_path() + "temp/"
     with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
         temp_paths[center] = tmp_file.name
@@ -38,6 +35,8 @@ class Globals:
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
     BYPASS_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
+    TEST_CENTER = "Testx" # used for testinf in DEV mode
+
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
