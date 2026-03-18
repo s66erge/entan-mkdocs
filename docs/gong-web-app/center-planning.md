@@ -84,14 +84,13 @@ async def planning_page(session, selected_name, centers, csms, clocks):
     )
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, csms, reason, state, err):
+def status_page(session, center_name, centers, csms):
     timezon = centers[center_name].timezone
     return Main(
         Div(display_markdown("planning-busy-t")),
         P(f"timezone: {timezon}"),
-        P(f"state: {state}"),
-        P(f"reason: {reason}"),
-        P(f"error: {err}"),
+        P(f"state: {csms[center_name].configuration[0].id }"),
+        #P(f"error: {err}"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries]),
         Span(
             A("dashboard", href="/dashboard"),

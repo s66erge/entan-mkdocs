@@ -109,8 +109,7 @@ def create_code(email, users):
         users.update(
             email=email,
             magic_link_token=login_code,
-            magic_link_expiry=magic_link_expiry,
-            number_link_touched=0
+            magic_link_expiry=magic_link_expiry
         )
         send_login_code_email(email, login_code)
         return (

@@ -9,7 +9,10 @@ import asyncio
 from myFasthtml import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateMachine, StateChart
-from libs.dbset import get_central_db
+import libs.dbset as dbset
+import libs.transit as transit
+
+csms = {}
 
 <<state-machine>>
 <<abstract-with-persistency>>
@@ -39,7 +42,6 @@ class HistoryListener:
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
-
 class CenterState(StateMachine):
 
     listeners = [HistoryListener]
@@ -49,28 +51,35 @@ class CenterState(StateMachine):
     wait_01 = State("Waiting for 1am at center timezone")
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
-    started_prod = State("Getting production version after center restart")
+    getting_prod = State("Getting production version after center restart")
     version_check = State("Checking production version")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("getting prod version failed, waiting for production recovery")
     w_reco_version = State("wrong_db_version, waiting for recovery")
 
     progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
-            | wait_02.to(started_prod) | started_prod.to(version_check) | version_check.to(free)
+            | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
 
-    problem  = transfer.to(w_reco_trans) | started_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
+    # ACTIONS
+
+    def on_enter_version_check(self):
+        center = self.model.center_name
+        task = asyncio.create_task(transit.check_prod_version(center, csms[center]))
+        transit.register_task(center, task)    
 ```
 
-# State machines creation and access
+
+### State machines creation and access
 
 1 state machine per center.
 To create them: csms = create_center_state_machines()
@@ -79,9 +88,8 @@ To access the sm for one center: sm = csms["Mahi"]
 ```{.python #create-centers-sms}
 
 def create_center_state_machines(centers):
-    csms = {}
     clocks = {}
-    db2 = get_central_db()
+    db2 = dbset.get_central_db()
     centers_list = db2.t.center()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
@@ -89,7 +97,7 @@ def create_center_state_machines(centers):
         sm = CenterState(model=center_state, max_size=25)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
-    return csms, clocks
+    return clocks
 ```
 
 ### DBPersistentModel: Concrete model strategy

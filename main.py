@@ -1,7 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
 from myFasthtml import *
-import json
+import asyncio
 import libs.states as states
 import libs.auth as auth
 from libs.auth import admin_required
@@ -13,6 +13,7 @@ import libs.fetch as fetch
 import libs.admin as admin
 import libs.adchan as adchan
 import libs.utils as utils
+import libs.states as states
 import libs.transit as transit
 
 #  from starlette.testclient import TestClient
@@ -44,8 +45,17 @@ centers = db.create(dbset.Center, pk='center_name')
 planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 
 dbset.init_data(roles, users, centers, planners)
+clocks = states.create_center_state_machines(centers)
 
-csms, clocks = states.create_center_state_machines(centers)
+async def workflow_supervisor():
+    while True:
+        await asyncio.sleep(5)
+        for center in states.csms:
+            await transit.check_and_advance(center, states.csms)
+@app.on_event("startup")
+async def start_supervisor():
+    asyncio.create_task(workflow_supervisor())
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#login-authenticate>>[init]
 
@@ -101,19 +111,19 @@ def get(request):
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]
 
 @rt('/planning_page')
-async def get(session, request, selected_name: str):
+async def get(session, selected_name: str):
     center = selected_name
     session["center"] = center
-    enter_edit_OK, state = await transit.check_center_free(csms[center], clocks[center], session['auth'])
+    enter_edit_OK, state = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:
         utils.create_temp_path(center)
-        return await planning.planning_page(session, center, centers, csms, clocks)
+        return await planning.planning_page(session, center, centers, states.csms, clocks)
     else:
         return Redirect(f"/status_page?center={center}&reason=not_free&state={state}&err=no_error")
 
 @rt('/status_page')
-def get(session, center: str, reason: str, state: str, err:str):
-    return planning.status_page(session, center, centers, csms, reason, state, err)
+def get(session, center: str):
+    return planning.status_page(session, center, centers, states.csms)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -136,16 +146,18 @@ async def post(session, ptype: str, start: str):
 @rt('/planning/abandon_edit')
 def get(session):
     utils.delete_temp_path(session["center"])
-    return transit.abandon_edit(session, csms)
+    return transit.abandon_edit(session, states.csms)
 
 @rt('/save-center-db')
+# FIXME move getting user offset to dashboard ?
 async def get(session, offset: int):
+    users.update(email=session["auth"], offset=offset)
     if not session["planOK"]:
         return utils.feedback_to_user({"error": "plan_not_ok"})
     save_db_path = planning.save_db_plan_timetable(session["center"], centers)
     utils.delete_temp_path(session["center"])
-    state, reason, err = await transit.send_check_center_db(session, centers, csms, offset, save_db_path)
-    return Redirect(f"/status_page?center={session["center"]}&state={state}&reason={reason}&err={err}")
+    await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
+    return Redirect(f"/status_page?center={session["center"]}")
 
 
 # ~/~ end

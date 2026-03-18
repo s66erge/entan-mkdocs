@@ -12,12 +12,39 @@ from zoneinfo import ZoneInfo
 from libs.send2pi import file_download, file_upload, session_connect
 from libs.utils import Globals, bypass, get_db_path, isa_dev_computer
 
+pending_tasks = {}
+prod_version = {}
+run_errors = {}
+
 <<user-transitions>>
+<<workflow-supervisor>>
 <<system-transitions>>
 ```
-### The state machine for each center
+### The workflow supervisor
 
-see: https://python-statemachine.readthedocs.io/en/latest/index.html
+```{.python #workflow-supervisor}
+
+def register_task(center: str, task: asyncio.Task):
+    pending_tasks[center] = task
+    print(pending_tasks)
+
+async def check_and_advance(center: str, csms):
+    sm = csms[center]
+    task = pending_tasks.get(center)
+    if not task:
+        return
+    if not task.done():
+        return
+    result = task.result()
+    del pending_tasks[center]
+    print(pending_tasks)
+    if result:
+        sm.progress()
+        return
+    else:
+        sm.problem()
+        return
+```
 
 ```{.python #user-transitions}
 
@@ -56,6 +83,17 @@ To create them: csms = create_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
 ```{.python #system-transitions}
+
+def date_check(prod_version):
+    # FIXME after discussion with Ivan
+    return True
+
+async def check_prod_version(center, state_mach):
+    if date_check(prod_version[center]):
+        return True
+    else:
+        return False
+
 def get_event_delay(center_tz, hours, minutes):
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=hours, minute=minutes, second=0, microsecond=0)
@@ -76,73 +114,36 @@ def download_test(remoteDBfilePath, port):
     ssh_session = session_connect(port)
     file_download(remoteDBfilePath, localDBpath, ssh_session)
 
-def date_check(resu, next_date_iso):
-    # FIXME after discussion with Ivan
-    return True
-
 async def send_check_center_db(session, centers, csms, offset, save_db_path):
     center_name = session['center']
     print(f'offset: {offset}')
-    state_mach = csms[center_name]
+    states_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
     port = centers[center_name].routing_port
-    state_mach.progress()
+
+    states_mach.progress()   # to wait_01
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
     now_here = datetime.now(timezone.utc) - timedelta(minutes=offset)
     print(f"now time at center {now_center}, here {now_here}. Will upload in {delay_1_s/3600} hours")
+
+    states_mach.progress()   # to transfer
     err = "no error"
-    reason = ""
-    try:
-        if isa_dev_computer():
-            await asyncio.sleep(Globals.SHORT_DELAY)
-            localDBfilePath = Path(get_db_path() + "/" + "test22.json")
-            upload_test(localDBfilePath, port)
-        else:
-            await asyncio.sleep(delay_1_s)
-            #upload_real(port)
-        state_mach.progress()
-        reason = "OK_file_transfer"
-        print(reason)
-    except Exception as e:
-        state_mach.problem()
-        reason = "file_transfer_failed"
-        err = e
-    else:
-        delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
-        try:
-            if isa_dev_computer():
-                await asyncio.sleep(Globals.SHORT_DELAY)
-                remoteDBfilePath = Path("/home/pi/test" + "/" + "test22.json")
-                resu = download_test(remoteDBfilePath, port)
-            else:
-                await asyncio.sleep(delay_2_s)
-                #resu = download_real(port)
-            state_mach.progress()
-            reason = "OK received prod info"
-            print(reason)
-        except Exception as e:
-            state_mach.problem()
-            reason = "production info not received"
-            err = e
-            #return Redirect(f'/transfer_failed?reason=prod&mess={quote_plus(e)}')
-        else:
-            if date_check(resu, next_date_iso):
-                state_mach.progress()
-                reason = "OK db production version"
-                print(reason)
-                #return Redirect('/transfer_success')
-            else:
-                #return Redirect('/transfer_failed?reason=wrong_date')
-                state_mach.problem()
-                reason = "in_production_failed"
-                print(reason)
-                err = "wrong file date"
-                state_mach.problem()
-        finally:
-            pass
-    finally:
-        state = state_mach.configuration[0].id
-        return state, reason, err
+    await asyncio.sleep(Globals.SHORT_DELAY)
+    localDBfilePath = Path(get_db_path() + "/" + "test22.json")
+    upload_test(localDBfilePath, port)
+
+    states_mach.progress()  # to wait_02
+    delay_2_s = 70 * 60  # seconds: 1 hour and 10 minutes
+    await asyncio.sleep(Globals.SHORT_DELAY)
+
+    states_mach.progress()  # to getting_prod
+    remoteDBfilePath = Path("/home/pi/test" + "/" + "test22.json")
+    resu = download_test(remoteDBfilePath, port)
+    prod_version[center_name] = resu
+
+    states_mach.progress()  # to version_check 
+    run_errors[center_name] = err
+    return
 
 ```
 
