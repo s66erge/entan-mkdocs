@@ -52,6 +52,7 @@ app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before
 
 db_path = utils.get_db_path()
 db = dbset.get_central_db()
+utils.wipe_all_temps()
 
 roles = db.create(dbset.Role, pk='role_name')
 users = db.create(dbset.User, pk='email')
@@ -83,8 +84,9 @@ def post(email: str):
     return auth.create_code(email, users)
 
 @rt('/verify_code')
-def post(session, code: str):
-    return auth.verify_code(session, code, users) 
+def post(session, request, code: str):
+    timezon = dict(request.query_params).get('timezone', 'UTC')
+    return auth.verify_code(session, code, timezon, users) 
 
 @rt('/')
 def home():
@@ -131,16 +133,16 @@ def get(request):
 async def get(session, selected_name: str):
     center = selected_name
     session["center"] = center
-    enter_edit_OK, state = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
+    enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:
         utils.create_temp_path(center)
         return await planning.planning_page(session, center, centers, states.csms, clocks)
     else:
-        return Redirect(f"/status_page?center={center}&reason=not_free&state={state}&err=no_error")
+        return Redirect(f"/status_page?center={center}")
 
 @rt('/status_page')
 def get(session, center: str):
-    return planning.status_page(session, center, centers, states.csms)
+    return planning.status_page(session, center, centers, users, states.csms)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -167,13 +169,15 @@ def get(session):
 
 @rt('/save-center-db')
 # FIXME move getting user offset to dashboard ?
-async def get(session, offset: int):
-    users.update(email=session["auth"], offset=offset)
+async def get(session):
+    state_mach = states.csms[session["center"]]
     if not session["planOK"]:
         return utils.feedback_to_user({"error": "plan_not_ok"})
     save_db_path = planning.save_db_plan_timetable(session["center"], centers)
+    state_mach.model.save_db_path = save_db_path
     utils.delete_temp_path(session["center"])
-    await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
+    # await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
+    state_mach.progress()   # from 'edit' to 'wait_01'
     return Redirect(f"/status_page?center={session["center"]}")
 
 

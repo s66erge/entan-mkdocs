@@ -37,10 +37,9 @@ class HistoryListener:
 
     def after_transition(self, event, source, target):
         model = self.sm.model
-        result_mess = f" with message: {model.last_result}" if model.last_result else ""
+        result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
             f"from {source.id} to {target.id} on {event}" + result_mess
-
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
@@ -69,7 +68,7 @@ class CenterState(StateMachine):
     progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
             | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
 
-    abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    abandon_changes   = Event(edit.to(free), name='user abandon changes or 1 hour edit timer elapsed')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
@@ -84,14 +83,20 @@ class CenterState(StateMachine):
     def on_exit_free(self):
         self.model.last_result = None
 
+    def on_enter_wait_01(self):
+        run_sm_action(self.model, transit.wait_until, until_hour=1)
+
+    def on_enter_transfer(self):
+        run_sm_action(self.model, transit.transfer_new_db)
+
+    def on_enter_wait_02(self):
+        run_sm_action(self.model, transit.wait_until, until_hour=2, minutes=20)
+
     def on_enter_getting_prod(self):
         run_sm_action(self.model, transit.get_version_prod)
 
     def on_enter_version_check(self):
         run_sm_action(self.model, transit.check_version_prod)
-
-
-
 
 ```
 
@@ -134,7 +139,8 @@ class CenterDataModel(AbstractPersistentModel):
         self.user = user
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
-        self.version_prod = None  # production version storage location
+        self.save_db_path = None  # new production db to be sent
+        self.version_prod = None  # production version date storage location
 
     def _read_state(self):
         row = self.centers[self.center_name]

@@ -10,27 +10,9 @@ from datetime import datetime, date, timedelta
 
 temp_paths = {}
 
-def get_db_path():
-    if isa_dev_computer():
-        root = ""
-    elif os.environ.get('Github_CI') == 'true': # Github CI actions
-        root = ""
-    else:   # Railway production permanent storage
-        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    return root + "data/"
-
-def create_temp_path(center):
-    temp_dir = get_db_path() + "temp/"
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
-        temp_paths[center] = tmp_file.name
-
-def delete_temp_path(center):
-    if center in temp_paths and os.path.exists(temp_paths[center]):
-        os.unlink(temp_paths[center])
-    temp_paths[center] = ""
-
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
+    SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
@@ -52,6 +34,15 @@ def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
+
+def get_db_path():
+    if isa_dev_computer():
+        root = ""
+    elif os.environ.get('Github_CI') == 'true': # Github CI actions
+        root = ""
+    else:   # Railway production permanent storage
+        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
+    return root + "data/"
 
 def bypass(session):
     return isa_dev_computer() or session["auth"] == Globals.BYPASS_USER
@@ -87,6 +78,25 @@ def display_markdown(file_name:str):
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/utilities.md#temp-files>>[init]
+
+def create_temp_path(center):
+    temp_dir = get_db_path() + Globals.SUBDIR_TEMP 
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
+        temp_paths[center] = tmp_file.name
+
+def delete_temp_path(center):
+    if center in temp_paths and os.path.exists(temp_paths[center]):
+        os.unlink(temp_paths[center])
+    temp_paths[center] = ""
+
+def wipe_all_temps():
+    temp_dir =  get_db_path() + Globals.SUBDIR_TEMP
+    for filename in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 
 def add_months_days(date_str, num_months, num_days):
@@ -101,6 +111,12 @@ def add_months_days(date_str, num_months, num_days):
     # Add num_days to the result
     result_date += timedelta(days=num_days)
     return result_date.isoformat()
+
+def seconds_to_hours_minutes(total_seconds):
+    hours = total_seconds // 3600
+    remaining_minutes = (total_seconds % 3600) // 60
+    return hours, remaining_minutes
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#feedback-to-user>>[init]
 

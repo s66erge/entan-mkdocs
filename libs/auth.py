@@ -19,13 +19,24 @@ def signin_form():
     )
 
 def code_form():
-    return Form(
+    return Div( 
+        Form(
         Input(id='code', name='code', type='text', placeholder='Enter your code'),
         Button("Verify code", type="submit", id="verify-btn"),
+        id="code-form",
         hx_post="/verify_code",
         hx_target="#code-error",
         hx_disabled_elt="#verify-btn"
+        ),
+        Script("""
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const frm = document.getElementById("code-form");
+        const current = frm.getAttribute("hx-post");
+        const sep = current.includes("?") ? "&" : "?";
+        frm.setAttribute("hx-post", current + `${sep}timezone=${timeZone}`);
+        """)
     )
+
 
 """
 @rt('/login')
@@ -113,10 +124,10 @@ The Gong App Team
 
 """
 @rt('/verify_code')
-def post(code: str, session):
+def post(session, code: str):
     return auth.verify_code(session, code, users)
 """
-def verify_code(session, code, users):
+def verify_code(session, code, timezon, users):
     nowstr = f"'{datetime.now()}'"
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (code, nowstr))[0]
@@ -133,7 +144,8 @@ def verify_code(session, code, users):
         email=user.email,
         magic_link_token=None,
         magic_link_expiry=None,
-        is_active=True
+        is_active=True,
+        timezone = timezon
     )
     print(f"{user.email} just got connected via code")
     return Redirect('/dashboard')

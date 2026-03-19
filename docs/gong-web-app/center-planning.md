@@ -7,9 +7,8 @@ import asyncio
 import json
 import os
 import shutil
-from datetime import datetime, timedelta, timezone
-from re import match
-from urllib.parse import quote_plus
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from myFasthtml import *
 import libs.utils as utils
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
@@ -62,16 +61,6 @@ async def planning_page(session, selected_name, centers, csms, clocks):
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
                 cls="allownavigation") if utils.bypass(session) else None,
-            Script("""
-            const offset = new Date().getTimezoneOffset();
-            const btn = document.getElementById("save-btn"); // <button id="save-btn">
-            const current = btn.getAttribute("hx-get");
-            const sep = current.includes("?") ? "&" : "?";
-            btn.setAttribute("hx-get", current + `${sep}offset=${offset}`);
-            //const link = document.getElementById("save-link"); //<a id="save-link">
-            //const sep = link.href.includes("?") ? "&" : "?";
-            //link.href = link.href + `${sep}offset=${offset}`;
-            """),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")
@@ -85,15 +74,21 @@ async def planning_page(session, selected_name, centers, csms, clocks):
     )
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, csms):
+def status_page(session, center_name, centers, users, csms):
+    email = session["auth"]
+    user_timezone = users[email].timezone
     center_obj = centers[center_name]
+    ct_timezone = center_obj.timezone
     state_mach = csms[center_name]
     state = state_mach.configuration[0].id
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
         Div(utils.display_markdown(mark_file)),
         H3(f"Center {center_name}"),
-        P(f"Center timezone: {center_obj.timezone}"),
+        P(f"Center timezone: {ct_timezone}"),
+        P(f"Local time at center: {datetime.now(ZoneInfo(ct_timezone)).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
+        P(f"UTC time: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
+        P(f"Your time from your browser: {datetime.now(ZoneInfo(user_timezone)).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
         P(f"Current state: {state}"),
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
         H3("Center states history"),
@@ -208,7 +203,6 @@ def save_db_plan_timetable(center_name, centers):
     for record in get_plan(utils.temp_paths[center_name]):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
-
     return Path(dest_db_file)
 
 def get_plan(temp_path):
