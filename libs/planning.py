@@ -8,7 +8,6 @@ from re import match
 from urllib.parse import quote_plus
 from myFasthtml import *
 import libs.utils as utils
-from libs.transit import run_errors
 from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
 from libs.dbset import Coming_periods
 from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
@@ -202,13 +201,18 @@ async def planning_page(session, selected_name, centers, csms, clocks):
 
 #@rt('/status_page')
 def status_page(session, center_name, centers, csms):
-    timezon = centers[center_name].timezone
+    center_obj = centers[center_name]
+    state_mach = csms[center_name]
+    state = state_mach.configuration[0].id
+    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
-        Div(utils.display_markdown("planning-busy-t")),
-        P(f"timezone: {timezon}"),
-        P(f"state: {csms[center_name].configuration[0].id }"),
-        P(f"error: {run_errors.get(center_name, "None")}"),
-        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries]),
+        Div(utils.display_markdown(mark_file)),
+        H3(f"Center {center_name}"),
+        P(f"Center timezone: {center_obj.timezone}"),
+        P(f"Current state: {state}"),
+        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
+        H3("Center states history"),
+        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
         Span(
             A("dashboard", href="/dashboard"),
             Span(style="display: inline-block; width: 20px;"),

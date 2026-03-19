@@ -42,8 +42,10 @@ class Globals:
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
+    PI_FOLDER_TEST = "/home/pi/test"  # PI folder used for ssh get/put tests
+    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
     BYPASS_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
-    TEST_CENTER = "Testx" # used for testinf in DEV mode
+    TEST_CENTER = "Testx" # used for testing in DEV mode
 
     @classmethod
     def get(cls, name, default=None):

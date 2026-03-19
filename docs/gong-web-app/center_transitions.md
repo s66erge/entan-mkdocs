@@ -4,6 +4,8 @@ The status of a center data is managed with a state machine. The state is persis
 Here are the transitions processes used by the state machines
 
 ```{.python file=libs/transit.py}
+import json
+import os
 import asyncio
 from myFasthtml import *
 from datetime import datetime, timedelta, timezone
@@ -14,8 +16,6 @@ from libs.send2pi import file_download, file_upload, session_connect
 from libs.utils import Globals, bypass, get_db_path, isa_dev_computer
 
 pending_tasks = {}
-prod_version = {}
-run_errors = {}
 
 <<user-transitions>>
 <<workflow-supervisor>>
@@ -39,7 +39,8 @@ async def check_and_advance(center: str, csms):
     result = task.result()
     del pending_tasks[center]
     print(pending_tasks)
-    if result:
+    sm.model.last_result = result
+    if "success" in result:
         sm.progress()
         return
     else:
@@ -85,12 +86,41 @@ To access the sm for one center: sm = csms["Mahi"]
 
 ```{.python #system-transitions}
 
-async def check_prod_version(center, csms):
-    # FIXME after discussion with Ivan
-    if utils.isa_dev_computer() and center == utils.Globals.TEST_CENTER:
-        return True
+
+async def get_version_prod(model):
+    # FIXME try 3 times at 10 min. intervals
+    localDBpath = Path(get_db_path())
+    port = model.centers[model.center_name].routing_port
+    try:
+        if model.center_name == utils.Globals.TEST_CENTER:
+            folder = utils.Globals.PI_FOLDER_TEST
+            file = utils.Globals.PI_FILE_TEST
+            remoteDBfilePath = Path(folder + "/" + file)
+        else:
+            # FIXME after discussion with Ivan        
+            remoteDBfilePath = Path("/home/pi/prod")
+        ssh_session = session_connect(port)
+        file_download(remoteDBfilePath, localDBpath, ssh_session)
+        file_transfered = localDBpath / file
+        with open(file_transfered, 'r') as f:
+            data = json.load(f)
+            print(data)
+        model.version_prod = data["date"]
+    except Exception as e:
+        return {"error": f"ssh get production version failed: {e}"}
     else:
-        return False
+       return {"success": f"production version is {data["date"]}"}
+
+async def check_version_prod(model):
+    # FIXME after discussion with Ivan
+    tz = ZoneInfo(model.centers[model.center_name].timezone)
+    now = datetime.now(tz)
+    date_at_center = now.date().isoformat()
+    if  date_at_center == model.version_prod:
+        return {"success": f"production version OK at center date: {date_at_center}"}
+    else:
+        return {"error": f"production version is NOT OK with center date: {date_at_center}"}
+
 
 def get_event_delay(center_tz, hours, minutes):
     now_center = datetime.now(center_tz)
@@ -107,17 +137,12 @@ def upload_test(localDBfilePath, port):
     ssh_session = session_connect(port)
     file_upload(localDBfilePath, remoteDBpath, ssh_session)
 
-def download_test(remoteDBfilePath, port):
-    localDBpath = Path(get_db_path())
-    ssh_session = session_connect(port)
-    file_download(remoteDBfilePath, localDBpath, ssh_session)
 
 async def send_check_center_db(session, centers, csms, offset, save_db_path):
     center_name = session['center']
     print(f'offset: {offset}')
     states_mach = csms[center_name]
     center_tz = ZoneInfo(centers[center_name].timezone)
-    port = centers[center_name].routing_port
 
     states_mach.progress()   # to wait_01
     now_center, delay_1_s, next_date_iso = get_event_delay(center_tz, hours=1, minutes=0)
@@ -128,6 +153,7 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
     err = "no error"
     await asyncio.sleep(Globals.SHORT_DELAY)
     localDBfilePath = Path(get_db_path() + "/" + "test22.json")
+    port = centers[center_name].routing_port
     upload_test(localDBfilePath, port)
 
     states_mach.progress()  # to wait_02
@@ -135,12 +161,8 @@ async def send_check_center_db(session, centers, csms, offset, save_db_path):
     await asyncio.sleep(Globals.SHORT_DELAY)
 
     states_mach.progress()  # to getting_prod
-    remoteDBfilePath = Path("/home/pi/test" + "/" + "test22.json")
-    resu = download_test(remoteDBfilePath, port)
-    prod_version[center_name] = resu
 
-    states_mach.progress()  # to version_check 
-    run_errors[center_name] = err
+    #states_mach.progress()  # to version_check 
     return
 
 ```

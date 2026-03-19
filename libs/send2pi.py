@@ -46,8 +46,7 @@ def session_connect(rthjPort: int) -> paramiko.SSHClient | None:
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/send_db_to_pi.md#file_upload>>[init]
 def file_upload(localDBfilePath: Path, remoteDBpath: Path, session: paramiko.SSHClient):
-    scp = SCPClient(
-        session.get_transport())  # type: ignore
+    scp = SCPClient(session.get_transport())  # type: ignore
     # We will use Path().as_posix() to deal with the linux filesystem on the RPI !
     scp.put(str(localDBfilePath), str(remoteDBpath.as_posix()))
     # close the SCP connection
@@ -55,12 +54,12 @@ def file_upload(localDBfilePath: Path, remoteDBpath: Path, session: paramiko.SSH
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/send_db_to_pi.md#file_download>>[init]
 def file_download(remoteDBfilePath: Path, localDBpath: Path, session: paramiko.SSHClient):
-    scp = SCPClient(
-        session.get_transport())  # type: ignore
+    scp = SCPClient(session.get_transport())  # type: ignore
     # We will use Path().as_posix() to deal with the linux filesystem on the RPI !
     scp.get(str(remoteDBfilePath.as_posix()), str(localDBpath))
     # close the SCP connection
     scp.close()
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/send_db_to_pi.md#main_program>>[init]
 if __name__ == "__main__":

@@ -36,15 +36,19 @@ class HistoryListener:
         self.sm = sm
 
     def after_transition(self, event, source, target):
-        log = f"At {self.sm.model.get_start_time()}, {self.sm.model.get_user()} moved {self.sm.model.center_name} from {source.id} -> {target.id} on {event}"
+        model = self.sm.model
+        result_mess = f" with message: {model.last_result}" if model.last_result else ""
+        log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
+            f"from {source.id} to {target.id} on {event}" + result_mess
+
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
-def run_center_action(state_mach, action, *args, **kwargs):
-    task = asyncio.create_task(action(state_mach.model.center_name, *args, **kwargs))
-    transit.register_task(state_mach.model.center_name, task)
+def run_sm_action(model, action, *args, **kwargs):
+    task = asyncio.create_task(action(model, *args, **kwargs))
+    transit.register_task(model.center_name, task)
     return task
 
 class CenterState(StateMachine):
@@ -77,8 +81,15 @@ class CenterState(StateMachine):
 
     # ACTIONS ---------------------------------
 
+    def on_exit_free(self):
+        self.model.last_result = None
+
+    def on_enter_getting_prod(self):
+        run_sm_action(self.model, transit.get_version_prod)
+
     def on_enter_version_check(self):
-        run_center_action(self, transit.check_prod_version, csms)
+        run_sm_action(self.model, transit.check_version_prod)
+
 
 
 
@@ -121,7 +132,9 @@ class CenterDataModel(AbstractPersistentModel):
         self.center_name = center_name
         self.centers = centers
         self.user = user
-        self.statustart = None  # Cache for the timestamp of the last state change
+        self.statustart = None    # Cache for the timestamp of the last state change
+        self.last_result = None   # result of the last operation on this machine
+        self.version_prod = None  # production version storage location
 
     def _read_state(self):
         row = self.centers[self.center_name]
