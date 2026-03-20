@@ -10,6 +10,7 @@ from pathlib import Path
 # import aiohttp  # moved to "myFasthtml.py"
 import json
 import asyncio
+from tabulate import tabulate
 from datetime import date
 from myFasthtml import *
 from libs.utils import add_months_days
@@ -196,7 +197,9 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     end_date = add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+    #print(tabulate(extracted))
     periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj, list_of_types)  ## [5]
+    #print(tabulate(periods_dhamma_org))
     cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict)
 
     merged = periods_db_center + cleaned_dhamma_org

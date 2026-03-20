@@ -7,9 +7,9 @@ from pathlib import Path
 from urllib.parse import quote_plus
 from myFasthtml import *
 from myFasthtml import database
+import libs.cdash as cdash
+import libs.utils as utils
 
-from libs.cdash import top_menu
-from libs.utils import display_markdown
 
 <<consult-page>>
 <<consult-periods>>
@@ -39,8 +39,8 @@ def consult_page(session, centers):
         hx_target="#coming-periods"
     )
     return Main( 
-        top_menu(session['role']),
-        Div(display_markdown("consult-t")),
+        cdash.top_menu(session['role']),
+        Div(utils.display_markdown("consult-t")),
         Div(form, id="consult-db"),
         H2("Coming periods"),
         Div(id="coming-periods"),      # filled by /consult/select_db
