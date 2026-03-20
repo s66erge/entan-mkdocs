@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/center-planning/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Center planning page - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Center planning page";
+        var mkdocs_page_input_path = "gong-web-app\\center-planning.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/center-planning/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Center planning page</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#planning-page">Planning page</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-colored-html-table-of-current-plan">Create colored html table of current plan</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#load-from-dhammaorg-and-show-the-merged-and-checked-center-plan">Load from dhamma.org and show the merged and checked center plan</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">Center planning page</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/center-planning.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="center-planning-page">Center planning page<a class="headerlink" href="#center-planning-page" title="Permanent link">#</a></h1>
+<p>Will only be reachable for authenticated users and planner for the selected center.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">zoneinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZoneInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">myFasthtml</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.cdash</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cdash</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.plancheck</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plancheck</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dbset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.utilsJS</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utilsJS</span>
+
+<span class="o">&lt;&lt;</span><span class="n">create</span><span class="o">-</span><span class="n">html</span><span class="o">-</span><span class="n">table</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">load</span><span class="o">-</span><span class="n">show</span><span class="o">-</span><span class="n">center</span><span class="o">-</span><span class="n">plan</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">planning</span><span class="o">-</span><span class="n">page</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<h3 id="planning-page">Planning page<a class="headerlink" href="#planning-page" title="Permanent link">#</a></h3>
+<p>Check first if the center is available for edits, either:</p>
+<ul>
+<li>if state is "edit" and the state changes happenned more than 'max time' ago, then force it to 'free' first</li>
+<li>state is "free"</li>
+</ul>
+<p>Then:</p>
+<ul>
+<li>available: load the main menu for changing center planning</li>
+<li>not available: explain to the user to wait for current changes to enter production at center </li>
+</ul>
+<div id="planning-page" class="highlight"><pre><span></span><code><span class="c1"># @rt(&#39;/planning_page&#39;)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">planning_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">csms</span><span class="p">,</span> <span class="n">clocks</span><span class="p">):</span>
+    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;planOK&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">center_lock</span> <span class="o">=</span> <span class="n">clocks</span><span class="p">[</span><span class="n">selected_name</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">&quot;planning-t&quot;</span><span class="p">)),</span>
+        <span class="n">Span</span><span class="p">(</span>
+            <span class="n">Span</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">INITIAL_COUNTDOWN</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;start-time&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: none;&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="s1">&#39;/planning/abandon_edit&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;timer-redirect&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: none;&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modify </span><span class="si">{</span><span class="n">selected_name</span><span class="si">}</span><span class="s2"> planning&quot;</span><span class="p">,</span>
+                <span class="n">hx_get</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/planning/load_dhamma_db&quot;</span><span class="p">,</span>
+                <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planning-periods&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: inline-block; width: 20px;&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modify </span><span class="si">{</span><span class="n">selected_name</span><span class="si">}</span><span class="s2"> timetables&quot;</span><span class="p">,</span>
+                <span class="n">hx_get</span><span class="o">=</span><span class="s2">&quot;/unfinished?goto_dash=NO&quot;</span><span class="p">,</span>
+                <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planning-periods&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: inline-block; width: 20px;&quot;</span><span class="p">),</span>
+            <span class="n">A</span><span class="p">(</span><span class="s2">&quot;return NO CHANGES&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/planning/abandon_edit&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;allownavigation&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: inline-block; width: 20px;&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;offset&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;hidden&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SAVE CHANGES to </span><span class="si">{</span><span class="n">selected_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;save-btn&quot;</span><span class="p">,</span>
+                <span class="n">hx_get</span><span class="o">=</span><span class="s2">&quot;/save-center-db&quot;</span><span class="p">,</span>
+                <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#line-feedback&quot;</span><span class="p">,</span>
+                <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;allownavigation&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">dev_comp_or_user</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">Span</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: inline-block; width: 20px;&quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="s2">&quot;Remainning time: &quot;</span><span class="p">),</span>
+            <span class="n">Span</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;timer&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;timer-display&quot;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;line-feedback&quot;</span><span class="p">),</span>
+        <span class="n">Script</span><span class="p">(</span><span class="n">utilsJS</span><span class="o">.</span><span class="n">JS_CLIENT_TIMER</span><span class="p">),</span>
+        <span class="n">Script</span><span class="p">(</span><span class="n">utilsJS</span><span class="o">.</span><span class="n">JS_BLOCK_NAV</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span> 
+        <span class="n">Div</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planning-periods&quot;</span><span class="p">),</span>          <span class="c1"># filled by /planning/load_dhamma_db</span>
+        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
+    <span class="p">)</span>
+
+<span class="c1">#@rt(&#39;/status_page&#39;)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">status_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">csms</span><span class="p">):</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span>
+    <span class="n">user_timezone</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">email</span><span class="p">]</span><span class="o">.</span><span class="n">timezone</span>
+    <span class="n">center_obj</span> <span class="o">=</span> <span class="n">centers</span><span class="p">[</span><span class="n">center_name</span><span class="p">]</span>
+    <span class="n">ct_timezone</span> <span class="o">=</span> <span class="n">center_obj</span><span class="o">.</span><span class="n">timezone</span>
+    <span class="n">state_mach</span> <span class="o">=</span> <span class="n">csms</span><span class="p">[</span><span class="n">center_name</span><span class="p">]</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">state_mach</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">mark_file</span> <span class="o">=</span> <span class="s2">&quot;planning-free-t&quot;</span> <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;free&quot;</span> <span class="k">else</span> <span class="s2">&quot;planning-busy-t&quot;</span>
+    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+        <span class="n">cdash</span><span class="o">.</span><span class="n">top_menu</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">display_markdown</span><span class="p">(</span><span class="n">mark_file</span><span class="p">)),</span>
+        <span class="n">H3</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Center </span><span class="si">{</span><span class="n">center_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Center timezone: </span><span class="si">{</span><span class="n">ct_timezone</span><span class="si">}</span><span class="s2">, Local time: </span><span class="si">{</span><span class="n">utils</span><span class="o">.</span><span class="n">short_iso</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">ct_timezone</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UTC time: </span><span class="si">{</span><span class="n">utils</span><span class="o">.</span><span class="n">short_iso</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Your browser timezone: </span><span class="si">{</span><span class="n">user_timezone</span><span class="si">}</span><span class="s2">, local time: </span><span class="si">{</span><span class="n">utils</span><span class="o">.</span><span class="n">short_iso</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">user_timezone</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current state: </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">P</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Last result: </span><span class="si">{</span><span class="n">state_mach</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">last_result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">state_mach</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">last_result</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">H3</span><span class="p">(</span><span class="s2">&quot;Center states history&quot;</span><span class="p">),</span>
+        <span class="n">Ul</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">Li</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">csms</span><span class="p">[</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">active_listeners</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entries</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+        <span class="n">A</span><span class="p">(</span><span class="s2">&quot;set FREE&quot;</span><span class="p">,</span><span class="n">href</span><span class="o">=</span><span class="s2">&quot;/planning/abandon_edit&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">dev_comp_or_user</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
+    <span class="p">)</span>
+</code></pre></div>
+<h3 id="create-colored-html-table-of-current-plan">Create colored html table of current plan<a class="headerlink" href="#create-colored-html-table-of-current-plan" title="Permanent link">#</a></h3>
+<div id="create-html-table" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_draft_plan_table</span><span class="p">(</span><span class="n">draft_plan</span><span class="p">,</span> <span class="n">mess</span><span class="p">):</span>
+    <span class="c1"># Create an HTML table from a draft plan list of dictionaries</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">plan_line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">draft_plan</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;start_date&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))):</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;end_date&quot;</span><span class="p">)</span>
+        <span class="n">ptype</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">)</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;check&quot;</span><span class="p">)</span>
+        <span class="n">course</span> <span class="o">=</span> <span class="n">plan_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;course_type&quot;</span><span class="p">)</span>
+        <span class="c1"># Conditional coloring</span>
+        <span class="n">ptype_cell</span> <span class="o">=</span> <span class="n">Td</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;background: red&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ptype</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;UNKNOWN&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">Td</span><span class="p">(</span><span class="n">ptype</span><span class="p">)</span>
+        <span class="n">source_cell</span> <span class="o">=</span> <span class="n">Td</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;background: blue&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s2">&quot;new input&quot;</span> <span class="k">else</span> <span class="n">Td</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">match</span> <span class="n">check</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="k">case</span> <span class="s2">&quot;OK&quot;</span><span class="p">:</span>
+                <span class="n">check_cell</span> <span class="o">=</span> <span class="n">Td</span><span class="p">(</span><span class="n">check</span><span class="p">)</span>
+            <span class="k">case</span> <span class="s2">&quot;CH&quot;</span><span class="p">:</span>
+                <span class="n">check_cell</span> <span class="o">=</span> <span class="n">Td</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;background: orange&quot;</span><span class="p">)</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="n">check_cell</span> <span class="o">=</span> <span class="n">Td</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;background: red&quot;</span><span class="p">)</span>
+        <span class="c1"># Add delete link for removing this row</span>
+        <span class="n">delete_link</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span>
+            <span class="n">hx_post</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/planning/delete_line/</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planning-periods&quot;</span><span class="p">,</span>
+            <span class="n">hx_confirm</span><span class="o">=</span><span class="s2">&quot;Are you sure you want to delete this entry?&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Tr</span><span class="p">(</span>
+                <span class="n">Td</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">Td</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="n">ptype_cell</span><span class="p">,</span> <span class="n">source_cell</span><span class="p">,</span> <span class="n">check_cell</span><span class="p">,</span> <span class="n">Td</span><span class="p">(</span><span class="n">course</span><span class="p">),</span> <span class="n">Td</span><span class="p">(</span><span class="n">delete_link</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+    <span class="n">period_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">Option</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;period_type&#39;</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;period_type&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">plancheck</span><span class="o">.</span><span class="n">get_dhamm_org_types_list</span><span class="p">()]</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span>
+        <span class="n">Div</span><span class="p">(</span>
+            <span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Period type:&quot;</span><span class="p">),</span>
+            <span class="n">Select</span><span class="p">(</span>
+                <span class="n">Option</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select period type...&quot;</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">period_options</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ptype&quot;</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">&quot;width: 200px&quot;</span>
+            <span class="p">),</span>
+            <span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Start date:&quot;</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">today</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;width: 200px&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add Period&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">hx_post</span><span class="o">=</span><span class="s2">&quot;/planning/add_line&quot;</span><span class="p">,</span>
+        <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planning-periods&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+        <span class="n">Thead</span><span class="p">(</span> <span class="n">Tr</span><span class="p">(</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Start date&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;End date&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Period type&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Source&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Check&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Info given by center in dhamma.org&quot;</span><span class="p">),</span> <span class="n">Th</span><span class="p">(</span><span class="s2">&quot;Action&quot;</span><span class="p">),)),</span>
+        <span class="n">Tbody</span><span class="p">(</span><span class="o">*</span><span class="n">rows</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+        <span class="n">H2</span><span class="p">(</span><span class="s2">&quot;Plan with &#39;www.google.org&#39; added for 12 months from current course start&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">(</span><span class="n">mess</span><span class="p">),</span> <span class="n">hx_swap_oob</span><span class="o">=</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;line-feedback&quot;</span><span class="p">),</span>
+        <span class="n">table</span><span class="p">,</span>
+        <span class="n">form</span><span class="p">,</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planning-periods&quot;</span>
+    <span class="p">)</span>
+</code></pre></div>
+<h3 id="load-from-dhammaorg-and-show-the-merged-and-checked-center-plan">Load from dhamma.org and show the merged and checked center plan<a class="headerlink" href="#load-from-dhammaorg-and-show-the-merged-and-checked-center-plan" title="Permanent link">#</a></h3>
+<div id="load-show-center-plan" class="highlight"><pre><span></span><code><span class="c1"># @rt(&#39;/planning/load_dhamma_db&#39;)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_dhamma_db</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+        <span class="n">P</span><span class="p">(</span><span class="s2">&quot; Loading this center planning from dhamma.org ...&quot;</span><span class="p">),</span>
+        <span class="n">Div</span><span class="p">(</span><span class="n">hx_get</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/planning/check_show_dhamma&quot;</span><span class="p">,</span> 
+            <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#planning-periods&quot;</span><span class="p">,</span>
+            <span class="n">hx_trigger</span><span class="o">=</span><span class="s2">&quot;load&quot;</span><span class="p">,</span>  <span class="c1"># Triggers when this div loads</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display: none;&quot;</span><span class="p">),</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;planning-periods&quot;</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_db_plan_timetable</span><span class="p">(</span><span class="n">center_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
+    <span class="n">source_db_file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">center_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.ok.db&quot;</span>
+    <span class="n">dest_db_file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">center_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.sending.db&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dest_db_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">dest_db_file</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">source_db_file</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_db_file</span><span class="p">))</span>
+
+    <span class="n">dest_db</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">dest_db_file</span><span class="p">)</span>
+    <span class="n">dest_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DROP TABLE coming_periods&quot;</span><span class="p">)</span>
+    <span class="c1">#for t in dest_db.t:</span>
+    <span class="c1">#    dest_db.execute(f&quot;DROP TABLE {str(t)}&quot;)</span>
+    <span class="n">coming_periods</span> <span class="o">=</span> <span class="n">dest_db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Coming_periods</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">&#39;start_date&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">get_plan</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">temp_paths</span><span class="p">[</span><span class="n">center_name</span><span class="p">]):</span>
+        <span class="n">coming_periods</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">],</span> <span class="n">period_type</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;period_type&quot;</span><span class="p">])</span>
+    <span class="n">dest_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_db_file</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_plan</span><span class="p">(</span><span class="n">temp_path</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_plan</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="n">plan</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">mess</span><span class="p">):</span>
+    <span class="n">selected_name</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span>
+    <span class="n">new_draft_plan</span> <span class="o">=</span> <span class="n">plancheck</span><span class="o">.</span><span class="n">check_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">save_plan</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">temp_paths</span><span class="p">[</span><span class="n">selected_name</span><span class="p">],</span> <span class="n">new_draft_plan</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">show_draft_plan_table</span><span class="p">(</span><span class="n">new_draft_plan</span><span class="p">,</span> <span class="n">mess</span><span class="p">)</span>
+
+<span class="c1"># @rt(&#39;/planning/delete_line&#39;)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="n">selected_name</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">get_plan</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">temp_paths</span><span class="p">[</span><span class="n">selected_name</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleting line </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> from draft plan with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="p">):</span>
+        <span class="n">plan</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="s2">&quot;line_deleted&quot;</span><span class="p">})</span>
+
+<span class="c1">#@rt(&#39;/planning/add_line&#39;)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">add_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+    <span class="n">selected_name</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">get_plan</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">temp_paths</span><span class="p">[</span><span class="n">selected_name</span><span class="p">])</span>
+    <span class="c1"># Create new plan line with user input</span>
+    <span class="n">new_line</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
+        <span class="s2">&quot;period_type&quot;</span><span class="p">:</span> <span class="n">ptype</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;new input&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;check&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;course_type&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">}</span>    
+    <span class="c1"># Add the new line to the plan</span>
+    <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_line</span><span class="p">)</span>    
+    <span class="c1"># Sort plan by start_date</span>
+    <span class="n">plansor</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
+    <span class="n">plancomp</span> <span class="o">=</span> <span class="n">plancheck</span><span class="o">.</span><span class="n">add_end_dates</span><span class="p">(</span><span class="n">plansor</span><span class="p">,</span> <span class="n">centers</span><span class="p">[</span><span class="n">selected_name</span><span class="p">])</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plancomp</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span> <span class="p">:</span> <span class="s2">&quot;new_course&quot;</span><span class="p">})</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../center-plan-check/" class="btn btn-neutral float-left" title="Center planning page"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../center_machines/" class="btn btn-neutral float-right" title="Center state machines">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../center-plan-check/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../center_machines/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

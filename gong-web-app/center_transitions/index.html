@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/center_transitions/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Center machines transitions - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Center machines transitions";
+        var mkdocs_page_input_path = "gong-web-app\\center_transitions.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/center_transitions/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Center machines transitions</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-workflow-supervisor">The workflow supervisor</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">Center machines transitions</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/center_transitions.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="center-machines-transitions">Center machines transitions<a class="headerlink" href="#center-machines-transitions" title="Permanent link">#</a></h1>
+<p>The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
+Here are the transitions processes used by the state machines</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">myFasthtml</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">zoneinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZoneInfo</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.send2pi</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">send2pi</span>
+
+<span class="n">pending_tasks</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="o">&lt;&lt;</span><span class="n">user</span><span class="o">-</span><span class="n">transitions</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">workflow</span><span class="o">-</span><span class="n">supervisor</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">system</span><span class="o">-</span><span class="n">transitions</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<h3 id="the-workflow-supervisor">The workflow supervisor<a class="headerlink" href="#the-workflow-supervisor" title="Permanent link">#</a></h3>
+<div id="workflow-supervisor" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">register_task</span><span class="p">(</span><span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+    <span class="n">pending_tasks</span><span class="p">[</span><span class="n">center</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pending_tasks</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_and_advance</span><span class="p">(</span><span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">csms</span><span class="p">):</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">csms</span><span class="p">[</span><span class="n">center</span><span class="p">]</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">pending_tasks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+        <span class="k">return</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">pending_tasks</span><span class="p">[</span><span class="n">center</span><span class="p">]</span>
+    <span class="n">sm</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">last_result</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">progress</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sm</span><span class="o">.</span><span class="n">problem</span><span class="p">()</span>
+        <span class="k">return</span>
+</code></pre></div>
+<div id="user-transitions" class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_center_free</span><span class="p">(</span><span class="n">state_mach</span><span class="p">,</span> <span class="n">center_lock</span><span class="p">,</span> <span class="n">this_user</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">center_lock</span><span class="p">:</span>
+        <span class="n">center_is_free</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">tnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="n">start_state_time</span> <span class="o">=</span> <span class="n">state_mach</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_start_time</span><span class="p">()</span>
+        <span class="n">past</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">start_state_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="s2">&quot;+00:00&quot;</span><span class="p">))</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">tnow</span><span class="o">-</span><span class="n">past</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">time_to_go</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">INITIAL_COUNTDOWN</span>
+        <span class="k">if</span> <span class="n">state_mach</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">&quot;edit&quot;</span> <span class="ow">and</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">INITIAL_COUNTDOWN</span><span class="p">:</span>
+            <span class="n">state_mach</span><span class="o">.</span><span class="n">abandon_changes</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">state_mach</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">&quot;free&quot;</span><span class="p">:</span>
+            <span class="n">state_mach</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">this_user</span>
+            <span class="n">state_mach</span><span class="o">.</span><span class="n">progress</span><span class="p">()</span>
+            <span class="n">center_is_free</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">center_is_free</span><span class="p">,</span> <span class="n">time_to_go</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">abandon_edit</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">csms</span><span class="p">):</span>
+    <span class="n">this_center</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span>
+    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">this_center</span> <span class="ow">in</span> <span class="n">csms</span> <span class="ow">and</span> <span class="n">csms</span><span class="p">[</span><span class="n">this_center</span><span class="p">]</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">&quot;edit&quot;</span><span class="p">:</span>
+        <span class="n">csms</span><span class="p">[</span><span class="n">this_center</span><span class="p">]</span><span class="o">.</span><span class="n">abandon_changes</span><span class="p">()</span>
+        <span class="n">csms</span><span class="p">[</span><span class="n">this_center</span><span class="p">]</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">dev_comp_or_user</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+        <span class="n">csms</span><span class="p">[</span><span class="n">this_center</span><span class="p">]</span><span class="o">.</span><span class="n">force_to_free</span><span class="p">()</span>
+    <span class="k">return</span>  <span class="n">Redirect</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h1 id="state-machines-creation-and-access">State machines creation and access<a class="headerlink" href="#state-machines-creation-and-access" title="Permanent link">#</a></h1>
+<p>1 state machine per center.
+To create them: csms = create_center_state_machines()
+To access the sm for one center: sm = csms["Mahi"]</p>
+<div id="system-transitions" class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_until</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">until_hour</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">center_tz</span> <span class="o">=</span> <span class="n">ZoneInfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">timezone</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">center_name</span> <span class="o">==</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">TEST_CENTER</span><span class="p">:</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">SHORT_DELAY</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">now_center</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">center_tz</span><span class="p">)</span>
+        <span class="n">next_event</span> <span class="o">=</span> <span class="n">now_center</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="n">until_hour</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="n">minutes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">now_center</span><span class="o">.</span><span class="n">hour</span> <span class="o">&gt;=</span> <span class="n">until_hour</span> <span class="ow">and</span> <span class="n">now_center</span><span class="o">.</span><span class="n">minute</span> <span class="o">&gt;=</span> <span class="n">minutes</span><span class="p">:</span>
+            <span class="c1"># If it&#39;s already past the target time, schedule for tomorrow</span>
+            <span class="n">next_event</span> <span class="o">+=</span>  <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_event</span> <span class="o">-</span> <span class="n">now_center</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Date/time now at center: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">center_tz</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span> 
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transfer_new_db</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># FIXME try 3 times at 10 min. intervals</span>
+    <span class="n">localDBPath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">())</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">routing_port</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">center_name</span> <span class="o">==</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">TEST_CENTER</span><span class="p">:</span>
+            <span class="n">remoteDBPath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">PI_FOLDER_TEST</span><span class="p">)</span>
+            <span class="n">db_file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">PI_FILE_TEST</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># FIXME after discussion with Ivan        </span>
+            <span class="n">remoteDBPath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/home/pi/prod&quot;</span><span class="p">)</span>
+            <span class="n">db_file</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">save_db_file</span>
+
+        <span class="n">ssh_session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">send2pi</span><span class="o">.</span><span class="n">session_connect</span><span class="p">,</span><span class="n">port</span><span class="p">)</span>
+        <span class="n">localDBFilePath</span> <span class="o">=</span> <span class="n">localDBPath</span> <span class="o">/</span> <span class="n">db_file</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">send2pi</span><span class="o">.</span><span class="n">file_upload</span><span class="p">,</span> <span class="n">localDBFilePath</span><span class="p">,</span> <span class="n">remoteDBPath</span><span class="p">,</span> <span class="n">ssh_session</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;ssh transfer production db failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">center_tz</span> <span class="o">=</span> <span class="n">ZoneInfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">timezone</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;production db sent at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">center_tz</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> center time&quot;</span><span class="p">}</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_version_prod</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># FIXME try 3 times at 10 min. intervals</span>
+    <span class="n">localDBPath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">())</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">routing_port</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">center_name</span> <span class="o">==</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">TEST_CENTER</span><span class="p">:</span>
+            <span class="n">folder</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">PI_FOLDER_TEST</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">PI_FILE_TEST</span>
+            <span class="n">remoteDBFilePath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># FIXME after discussion with Ivan        </span>
+            <span class="n">remoteDBFilePath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/home/pi/prod&quot;</span><span class="p">)</span>
+        <span class="n">ssh_session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">send2pi</span><span class="o">.</span><span class="n">session_connect</span><span class="p">,</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">send2pi</span><span class="o">.</span><span class="n">file_download</span><span class="p">,</span> <span class="n">remoteDBFilePath</span><span class="p">,</span> <span class="n">localDBPath</span><span class="p">,</span> <span class="n">ssh_session</span><span class="p">)</span>
+        <span class="n">file_transfered</span> <span class="o">=</span> <span class="n">localDBPath</span> <span class="o">/</span> <span class="n">file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_transfered</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">version_prod</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;ssh get production version failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;production version is </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_version_prod</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># FIXME after discussion with Ivan</span>
+    <span class="n">now_at_center</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">ZoneInfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span><span class="o">.</span><span class="n">timezone</span><span class="p">))</span>
+    <span class="n">date_at_center</span> <span class="o">=</span> <span class="n">now_at_center</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="k">if</span>  <span class="n">date_at_center</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">version_prod</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;production version OK at center date: </span><span class="si">{</span><span class="n">date_at_center</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;production version is NOT OK with center date: </span><span class="si">{</span><span class="n">date_at_center</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../center_machines/" class="btn btn-neutral float-left" title="Center state machines"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../database-setup/" class="btn btn-neutral float-right" title="Database setup and init">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../center_machines/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../database-setup/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

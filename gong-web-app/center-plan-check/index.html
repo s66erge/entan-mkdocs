@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/center-plan-check/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Center planning page - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Center planning page";
+        var mkdocs_page_input_path = "gong-web-app\\center-plan-check.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/center-plan-check/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Center planning page</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">Center planning page</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/center-plan-check.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="center-planning-page">Center planning page<a class="headerlink" href="#center-planning-page" title="Permanent link">#</a></h1>
+<p>Will only be reachable for authenticated users and planner for the selected center.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">myFasthtml</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utils</span>
+
+<span class="o">&lt;&lt;</span><span class="n">this</span><span class="o">-</span><span class="n">center</span><span class="o">-</span><span class="n">courses</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">obtain</span><span class="o">-</span><span class="n">durations</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">check</span><span class="o">-</span><span class="n">complete</span><span class="o">-</span><span class="n">plan</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<div id="check-complete-plan" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
+    <span class="n">types_with_duration</span> <span class="o">=</span> <span class="n">get_types_with_duration</span><span class="p">(</span><span class="n">centers</span><span class="p">[</span><span class="n">selected_name</span><span class="p">])</span>    
+    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;planOK&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plan</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OK&quot;</span>
+            <span class="k">continue</span>
+        <span class="n">next_start_date</span> <span class="o">=</span> <span class="n">plan</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">e_this</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;end_date&quot;</span><span class="p">))</span>
+            <span class="n">s_next</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">next_start_date</span><span class="p">)</span> 
+            <span class="n">delta_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_next</span> <span class="o">-</span> <span class="n">e_this</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> 
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;InvalidDate&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">get_period_types_in_db</span><span class="p">(</span><span class="n">centers</span><span class="p">[</span><span class="n">selected_name</span><span class="p">]):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NoType&quot;</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">next_start_date</span> <span class="ow">and</span> <span class="n">pt</span> <span class="o">==</span> <span class="n">plan</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Duplicated periods&quot;</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">next_start_date</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Same starting date&quot;</span>
+            <span class="k">elif</span> <span class="n">delta_days</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Overlap of </span><span class="si">{</span><span class="o">-</span><span class="w"> </span><span class="n">delta_days</span><span class="si">}</span><span class="s2"> day(s)&quot;</span>
+            <span class="k">elif</span> <span class="n">delta_days</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">this_end_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_end_last_day&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types_with_duration</span>
+                                    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">pt</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">next_pt</span> <span class="o">=</span> <span class="n">plan</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span>
+                <span class="n">next_start_time</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_start_first_day&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types_with_duration</span>
+                                        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">next_pt</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">this_end_time</span> <span class="o">&gt;</span> <span class="n">next_start_time</span><span class="p">:</span>
+                    <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;CHECK Time overlap&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OK same day&quot;</span>
+            <span class="k">elif</span> <span class="n">delta_days</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;OK default </span><span class="si">{</span><span class="n">delta_days</span><span class="si">}</span><span class="s2"> days&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OK&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;check&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;CHECK&quot;</span><span class="p">)):</span>
+            <span class="n">session</span><span class="p">[</span><span class="s1">&#39;planOK&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">plan</span>
+</code></pre></div>
+<div id="this-center-courses" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_end_dates</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">center_obj</span><span class="p">):</span>
+    <span class="n">types_with_duration</span> <span class="o">=</span> <span class="n">get_types_with_duration</span><span class="p">(</span><span class="n">center_obj</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="s1">&#39;end_date&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">this_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;period_type&#39;</span><span class="p">],</span> <span class="n">types_with_duration</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">this_type</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;F&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">next_start</span> <span class="o">=</span> <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date&#39;</span><span class="p">)</span>
+                    <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">add_months_days</span><span class="p">(</span><span class="n">next_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">add_months_days</span><span class="p">(</span><span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;start_date&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">add_months_days</span><span class="p">(</span><span class="n">plan</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;start_date&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">this_type</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plan</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">coming_center_courses</span><span class="p">(</span><span class="n">center_obj</span><span class="p">):</span>
+    <span class="c1">#center = center_obj.center_name</span>
+    <span class="n">selected_db</span> <span class="o">=</span> <span class="n">center_obj</span><span class="o">.</span><span class="n">gong_db_name</span>
+    <span class="n">db_center</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="n">selected_db</span><span class="p">)</span>
+
+    <span class="n">periods</span> <span class="o">=</span> <span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">coming_periods</span>
+    <span class="n">Period</span> <span class="o">=</span> <span class="n">periods</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+    <span class="n">count_past</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">()</span> <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())</span>
+    <span class="n">date_current_course</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start_date</span>  <span class="c1">## [2]</span>
+
+    <span class="n">periods_db_center_obj</span> <span class="o">=</span> <span class="n">periods</span><span class="p">()[</span><span class="n">count_past</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1">## [3]</span>
+    <span class="n">periods_db_center</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="s1">&#39;period_type&#39;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">period_type</span><span class="p">,</span>
+            <span class="s1">&#39;source&#39;</span> <span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">center_obj</span><span class="o">.</span><span class="n">center_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_db&quot;</span>
+
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periods_db_center_obj</span>  <span class="c1">## [3]</span>
+    <span class="p">]</span>
+    <span class="n">sorted_periods</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">periods_db_center</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
+    <span class="n">sorted_periods_ends</span> <span class="o">=</span> <span class="n">add_end_dates</span><span class="p">(</span><span class="n">sorted_periods</span><span class="p">,</span> <span class="n">center_obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sorted_periods_ends</span><span class="p">,</span> <span class="n">date_current_course</span>
+</code></pre></div>
+<div id="obtain-durations" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dhamm_org_types_list</span><span class="p">():</span>
+    <span class="n">db_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">db_path</span> <span class="o">+</span> <span class="s1">&#39;course_type_map.csv&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_period_types_in_db</span><span class="p">(</span><span class="n">center_obj</span><span class="p">):</span>
+    <span class="n">selected_db</span> <span class="o">=</span> <span class="n">center_obj</span><span class="o">.</span><span class="n">gong_db_name</span>
+    <span class="n">db_center</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="n">selected_db</span><span class="p">)</span>
+    <span class="n">period_types_in_db</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">periods_struct</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">period_types_in_db</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_types_with_duration</span><span class="p">(</span><span class="n">center_obj</span><span class="p">):</span>
+    <span class="n">list_of_types</span> <span class="o">=</span> <span class="n">get_dhamm_org_types_list</span><span class="p">()</span>
+    <span class="n">selected_db</span> <span class="o">=</span> <span class="n">center_obj</span><span class="o">.</span><span class="n">gong_db_name</span>
+    <span class="n">db_center</span> <span class="o">=</span> <span class="n">database</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="n">selected_db</span><span class="p">)</span>
+    <span class="n">period_types_in_db</span> <span class="o">=</span> <span class="n">get_period_types_in_db</span><span class="p">(</span><span class="n">center_obj</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_of_types</span><span class="p">:</span>
+        <span class="n">vt</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">period_types_in_db</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">periods_struct</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">vt</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;F&quot;</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">day_0_type</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day_type&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">periods_struct</span><span class="p">())</span>
+                 <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">vt</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">times_day_0</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">timetables</span><span class="p">())</span>
+                 <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">vt</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">day_0_type</span><span class="p">]</span> 
+        <span class="n">item</span><span class="p">[</span><span class="s2">&quot;time_start_first_day&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">times_day_0</span><span class="p">)</span>
+        <span class="n">last_day_type</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day_type&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">periods_struct</span><span class="p">())</span>
+                 <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">vt</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">days</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">times_last_day</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">db_center</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">timetables</span><span class="p">())</span>
+                 <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;period_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">vt</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;day_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_day_type</span><span class="p">]</span> 
+        <span class="n">item</span><span class="p">[</span><span class="s2">&quot;time_end_last_day&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">times_last_day</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">list_of_types</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../center-dashboard/" class="btn btn-neutral float-left" title="Center dashboard page"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../center-planning/" class="btn btn-neutral float-right" title="Center planning page">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../center-dashboard/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../center-planning/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

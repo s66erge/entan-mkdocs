@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/utils-javascript/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>JS utilities - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "JS utilities";
+        var mkdocs_page_input_path = "gong-web-app\\utils-javascript.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/utils-javascript/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">JS utilities</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#block-navigation">Block navigation</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">JS utilities</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/utils-javascript.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="js-utilities">JS utilities<a class="headerlink" href="#js-utilities" title="Permanent link">#</a></h1>
+<div class="highlight"><pre><span></span><code><span class="o">&lt;&lt;</span><span class="n">block</span><span class="o">-</span><span class="n">navigation</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">client</span><span class="o">-</span><span class="n">timer</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<h3 id="block-navigation">Block navigation<a class="headerlink" href="#block-navigation" title="Permanent link">#</a></h3>
+<p>Except for links/buttons with class='allownavigation'</p>
+<div id="block-navigation" class="highlight"><pre><span></span><code><span class="n">JS_BLOCK_NAV</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">document.querySelectorAll(&#39;a&#39;).forEach(link =&gt; {</span>
+<span class="s2">    // Click handler - only disable for same-tab navigation</span>
+<span class="s2">    link.addEventListener(&#39;click&#39;, function(event) {</span>
+<span class="s2">        if this.classList.contains(&#39;allownavigation&#39;) {</span>
+<span class="s2">            window.onbeforeunload = null;</span>
+<span class="s2">        }</span>
+<span class="s2">        const willOpenNewTab =</span>
+<span class="s2">            event.ctrlKey || event.metaKey || event.shiftKey || event.altKey</span>
+<span class="s2">            || event.button === 1</span>
+<span class="s2">            || this.getAttribute(&#39;target&#39;) === &#39;_blank&#39;</span>
+<span class="s2">            || (event.ctrlKey &amp;&amp; event.shiftKey)  // Ctrl+Shift</span>
+<span class="s2">            || (event.ctrlKey &amp;&amp; event.altKey)    // Ctrl+Alt</span>
+<span class="s2">        ;</span>
+<span class="s2">        // ONLY disable onbeforeunload for same-tab navigation</span>
+<span class="s2">        if (willOpenNewTab) {</span>
+<span class="s2">            //console.log(&#39;Click intercepted:&#39;, this.href, { willOpenNewTab });</span>
+<span class="s2">            window.onbeforeunload = function() { return &quot;Unsaved changes!&quot;;};</span>
+<span class="s2">            event.preventDefault();  // Prevent default navigation</span>
+<span class="s2">        } else {</span>
+<span class="s2">            //console.log(&#39;Click NOT intercepted:&#39;, this.href, { willOpenNewTab });</span>
+<span class="s2">            window.onbeforeunload = null;  // Disable for this navigation</span>
+<span class="s2">        }</span>
+<span class="s2">    });</span>
+<span class="s2">    // Context menu handler for right-click</span>
+<span class="s2">    link.addEventListener(&#39;contextmenu&#39;, function(event) {</span>
+<span class="s2">        //console.log(&#39;context menu intercepted:&#39;, this.href);</span>
+<span class="s2">        window.onbeforeunload = function() { return &quot;Unsaved changes!&quot;;};</span>
+<span class="s2">        event.preventDefault();  // Prevent default navigation</span>
+<span class="s2">    });</span>
+<span class="s2">});</span>
+
+<span class="s2">// disable bfcache: see https://web.dev/articles/bfcache</span>
+<span class="s2">document.addEventListener(&#39;DOMContentLoaded&#39;, function() {</span>
+<span class="s2">  // Disable bfcache immediately</span>
+<span class="s2">  window.addEventListener(&#39;unload&#39;, () =&gt; </span><span class="si">{}</span><span class="s2">);</span>
+<span class="s2">  window.addEventListener(&#39;beforeunload&#39;, () =&gt; </span><span class="si">{}</span><span class="s2">);</span>
+<span class="s2">  window.addEventListener(&#39;pageshow&#39;, (e) =&gt; {</span>
+<span class="s2">    if (e.persisted) location.reload();</span>
+<span class="s2">  });</span>
+<span class="s2">});</span>
+
+<span class="s2">console.log(&quot;Planning page timer script loaded, onbeforeunload set to warn about unsaved changes.&quot;);</span>
+<span class="s2">window.onbeforeunload = function() { return &quot;Unsaved changes!&quot;;};</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<div id="client-timer" class="highlight"><pre><span></span><code><span class="n">JS_CLIENT_TIMER</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">function startCountdown(seconds, elementId) {</span>
+<span class="s2">    const element = document.getElementById(elementId);</span>
+<span class="s2">    let timeLeft = seconds;</span>
+
+<span class="s2">    function updateDisplay() {</span>
+<span class="s2">        if (timeLeft &gt; 60) {</span>
+<span class="s2">            const minutes = Math.floor(timeLeft / 60);</span>
+<span class="s2">            element.textContent = `$</span><span class="si">{minutes}</span><span class="s2"> min`;</span>
+<span class="s2">        } else {</span>
+<span class="s2">            element.textContent = `$</span><span class="si">{timeLeft}</span><span class="s2"> sec`;</span>
+<span class="s2">        }</span>
+<span class="s2">    }</span>
+<span class="s2">    updateDisplay();</span>
+
+<span class="s2">    const interval = setInterval(() =&gt; {</span>
+<span class="s2">        timeLeft--;</span>
+<span class="s2">        updateDisplay();    </span>
+<span class="s2">        if (timeLeft &lt;= 0) {</span>
+<span class="s2">            clearInterval(interval);</span>
+<span class="s2">            window.onbeforeunload = null;</span>
+<span class="s2">            window.location.href = `$</span><span class="si">{timerRedirect}</span><span class="s2">`;</span>
+<span class="s2">        }</span>
+<span class="s2">    }, 1000);</span>
+<span class="s2">}</span>
+<span class="s2">// Get starting time from #start-time element and START AUTOMATICALLY</span>
+<span class="s2">const startSeconds = parseInt(document.getElementById(&#39;start-time&#39;).textContent);</span>
+<span class="s2">const timerRedirect = document.getElementById(&#39;timer-redirect&#39;).textContent;</span>
+<span class="s2">startCountdown(startSeconds, &#39;timer&#39;);</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../utilities/" class="btn btn-neutral float-left" title="Utilities"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../obtain-schedule/API/" class="btn btn-neutral float-right" title="dhamma.org courses API">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../utilities/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../obtain-schedule/API/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

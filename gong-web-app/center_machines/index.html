@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/center_machines/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Center state machines - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Center state machines";
+        var mkdocs_page_input_path = "gong-web-app\\center_machines.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/center_machines/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Center state machines</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-state-machine-for-each-center">The state machine for each center</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#state-machines-creation-and-access">State machines creation and access</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#dbpersistentmodel-concrete-model-strategy">DBPersistentModel: Concrete model strategy</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">Center state machines</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/center_machines.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="center-state-machines">Center state machines<a class="headerlink" href="#center-state-machines" title="Permanent link">#</a></h1>
+<p>The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">myFasthtml</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statemachine</span><span class="w"> </span><span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">StateMachine</span><span class="p">,</span> <span class="n">StateChart</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dbset</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">libs.transit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">transit</span>
+
+<span class="n">csms</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="o">&lt;&lt;</span><span class="n">state</span><span class="o">-</span><span class="n">machine</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">abstract</span><span class="o">-</span><span class="k">with</span><span class="o">-</span><span class="n">persistency</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">db</span><span class="o">-</span><span class="n">persistent</span><span class="o">-</span><span class="n">model</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">create</span><span class="o">-</span><span class="n">centers</span><span class="o">-</span><span class="n">sms</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="nb">print</span><span class="o">-</span><span class="n">graph</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<h3 id="the-state-machine-for-each-center">The state machine for each center<a class="headerlink" href="#the-state-machine-for-each-center" title="Permanent link">#</a></h3>
+<p>see: https://python-statemachine.readthedocs.io/en/latest/index.html</p>
+<div id="state-machine" class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">HistoryListener</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">sm</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm</span><span class="o">.</span><span class="n">model</span>
+        <span class="n">result_mess</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; with: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">last_result</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">last_result</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;At </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">get_start_time</span><span class="p">()</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span><span class="si">}</span><span class="s2"> moved </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="o">+</span> \
+            <span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">result_mess</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run_sm_action</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">action</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+    <span class="n">transit</span><span class="o">.</span><span class="n">register_task</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">center_name</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">task</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CenterState</span><span class="p">(</span><span class="n">StateMachine</span><span class="p">):</span>
+
+    <span class="n">listeners</span> <span class="o">=</span> <span class="p">[</span><span class="n">HistoryListener</span><span class="p">]</span>
+
+    <span class="n">free</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Planning free to be edited&quot;</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">edit</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Planning is being edited&quot;</span><span class="p">)</span>
+    <span class="n">wait_01</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Waiting for 1am at center timezone&quot;</span><span class="p">)</span>
+    <span class="n">transfer</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Transferring planning to center&quot;</span><span class="p">)</span> 
+    <span class="n">wait_02</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Waiting for 2am at center timezone&quot;</span><span class="p">)</span>
+    <span class="n">getting_prod</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Getting production version after center restart&quot;</span><span class="p">)</span>
+    <span class="n">version_check</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Checking production version&quot;</span><span class="p">)</span>
+    <span class="n">w_reco_trans</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Planning send failed, waiting for file transfer recovery&quot;</span><span class="p">)</span>
+    <span class="n">w_reco_prod</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;getting prod version failed, waiting for production recovery&quot;</span><span class="p">)</span>
+    <span class="n">w_reco_version</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;wrong_db_version, waiting for recovery&quot;</span><span class="p">)</span>
+
+    <span class="n">progress</span> <span class="o">=</span> <span class="n">free</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">edit</span><span class="p">)</span> <span class="o">|</span> <span class="n">edit</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">wait_01</span><span class="p">)</span> <span class="o">|</span> <span class="n">wait_01</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">transfer</span><span class="p">)</span> <span class="o">|</span> <span class="n">transfer</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">wait_02</span><span class="p">)</span> \
+            <span class="o">|</span> <span class="n">wait_02</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">getting_prod</span><span class="p">)</span> <span class="o">|</span> <span class="n">getting_prod</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">version_check</span><span class="p">)</span> <span class="o">|</span> <span class="n">version_check</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">free</span><span class="p">)</span>
+
+    <span class="n">abandon_changes</span>   <span class="o">=</span> <span class="n">Event</span><span class="p">(</span><span class="n">edit</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">free</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;user abandon changes or 1 hour edit timer elapsed&#39;</span><span class="p">)</span>
+    <span class="n">reco_trans_done</span>   <span class="o">=</span> <span class="n">Event</span><span class="p">(</span><span class="n">w_reco_trans</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">wait_02</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;recovery of file transfer done&#39;</span><span class="p">)</span>
+    <span class="n">reco_prod_done</span>    <span class="o">=</span> <span class="n">Event</span><span class="p">(</span><span class="n">w_reco_prod</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">version_check</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;recovery of db in production done&#39;</span><span class="p">)</span>
+    <span class="n">reco_version_done</span> <span class="o">=</span> <span class="n">Event</span><span class="p">(</span><span class="n">w_reco_version</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">free</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;OK version of db in production&#39;</span><span class="p">)</span>
+
+    <span class="n">problem</span>  <span class="o">=</span> <span class="n">transfer</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">w_reco_trans</span><span class="p">)</span> <span class="o">|</span> <span class="n">getting_prod</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">w_reco_prod</span><span class="p">)</span> <span class="o">|</span> <span class="n">version_check</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">w_reco_version</span><span class="p">)</span>
+
+    <span class="c1"># used only in dev mode: force to free transitions</span>
+    <span class="n">force_to_free</span> <span class="o">=</span> <span class="n">free</span><span class="o">.</span><span class="n">from_</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+
+    <span class="c1"># ACTIONS ---------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_exit_free</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">last_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_enter_wait_01</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_sm_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">transit</span><span class="o">.</span><span class="n">wait_until</span><span class="p">,</span> <span class="n">until_hour</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_enter_transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_sm_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">transit</span><span class="o">.</span><span class="n">transfer_new_db</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_enter_wait_02</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_sm_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">transit</span><span class="o">.</span><span class="n">wait_until</span><span class="p">,</span> <span class="n">until_hour</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_enter_getting_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_sm_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">transit</span><span class="o">.</span><span class="n">get_version_prod</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_enter_version_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run_sm_action</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">transit</span><span class="o">.</span><span class="n">check_version_prod</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="state-machines-creation-and-access">State machines creation and access<a class="headerlink" href="#state-machines-creation-and-access" title="Permanent link">#</a></h3>
+<p>1 state machine per center.
+To create them: csms = create_center_state_machines()
+To access the sm for one center: sm = csms["Mahi"]</p>
+<div id="create-centers-sms" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_center_state_machines</span><span class="p">(</span><span class="n">centers</span><span class="p">):</span>
+    <span class="n">clocks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">db2</span> <span class="o">=</span> <span class="n">dbset</span><span class="o">.</span><span class="n">get_central_db</span><span class="p">()</span>
+    <span class="n">centers_list</span> <span class="o">=</span> <span class="n">db2</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;center_name&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">centers_list</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">center_state</span> <span class="o">=</span> <span class="n">CenterDataModel</span><span class="p">(</span><span class="n">center_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="n">centers</span><span class="p">)</span>
+        <span class="n">sm</span> <span class="o">=</span> <span class="n">CenterState</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">center_state</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+        <span class="n">csms</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sm</span>
+        <span class="n">clocks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">clocks</span>
+</code></pre></div>
+<h3 id="dbpersistentmodel-concrete-model-strategy">DBPersistentModel: Concrete model strategy<a class="headerlink" href="#dbpersistentmodel-concrete-model-strategy" title="Permanent link">#</a></h3>
+<p>A concrete implementation of the generic storage protocol above, that reads and writes to the central database on table centers with center_name in fields:</p>
+<ul>
+<li>status: the current state</li>
+<li>created_by: the user who took ownership of this center database</li>
+<li>status_start: date/time when the status changed (ISO UTC string)</li>
+</ul>
+<div id="db-persistent-model" class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CenterDataModel</span><span class="p">(</span><span class="n">AbstractPersistentModel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_name</span> <span class="o">=</span> <span class="n">center_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centers</span> <span class="o">=</span> <span class="n">centers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span> <span class="o">=</span> <span class="kc">None</span>    <span class="c1"># Cache for the timestamp of the last state change</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_result</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># result of the last operation on this machine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_db_path</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># new production db to be sent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_prod</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># production version date storage location</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">status_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">created_by</span>
+        <span class="k">return</span> <span class="n">row</span><span class="o">.</span><span class="n">status</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">status</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1"># Write BOTH state AND current timestamp</span>
+        <span class="n">now_utc</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S+00:00&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span> <span class="o">=</span> <span class="n">now_utc</span>      
+        <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">center_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">center_name</span><span class="p">,</span> 
+            <span class="n">status</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">status_start</span><span class="o">=</span><span class="n">now_utc</span><span class="p">,</span>
+            <span class="n">created_by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If statustart is not cached, read it from the database</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">status_start</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">status_start</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">statustart</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">center_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">created_by</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span>
+</code></pre></div>
+<h1 id="abstract-model-with-persistency-protocol">Abstract model with persistency protocol<a class="headerlink" href="#abstract-model-with-persistency-protocol" title="Permanent link">#</a></h1>
+<p>Abstract Base Class for persistent models.
+Subclasses should implement concrete strategies for:</p>
+<ul>
+<li><code>_read_state</code>: Read the state from the concrete persistent layer.</li>
+<li><code>_write_state</code>: Write the state from the concrete persistent layer.</li>
+</ul>
+<div id="abstract-with-persistency" class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AbstractPersistentModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_state</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span>
+    <span class="nd">@state</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_state</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="to-print-the-state-machine-graph">To print the state machine graph<a class="headerlink" href="#to-print-the-state-machine-graph" title="Permanent link">#</a></h3>
+<div id="print-graph" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">states_print</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">statemachine</span><span class="w"> </span><span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">StateMachine</span><span class="p">,</span> <span class="n">StateChart</span> 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">statemachine.contrib.diagram</span><span class="w"> </span><span class="kn">import</span> <span class="n">quickchart_write_svg</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">CenterState</span><span class="p">(</span><span class="n">StateChart</span><span class="p">)</span>
+    <span class="n">quickchart_write_svg</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="s2">&quot;images/center_machines.svg&quot;</span><span class="p">)</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../center-planning/" class="btn btn-neutral float-left" title="Center planning page"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../center_transitions/" class="btn btn-neutral float-right" title="Center machines transitions">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../center-planning/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../center_transitions/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

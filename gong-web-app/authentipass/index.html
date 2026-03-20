@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/authentipass/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Authentication with passwords - Gong system and apps for Vipassane centers</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Authentication with passwords";
+        var mkdocs_page_input_path = "gong-web-app\\authentipass.md";
+        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/authentipass/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong players</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Gong web app</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../0-gong-prog/">Gong main program</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Authentication with passwords</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#login-form">Login form</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Setup deploy</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Gong system and apps for Vipassane centers</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Gong web app</li>
+      <li class="breadcrumb-item active">Authentication with passwords</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/authentipass.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="authentication-with-passwords">Authentication with passwords<a class="headerlink" href="#authentication-with-passwords" title="Permanent link">#</a></h1>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">passlib.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">CryptContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">isa_dev_computer</span><span class="p">,</span> <span class="n">send_email</span><span class="p">,</span> <span class="n">feedback_to_user</span>
+
+<span class="o">&lt;&lt;</span><span class="n">register</span><span class="o">&gt;&gt;</span>
+<span class="o">&lt;&lt;</span><span class="n">admin_required</span><span class="o">&gt;&gt;</span>
+</code></pre></div>
+<h3 id="login-form">Login form<a class="headerlink" href="#login-form" title="Permanent link">#</a></h3>
+<p>The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!</p>
+<div id="register" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">MyForm</span><span class="p">(</span><span class="n">btn_text</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Form</span><span class="p">(</span>
+        <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Email&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Password&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="n">btn_text</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span><span class="p">),</span>
+        <span class="n">Span</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;color:red&quot;</span><span class="p">),</span>
+        <span class="n">hx_post</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+        <span class="n">hx_target</span><span class="o">=</span><span class="s2">&quot;#error&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/register&#39;)</span>
+<span class="sd">def get():</span>
+<span class="sd">    return authpass.register_get()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_get</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Article</span><span class="p">(</span>
+            <span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Register&quot;</span><span class="p">),</span>
+            <span class="n">MyForm</span><span class="p">(</span><span class="s2">&quot;Register&quot;</span><span class="p">,</span> <span class="s2">&quot;/registercheck&quot;</span><span class="p">),</span>
+            <span class="n">Hr</span><span class="p">(),</span>
+            <span class="n">P</span><span class="p">(</span><span class="s2">&quot;Already have an account? &quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">(</span><span class="s2">&quot;Login&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/login&quot;</span><span class="p">)),</span>
+            <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;mw-480 mx-auto&quot;</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">pwd_context</span> <span class="o">=</span> <span class="n">CryptContext</span><span class="p">(</span><span class="n">schemes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bcrypt&quot;</span><span class="p">],</span> <span class="n">deprecated</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_password_hash</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pwd_context</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/registercheck&#39;)</span>
+<span class="sd">def post(email:str, password:str):</span>
+<span class="sd">    return authpass.register_post(email, password)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_post</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">users</span><span class="p">):</span>
+    <span class="n">User</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">users</span><span class="p">[</span><span class="n">email</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;User already exists&quot;</span>
+    <span class="k">except</span> <span class="n">NotFoundError</span><span class="p">:</span>
+        <span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">get_password_hash</span><span class="p">(</span><span class="n">password</span><span class="p">))</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HttpHeader</span><span class="p">(</span><span class="s1">&#39;HX-Redirect&#39;</span><span class="p">,</span> <span class="s1">&#39;/login&#39;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/login&#39;)</span>
+<span class="sd">def get():</span>
+<span class="sd">    return authpass.login_get()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">login_get</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Article</span><span class="p">(</span>
+            <span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Login&quot;</span><span class="p">),</span>
+            <span class="n">MyForm</span><span class="p">(</span><span class="s2">&quot;Login&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;/logincheck&quot;</span><span class="p">),</span>
+            <span class="n">Hr</span><span class="p">(),</span>
+            <span class="c1"># P(&quot;Want to create an Account? &quot;, A(&quot;Register&quot;, href=&quot;/register&quot;)),</span>
+            <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;mw-480 mx-auto&quot;</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_password</span><span class="p">(</span><span class="n">plain_password</span><span class="p">,</span> <span class="n">hashed_password</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pwd_context</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">plain_password</span><span class="p">,</span> <span class="n">hashed_password</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@rt(&#39;/logincheck&#39;)</span>
+<span class="sd">def post():</span>
+<span class="sd">    return authpass.logincheck()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">logincheck</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">users</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">email</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">NotFoundError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Email or password are incorrect&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify_password</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Email or password are incorrect&quot;</span>
+    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">role_name</span>
+    <span class="k">return</span> <span class="n">HttpHeader</span><span class="p">(</span><span class="s1">&#39;HX-Redirect&#39;</span><span class="p">,</span> <span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
+</code></pre></div>
+<div id="admin_required" class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">admin_required</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">role</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;admin&quot;</span><span class="p">:</span>
+            <span class="c1"># Redirect to unauthorized page if not admin</span>
+            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s1">&#39;/no_access_right&#39;</span><span class="p">)</span>
+        <span class="c1"># Proceed if user is admin</span>
+        <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../authenticate/" class="btn btn-neutral float-left" title="Authentication with a code by email"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../center-consult/" class="btn btn-neutral float-right" title="Center consult page">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../authenticate/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../center-consult/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
