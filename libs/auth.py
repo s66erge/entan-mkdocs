@@ -6,7 +6,7 @@ import string
 from datetime import datetime, timedelta
 from functools import wraps
 from myFasthtml import *
-from libs.utils import isa_dev_computer, send_email, feedback_to_user
+import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
 def signin_form():
@@ -19,13 +19,24 @@ def signin_form():
     )
 
 def code_form():
-    return Form(
+    return Div( 
+        Form(
         Input(id='code', name='code', type='text', placeholder='Enter your code'),
         Button("Verify code", type="submit", id="verify-btn"),
+        id="code-form",
         hx_post="/verify_code",
         hx_target="#code-error",
         hx_disabled_elt="#verify-btn"
+        ),
+        Script("""
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const frm = document.getElementById("code-form");
+        const current = frm.getAttribute("hx-post");
+        const sep = current.includes("?") ? "&" : "?";
+        frm.setAttribute("hx-post", current + `${sep}timezone=${timeZone}`);
+        """)
     )
+
 
 """
 @rt('/login')
@@ -59,7 +70,7 @@ def post(email: str):
 
 def create_code(email, users):
     if not email:
-        return (feedback_to_user({'error': 'missing_email'}))
+        return (utils.feedback_to_user({'error': 'missing_email'}))
 
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -69,12 +80,11 @@ def create_code(email, users):
         users.update(
             email=email,
             magic_link_token=login_code,
-            magic_link_expiry=magic_link_expiry,
-            number_link_touched=0
+            magic_link_expiry=magic_link_expiry
         )
         send_login_code_email(email, login_code)
         return (
-            P(feedback_to_user({'success': 'login_code_sent'}), id="success"),
+            P(utils.feedback_to_user({'success': 'login_code_sent'}), id="success"),
             HttpHeader('HX-Reswap', 'outerHTML'),
             Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true"),
             Div(code_form(), id='code_form', hx_swap_oob="true")
@@ -82,7 +92,7 @@ def create_code(email, users):
     except IndexError:
         # Handle case when no user is found
         return Div(
-            feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
+            utils.feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
         )
 
 # ~/~ end
@@ -105,24 +115,24 @@ With Metta
 The Gong App Team
 """
     # dev toggle if you like
-    if isa_dev_computer():
+    if utils.isa_dev_computer():
         print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
     else:
-        send_email(email_subject, email_text, [email_address])
+        utils.send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
 
 """
 @rt('/verify_code')
-def post(code: str, session):
+def post(session, code: str):
     return auth.verify_code(session, code, users)
 """
-def verify_code(session, code, users):
+def verify_code(session, code, timezon, users):
     nowstr = f"'{datetime.now()}'"
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (code, nowstr))[0]
     except IndexError:
-        return feedback_to_user({'error': 'invalid_or_expired_code'})
+        return utils.feedback_to_user({'error': 'invalid_or_expired_code'})
 
     User = users.dataclass()
     session.clear()
@@ -134,7 +144,8 @@ def verify_code(session, code, users):
         email=user.email,
         magic_link_token=None,
         magic_link_expiry=None,
-        is_active=True
+        is_active=True,
+        timezone = timezon
     )
     print(f"{user.email} just got connected via code")
     return Redirect('/dashboard')

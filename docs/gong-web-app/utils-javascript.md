@@ -15,6 +15,9 @@ JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation
     link.addEventListener('click', function(event) {
+        if this.classList.contains('allownavigation') {
+            window.onbeforeunload = null;
+        }
         const willOpenNewTab =
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
             || event.button === 1
@@ -23,21 +26,18 @@ document.querySelectorAll('a').forEach(link => {
             || (event.ctrlKey && event.altKey)    // Ctrl+Alt
         ;
         // ONLY disable onbeforeunload for same-tab navigation
-        if ((willOpenNewTab) && !this.classList.contains('allownavigation')) {
-            console.log('Click intercepted:', this.href, { willOpenNewTab });
+        if (willOpenNewTab) {
+            //console.log('Click intercepted:', this.href, { willOpenNewTab });
             window.onbeforeunload = function() { return "Unsaved changes!";};
             event.preventDefault();  // Prevent default navigation
         } else {
-            console.log('Click NOT intercepted:', this.href, { willOpenNewTab });
+            //console.log('Click NOT intercepted:', this.href, { willOpenNewTab });
             window.onbeforeunload = null;  // Disable for this navigation
         }
     });
     // Context menu handler for right-click
     link.addEventListener('contextmenu', function(event) {
-        if (this.classList.contains('allownavigation')) {
-            return
-        };
-        console.log('context menu intercepted:', this.href);
+        //console.log('context menu intercepted:', this.href);
         window.onbeforeunload = function() { return "Unsaved changes!";};
         event.preventDefault();  // Prevent default navigation
     });

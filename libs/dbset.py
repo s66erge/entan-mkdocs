@@ -4,13 +4,12 @@ import textwrap
 import os
 # import Database # for PostgreSQL, moved to # from myFasthtml 
 # import database # for SQLite, moved to # from myFasthtml
-from libs.utils import isa_dev_computer, get_db_path
-
+import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#dataclasses>>[init]
 
 class Role: role_name: str; description: str
-class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; number_link_touched: int
+class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
 class Center: center_name: str; timezone: str; gong_db_name: str; location: str; routing_port: int; other_course: str; status: str; created_by: str; status_start: str
 class Planner: user_email: str; center_name: str
 
@@ -35,9 +34,9 @@ def get_db_path():
 
 # on postgreSQL
 def get_central_db():
-    if isa_dev_computer():
+    if utils.isa_dev_computer():
         # local sqlite3
-        return database(get_db_path() + "gongUsers.db")
+        return database(utils.get_db_path() + "gongUsers.db")
         # local postgreSQL on docker
         #return Database("postgresql://postgres:route66@localhost:5432/postgres")
     else:

@@ -6,17 +6,21 @@
 ```{.python file=main.py}
 
 from myFasthtml import *
-import json
-from libs.states import create_center_state_machines
-from libs.auth import admin_required, verify_code, create_code, login
-from libs.cdash import dashboard, send_check_center_db
-from libs.consul import consult_page, consult_select_db, consult_select_period, consult_select_timetable
-from libs.dbset import Role, User, Center, Planner, init_data, get_central_db
-from libs.planning import planning_page, load_dhamma_db, check_save_show_plan, delete_line, add_line, abandon_edit, save_db_plan_timetable, check_center_free, status_page
-from libs.fetch import fetch_dhamma_courses
-from libs.admin import show_page
-from libs.adchan import add_planner, delete_planner, add_center, delete_center, add_user, delete_user
-from libs.utils import feedback_to_user, display_markdown, Globals, create_temp_path, delete_temp_path, get_db_path
+import asyncio
+import libs.states as states
+import libs.auth as auth
+from libs.auth import admin_required
+import libs.cdash as cdash
+import libs.consul as consul
+import libs.dbset as dbset
+import libs.planning as planning
+import libs.fetch as fetch
+import libs.admin as admin
+import libs.adchan as adchan
+import libs.utils as utils
+import libs.states as states
+import libs.transit as transit
+
 #  from starlette.testclient import TestClient
 
 <<initialize-program>>
@@ -46,37 +50,48 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/l
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
 # client = TestClient(app)
 
-db_path = get_db_path()
-db = get_central_db()
+db_path = utils.get_db_path()
+db = dbset.get_central_db()
+utils.wipe_all_temps()
 
-roles = db.create(Role, pk='role_name')
-users = db.create(User, pk='email')
-centers = db.create(Center, pk='center_name')
-planners = db.create(Planner, pk=('user_email', 'center_name'))
+roles = db.create(dbset.Role, pk='role_name')
+users = db.create(dbset.User, pk='email')
+centers = db.create(dbset.Center, pk='center_name')
+planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 
-init_data(roles, users, centers, planners)
+dbset.init_data(roles, users, centers, planners)
+clocks = states.create_center_state_machines(centers)
 
-csms, clocks = create_center_state_machines(centers)
+async def workflow_supervisor():
+    while True:
+        await asyncio.sleep(5)
+        for center in states.csms:
+            await transit.check_and_advance(center, states.csms)
+@app.on_event("startup")
+async def start_supervisor():
+    asyncio.create_task(workflow_supervisor())
+
 ```
 
 ```{.python #login-authenticate}
 
 @rt('/login')
 def get():
-    return login()
+    return auth.login()
 
 @rt('/create_code')
 def post(email: str):
-    return create_code(email, users)
+    return auth.create_code(email, users)
 
 @rt('/verify_code')
-def post(session, code: str):
-    return verify_code(session, code, users) 
+def post(session, request, code: str):
+    timezon = dict(request.query_params).get('timezone', 'UTC')
+    return auth.verify_code(session, code, timezon, users) 
 
 @rt('/')
 def home():
     return Main(
-        Div(display_markdown("home-t")),
+        Div(utils.display_markdown("home-t")),
         A("Login",href="/login", class_="button"),
         cls="container"
     )
@@ -89,75 +104,80 @@ def post(session):
 
 @rt('/dashboard')
 def get(session):
-    return dashboard(session, users, planners)
+    return cdash.dashboard(session, users, planners)
 ```
 
 ```{.python #consult-centers-plans}
 
 @rt('/consult_page')
 def get(session, request):
-    return consult_page(session, centers)
+    return consul.consult_page(session, centers)
 
 @rt('/consult/select_db')
 def get(request):
-    return consult_select_db(request, centers, db_path)
+    return consul.consult_select_db(request, centers, db_path)
 
 @rt('/consult/select_period')
 def get(request):
-    return consult_select_period(request, db_path)
+    return consul.consult_select_period(request, db_path)
 
 @rt('/consult/select_timetable')
 def get(request):
-    return consult_select_timetable(request, db_path)
+    return consul.consult_select_timetable(request, db_path)
 
 ```
 
 ```{.python #courses-planning}
 
 @rt('/planning_page')
-async def get(session, request):
-    params = dict(request.query_params)
-    center = params.get("selected_name")
+async def get(session, center: str):
     session["center"] = center
-    enter_edit_OK, state = await check_center_free(csms[center], clocks[center], session['auth'])
+    enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:
-        create_temp_path(center)
-        return await planning_page(session, center, centers, csms, clocks)
+        utils.create_temp_path(center)
+        return await planning.planning_page(session, center, centers, states.csms, clocks)
     else:
-        return Redirect(f"/status_page?center={center}&reason=not_free&state={state}&err=no_error")
+        return Redirect(f"/status_page?center={center}")
 
 @rt('/status_page')
-def get(session, center: str, reason: str, state: str, err:str):
-    return status_page(session, center, centers, reason, state, err)
+def get(session, center: str):
+    return planning.status_page(session, center, centers, users, states.csms)
 
 @rt('/planning/load_dhamma_db')
 def get(session):
-    return load_dhamma_db(session)
+    return planning.load_dhamma_db(session)
 
 @rt('/planning/check_show_dhamma')
 async def get(session, request):
-    merged_plan = await fetch_dhamma_courses(centers, session["center"], Globals.MONTHS_TO_FETCH, Globals.DAYS_TO_FETCH)
-    return await check_save_show_plan(session, merged_plan, centers, {})
+    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
+                        utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
+    return await planning.check_save_show_plan(session, merged_plan, centers, {})
 
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
-    return await delete_line(session, centers, idx)
+    return await planning.delete_line(session, centers, idx)
 
 @rt('/planning/add_line')
 async def post(session, ptype: str, start: str):
-    return await add_line(session, centers, ptype, start)
+    return await planning.add_line(session, centers, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):
-    delete_temp_path(session["center"])
-    return abandon_edit(session, csms)
+    utils.delete_temp_path(session["center"])
+    return transit.abandon_edit(session, states.csms)
 
 @rt('/save-center-db')
-async def get(session, offset: int):
-    save_db_path = save_db_plan_timetable(session["center"], centers)
-    delete_temp_path(session["center"])
-    state, reason, err = await send_check_center_db(session, centers, csms, offset, save_db_path)
-    return Redirect(f"/status_page?center={session["center"]}&state={state}&reason={reason}&err={err}")
+# FIXME move getting user offset to dashboard ?
+async def get(session):
+    state_mach = states.csms[session["center"]]
+    if not session["planOK"]:
+        return utils.feedback_to_user({"error": "plan_not_ok"})
+    save_db_path = planning.save_db_plan_timetable(session["center"], centers)
+    state_mach.model.save_db_path = save_db_path
+    utils.delete_temp_path(session["center"])
+    # await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
+    state_mach.progress()   # from 'edit' to 'wait_01'
+    return Redirect(f"/status_page?center={session["center"]}")
 
 
 ```
@@ -167,37 +187,37 @@ async def get(session, offset: int):
 @rt('/admin_page')
 @admin_required
 def get(session, request):
-    return show_page(request, users, roles, centers, planners)
+    return admin.show_page(request, users, roles, centers, planners)
 
 @rt('/delete_user/{email}')
 @admin_required
 def post(session, email: str):
-    return delete_user(email, users, planners, centers)
+    return adchan.delete_user(email, users, planners, centers)
 
 @rt('/add_user')
 @admin_required
 def post(session, new_user_email: str = "", name: str = "",role_name: str =""):
-    return add_user(new_user_email, name ,role_name, users, roles, centers)
+    return adchan.add_user(new_user_email, name ,role_name, users, roles, centers)
 
 @rt('/delete_center/{center_name}')
 @admin_required
 def post(session, center_name: str):
-    return delete_center(center_name, users, centers, planners, db_path)
+    return adchan.delete_center(center_name, users, centers, planners, db_path)
 
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
-    return add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path)
+    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
-    return delete_planner(user_email, center_name, planners)
+    return adchan.delete_planner(user_email, center_name, planners)
 
 @rt('/add_planner')
 @admin_required
 def post(session, new_planner_user_email: str = "", new_planner_center_name: str = ""):
-    return add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
+    return adchan.add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
 
 ```
 
@@ -227,7 +247,7 @@ def db_error(session, etext: str):
     return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Head(Title("Database error")),
-        Body(Div(feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        Body(Div(utils.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
         (A("Dashboard", href="/dashboard")),
         cls="container"
     )

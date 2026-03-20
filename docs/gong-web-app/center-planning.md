@@ -7,17 +7,15 @@ import asyncio
 import json
 import os
 import shutil
-from datetime import datetime, timedelta, timezone
-from re import match
-from urllib.parse import quote_plus
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from myFasthtml import *
-from libs.utils import display_markdown, isa_dev_computer, feedback_to_user, get_db_path, bypass, Globals, temp_paths
-from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
-from libs.dbset import Coming_periods
-from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
+import libs.utils as utils
+import libs.cdash as cdash 
+import libs.plancheck as plancheck
+import libs.dbset as dbset
+import libs.utilsJS as utilsJS
 
-
-<<abandon-edit>>
 <<create-html-table>>
 <<load-show-center-plan>>
 <<planning-page>>
@@ -37,29 +35,15 @@ Then:
 - not available: explain to the user to wait for current changes to enter production at center 
 
 ```{.python #planning-page}
-async def check_center_free(state_mach, center_lock, this_user):
-    async with center_lock:
-        center_is_free = False
-        tnow = datetime.now(timezone.utc)
-        start_state_time = state_mach.model.get_start_time()
-        past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
-        delta = (tnow-past).total_seconds()
-        if state_mach.configuration[0].id == "edit" and delta > Globals.INITIAL_COUNTDOWN:
-            state_mach.abandon_changes()
-        if state_mach.configuration[0].id == "free":
-            state_mach.model.user = this_user
-            state_mach.progress()
-            center_is_free = True
-        return center_is_free, state_mach.configuration[0].id
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
     session['planOK'] = False
     center_lock = clocks[selected_name]
     return Main(
-        Div(display_markdown("planning-t")),
+        Div(utils.display_markdown("planning-t")),
         Span(
-            Span(str(Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
+            Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
             Span('/planning/abandon_edit', id="timer-redirect", style="display: none;"),
             Button(f"Modify {selected_name} planning",
                 hx_get=f"/planning/load_dhamma_db",
@@ -72,42 +56,43 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("", id="offset", type="hidden"),
-            A(f"SAVE CHANGES to {selected_name}", id="save-link", href="/save-center-db", 
-                cls="allownavigation") if bypass(session) else None,
-            Script("""
-            const offset = new Date().getTimezoneOffset();
-            const link = document.getElementById("save-link"); //<a id="save-link">
-            const sep = link.href.includes("?") ? "&" : "?";
-            link.href = link.href + `${sep}offset=${offset}`;
-            """),
+            Button(f"SAVE CHANGES to {selected_name}", id="save-btn",
+                hx_get="/save-center-db",
+                hx_target="#line-feedback",
+                cls="allownavigation") if utils.dev_comp_or_user(session) else None,
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")
         ),
         Div(id="line-feedback"),
-        Script(JS_CLIENT_TIMER),
-        Script(JS_BLOCK_NAV),
+        Script(utilsJS.JS_CLIENT_TIMER),
+        Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
         Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
         cls="container"
     )
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, reason, state, err):
-    timezon = centers[center_name].timezone
+def status_page(session, center_name, centers, users, csms):
+    email = session["auth"]
+    user_timezone = users[email].timezone
+    center_obj = centers[center_name]
+    ct_timezone = center_obj.timezone
+    state_mach = csms[center_name]
+    state = state_mach.configuration[0].id
+    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
-        Div(display_markdown("planning-busy-t")),
-        P(f"timezone: {timezon}"),
-        P(f"state: {state}"),
-        P(f"reason: {reason}"),
-        P(f"error: {err}"),
-        Span(
-            A("dashboard", href="/dashboard"),
-            Span(style="display: inline-block; width: 20px;"),
-            Button("Logout", hx_post="/logout"),
-            Span(style="display: inline-block; width: 20px;"),
-            A("set FREE",href="/planning/abandon_edit") if bypass(session) else None,        
-        ),
+        cdash.top_menu(session['role']),
+        Div(utils.display_markdown(mark_file)),
+        H3(f"Center {center_name}"),
+        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
+        P(f"UTC time: {utils.short_iso(datetime.now())}"),
+        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
+        P(f"Current state: {state}"),
+        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
+        H3("Center states history"),
+        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
+        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
         cls="container"
     )
 
@@ -150,7 +135,7 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_dhamm_org_types_list()]
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in plancheck.get_dhamm_org_types_list()]
     form = Form(
         Div(
             Label("Period type:"),
@@ -174,7 +159,7 @@ def show_draft_plan_table(draft_plan, mess):
     )
     return Div(
         H2("Plan with 'www.google.org' added for 12 months from current course start"),
-        Div(feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
+        Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
         table,
         form,
         id="planning-periods"
@@ -197,8 +182,8 @@ def load_dhamma_db(session):
     )
 
 def save_db_plan_timetable(center_name, centers):
-    source_db_file = get_db_path() + "/" + center_name.lower() + ".ok.db"
-    dest_db_file = get_db_path() + "/" + center_name.lower() + ".sending.db"
+    source_db_file = utils.get_db_path() + "/" + center_name.lower() + ".ok.db"
+    dest_db_file = utils.get_db_path() + "/" + center_name.lower() + ".sending.db"
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
     shutil.copy2(Path(source_db_file), Path(dest_db_file))
@@ -207,11 +192,10 @@ def save_db_plan_timetable(center_name, centers):
     dest_db.execute("DROP TABLE coming_periods")
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
-    coming_periods = dest_db.create(Coming_periods, pk='start_date')
-    for record in get_plan(temp_paths[center_name]):
+    coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
+    for record in get_plan(utils.temp_paths[center_name]):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
-
     return Path(dest_db_file)
 
 def get_plan(temp_path):
@@ -224,14 +208,14 @@ def save_plan(temp_path, plan):
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
-    new_draft_plan = check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(save_plan, temp_paths[selected_name], new_draft_plan)
+    new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
+    await asyncio.to_thread(save_plan, utils.temp_paths[selected_name], new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
     selected_name = session["center"]
-    plan = get_plan(temp_paths[selected_name])
+    plan = get_plan(utils.temp_paths[selected_name])
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -240,7 +224,7 @@ async def delete_line(session, centers, index):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session["center"]
-    plan = get_plan(temp_paths[selected_name])
+    plan = get_plan(utils.temp_paths[selected_name])
     # Create new plan line with user input
     new_line = {
         "start_date": start,
@@ -253,25 +237,6 @@ async def add_line(session, centers, ptype, start):
     plan.append(new_line)    
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
-    plancomp = add_end_dates(plansor, centers[selected_name])
+    plancomp = plancheck.add_end_dates(plansor, centers[selected_name])
     return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
 ```
-
-### Abandon center planning edit
-
-Check for the rare situation when arriving here on 'free' state instead of 'edit'.
-
-```{.python #abandon-edit}
-# @rt('/planning/abandon_edit')
-def abandon_edit(session, csms):
-    this_center = session["center"]
-    session["center"] = ""
-    if this_center in csms and csms[this_center].configuration[0].id == "edit":
-        csms[this_center].abandon_changes()
-        csms[this_center].model.user = None
-    elif bypass(session):
-        csms[this_center].force_to_free()
-    return  Redirect('/dashboard')
-
-```
-

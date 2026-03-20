@@ -3,40 +3,86 @@ from abc import ABC
 from abc import abstractmethod
 import asyncio
 from myFasthtml import *
-import time
 from datetime import datetime, timezone
-# from statemachine import State, Event, StateMachine, StateChart # moved to "myFasthtml.py"
-from libs.dbset import get_central_db
-from libs.utils import isa_dev_computer
+from statemachine import State, Event, StateMachine, StateChart
+import libs.dbset as dbset
+import libs.transit as transit
+
+csms = {}
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+class HistoryListener:
+    def __init__(self):
+        self.max_size = 50
+        self.sm = None
+        self.entries = []
+
+    def setup(self, sm, max_size, **kwargs):
+        self.max_size = max_size
+        self.sm = sm
+
+    def after_transition(self, event, source, target):
+        model = self.sm.model
+        result_mess = f" with: {model.last_result}" if model.last_result else ""
+        log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
+            f"from {source.id} to {target.id} on {event}" + result_mess
+        self.entries.append(log)
+        print(log)
+        if len(self.entries) > self.max_size:
+            self.entries.pop(0)
+
+def run_sm_action(model, action, *args, **kwargs):
+    task = asyncio.create_task(action(model, *args, **kwargs))
+    transit.register_task(model.center_name, task)
+    return task
+
 class CenterState(StateMachine):
-    free = State(initial=True)   # free to be edited
-    edit = State()               # next version being edited
-    w01_transfer = State()       # db ready, waiting for 1am to do/check transfer 
-    w02_prod = State()           # db sent, waiting for 2am to check prod start 
-    version_check = State()      # prod_info received, checking db version is OK
-    w_reco_trans = State()       # db send failed, waiting for file transfer recovery
-    w_reco_prod = State()        # getting prod info failed, waiting for production recovery
-    w_reco_version = State()     # wrong_db_version, waiting for recovery
 
-    progress = free.to(edit) | edit.to(w01_transfer) | w01_transfer.to(w02_prod) | w02_prod.to(version_check) | version_check.to(free)
+    listeners = [HistoryListener]
 
-    abandon_changes   = Event(edit.to(free), name='user abandon changes')
-    reco_trans_done   = Event(w_reco_trans.to(w02_prod), name='recovery of file transfer done')
+    free = State("Planning free to be edited", initial=True)
+    edit = State("Planning is being edited")
+    wait_01 = State("Waiting for 1am at center timezone")
+    transfer = State("Transferring planning to center") 
+    wait_02 = State("Waiting for 2am at center timezone")
+    getting_prod = State("Getting production version after center restart")
+    version_check = State("Checking production version")
+    w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+    w_reco_prod = State("getting prod version failed, waiting for production recovery")
+    w_reco_version = State("wrong_db_version, waiting for recovery")
+
+    progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
+            | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
+
+    abandon_changes   = Event(edit.to(free), name='user abandon changes or 1 hour edit timer elapsed')
+    reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
 
-    problem  = w01_transfer.to(w_reco_trans) | w02_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
-    def on_enter_state(self, target, event):
-        if getattr(self.model, "user", None) :
-            print(f"{self.model.user} entered {self.model.center_name} into '{target.id}' on '{event.name}'")
-        else:
-            print(f"into '{target.id}' on '{event.name}'")
+    # ACTIONS ---------------------------------
+
+    def on_exit_free(self):
+        self.model.last_result = None
+
+    def on_enter_wait_01(self):
+        run_sm_action(self.model, transit.wait_until, until_hour=1)
+
+    def on_enter_transfer(self):
+        run_sm_action(self.model, transit.transfer_new_db)
+
+    def on_enter_wait_02(self):
+        run_sm_action(self.model, transit.wait_until, until_hour=2, minutes=20)
+
+    def on_enter_getting_prod(self):
+        run_sm_action(self.model, transit.get_version_prod)
+
+    def on_enter_version_check(self):
+        run_sm_action(self.model, transit.check_version_prod)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -66,7 +112,10 @@ class CenterDataModel(AbstractPersistentModel):
         self.center_name = center_name
         self.centers = centers
         self.user = user
-        self.statustart = None  # Cache for the timestamp of the last state change
+        self.statustart = None    # Cache for the timestamp of the last state change
+        self.last_result = None   # result of the last operation on this machine
+        self.save_db_path = None  # new production db to be sent
+        self.version_prod = None  # production version date storage location
 
     def _read_state(self):
         row = self.centers[self.center_name]
@@ -102,57 +151,23 @@ class CenterDataModel(AbstractPersistentModel):
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
 
 def create_center_state_machines(centers):
-    csms = {}
     clocks = {}
-    db2 = get_central_db()
+    db2 = dbset.get_central_db()
     centers_list = db2.t.center()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
         center_state = CenterDataModel(center_name=name, centers=centers)
-        sm = CenterState(model=center_state)
+        sm = CenterState(model=center_state, max_size=25)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
-    return csms, clocks
+    return clocks
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#manual-testing>>[init]
+# ~/~ begin <<docs/gong-web-app/center_machines.md#print-graph>>[init]
 def states_print():
     from statemachine import State, Event, StateMachine, StateChart 
     from statemachine.contrib.diagram import quickchart_write_svg
     sm = CenterState(StateChart)
     quickchart_write_svg(sm, "images/center_machines.svg")
 
-def states_test(centers):
-    csm = create_center_state_machines()
-    sm = csm["Mahi"]
-
-    if isa_dev_computer():
-        from statemachine.contrib.diagram import quickchart_write_svg
-        quickchart_write_svg(sm, "images/center_machines.svg") 
-
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    print(f"Initial state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm.model.user = "abc@mail.com"
-    sm.send("start_editing")
-    print(f"new state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    # Remove the instances from memory.
-    del sm
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    #db = get_central_db()
-    #centers = db.t.centers
-    #Center = centers.dataclass()
-    print(f"in database: {centers['Mahi'].status}, started at: {centers['Mahi'].status_start}, user: {centers['Mahi'].created_by}")
-    # Restore the previous state from db
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm = csm["Mahi"]
-    print(f"State restored from database: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
-    time.sleep(3)
-    print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    sm.model.user = None
-    sm.send("abandon_changes")
-    print(f"State after last transition: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
 # ~/~ end
 # ~/~ end

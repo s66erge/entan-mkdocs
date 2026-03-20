@@ -22,4 +22,5 @@ __pycache__/*
 !tests/
 
 # and ignore this
-/data/temp
+*/temp
+*/tmp

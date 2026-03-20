@@ -2,6 +2,7 @@
 import socket
 import tempfile
 import calendar
+from zoneinfo import ZoneInfo
 from myFasthtml import *
 # import resend # moved to "myFasthtml.py"
 # import markdown2 # moved to "myFasthtml.py"
@@ -10,34 +11,17 @@ from datetime import datetime, date, timedelta
 
 temp_paths = {}
 
-def get_db_path():
-    if isa_dev_computer():
-        root = ""
-    elif os.environ.get('Github_CI') == 'true': # Github CI actions
-        root = ""
-    else:   # Railway production permanent storage
-        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    return root + "data/"
-
-def create_temp_path(center):
-    # FIXME create files inside a WRITABLE direcory : get_db_path !!!
-    # Create temp file in a specific directory
-    #with tempfile.NamedTemporaryFile(mode='w', delete=False, dir='/path/to/directory') as tmp_file:
-    temp_dir = get_db_path() + "temp/"
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
-        temp_paths[center] = tmp_file.name
-
-def delete_temp_path(center):
-    if center in temp_paths and os.path.exists(temp_paths[center]):
-        os.unlink(temp_paths[center])
-    temp_paths[center] = ""
-
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
+    SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
-    BYPASS_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
+    PI_FOLDER_TEST = "/home/pi/test"  # PI folder used for ssh get/put tests
+    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
+    DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
+    TEST_CENTER = "Testx" # used for testing in DEV mode
+
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
@@ -52,8 +36,17 @@ def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
 
-def bypass(session):
-    return isa_dev_computer() or session["auth"] == Globals.BYPASS_USER
+def get_db_path():
+    if isa_dev_computer():
+        root = ""
+    elif os.environ.get('Github_CI') == 'true': # Github CI actions
+        root = ""
+    else:   # Railway production permanent storage
+        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
+    return root + "data/"
+
+def dev_comp_or_user(session):
+    return isa_dev_computer() or session["auth"] == Globals.DEV_USER
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
@@ -86,6 +79,25 @@ def display_markdown(file_name:str):
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/utilities.md#temp-files>>[init]
+
+def create_temp_path(center):
+    temp_dir = get_db_path() + Globals.SUBDIR_TEMP 
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
+        temp_paths[center] = tmp_file.name
+
+def delete_temp_path(center):
+    if center in temp_paths and os.path.exists(temp_paths[center]):
+        os.unlink(temp_paths[center])
+    temp_paths[center] = ""
+
+def wipe_all_temps():
+    temp_dir =  get_db_path() + Globals.SUBDIR_TEMP
+    for filename in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 
 def add_months_days(date_str, num_months, num_days):
@@ -100,6 +112,15 @@ def add_months_days(date_str, num_months, num_days):
     # Add num_days to the result
     result_date += timedelta(days=num_days)
     return result_date.isoformat()
+
+def short_iso(date_time: datetime, timezon="UTC"):
+    return date_time.astimezone(ZoneInfo(timezon)).strftime('%Y-%m-%dT%H:%M:%S%z')
+
+def seconds_to_hours_minutes(total_seconds):
+    hours = total_seconds // 3600
+    remaining_minutes = (total_seconds % 3600) // 60
+    return hours, remaining_minutes
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#feedback-to-user>>[init]
 
