@@ -31,7 +31,7 @@ repo_url: https://github.com/s66erge/entan-mkdocs
 
 plugins:
   - search
-  - entangled
+  #- entangled
   - mermaid2:
       arguments:
          securityLevel: 'loose' 
@@ -42,24 +42,31 @@ plugins:
 markdown_extensions:
   - toc:
       permalink: "#"
+  - pymdownx.highlight:
+      linenums: true    
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-#         format: !!python/name:mermaid2.fence_mermaid
+          #format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:mermaid2.fence_mermaid
 
 theme:
-  name: readthedocs
+  #name: readthedocs
   name: material
   features:
     - content.code.copy
+    - navigation.instant
+    - navigation.sections
+    - content.code.annotate
+    - navigation.top
+    - toc.integrate
   palette: 
-    # Palette toggle for light mode
-    #- scheme: default
-    #  toggle:
-    #    icon: material/brightness-7 
-    #    name: Switch to dark mode
+    #Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
 
     # Palette toggle for dark mode
     - scheme: slate
@@ -67,7 +74,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-  watch:
+watch:
   - docs
 ```
 

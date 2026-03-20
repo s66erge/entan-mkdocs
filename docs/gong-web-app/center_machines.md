@@ -95,11 +95,12 @@ class CenterState(StateMachine):
     def on_enter_getting_prod(self):
         run_sm_action(self.model, transit.get_version_prod)
 
-    def on_enter_version_check(self):
+    def on_enter_version_check(self):  # (1)
         run_sm_action(self.model, transit.check_version_prod)
 
 ```
 
+1. an annotation
 
 ### State machines creation and access
 
