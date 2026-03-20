@@ -11,11 +11,10 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from myFasthtml import *
 import libs.utils as utils
-from libs.plancheck import check_plan, get_dhamm_org_types_list, add_end_dates
-from libs.dbset import Coming_periods
-from libs.utilsJS import JS_BLOCK_NAV, JS_CLIENT_TIMER
-
-
+import libs.cdash as cdash 
+import libs.plancheck as plancheck
+import libs.dbset as dbset
+import libs.utilsJS as utilsJS
 
 <<create-html-table>>
 <<load-show-center-plan>>
@@ -60,14 +59,14 @@ async def planning_page(session, selected_name, centers, csms, clocks):
             Button(f"SAVE CHANGES to {selected_name}", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
-                cls="allownavigation") if utils.bypass(session) else None,
+                cls="allownavigation") if utils.dev_comp_or_user(session) else None,
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")
         ),
         Div(id="line-feedback"),
-        Script(JS_CLIENT_TIMER),
-        Script(JS_BLOCK_NAV),
+        Script(utilsJS.JS_CLIENT_TIMER),
+        Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
         Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
         cls="container"
@@ -83,23 +82,17 @@ def status_page(session, center_name, centers, users, csms):
     state = state_mach.configuration[0].id
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
+        cdash.top_menu(session['role']),
         Div(utils.display_markdown(mark_file)),
         H3(f"Center {center_name}"),
-        P(f"Center timezone: {ct_timezone}"),
-        P(f"Local time at center: {datetime.now(ZoneInfo(ct_timezone)).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
-        P(f"UTC time: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
-        P(f"Your time from your browser: {datetime.now(ZoneInfo(user_timezone)).strftime('%Y-%m-%dT%H:%M:%S+00:00')}"),
+        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
+        P(f"UTC time: {utils.short_iso(datetime.now())}"),
+        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
         P(f"Current state: {state}"),
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
-        Span(
-            A("dashboard", href="/dashboard"),
-            Span(style="display: inline-block; width: 20px;"),
-            Button("Logout", hx_post="/logout"),
-            Span(style="display: inline-block; width: 20px;"),
-            A("set FREE",href="/planning/abandon_edit") if utils.bypass(session) else None,        
-        ),
+        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
         cls="container"
     )
 
@@ -142,7 +135,7 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in get_dhamm_org_types_list()]
+    period_options = [Option(item['period_type'], value=item['period_type']) for item in plancheck.get_dhamm_org_types_list()]
     form = Form(
         Div(
             Label("Period type:"),
@@ -199,7 +192,7 @@ def save_db_plan_timetable(center_name, centers):
     dest_db.execute("DROP TABLE coming_periods")
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
-    coming_periods = dest_db.create(Coming_periods, pk='start_date')
+    coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
     for record in get_plan(utils.temp_paths[center_name]):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
@@ -215,7 +208,7 @@ def save_plan(temp_path, plan):
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
-    new_draft_plan = check_plan(session, plan, selected_name, centers)
+    new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
     await asyncio.to_thread(save_plan, utils.temp_paths[selected_name], new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
@@ -244,6 +237,6 @@ async def add_line(session, centers, ptype, start):
     plan.append(new_line)    
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
-    plancomp = add_end_dates(plansor, centers[selected_name])
+    plancomp = plancheck.add_end_dates(plansor, centers[selected_name])
     return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
 ```

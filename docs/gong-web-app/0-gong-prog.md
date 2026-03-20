@@ -130,8 +130,7 @@ def get(request):
 ```{.python #courses-planning}
 
 @rt('/planning_page')
-async def get(session, selected_name: str):
-    center = selected_name
+async def get(session, center: str):
     session["center"] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:

@@ -6,7 +6,7 @@ import string
 from datetime import datetime, timedelta
 from functools import wraps
 from myFasthtml import *
-from libs.utils import isa_dev_computer, send_email, feedback_to_user
+import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
 def signin_form():
@@ -70,7 +70,7 @@ def post(email: str):
 
 def create_code(email, users):
     if not email:
-        return (feedback_to_user({'error': 'missing_email'}))
+        return (utils.feedback_to_user({'error': 'missing_email'}))
 
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -84,7 +84,7 @@ def create_code(email, users):
         )
         send_login_code_email(email, login_code)
         return (
-            P(feedback_to_user({'success': 'login_code_sent'}), id="success"),
+            P(utils.feedback_to_user({'success': 'login_code_sent'}), id="success"),
             HttpHeader('HX-Reswap', 'outerHTML'),
             Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true"),
             Div(code_form(), id='code_form', hx_swap_oob="true")
@@ -92,7 +92,7 @@ def create_code(email, users):
     except IndexError:
         # Handle case when no user is found
         return Div(
-            feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
+            utils.feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
         )
 
 # ~/~ end
@@ -115,10 +115,10 @@ With Metta
 The Gong App Team
 """
     # dev toggle if you like
-    if isa_dev_computer():
+    if utils.isa_dev_computer():
         print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
     else:
-        send_email(email_subject, email_text, [email_address])
+        utils.send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
 
@@ -132,7 +132,7 @@ def verify_code(session, code, timezon, users):
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (code, nowstr))[0]
     except IndexError:
-        return feedback_to_user({'error': 'invalid_or_expired_code'})
+        return utils.feedback_to_user({'error': 'invalid_or_expired_code'})
 
     User = users.dataclass()
     session.clear()

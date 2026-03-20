@@ -6,8 +6,7 @@ import textwrap
 import os
 # import Database # for PostgreSQL, moved to # from myFasthtml 
 # import database # for SQLite, moved to # from myFasthtml
-from libs.utils import isa_dev_computer, get_db_path
-
+import libs.utils as utils
 
 <<dataclasses>>
 <<getdb-path>>
@@ -44,9 +43,9 @@ def get_db_path():
 
 # on postgreSQL
 def get_central_db():
-    if isa_dev_computer():
+    if utils.isa_dev_computer():
         # local sqlite3
-        return database(get_db_path() + "gongUsers.db")
+        return database(utils.get_db_path() + "gongUsers.db")
         # local postgreSQL on docker
         #return Database("postgresql://postgres:route66@localhost:5432/postgres")
     else:

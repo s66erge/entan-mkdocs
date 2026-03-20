@@ -34,7 +34,7 @@ def abandon_edit(session, csms):
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-    elif utils.bypass(session):
+    elif utils.dev_comp_or_user(session):
         csms[this_center].force_to_free()
     return  Redirect('/dashboard')
 

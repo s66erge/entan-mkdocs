@@ -2,9 +2,6 @@
 import paramiko 
 from scp import SCPClient   # scp module of paramiko
 from pathlib import Path
-import os
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
 # ssh -J pi@itadic.run.place:22 pi@localhost -p 7012
 

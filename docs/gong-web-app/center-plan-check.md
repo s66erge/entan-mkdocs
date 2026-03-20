@@ -5,7 +5,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```{.python file=libs/plancheck.py}
 from myFasthtml import *
 from datetime import date
-from libs.utils import add_months_days, get_db_path
+import libs.utils as utils
 
 <<this-center-courses>>
 <<obtain-durations>>
@@ -69,17 +69,17 @@ def add_end_dates(plan, center_obj):
             if this_type["tags"] != "F":
                 if i < len(plan) - 1:
                     next_start = plan[i+1].get('start_date')
-                    plan[i]['end_date'] = add_months_days(next_start, 0, -1)
+                    plan[i]['end_date'] = utils.add_months_days(next_start, 0, -1)
                 else:
-                    plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, 1)
+                    plan[i]['end_date'] = utils.add_months_days(plan[i]['start_date'], 0, 1)
             else:
-                plan[i]['end_date'] = add_months_days(plan[i]['start_date'], 0, this_type.get("duration") -1)
+                plan[i]['end_date'] = utils.add_months_days(plan[i]['start_date'], 0, this_type.get("duration") -1)
     return plan
 
 def coming_center_courses(center_obj):
     #center = center_obj.center_name
     selected_db = center_obj.gong_db_name
-    db_center = database(get_db_path() + selected_db)
+    db_center = database(utils.get_db_path() + selected_db)
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
@@ -104,20 +104,20 @@ def coming_center_courses(center_obj):
 
 ```{.python #obtain-durations}
 def get_dhamm_org_types_list():
-    db_path = get_db_path()
+    db_path = utils.get_db_path()
     df = pd.read_csv(db_path + 'course_type_map.csv')
     return df.to_dict(orient='records')
 
 def get_period_types_in_db(center_obj):
     selected_db = center_obj.gong_db_name
-    db_center = database(get_db_path() + selected_db)
+    db_center = database(utils.get_db_path() + selected_db)
     period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
     return period_types_in_db
 
 def get_types_with_duration(center_obj):
     list_of_types = get_dhamm_org_types_list()
     selected_db = center_obj.gong_db_name
-    db_center = database(get_db_path() + selected_db)
+    db_center = database(utils.get_db_path() + selected_db)
     period_types_in_db = get_period_types_in_db(center_obj)
     for item in list_of_types:
         vt = item.get("period_type")

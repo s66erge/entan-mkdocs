@@ -10,6 +10,7 @@
 import socket
 import tempfile
 import calendar
+from zoneinfo import ZoneInfo
 from myFasthtml import *
 # import resend # moved to "myFasthtml.py"
 # import markdown2 # moved to "myFasthtml.py"
@@ -26,7 +27,7 @@ class Globals:
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
     PI_FOLDER_TEST = "/home/pi/test"  # PI folder used for ssh get/put tests
     PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
-    BYPASS_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
+    DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
 
     @classmethod
@@ -68,8 +69,8 @@ def get_db_path():
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
 
-def bypass(session):
-    return isa_dev_computer() or session["auth"] == Globals.BYPASS_USER
+def dev_comp_or_user(session):
+    return isa_dev_computer() or session["auth"] == Globals.DEV_USER
 
 ```
 
@@ -172,6 +173,9 @@ def add_months_days(date_str, num_months, num_days):
     # Add num_days to the result
     result_date += timedelta(days=num_days)
     return result_date.isoformat()
+
+def short_iso(date_time: datetime, timezon="UTC"):
+    return date_time.astimezone(ZoneInfo(timezon)).strftime('%Y-%m-%dT%H:%M:%S%z')
 
 def seconds_to_hours_minutes(total_seconds):
     hours = total_seconds // 3600

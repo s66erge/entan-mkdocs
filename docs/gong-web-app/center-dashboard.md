@@ -4,8 +4,7 @@ Will only be reachable for authenticated users.
 
 ```{.python file=libs/cdash.py}
 from myFasthtml import *
-import asyncio
-from libs.utils import display_markdown
+import libs.utils as utils
 
 <<dashboard>>
 
@@ -35,19 +34,32 @@ def dashboard(session, users, planners):
     select = Select(
         Option("Select a center", value="", selected=True),
         *[Option(name, value=name) for name in user_centers],
-        name="selected_name",
+        name="center",
         id="planning-db-select",
         required=True
     )
+
+    form = Form(
+        select,
+        Button("MODIFY", type="submit", onclick="document.getElementById('myForm').action='/planning_page'"),
+        Button("STATUS", type="submit", onclick="document.getElementById('myForm').action='/status_page'"),
+        action="/default_route",
+        id="myForm",
+        method="get",
+    )
+
+
+    """
     form = Form(
         select,
         Button("MODIFY", type="submit"),
         action="/planning_page",
         method ="get",
     )
+    """
     return Main(
         top_menu(session['role']),
-        Div(Div(display_markdown("dashboard-t")),
+        Div(Div(utils.display_markdown("dashboard-t")),
             P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
             P(""),
             P(A("CONSULT", href="/consult_page")),
