@@ -80,16 +80,14 @@ def init_data(roles, users, centers, planners):
     oc_pajj = textwrap.dedent("""\
     {
     "replacements": {"Other": {"TRUSTMEETING": "Trust WE"},
-                     "ServicePeriod": {"@ALL@": "IN BETWEEN"}},
+                 "ServicePeriod": {"WORKPERIOD": "IN BETWEEN",
+                                   "SIT&SERVE": "Service"}},
     "delete": {"IN BETWEEN": "@ALL@"}
     }
     """).strip('\n')
     if not centers():
         centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
         centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", routing_port= 7011, other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
-    else:
-        centers.update(center_name="Mahi", other_course=oc_mahi)
-        centers.update(center_name="Pajjota", other_course=oc_pajj)
 
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
