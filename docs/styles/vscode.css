@@ -1,42 +1,52 @@
-/* VS Code Dark+ background */
+/* Dark Modern background + bright text */
 .md-typeset pre > code {
-  background-color: #1e1e1e !important;
-  color: #d4d4d4 !important;
+  background-color: #1e1f22 !important;   /* Dark Modern base background */
+  color: #f2f2f2 !important;              /* bright neutral text */
 }
 
-/* Keywords */
-.token.keyword {
-  color: #c586c0 !important;
-}
-
-/* Strings */
-.token.string {
-  color: #ce9178 !important;
-}
-
-/* Functions */
-.token.function {
-  color: #dcdcaa !important;
-}
-
-/* Variables */
-.token.variable,
-.token.parameter {
-  color: #9cdcfe !important;
-}
-
-/* Comments */
-.token.comment {
-  color: #6a9955 !important;
+/* Comments — slightly neon but not too aggressive */
+.md-typeset .c {
+  color: #6a9955 !important;              /* VS Code green */
   font-style: italic;
 }
 
-/* Numbers */
-.token.number {
-  color: #b5cea8 !important;
+/* Keywords (def, return, class, etc.) */
+.md-typeset .k {
+  color: #c586c0 !important;              /* VS Code purple */
+  font-weight: 600;
 }
 
-/* Operators */
-.token.operator {
-  color: #d4d4d4 !important;
+/* Strings */
+.md-typeset .s {
+  color: #ce9178 !important;              /* warm orange */
+  font-weight: 600;
+}
+
+/* Function names */
+.md-typeset .nf {
+  color: #dcdcaa !important;              /* soft yellow */
+  font-weight: 600;
+}
+
+/* Variables, names, attributes */
+.md-typeset .n,
+.md-typeset .na,
+.md-typeset .nb {
+  color: #9cdcfe !important;              /* bright cyan */
+}
+
+/* Numbers */
+.md-typeset .mi {
+  color: #b5cea8 !important;              /* greenish numeric tone */
+  font-weight: 600;
+}
+
+/* Operators (=, +, -, etc.) */
+.md-typeset .o {
+  color: #ffffff !important;
+}
+
+/* Punctuation ((), {}, :, etc.) */
+.md-typeset .p {
+  color: #ffffff !important;
 }

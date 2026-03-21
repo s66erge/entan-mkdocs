@@ -19,7 +19,8 @@ markdown_extensions:
   - pymdownx.highlight:
       linenums: true
       use_pygments: true
-      pygments_style: solarized-dark
+      pygments_style: default
+      # solarized-dark monokai default 
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -49,6 +50,9 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+
+extra_css:
+  - styles/vscode.css
 
 watch:
   - docs

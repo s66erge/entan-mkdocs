@@ -41,7 +41,6 @@ def dashboard(session, users, planners):
         id="planning-db-select",
         required=True
     )
-
     form = Form(
         select,
         Button("MODIFY", type="submit", onclick="document.getElementById('myForm').action='/planning_page'"),
@@ -50,16 +49,6 @@ def dashboard(session, users, planners):
         id="myForm",
         method="get",
     )
-
-
-    """
-    form = Form(
-        select,
-        Button("MODIFY", type="submit"),
-        action="/planning_page",
-        method ="get",
-    )
-    """
     return Main(
         top_menu(session['role']),
         Div(Div(utils.display_markdown("dashboard-t")),
