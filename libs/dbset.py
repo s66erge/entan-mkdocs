@@ -19,26 +19,13 @@ class Timetables: period_type: str; day_type: str; time: str; gong_id: int; auto
 class Gongs: sound_id: int; repeat: int; interval: float; length: float; comment: str  
 class Targets: id: int; shortname: str; longname: str
 
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/database-setup.md#getdb-path>>[init]
-"""
-def get_db_path():
-    if isa_dev_computer():
-        root = ""
-    elif os.environ.get('Github_CI') == 'true': # Github CI actions
-        root = ""
-    else:   # Railway production permanent storage
-        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    return root + "data/"
-"""
-
 # on postgreSQL
 def get_central_db():
     if utils.isa_dev_computer():
         # local sqlite3
-        return database(utils.get_db_path() + "gongUsers.db")
+        # return database(utils.get_db_path() + "gongUsers.db")
         # local postgreSQL on docker
-        #return Database("postgresql://postgres:route66@localhost:5432/postgres")
+        return Database("postgresql://postgres:Route666@localhost:5432/postgres")
     else:
         return Database(os.environ.get('DATABASE_URL'))
 
@@ -76,6 +63,7 @@ def init_data(roles, users, centers, planners):
     if not centers():
         centers.insert(center_name="Mahi", gong_db_name="mahi.ok.db", location="1396", timezone="Europe/Paris", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
         centers.insert(center_name="Pajjota", gong_db_name="pajjota.ok.db", location="1370", timezone="Europe/Brussels", routing_port= 7011, other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Testx", gong_db_name="testx.ok.db", location="1396", timezone="America/Chicago", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
 
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)
@@ -85,6 +73,7 @@ def init_data(roles, users, centers, planners):
     if not planners():
         planners.insert(user_email= "spegoff@authentica.eu", center_name= "Mahi")
         planners.insert(user_email= "spegoff@authentica.eu", center_name= "Pajjota")
+        planners.insert(user_email= "spegoff@authentica.eu", center_name= "Testx")
         planners.insert(user_email= "spegoff@gmail.com", center_name= "Pajjota")
         planners.insert(user_email= "spegoff@gmail.com", center_name= "Mahi")
         planners.insert(user_email= "ivan.tadic@dhamma.org", center_name= "Pajjota")
