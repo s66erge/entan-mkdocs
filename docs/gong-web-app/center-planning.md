@@ -2,7 +2,9 @@
 
 Will only be reachable for authenticated users and planner for the selected center.
 
-```{.python file=libs/planning.py}
+```python
+#| file: libs/planning.py 
+
 import asyncio
 import json
 import os
@@ -34,7 +36,8 @@ Then:
 - available: load the main menu for changing center planning
 - not available: explain to the user to wait for current changes to enter production at center 
 
-```{.python #planning-page}
+```python
+#| id: planning-page
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
@@ -101,7 +104,8 @@ def status_page(session, center_name, centers, users, csms):
 
 ### Create colored html table of current plan
 
-```{.python #create-html-table}
+```python
+#| id: create-html-table
 def show_draft_plan_table(draft_plan, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
@@ -169,7 +173,8 @@ def show_draft_plan_table(draft_plan, mess):
 
 ### Load from dhamma.org and show the merged and checked center plan
 
-```{.python #load-show-center-plan}
+```python
+#| id: load-show-center-plan
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(

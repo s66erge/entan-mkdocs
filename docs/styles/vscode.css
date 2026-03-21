@@ -1,0 +1,42 @@
+/* VS Code Dark+ background */
+.md-typeset pre > code {
+  background-color: #1e1e1e !important;
+  color: #d4d4d4 !important;
+}
+
+/* Keywords */
+.token.keyword {
+  color: #c586c0 !important;
+}
+
+/* Strings */
+.token.string {
+  color: #ce9178 !important;
+}
+
+/* Functions */
+.token.function {
+  color: #dcdcaa !important;
+}
+
+/* Variables */
+.token.variable,
+.token.parameter {
+  color: #9cdcfe !important;
+}
+
+/* Comments */
+.token.comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+
+/* Numbers */
+.token.number {
+  color: #b5cea8 !important;
+}
+
+/* Operators */
+.token.operator {
+  color: #d4d4d4 !important;
+}

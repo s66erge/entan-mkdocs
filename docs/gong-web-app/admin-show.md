@@ -2,7 +2,9 @@
 
 Will only be reachable for signed in admin users.
 
-```{.python file=libs/admin.py}
+```python
+#| file: libs/admin.py 
+
 from myFasthtml import *
 from libs.utils import *
 
@@ -13,7 +15,8 @@ from libs.utils import *
 ```
 TODO document admin-show
 
-```{.python #admin-page}
+```python
+#| id: admin-page
 
 # @rt('/admin_page')
 def show_page(request, users, roles, centers, planners):
@@ -51,7 +54,8 @@ def show_page(request, users, roles, centers, planners):
     )
 ```
 
-```{.python #show-users}
+```python
+#| id: show-users
 
 def show_users_table(users):
     return Main(
@@ -88,7 +92,8 @@ def show_users_form(roles):
     )
 ```
 
-```{.python #show-centers}
+```python
+#| id: show-centers
 
 def show_centers_table(centers):
     return Main(
@@ -129,7 +134,8 @@ def show_centers_form(centers):
     )
 ```
 
-```{.python #show-planners}
+```python
+#| id: show-planners
 
 def show_planners_table(planners):
     return Main(

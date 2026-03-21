@@ -7,7 +7,8 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
 ### Windows
 
-```{.pwsh file= setup/mkdocs.ps1}
+```pwsh
+#| file:  setup/mkdocs.ps1 
 uv pip install mkdocs
 uv pip install mkdocs-mermaid2-plugin
 uv pip install mkdocs-material
@@ -24,7 +25,8 @@ uv pip install mkdocs-entangled-plugin
 
 ## Configuration
 
-```{.yaml file= mkdocs.yml}
+```yaml
+#| file:  mkdocs.yml 
 site_name: Gong system and apps for Vipassane centers
 site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
@@ -43,7 +45,9 @@ markdown_extensions:
   - toc:
       permalink: "#"
   - pymdownx.highlight:
-      linenums: true    
+      linenums: true
+      use_pygments: true
+      pygments_style: solarized-dark
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

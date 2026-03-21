@@ -4,7 +4,9 @@
 fetch_dhamma_courses("Mahi", 6, 0)
 fetch_dhamma_courses("Pajjota", 6, 0)
 
-```{.python file=libs/fetch.py}
+```python
+#| file: libs/fetch.py 
+
 from pathlib import Path
 # import pandas as pd  # moved to "myFasthtml.py"
 # import aiohttp  # moved to "myFasthtml.py"
@@ -27,7 +29,8 @@ Get the courses from www.dhamma.org for a specific center from date_start until 
 Call to this async function from sync code with:
 courses = asyncio.run(fetch_courses_from_dhamma(location, date_start, date_end))
 
-```{.python #fetch-api}
+```python
+#| id: fetch-api
 
 async def fetch_courses_from_dhamma(location, date_start, date_end):
     url = "https://www.dhamma.org/en-US/courses/do_search"
@@ -88,7 +91,8 @@ If anchor == "Other", find in other_dict the value of a key == course_type
 and return "UNKNOWN" if not found.
 if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' matches anchor and return the value of 'period_type'.
 
-```{.python #period-type}
+```python
+#| id: period-type
 
 def get_period_type(anchor, course_type: str, list_of_types, other_dict):
     replacements = other_dict.get("replacements")
@@ -110,7 +114,8 @@ def get_period_type(anchor, course_type: str, list_of_types, other_dict):
 Remove duplicates: if consecutive items have identical start_date and period_type,
 keep only one with source='BOTH'
 
-```{.python #deduplicate}
+```python
+#| id: deduplicate
 def deduplicate(merged):
     deduplicated = []
     i = 0
@@ -138,7 +143,8 @@ Get a merged list of courses from the current courses in the center db and the f
 - course types mapped to the courses databases courses
 - with a source field "dhamma.org", "center db" or "BOTH"
 
-```{.python #fetch-courses}
+```python
+#| id: fetch-courses
 
 def get_dhamma_courses_types(extracted, center_obj, list_of_types):
     for course in extracted:   ## [5]

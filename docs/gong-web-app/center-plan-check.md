@@ -2,7 +2,9 @@
 
 Will only be reachable for authenticated users and planner for the selected center.
 
-```{.python file=libs/plancheck.py}
+```python
+#| file: libs/plancheck.py 
+
 from myFasthtml import *
 from datetime import date
 import libs.utils as utils
@@ -13,8 +15,8 @@ import libs.utils as utils
 
 ```
 
-```{.python #check-complete-plan}
-
+```python
+#| id: check-complete-plan
 def check_plan(session, plan, selected_name, centers):
     types_with_duration = get_types_with_duration(centers[selected_name])    
     session['planOK'] = True
@@ -59,7 +61,8 @@ def check_plan(session, plan, selected_name, centers):
 ```
 
 
-```{.python #this-center-courses}
+```python
+#| id: this-center-courses
 
 def add_end_dates(plan, center_obj):
     types_with_duration = get_types_with_duration(center_obj)
@@ -102,7 +105,8 @@ def coming_center_courses(center_obj):
 
 ```
 
-```{.python #obtain-durations}
+```python
+#| id: obtain-durations
 def get_dhamm_org_types_list():
     db_path = utils.get_db_path()
     df = pd.read_csv(db_path + 'course_type_map.csv')

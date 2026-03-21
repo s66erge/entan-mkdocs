@@ -3,7 +3,9 @@
 The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
 Here are the transitions processes used by the state machines
 
-```{.python file=libs/transit.py}
+```python
+#| file: libs/transit.py 
+
 import json
 import asyncio
 from myFasthtml import *
@@ -21,7 +23,8 @@ pending_tasks = {}
 ```
 ### The workflow supervisor
 
-```{.python #workflow-supervisor}
+```python
+#| id: workflow-supervisor
 
 def register_task(center: str, task: asyncio.Task):
     pending_tasks[center] = task
@@ -45,7 +48,8 @@ async def check_and_advance(center: str, csms):
         return
 ```
 
-```{.python #user-transitions}
+```python
+#| id: user-transitions
 
 async def check_center_free(state_mach, center_lock, this_user):
     async with center_lock:
@@ -81,7 +85,8 @@ def abandon_edit(session, csms):
 To create them: csms = create_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
-```{.python #system-transitions}
+```python
+#| id: system-transitions
 
 async def wait_until(model, until_hour, minutes=0):
     center_tz = ZoneInfo(model.centers[model.center_name].timezone)

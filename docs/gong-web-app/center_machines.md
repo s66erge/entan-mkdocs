@@ -2,7 +2,9 @@
 
 The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
 
-```{.python file=libs/states.py}
+```python
+#| file: libs/states.py
+
 from abc import ABC
 from abc import abstractmethod
 import asyncio
@@ -24,7 +26,8 @@ csms = {}
 
 see: https://python-statemachine.readthedocs.io/en/latest/index.html
 
-```{.python #state-machine}
+```python
+#| id: state-machine
 class HistoryListener:
     def __init__(self):
         self.max_size = 50
@@ -108,7 +111,8 @@ class CenterState(StateMachine):
 To create them: csms = create_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
-```{.python #create-centers-sms}
+```python
+#| id: create-centers-sms
 
 def create_center_state_machines(centers):
     clocks = {}
@@ -131,7 +135,8 @@ A concrete implementation of the generic storage protocol above, that reads and 
 - created_by: the user who took ownership of this center database
 - status_start: date/time when the status changed (ISO UTC string)
 
-```{.python #db-persistent-model}
+```python
+#| id: db-persistent-model
 class CenterDataModel(AbstractPersistentModel):
     def __init__(self, center_name, centers, user=None):
         super().__init__()
@@ -183,7 +188,8 @@ Subclasses should implement concrete strategies for:
 - `_read_state`: Read the state from the concrete persistent layer.
 - `_write_state`: Write the state from the concrete persistent layer.
 
-```{.python #abstract-with-persistency}
+```python
+#| id: abstract-with-persistency
 class AbstractPersistentModel(ABC):
     def __init__(self):
         self._state = None
@@ -206,7 +212,8 @@ class AbstractPersistentModel(ABC):
 
 ### To print the state machine graph
 
-```{.python #print-graph}
+```python
+#| id: print-graph
 def states_print():
     from statemachine import State, Event, StateMachine, StateChart 
     from statemachine.contrib.diagram import quickchart_write_svg

@@ -1,6 +1,8 @@
 # Database setup and init
 
-```{.python file=libs/dbset.py}
+```python
+#| file: libs/dbset.py 
+
 from myFasthtml import *
 import textwrap
 import os
@@ -13,7 +15,8 @@ import libs.utils as utils
 ```
 ### Database path and name
 
-```{.python #dataclasses}
+```python
+#| id: dataclasses
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
@@ -44,7 +47,8 @@ def get_central_db():
 
 ```
 
-```{.python #getdb-path}
+```python
+#| id: getdb-path
 """
 def get_db_path():
     if isa_dev_computer():
@@ -76,7 +80,8 @@ def get_central_db():
 
 ### Database setup
 
-```{.python #setup-database}
+```python
+#| id: setup-database
 
 def init_data(roles, users, centers, planners):
 

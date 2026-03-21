@@ -1,5 +1,4 @@
 # ~/~ begin <<docs/gong-web-app/utils-javascript.md#libs/utilsJS.py>>[init]
-
 # ~/~ begin <<docs/gong-web-app/utils-javascript.md#block-navigation>>[init]
 JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {

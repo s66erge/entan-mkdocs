@@ -1,4 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#libs/plancheck.py>>[init]
+
 from myFasthtml import *
 from datetime import date
 import libs.utils as utils
@@ -86,7 +87,6 @@ def get_types_with_duration(center_obj):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
-
 def check_plan(session, plan, selected_name, centers):
     types_with_duration = get_types_with_duration(centers[selected_name])    
     session['planOK'] = True

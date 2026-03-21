@@ -3,9 +3,10 @@
 ### Program start
 
 
-```{.python file=main.py}
+```python
+#| file: main.py
 
-from myFasthtml import *
+from myFasthtml import *  # (1)
 import asyncio
 import libs.states as states
 import libs.auth as auth
@@ -32,7 +33,13 @@ import libs.transit as transit
 
 ```
 
-```{.python #initialize-program}
+1. Another annotation MERMAID2  - Found superfences config: 'custom_fences': 'name': 'mermaid', 'class': 'mermaid', 'format': function fence_mermaid at 0x000002B15DA79D00
+
+### Initializations
+
+```python
+#| id: initialize-program
+
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }
@@ -72,8 +79,10 @@ async def start_supervisor():
     asyncio.create_task(workflow_supervisor())
 
 ```
+### Routes for authentication
 
-```{.python #login-authenticate}
+```python
+#| id: login-authenticate
 
 @rt('/login')
 def get():
@@ -107,7 +116,10 @@ def get(session):
     return cdash.dashboard(session, users, planners)
 ```
 
-```{.python #consult-centers-plans}
+### Routes for consulting plannings
+
+```python
+#| id: consult-centers-plans
 
 @rt('/consult_page')
 def get(session, request):
@@ -127,7 +139,10 @@ def get(request):
 
 ```
 
-```{.python #courses-planning}
+### Routes for planning modification
+
+```python
+#| id: courses-planning
 
 @rt('/planning_page')
 async def get(session, center: str):
@@ -182,7 +197,10 @@ async def get(session):
 
 ```
 
-```{.python #users-admin}
+### Routes for admin
+
+```python
+#| id: users-admin
 
 @rt('/admin_page')
 @admin_required
@@ -221,7 +239,10 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 ```
 
-```{.python #other-routes}
+### Other routes
+
+```python
+#| id: other-routes
 
 @rt('/no_access_right')
 def get():

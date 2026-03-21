@@ -1,6 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
 
-from myFasthtml import *
+from myFasthtml import *  # (1)
 import asyncio
 import libs.states as states
 import libs.auth as auth
@@ -19,6 +19,7 @@ import libs.transit as transit
 #  from starlette.testclient import TestClient
 
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#initialize-program>>[init]
+
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }

@@ -2,7 +2,9 @@
 
 Will only be reachable for authenticated users.
 
-```{.python file=libs/consul.py}
+```python
+#| file: libs/consul.py 
+
 from pathlib import Path
 from urllib.parse import quote_plus
 from myFasthtml import *
@@ -20,7 +22,8 @@ import libs.utils as utils
 
 ### Consult page
 
-```{.python #consult-page}
+```python
+#| id: consult-page
 
 # @rt('/consult_page')
 def consult_page(session, centers):
@@ -52,7 +55,8 @@ def consult_page(session, centers):
 
 ### Consult panning periods + unused periods
 
-```{.python #consult-periods}
+```python
+#| id: consult-periods
 
 # @rt('/consult/select_db')
 def consult_select_db(request, centers, db_path):
@@ -117,7 +121,8 @@ def consult_select_db(request, centers, db_path):
 
 ### Consult structures
 
-```{.python #consult-structure}
+```python
+#| id: consult-structure
 
 # @rt('/consult/select_period')
 def consult_select_period(request, db_path):
@@ -178,7 +183,8 @@ def consult_select_period(request, db_path):
     )
 ```
 
-```{.python #consult-timetable}
+```python
+#| id: consult-timetable
 
 # @rt('/consult/select_timetables')
 def consult_select_timetable(request, db_path):

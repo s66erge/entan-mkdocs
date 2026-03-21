@@ -6,7 +6,9 @@
 - route or function not implemented yet
 
 
-```{.python file = libs/utils.py}
+```python
+#| file: libs/utils.py 
+
 import socket
 import tempfile
 import calendar
@@ -45,7 +47,8 @@ class Globals:
 ```
 ### Dummy start
 
-```{.python #dummy}
+```python
+#| id: dummy
 def dummy():
     return "dummy"
 ```
@@ -54,7 +57,8 @@ def dummy():
 
 This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.
 
-```{.python #isdev-computer}
+```python
+#| id: isdev-computer
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
@@ -76,7 +80,8 @@ def dev_comp_or_user(session):
 
 ### Check if current db is a teporary db in memory
 
-```{.python #istest-db}
+```python
+#| id: istest-db
 def isa_db_test(db):
     return 'Database <apsw.Connection object ""' in str(db)
 ```
@@ -100,7 +105,8 @@ Using: *send_email(subject, body, recipients)*
 - body = "This is a test email sent from Python."
 - recipients = ["recipient1@gmail.com"]  : list of recipients 
 
-```{.python #send-email}
+```python
+#| id: send-email
 
 def send_email(subject, body, recipients):
     # using resend
@@ -118,7 +124,8 @@ def send_email(subject, body, recipients):
 
 ### Managing temp files
 
-```{.python #temp-files}
+```python
+#| id: temp-files
 
 def create_temp_path(center):
     temp_dir = get_db_path() + Globals.SUBDIR_TEMP 
@@ -142,7 +149,8 @@ def wipe_all_temps():
 
 This function reads a markdown file name, without the extension '.md', then finds the file in the 'md-text' directory and converts it to HTML using the `markdown2` library, which is then returned as a NotStr object for rendering in the app.
 
-```{.python #display-markdown}
+```python
+#| id: display-markdown
 
 def display_markdown(file_name:str):
     file_path = os.path.join('md-text', f"{file_name}.md")
@@ -159,7 +167,8 @@ def display_markdown(file_name:str):
 Return an ISO date string num_months and num_days after date_str (YYYY-MM-DD).
 Uses divmod to compute year/month rollover and preserves end-of-month.
 
-```{.python #plus-months-days}
+```python
+#| id: plus-months-days
 
 def add_months_days(date_str, num_months, num_days):
     dt = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -186,7 +195,8 @@ def seconds_to_hours_minutes(total_seconds):
 
 ### Success/error message
 
-```{.python #feedback-to-user}
+```python
+#| id: feedback-to-user
 
 def feed_text(params):
     # query_params = dict(request.query_params)

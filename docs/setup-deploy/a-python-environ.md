@@ -12,7 +12,8 @@ VSCode extensions:
 
 ### Initial installation
 
-```{.pwsh file= setup/environ.ps1}
+```pwsh
+#| file: setup/environ.ps1
 scoop install main/uv
 uv python install
 uv venv
@@ -20,7 +21,8 @@ uv pip install -r pyproject.toml
 ```
 ### VSCode startup
 
-```{.pwsh file= setup/startup.ps1}
+```pwsh
+#| file: setup/startup.ps1
 .venv\Scripts\activate.ps1
 ```
 ## command

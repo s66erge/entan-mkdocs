@@ -8,7 +8,9 @@ All these functions are called with these htmx ([intro](../architecture/ui-archi
 - `hx_target=` id of DOM element where the resulting html will be placed  
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
 
-```{.python file=libs/adchan.py}
+```python
+#| file: libs/adchan.py 
+
 import email
 import shutil
 from myFasthtml import *
@@ -24,7 +26,8 @@ from libs.authpass import get_password_hash
 <<add-planner>>
 ```
 
-```{.python #delete-user}
+```python
+#| id: delete-user
 
 # @rt('/delete_user/{email}')
 def delete_user(email, users, planners, centers):
@@ -59,7 +62,8 @@ def delete_user(email, users, planners, centers):
 [4] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-```{.python #add-user}
+```python
+#| id: add-user
 # @rt('/add_user')
 
 def add_user(new_user_email, name ,role_name, users, roles, centers):
@@ -99,7 +103,8 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
 [2] rebuild the dropdown of the planners form to show changed users/centers
 <br><br> 
 
-```{.python #delete-center}
+```python
+#| id: delete-center
 
 # @rt('/delete_center/{center_name}')
 
@@ -142,7 +147,8 @@ def delete_center(center_name, users, centers, planners, db_path):
 [6] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-```{.python #add-center}
+```python
+#| id: add-center
 
 # @rt('/add_center')
 
@@ -194,7 +200,8 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
 [3] rebuild the dropdown of the planners form to show changed users/center
 <br><br>
 
-```{.python #delete-planner}
+```python
+#| id: delete-planner
 
 # @rt('/delete_planner/{user_email}/{center_name}')
 def delete_planner(user_email, center_name, planners):
@@ -219,7 +226,8 @@ def delete_planner(user_email, center_name, planners):
 [2] proceed with deletion
 <br><br>
 
-```{.python #add-planner}
+```python
+#| id: add-planner
 
 # @rt('/add_planner')
 

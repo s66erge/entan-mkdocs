@@ -2,7 +2,9 @@
 
 Will only be reachable for authenticated users.
 
-```{.python file=libs/cdash.py}
+```python
+#| file: libs/cdash.py 
+
 from myFasthtml import *
 import libs.utils as utils
 
@@ -12,7 +14,8 @@ import libs.utils as utils
 
 ### Main dashboard
 
-```{.python #dashboard}
+```python
+#| id: dashboard
 
 def top_menu(role):
     return Nav(

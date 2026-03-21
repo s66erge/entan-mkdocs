@@ -1,4 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/center-consult.md#libs/consul.py>>[init]
+
 from pathlib import Path
 from urllib.parse import quote_plus
 from myFasthtml import *
