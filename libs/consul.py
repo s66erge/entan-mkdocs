@@ -2,8 +2,7 @@
 
 from pathlib import Path
 from urllib.parse import quote_plus
-from myFasthtml import *
-from myFasthtml import database
+from fasthtml.common import *
 import libs.cdash as cdash
 import libs.utils as utils
 

@@ -5,8 +5,9 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```python
 #| file: libs/plancheck.py 
 
-from myFasthtml import *
+from fasthtml.common import *
 from datetime import date
+import pandas as pd
 import libs.utils as utils
 
 <<this-center-courses>>

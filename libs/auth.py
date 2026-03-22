@@ -6,7 +6,7 @@ import secrets
 import string
 from datetime import datetime, timedelta
 from functools import wraps
-from myFasthtml import *
+from fasthtml.common import *
 import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]

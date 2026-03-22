@@ -5,7 +5,7 @@ Will only be reachable for signed in admin users.
 ```python
 #| file: libs/admin.py 
 
-from myFasthtml import *
+from fasthtml.common import *
 from libs.utils import *
 
 <<show-users>>
@@ -56,7 +56,6 @@ def show_page(request, users, roles, centers, planners):
 
 ```python
 #| id: show-users
-
 def show_users_table(users):
     return Main(
         Table(

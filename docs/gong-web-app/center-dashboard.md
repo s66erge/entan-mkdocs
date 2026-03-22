@@ -5,7 +5,7 @@ Will only be reachable for authenticated users.
 ```python
 #| file: libs/cdash.py 
 
-from myFasthtml import *
+from fasthtml.common import *
 import libs.utils as utils
 
 <<dashboard>>

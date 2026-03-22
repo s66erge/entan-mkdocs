@@ -2,7 +2,7 @@
 
 import email
 import shutil
-from myFasthtml import *
+from fasthtml.common import *
 from libs.admin import *
 from libs.utils import isa_db_test, feedback_to_user
 from libs.authpass import get_password_hash

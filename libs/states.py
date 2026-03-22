@@ -3,7 +3,7 @@
 from abc import ABC
 from abc import abstractmethod
 import asyncio
-from myFasthtml import *
+from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateMachine, StateChart
 import libs.dbset as dbset

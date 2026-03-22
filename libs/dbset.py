@@ -1,10 +1,10 @@
 # ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
 
-from myFasthtml import *
+from fasthtml.common import database
+from fasthtml.common import *
+from fastsql import Database # MUST COME AFTER PRECEDING LINE !!!
 import textwrap
 import os
-# import Database # for PostgreSQL, moved to # from myFasthtml 
-# import database # for SQLite, moved to # from myFasthtml
 import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/database-setup.md#dataclasses>>[init]
@@ -25,7 +25,7 @@ def get_central_db():
     if utils.isa_dev_computer():
         # local sqlite3
         # return database(utils.get_db_path() + "gongUsers.db")
-        # local postgreSQL on docker
+        # local postgreSQL
         return Database("postgresql://postgres:Route666@localhost:5432/postgres")
     else:
         return Database(os.environ.get('DATABASE_URL'))

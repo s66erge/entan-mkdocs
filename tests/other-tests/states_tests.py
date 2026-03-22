@@ -1,7 +1,7 @@
 # Let's create instances and test the persistence.
 # To execute only when all center status are 'free'
 
-from myFasthtml import *
+from fasthtml.common import *
 import time
 from datetime import datetime, timezone
 from libs.utils import isa_dev_computer

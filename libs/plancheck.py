@@ -1,7 +1,8 @@
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#libs/plancheck.py>>[init]
 
-from myFasthtml import *
+from fasthtml.common import *
 from datetime import date
+import pandas as pd
 import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#this-center-courses>>[init]

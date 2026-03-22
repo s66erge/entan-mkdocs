@@ -1,52 +1,61 @@
-/* Dark Modern background + bright text */
+/* Brighter Dark Modern background */
 .md-typeset pre > code {
-  background-color: #1e1f22 !important;   /* Dark Modern base background */
-  color: #f2f2f2 !important;              /* bright neutral text */
+  background-color: #2a2d31 !important;   /* brighter than #24262a */
+  color: #ffffff !important;              /* pure bright text */
 }
 
-/* Comments — slightly neon but not too aggressive */
-.md-typeset .c {
-  color: #6a9955 !important;              /* VS Code green */
+/* Comments — darker, richer green */
+.md-typeset .c,
+.md-typeset .c1,
+.md-typeset .cm {
+  color: #5fbf5f !important;   /* darker green, still vivid */
   font-style: italic;
 }
 
-/* Keywords (def, return, class, etc.) */
+/* Keywords (def, return, import, class, etc.) */
 .md-typeset .k {
-  color: #c586c0 !important;              /* VS Code purple */
-  font-weight: 600;
+  color: #ff9dff !important;              /* brighter purple */
+  font-weight: 700;
 }
 
-/* Strings */
-.md-typeset .s {
-  color: #ce9178 !important;              /* warm orange */
+/* Strings — deeper, more saturated orange */
+.md-typeset .s,
+.md-typeset .s1,
+.md-typeset .s2 {
+  color: #ff8c42 !important;   /* strong orange, zero yellow tint */
   font-weight: 600;
 }
 
 /* Function names */
 .md-typeset .nf {
-  color: #dcdcaa !important;              /* soft yellow */
-  font-weight: 600;
+  color: #fff8a6 !important;              /* bright pastel yellow */
+  font-weight: 700;
 }
 
-/* Variables, names, attributes */
-.md-typeset .n,
+/* Module names in imports (import os) */
+.md-typeset .nn {
+  color: #a6e8ff !important;              /* brighter cyan */
+  font-weight: 700;
+}
+
+/* Imported symbols (from x import Y) */
 .md-typeset .na,
-.md-typeset .nb {
-  color: #9cdcfe !important;              /* bright cyan */
+.md-typeset .n {
+  color: #a6e8ff !important;              /* same bright cyan */
 }
 
 /* Numbers */
 .md-typeset .mi {
-  color: #b5cea8 !important;              /* greenish numeric tone */
-  font-weight: 600;
+  color: #d2ffcc !important;              /* bright mint */
+  font-weight: 700;
 }
 
-/* Operators (=, +, -, etc.) */
+/* Operators */
 .md-typeset .o {
   color: #ffffff !important;
 }
 
-/* Punctuation ((), {}, :, etc.) */
+/* Punctuation */
 .md-typeset .p {
   color: #ffffff !important;
 }

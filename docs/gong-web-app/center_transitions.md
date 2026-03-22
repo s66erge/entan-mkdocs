@@ -8,7 +8,7 @@ Here are the transitions processes used by the state machines
 
 import json
 import asyncio
-from myFasthtml import *
+from fasthtml.common import *
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo

@@ -6,7 +6,7 @@
 ```python
 #| file: main.py
 
-from myFasthtml import *  # (1)
+from fasthtml.common import *  # (1)
 import asyncio
 import libs.states as states
 import libs.auth as auth

@@ -1,13 +1,11 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
 
-from pathlib import Path
-# import pandas as pd  # moved to "myFasthtml.py"
-# import aiohttp  # moved to "myFasthtml.py"
+import aiohttp
 import json
 import asyncio
 from tabulate import tabulate
 from datetime import date
-from myFasthtml import *
+from fasthtml.common import *
 from libs.utils import add_months_days
 from libs.plancheck import get_dhamm_org_types_list, coming_center_courses
 

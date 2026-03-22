@@ -4,9 +4,9 @@ import socket
 import tempfile
 import calendar
 from zoneinfo import ZoneInfo
-from myFasthtml import *
-# import resend # moved to "myFasthtml.py"
-# import markdown2 # moved to "myFasthtml.py"
+from fasthtml.common import *
+import resend 
+import markdown2
 import os
 from datetime import datetime, date, timedelta
 
@@ -22,10 +22,10 @@ class Globals:
     PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
-
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
+
 
 # ~/~ begin <<docs/gong-web-app/utilities.md#dummy>>[init]
 def dummy():

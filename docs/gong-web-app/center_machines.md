@@ -8,7 +8,7 @@ The status of a center data is managed with a state machine. The state is persis
 from abc import ABC
 from abc import abstractmethod
 import asyncio
-from myFasthtml import *
+from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateMachine, StateChart
 import libs.dbset as dbset

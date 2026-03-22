@@ -1,10 +1,9 @@
 # ~/~ begin <<docs/gong-web-app/admin-show.md#libs/admin.py>>[init]
 
-from myFasthtml import *
+from fasthtml.common import *
 from libs.utils import *
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
-
 def show_users_table(users):
     return Main(
         Table(
