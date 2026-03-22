@@ -72,11 +72,16 @@ def send_email(subject, body, recipients):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 
-def display_markdown(file_name:str):
+def display_markdown(file_name:str, insert=None):
     file_path = os.path.join('md-text', f"{file_name}.md")
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
-            html_content = markdown2.markdown(f.read())
+            content = f.read()
+            if insert and "{{" in content and "}}" in content:
+                new_content = content.split("{{", 1)[0] + insert + content.split("}}", 1)[1]
+            else:
+                new_content = content
+            html_content = markdown2.markdown(new_content)
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
@@ -159,7 +164,8 @@ def feed_text(params):
         'center_deleted': 'Center and associated database deleted successfully!',
         'planner_deleted': 'Planner association deleted successfully!',
         'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
-        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.'
+        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.',
+        'show_plan': 'Here is the plan you already worked on.'
     }
     error_messages = {
         'missing_email':'Email is required.',

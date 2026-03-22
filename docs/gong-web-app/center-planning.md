@@ -44,15 +44,23 @@ async def planning_page(session, selected_name, centers, csms, clocks):
     session['planOK'] = False
     center_lock = clocks[selected_name]
     return Main(
-        Div(utils.display_markdown("planning-t")),
+        Div(utils.display_markdown("planning-t", selected_name)),
         Span(
             Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
             Span('/planning/timer_done', id="timer-redirect", style="display: none;"),
-            Button(f"Modify {selected_name} planning",
+            Button(f"(re)Start planning",
                 hx_get=f"/planning/load_dhamma_db",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            Button(f"Modify {selected_name} timetables",
+            Button(f"Saved planning",
+                hx_get=f"/planning/saved_plan",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button(f"(re)Load timetables",
+                hx_get="/unfinished?goto_dash=NO",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button(f"Modify timetables",
                 hx_get="/unfinished?goto_dash=NO",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),

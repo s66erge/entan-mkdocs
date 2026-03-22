@@ -27,7 +27,9 @@ import libs.transit as transit
 <<initialize-program>>
 <<login-authenticate>>
 <<consult-centers-plans>>
+<<start-save-plan-times>>
 <<courses-planning>>
+<<timetables-changes>>
 <<users-admin>>
 <<other-routes>>
 
@@ -116,7 +118,7 @@ def get(session):
     return cdash.dashboard(session, users, planners)
 ```
 
-### Routes for consulting plannings
+### Routes for consulting plannings/timetables
 
 ```python
 #| id: consult-centers-plans
@@ -139,10 +141,10 @@ def get(request):
 
 ```
 
-### Routes for planning modification
+### Routes to start/save planning and timetables
 
 ```python
-#| id: courses-planning
+#| id: start-save-plan-times
 
 @rt('/planning_page')
 async def get(session, center: str):
@@ -157,24 +159,6 @@ async def get(session, center: str):
 @rt('/status_page')
 def get(session, center: str):
     return planning.status_page(session, center, centers, users, states.csms)
-
-@rt('/planning/load_dhamma_db')
-def get(session):
-    return planning.load_dhamma_db(session)
-
-@rt('/planning/check_show_dhamma')
-async def get(session, request):
-    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
-                        utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
-    return await planning.check_save_show_plan(session, merged_plan, centers, {})
-
-@rt('/planning/delete_line/{idx}')
-async def post(session, idx: int):
-    return await planning.delete_line(session, centers, idx)
-
-@rt('/planning/add_line')
-async def post(session, ptype: str, start: str):
-    return await planning.add_line(session, centers, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):
@@ -196,6 +180,43 @@ async def get(session):
     utils.delete_temp_path(session["center"])
     state_mach.progress()   # from 'edit' to 'wait_01'
     return Redirect(f"/status_page?center={session["center"]}")
+
+```
+
+### Routes for planning modification
+
+```python
+#| id: courses-planning
+
+@rt('/planning/load_dhamma_db')
+def get(session):
+    return planning.load_dhamma_db(session)
+
+@rt('/planning/check_show_dhamma')
+async def get(session, request):
+    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
+                        utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
+    return await planning.check_save_show_plan(session, merged_plan, centers, {})
+
+@rt('/planning/saved_plan')
+async def get(session):
+    plan = utils.get_center_data(session["center"], "planning")
+    return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
+
+@rt('/planning/delete_line/{idx}')
+async def post(session, idx: int):
+    return await planning.delete_line(session, centers, idx)
+
+@rt('/planning/add_line')
+async def post(session, ptype: str, start: str):
+    return await planning.add_line(session, centers, ptype, start)
+
+```
+
+### Routes for timetables changes
+
+```python
+#| id: timetables-changes
 
 
 ```

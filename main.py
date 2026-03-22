@@ -111,7 +111,7 @@ def get(request):
     return consul.consult_select_timetable(request, db_path)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]
+# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#start-save-plan-times>>[init]
 
 @rt('/planning_page')
 async def get(session, center: str):
@@ -126,24 +126,6 @@ async def get(session, center: str):
 @rt('/status_page')
 def get(session, center: str):
     return planning.status_page(session, center, centers, users, states.csms)
-
-@rt('/planning/load_dhamma_db')
-def get(session):
-    return planning.load_dhamma_db(session)
-
-@rt('/planning/check_show_dhamma')
-async def get(session, request):
-    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
-                        utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
-    return await planning.check_save_show_plan(session, merged_plan, centers, {})
-
-@rt('/planning/delete_line/{idx}')
-async def post(session, idx: int):
-    return await planning.delete_line(session, centers, idx)
-
-@rt('/planning/add_line')
-async def post(session, ptype: str, start: str):
-    return await planning.add_line(session, centers, ptype, start)
 
 @rt('/planning/abandon_edit')
 def get(session):
@@ -165,6 +147,35 @@ async def get(session):
     utils.delete_temp_path(session["center"])
     state_mach.progress()   # from 'edit' to 'wait_01'
     return Redirect(f"/status_page?center={session["center"]}")
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]
+
+@rt('/planning/load_dhamma_db')
+def get(session):
+    return planning.load_dhamma_db(session)
+
+@rt('/planning/check_show_dhamma')
+async def get(session, request):
+    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
+                        utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
+    return await planning.check_save_show_plan(session, merged_plan, centers, {})
+
+@rt('/planning/saved_plan')
+async def get(session):
+    plan = utils.get_center_data(session["center"], "planning")
+    return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
+
+@rt('/planning/delete_line/{idx}')
+async def post(session, idx: int):
+    return await planning.delete_line(session, centers, idx)
+
+@rt('/planning/add_line')
+async def post(session, ptype: str, start: str):
+    return await planning.add_line(session, centers, ptype, start)
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#timetables-changes>>[init]
 
 
 # ~/~ end
