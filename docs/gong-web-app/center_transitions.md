@@ -28,7 +28,6 @@ pending_tasks = {}
 
 def register_task(center: str, task: asyncio.Task):
     pending_tasks[center] = task
-    print(pending_tasks)
 
 async def check_and_advance(center: str, csms):
     sm = csms[center]
@@ -58,14 +57,13 @@ async def check_center_free(state_mach, center_lock, this_user):
         start_state_time = state_mach.model.get_start_time()
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
-        time_to_go = utils.Globals.INITIAL_COUNTDOWN
         if state_mach.configuration[0].id == "edit" and delta > utils.Globals.INITIAL_COUNTDOWN:
             state_mach.abandon_changes()
         if state_mach.configuration[0].id == "free":
             state_mach.model.user = this_user
             state_mach.progress()
             center_is_free = True
-        return center_is_free, time_to_go
+        return center_is_free
 
 def abandon_edit(session, csms):
     this_center = session["center"]
@@ -75,6 +73,13 @@ def abandon_edit(session, csms):
         csms[this_center].model.user = None
     elif utils.dev_comp_or_user(session):
         csms[this_center].force_to_free()
+    return  Redirect('/dashboard')
+
+def timer_done(session, csms):
+    this_center = session["center"]
+    session["center"] = ""
+    csms[this_center].edit_timer_done()
+    csms[this_center].model.user = None    
     return  Redirect('/dashboard')
 
 ```

@@ -102,29 +102,21 @@ def save_db_plan_timetable(center_name, centers):
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
     coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
-    for record in get_plan(utils.temp_paths[center_name]):
+    for record in utils.get_center_data(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
     return Path(dest_db_file)
 
-def get_plan(temp_path):
-    with open(temp_path, 'r') as f:
-        return json.loads(f.read())
-
-def save_plan(temp_path, plan):
-    with open(temp_path, "w") as f:
-        f.write(json.dumps(plan, default=str))
-
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(save_plan, utils.temp_paths[selected_name], new_draft_plan)
+    await asyncio.to_thread(utils.save_center_data, selected_name, "planning", new_draft_plan)
     return show_draft_plan_table(new_draft_plan, mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
     selected_name = session["center"]
-    plan = get_plan(utils.temp_paths[selected_name])
+    plan = utils.get_center_data(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -133,7 +125,7 @@ async def delete_line(session, centers, index):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session["center"]
-    plan = get_plan(utils.temp_paths[selected_name])
+    plan = utils.get_center_data(selected_name, "planning")
     # Create new plan line with user input
     new_line = {
         "start_date": start,
@@ -159,7 +151,7 @@ async def planning_page(session, selected_name, centers, csms, clocks):
         Div(utils.display_markdown("planning-t")),
         Span(
             Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
-            Span('/planning/abandon_edit', id="timer-redirect", style="display: none;"),
+            Span('/planning/timer_done', id="timer-redirect", style="display: none;"),
             Button(f"Modify {selected_name} planning",
                 hx_get=f"/planning/load_dhamma_db",
                 hx_target="#planning-periods"),

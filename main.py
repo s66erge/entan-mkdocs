@@ -84,8 +84,8 @@ def home():
 
 @rt('/logout')
 def post(session):
-    del session['auth']
-    del session['role']
+    del session["auth"]
+    del session["role"]
     return Redirect('/login')
 
 @rt('/dashboard')
@@ -150,8 +150,12 @@ def get(session):
     utils.delete_temp_path(session["center"])
     return transit.abandon_edit(session, states.csms)
 
+@rt('/planning/timer_done')
+def get(session):
+    utils.delete_temp_path(session["center"])
+    return transit.timer_done(session, states.csms)
+
 @rt('/save-center-db')
-# FIXME move getting user offset to dashboard ?
 async def get(session):
     state_mach = states.csms[session["center"]]
     if not session["planOK"]:
@@ -159,7 +163,6 @@ async def get(session):
     save_db_path = planning.save_db_plan_timetable(session["center"], centers)
     state_mach.model.save_db_path = save_db_path
     utils.delete_temp_path(session["center"])
-    # await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
     state_mach.progress()   # from 'edit' to 'wait_01'
     return Redirect(f"/status_page?center={session["center"]}")
 

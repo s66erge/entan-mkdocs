@@ -12,6 +12,8 @@
 import socket
 import tempfile
 import calendar
+import json
+from enum import Enum
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
 import resend 
@@ -34,7 +36,6 @@ class Globals:
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
-
 
 <<dummy>>
 <<isdev-computer>>
@@ -143,6 +144,27 @@ def wipe_all_temps():
         file_path = os.path.join(temp_dir, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
+def get_all_center_data(center):
+    temp_path = temp_paths[center]
+    with open(temp_path, 'r') as f:
+        content = f.read()
+        return json.loads(content) if content else {}
+
+def save_all_center_data(center, data):
+    temp_path = temp_paths[center]
+    with open(temp_path, "w") as f:
+        f.write(json.dumps(data, default=str))
+
+def get_center_data(center, key):
+    center_data = get_all_center_data(center)
+    return center_data[key]
+
+def save_center_data(center, key, data):
+    center_data = get_all_center_data(center)
+    center_data[key] = data
+    save_all_center_data(center, center_data)
+
 ```
 
 ### Displaying the content of a markdown file

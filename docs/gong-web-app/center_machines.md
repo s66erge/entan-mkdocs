@@ -29,17 +29,13 @@ see: https://python-statemachine.readthedocs.io/en/latest/index.html
 ```python
 #| id: state-machine
 class HistoryListener:
-    def __init__(self):
-        self.max_size = 50
-        self.sm = None
+    def __init__(self, model):
+        self.max_size = 30
+        self.model = model
         self.entries = []
 
-    def setup(self, sm, max_size, **kwargs):
-        self.max_size = max_size
-        self.sm = sm
-
     def after_transition(self, event, source, target):
-        model = self.sm.model
+        model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
             f"from {source.id} to {target.id} on {event}" + result_mess
@@ -55,8 +51,6 @@ def run_sm_action(model, action, *args, **kwargs):
 
 class CenterState(StateMachine):
 
-    listeners = [HistoryListener]
-
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
     wait_01 = State("Waiting for 1am at center timezone")
@@ -71,7 +65,8 @@ class CenterState(StateMachine):
     progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
             | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
 
-    abandon_changes   = Event(edit.to(free), name='user abandon changes or 1 hour edit timer elapsed')
+    abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
@@ -121,7 +116,9 @@ def create_center_state_machines(centers):
     names = [c.get("center_name") for c in centers_list]
     for name in names:
         center_state = CenterDataModel(center_name=name, centers=centers)
-        sm = CenterState(model=center_state, max_size=25)
+        sm = CenterState(model=center_state)
+        the_listener = HistoryListener(model=center_state)
+        sm.add_listener(the_listener)
         csms[name] = sm
         clocks[name] = asyncio.Lock()
     return clocks

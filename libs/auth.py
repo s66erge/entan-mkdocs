@@ -1,7 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/authenticate.md#libs/auth.py>>[init]
 
-import os
-import socket
 import secrets
 import string
 from datetime import datetime, timedelta
@@ -137,9 +135,9 @@ def verify_code(session, code, timezon, users):
 
     User = users.dataclass()
     session.clear()
-    session['auth'] = user.email
-    session['role'] = user.role_name
-    session['center'] = ""
+    session["auth"] = user.email
+    session["role"] = user.role_name
+    session["center"] = ""
 
     users.update(
         email=user.email,
