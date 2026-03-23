@@ -28,10 +28,6 @@ class Globals:
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-# ~/~ begin <<docs/gong-web-app/utilities.md#dummy>>[init]
-def dummy():
-    return "dummy"
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#isdev-computer>>[init]
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]

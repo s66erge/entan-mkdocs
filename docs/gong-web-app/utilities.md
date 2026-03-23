@@ -37,7 +37,6 @@ class Globals:
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-<<dummy>>
 <<isdev-computer>>
 <<istest-db>>
 <<send-email>>
@@ -45,13 +44,6 @@ class Globals:
 <<temp-files>>
 <<plus-months-days>>
 <<feedback-to-user>>
-```
-### Dummy start
-
-```python
-#| id: dummy
-def dummy():
-    return "dummy"
 ```
 
 ### Check if the current computer is a development machine

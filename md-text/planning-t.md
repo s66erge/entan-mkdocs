@@ -1,3 +1,3 @@
-# Change {{}} center planning and/or timetables
+# Change {{center_name}} center planning and/or timetables
 
 - text to be written -

@@ -48,6 +48,11 @@ def coming_center_courses(center_obj):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
+def dict_from_excel(center, sheet):
+    file_path = utils.get_db_path() + center + ".xlsx"
+    df = pd.read_excel(file_path, sheet_name=sheet)
+    return df.to_dict('records')
+
 def get_dhamm_org_types_list():
     db_path = utils.get_db_path()
     df = pd.read_csv(db_path + 'course_type_map.csv')

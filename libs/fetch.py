@@ -2,12 +2,13 @@
 
 import aiohttp
 import json
+import re
 import asyncio
 from tabulate import tabulate
 from datetime import date
 from fasthtml.common import *
-from libs.utils import add_months_days
-from libs.plancheck import get_dhamm_org_types_list, coming_center_courses
+import libs.plancheck as plancheck
+import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
 
@@ -67,21 +68,21 @@ async def fetch_courses_from_dhamma(location, date_start, date_end):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#period-type>>[init]
 
-def get_period_type(anchor, course_type: str, list_of_types, other_dict):
-    replacements = other_dict.get("replacements")
-    if replacements.get(anchor):
-        course_type_dict = replacements[anchor]
-        if course_type_dict.get("@ALL@"):
-            return course_type_dict.get("@ALL@")
-        cleaned_course_type_0 = ''.join(course_type.upper().split())
-        cleaned_course_type = ''.join(cleaned_course_type_0.split('-'))
-        for key, value in course_type_dict.items():
-            if key in cleaned_course_type:
-                return value
-    for item in list_of_types:
-        if  anchor == item.get('raw_course_type'):
-            return item.get('period_type')
-    return anchor
+def get_period_type(dhamma_type, course_type: str, dhamma_types, replacement):
+    #replacements = other_dict.get("replacements")
+    replace_dhamma = [r for r in replacement if r["raw_course_type"] == dhamma_type]
+    if replace_dhamma:
+        replace_all = [r for r in replace_dhamma if r["course_description"] == "@ALL@"]
+        if replace_all:
+            return replace_all[0]["period_type"]
+        cleaned_type = re.sub(r'[^a-zA-Z0-9]', '', course_type).upper()
+        replace_cleaned = [r for r in replace_dhamma if r["course_description"] in cleaned_type]
+        if replace_cleaned:
+            return replace_cleaned[0]["period_type"]    
+    match_dhamma = [r for r in dhamma_types if r["raw_course_type"] == dhamma_type]
+    if  match_dhamma:
+        return match_dhamma[0]['period_type']
+    return dhamma_type
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
 def deduplicate(merged):
@@ -107,7 +108,7 @@ def deduplicate(merged):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
 
-def get_dhamma_courses_types(extracted, center_obj, list_of_types):
+def get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement):
     for course in extracted:   ## [5]
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
@@ -117,13 +118,13 @@ def get_dhamma_courses_types(extracted, center_obj, list_of_types):
         {
             "start_date": c.get("course_start_date"),
             "end_date": c.get("course_end_date"),
-            "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), list_of_types, other_dict),
+            "period_type": get_period_type(c.get("course_type_anchor"), c.get("course_type"), dhamma_types, replacement),
             "source": "dhamma.org",
             "course_type": c.get("course_type")
         }
         for c in extracted     ## [7]
     ]
-    return periods_dhamma_org, other_dict
+    return periods_dhamma_org
 
 def check_within(deletion_check, this_row, other_row):
     if other_row.get("period_type", "") != deletion_check:
@@ -135,14 +136,15 @@ def check_within(deletion_check, this_row, other_row):
         return True
     return False
 
-def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
+def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     cleaned = []
-    default_type = next((x for x in list_of_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
-    delete_list = other_dict.get("delete", {})
+    default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
         row_bef = cleaned[-1] if len(cleaned) > 0 else {}
         row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
-        deletion_check = delete_list.get(row["period_type"], "@TOKEEP@")
+        to_delete = [d for d in delete_list if d["period_type"] == row["period_type"]]
+        deletion_check = to_delete[0]["container"] if to_delete else "@TOKEEP@"
         if row["period_type"] == default_type or deletion_check == "@ALL@":
             continue
         elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
@@ -152,22 +154,23 @@ def clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict):
     return cleaned
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
-    #db_central = get_central_db()
-    #centers = db_central.t.centers
-    #Center = centers.dataclass()
     center_obj = centers[center]
-    list_of_types = get_dhamm_org_types_list()
+    dhamma_types = plancheck.dict_from_excel("all_centers", "dhamma_course")
+    #print(tabulate(dhamma_types, headers="keys"))
+    replacement = plancheck.dict_from_excel(center,"replacement")
+    inside = plancheck.dict_from_excel(center,"inside")
+    #print(tabulate(replacement, headers="keys"))
 
-    periods_db_center, date_current_course = coming_center_courses(center_obj)  ## [1-3]
+    periods_db_center, date_current_course = plancheck.coming_center_courses(center_obj)  ## [1-3]
 
     dhamma_location = f"location_{center_obj.location}"
-    end_date = add_months_days(date_current_course, num_months, num_days)
+    end_date = utils.add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
     #print(tabulate(extracted))
-    periods_dhamma_org, other_dict = get_dhamma_courses_types(extracted, center_obj, list_of_types)  ## [5]
+    periods_dhamma_org = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org))
-    cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, list_of_types, other_dict)
+    cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside)
 
     merged = periods_db_center + cleaned_dhamma_org
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
