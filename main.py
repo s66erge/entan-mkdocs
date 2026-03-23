@@ -125,7 +125,7 @@ async def get(session, center: str):
 
 @rt('/status_page')
 def get(session, center: str):
-    return planning.status_page(session, center, centers, users, states.csms)
+    return cdash.status_page(session, center, centers, users, states.csms)
 
 @rt('/planning/abandon_edit')
 def get(session):

@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 
 from fasthtml.common import *
+from datetime import datetime
 import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
@@ -52,5 +53,31 @@ def dashboard(session, users, planners):
         cls="container",
     )
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-dashboard.md#status-page>>[init]
 
+#@rt('/status_page')
+def status_page(session, center_name, centers, users, csms):
+    email = session["auth"]
+    user_timezone = users[email].timezone
+    center_obj = centers[center_name]
+    ct_timezone = center_obj.timezone
+    state_mach = csms[center_name]
+    state = state_mach.configuration[0].id
+    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
+    return Main(
+        top_menu(session['role']),
+        Div(utils.display_markdown(mark_file)),
+        H3(f"Center {center_name}"),
+        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
+        P(f"UTC time: {utils.short_iso(datetime.now())}"),
+        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
+        P(f"Current state: {state}"),
+        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
+        H3("Center states history"),
+        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
+        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
+        cls="container"
+    )
+
+# ~/~ end
 # ~/~ end

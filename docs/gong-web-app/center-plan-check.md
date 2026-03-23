@@ -23,7 +23,6 @@ def check_plan(session, plan, selected_name, centers):
     center_obj = centers[selected_name]
     types_with_duration = get_types_with_duration(center_obj)
     _, period_types_in_db =  get_period_types_in_db(center_obj)
-    print(period_types_in_db)
     session['planOK'] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:

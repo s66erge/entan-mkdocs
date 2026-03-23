@@ -5,7 +5,7 @@ import json
 import os
 import shutil
 from tabulate import tabulate
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
 import libs.utils as utils
@@ -15,6 +15,7 @@ import libs.dbset as dbset
 import libs.utilsJS as utilsJS
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
+
 def show_draft_plan_table(draft_plan, center_obj, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
@@ -186,30 +187,6 @@ async def planning_page(session, selected_name, centers, csms, clocks):
         Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
         Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
-        cls="container"
-    )
-
-#@rt('/status_page')
-def status_page(session, center_name, centers, users, csms):
-    email = session["auth"]
-    user_timezone = users[email].timezone
-    center_obj = centers[center_name]
-    ct_timezone = center_obj.timezone
-    state_mach = csms[center_name]
-    state = state_mach.configuration[0].id
-    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
-    return Main(
-        cdash.top_menu(session['role']),
-        Div(utils.display_markdown(mark_file)),
-        H3(f"Center {center_name}"),
-        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
-        P(f"UTC time: {utils.short_iso(datetime.now())}"),
-        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
-        P(f"Current state: {state}"),
-        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
-        H3("Center states history"),
-        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
-        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
         cls="container"
     )
 
