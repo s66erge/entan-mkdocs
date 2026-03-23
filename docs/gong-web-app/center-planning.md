@@ -9,6 +9,7 @@ import asyncio
 import json
 import os
 import shutil
+from tabulate import tabulate
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
@@ -107,14 +108,13 @@ def status_page(session, center_name, centers, users, csms):
         cls="container"
     )
 
-
 ```
 
 ### Create colored html table of current plan
 
 ```python
 #| id: create-html-table
-def show_draft_plan_table(draft_plan, mess):
+def show_draft_plan_table(draft_plan, center_obj, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
@@ -147,7 +147,8 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in plancheck.get_dhamm_org_types_list()]
+    _, period_types_in_db = plancheck.get_period_types_in_db(center_obj)
+    period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
     form = Form(
         Div(
             Label("Period type:"),
@@ -215,7 +216,7 @@ async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session["center"]
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
     await asyncio.to_thread(utils.save_center_data, selected_name, "planning", new_draft_plan)
-    return show_draft_plan_table(new_draft_plan, mess)
+    return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):

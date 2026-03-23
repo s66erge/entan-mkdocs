@@ -2,6 +2,7 @@
 
 from fasthtml.common import *
 from datetime import date
+from tabulate import tabulate
 import pandas as pd
 import libs.utils as utils
 
@@ -53,32 +54,21 @@ def dict_from_excel(center, sheet):
     df = pd.read_excel(file_path, sheet_name=sheet)
     return df.to_dict('records')
 
-def get_dhamm_org_types_list():
-    db_path = utils.get_db_path()
-    df = pd.read_csv(db_path + 'course_type_map.csv')
-    return df.to_dict(orient='records')
-
 def get_period_types_in_db(center_obj):
     selected_db = center_obj.gong_db_name
     db_center = database(utils.get_db_path() + selected_db)
     period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
-    return period_types_in_db
+    return db_center, period_types_in_db
 
 def get_types_with_duration(center_obj):
-    list_of_types = get_dhamm_org_types_list()
-    selected_db = center_obj.gong_db_name
-    db_center = database(utils.get_db_path() + selected_db)
-    period_types_in_db = get_period_types_in_db(center_obj)
-    for item in list_of_types:
-        vt = item.get("period_type")
-        if vt not in period_types_in_db:
-            continue
+    db_center, period_types_in_db = get_period_types_in_db(center_obj)
+    types_duration = []
+    for vt in period_types_in_db:
+        item = {}
+        item["period_type"] = vt
         days = [row.get("day") for row in list(db_center.t.periods_struct())
                 if row.get("period_type") == vt and row.get("day") is not None]
-        if item["tags"] == "F":
-            item["duration"] = max(days) + 1
-        else:
-            item["duration"] = 0
+        item["duration"] = max(days) + 1
         day_0_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
                  if row.get("period_type") == vt and row.get("day") == 0), None)
         times_day_0 = [row.get("time") for row in list(db_center.t.timetables())
@@ -89,12 +79,20 @@ def get_types_with_duration(center_obj):
         times_last_day = [row.get("time") for row in list(db_center.t.timetables())
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
         item["time_end_last_day"] = max(times_last_day)
-    return list_of_types
+        if "repeating" in last_day_type :
+            item["tags"] = "V"
+        else:
+            item["tags"] = "F"
+        types_duration.append(item)
+    return types_duration
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
 def check_plan(session, plan, selected_name, centers):
-    types_with_duration = get_types_with_duration(centers[selected_name])    
+    center_obj = centers[selected_name]
+    types_with_duration = get_types_with_duration(center_obj)
+    _, period_types_in_db =  get_period_types_in_db(center_obj)
+    print(period_types_in_db)
     session['planOK'] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
@@ -109,7 +107,7 @@ def check_plan(session, plan, selected_name, centers):
         except Exception:
             row["check"] = "InvalidDate"
         else:
-            if not pt in get_period_types_in_db(centers[selected_name]):
+            if not pt in period_types_in_db:
                 row["check"] = "NoType"
             elif row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
                 row["check"] = "Duplicated periods"
