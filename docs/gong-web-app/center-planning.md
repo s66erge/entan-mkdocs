@@ -173,8 +173,8 @@ def load_dhamma_db(session):
     )
 
 def save_db_plan_timetable(center_name, centers):
-    source_db_file = utils.get_db_path() + "/" + center_name.lower() + ".ok.db"
-    dest_db_file = utils.get_db_path() + "/" + center_name.lower() + ".sending.db"
+    source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
+    dest_db_file = utils.get_db_path() + dbset.gong_db_name(center_name, "sending")
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
     shutil.copy2(Path(source_db_file), Path(dest_db_file))

@@ -14,9 +14,11 @@ and these functions can update multiple other DOM elements with `hx_swap_oob="tr
 import email
 import shutil
 from fasthtml.common import *
-from libs.admin import *
-from libs.utils import isa_db_test, feedback_to_user
+import libs.dbset as dbset
+import libs.admin as admin
+import libs.utils as utils
 from libs.authpass import get_password_hash
+
 
 <<delete-user>>
 <<add-user>>
@@ -48,10 +50,10 @@ def delete_user(email, users, planners, centers):
             message = {"success": "user_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -90,11 +92,11 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
             message = {"success": "user_added"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
-            Div(show_users_form(roles), hx_swap_oob="true", id="users-form"),
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(admin.show_users_form(roles), hx_swap_oob="true", id="users-form"),
             ## [2]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -130,10 +132,10 @@ def delete_center(center_name, users, centers, planners, db_path):
                 message = {'success' : 'center_deleted'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         print(e)
@@ -151,16 +153,17 @@ def delete_center(center_name, users, centers, planners, db_path):
 #| id: add-center
 
 # @rt('/add_center')
-
-def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path):
+def add_center(new_center_name, new_timezone, routing_info, new_center_location, center_template, users, centers, db_path):
     ## [1]
-    if not new_gong_db_name.endswith('.db'):
-        new_gong_db_name += '.db'
+    print(f"template: {center_template}")
+    new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
-    template_db = f'{db_path}{db_template}'
+    template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
+    config_hex = centers[center_template].other_course
 
     try:
-        if new_center_name == "" or new_gong_db_name == "" or new_center_location == "" or db_template == "":
+        if new_center_name == "" or new_center_location == "" or center_template == "" \
+        or new_timezone == "" or new_center_location == "" or routing_info == "":
             message = {"error" : "missing_fields"}
 
         elif centers("center_name = ?", (new_center_name,)):
@@ -179,18 +182,19 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
                 timezone=new_timezone,
                 gong_db_name=new_gong_db_name,
                 location=new_center_location,
-                other_course="{}",
+                routing_port=int(routing_info),
+                other_course=config_hex,
                 status="free",
                 created_by=""
             )
             message = {'success': 'center_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
             ## [3]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -215,8 +219,8 @@ def delete_planner(user_email, center_name, planners):
             message = {"success" : "planner_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
         )
 
     except Exception as e:
@@ -253,9 +257,9 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
             message = {'success' : 'planner_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')

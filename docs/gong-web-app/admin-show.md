@@ -132,12 +132,12 @@ def show_centers_form(centers):
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="tz timezone (see: en.wikipedia.org/wiki/List_of_tz_database_time_zones)", name="new_timezone", required=True),
-                Input(type="text", placeholder="Gong DB Name (without .db)", name="new_gong_db_name", required=True),
+                Input(type="text", placeholder="Internet routing information", name="routing_port", required=True),
                 Input(type="text", placeholder="Center location number (see: dhamma.org)", name="new_center_location", required=True),
                 Select(
                     Option("Center planning and config to copy", value="", selected=True, disabled=True),
-                    *[Option(cdb, value=cdb) for cdb in center_names],
-                    name="db_template", required=True
+                    *[Option(c, value=c) for c in center_names],
+                    name="center_template", required=True
                 ),
                 Button("Add Center", type="submit"), hx_post="/add_center",hx_target="#centers-feedback"
             )

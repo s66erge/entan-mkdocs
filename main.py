@@ -204,8 +204,8 @@ def post(session, center_name: str):
 
 @rt('/add_center')
 @admin_required
-def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
-    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path)
+def post(session, new_center_name: str = "", new_timezone: str = "", routing_port: str = "", new_center_location: str = "", center_template: str = ""):
+    return adchan.add_center(new_center_name, new_timezone, routing_port, new_center_location, center_template, users, centers, db_path)
 
 @rt('/upload_config')
 async def post(file: UploadFile, center_name: str):
