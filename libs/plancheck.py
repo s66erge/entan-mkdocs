@@ -49,8 +49,26 @@ def coming_center_courses(center_obj):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
-def dict_from_excel(center, sheet):
+
+def load_excel_in_db(center, centers):
     file_path = utils.get_db_path() + center + ".xlsx"
+    with open(file_path, 'rb') as f:
+        binary_data = f.read()
+    hex_data = binary_data.hex()
+    centers.update(center_name=center, other_course=hex_data)
+
+def get_excel_from_db(center_obj):
+    if center_obj == "all_centers":
+        file_path = utils.get_db_path() + "all_centers.xlsx"
+    else:
+        binary_data = bytes.fromhex(center_obj.other_course)
+        file_path = utils.get_db_path() + center_obj.center_name + ".xlsx"
+        with open(file_path, 'wb') as f:
+            f.write(binary_data)
+    return file_path
+
+def dict_from_excel_in_db(center_obj, sheet):
+    file_path = get_excel_from_db(center_obj)
     df = pd.read_excel(file_path, sheet_name=sheet)
     return df.to_dict('records')
 

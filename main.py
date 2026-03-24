@@ -207,6 +207,24 @@ def post(session, center_name: str):
 def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
     return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path)
 
+@rt('/upload_config')
+async def post(file: UploadFile, center_name: str):
+    return await admin.upload_config(file, center_name, centers)
+
+@rt('/download_config/{center_name}')
+async def get(session, request):
+    return await admin.download_config(session, request, centers)
+
+@rt("/download_it")
+async def get(session):
+    filename = session["filename"]
+    file_path = utils.get_db_path() + filename
+    return FileResponse(
+        file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=filename
+    )
+
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
@@ -219,7 +237,6 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#other-routes>>[init]
-
 @rt('/no_access_right')
 def get():
     return Main(

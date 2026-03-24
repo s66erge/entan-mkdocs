@@ -94,7 +94,6 @@ if anchor != "Other"' find the dict in list_of_types where 'raw_course_type' mat
 #| id: period-type
 
 def get_period_type(dhamma_type, course_type: str, dhamma_types, replacement):
-    #replacements = other_dict.get("replacements")
     replace_dhamma = [r for r in replacement if r["raw_course_type"] == dhamma_type]
     if replace_dhamma:
         replace_all = [r for r in replace_dhamma if r["course_description"] == "@ALL@"]
@@ -150,7 +149,6 @@ def get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement):
         if course['course_type_anchor'].endswith("OSC"):
             course['course_type_anchor'] = course['course_type_anchor'][:-3].strip()
 
-    other_dict = json.loads(center_obj.other_course)  ## [6.1]
     periods_dhamma_org = [
         {
             "start_date": c.get("course_start_date"),
@@ -192,10 +190,10 @@ def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
-    dhamma_types = plancheck.dict_from_excel("all_centers", "dhamma_course")
+    dhamma_types = plancheck.dict_from_excel_in_db("all_centers", "dhamma_course")
     #print(tabulate(dhamma_types, headers="keys"))
-    replacement = plancheck.dict_from_excel(center,"replacement")
-    inside = plancheck.dict_from_excel(center,"inside")
+    replacement = plancheck.dict_from_excel_in_db(center_obj,"replacement")
+    inside = plancheck.dict_from_excel_in_db(center_obj,"inside")
     #print(tabulate(replacement, headers="keys"))
 
     periods_db_center, date_current_course = plancheck.coming_center_courses(center_obj)  ## [1-3]
@@ -204,9 +202,9 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
-    #print(tabulate(extracted))
+    #print(tabulate(extracted, headers="keys"))
     periods_dhamma_org = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
-    #print(tabulate(periods_dhamma_org))
+    #print(tabulate(periods_dhamma_org, headers="keys"))
     cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside)
 
     merged = periods_db_center + cleaned_dhamma_org

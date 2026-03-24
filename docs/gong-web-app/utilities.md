@@ -230,7 +230,9 @@ def feed_text(params):
         'planner_deleted': 'Planner association deleted successfully!',
         'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
         'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.',
-        'show_plan': 'Here is the plan you already worked on.'
+        'show_plan': 'Here is the plan you already worked on.',
+        'config_uploaded': "New configuration loaded in database",
+        'config_downloaded': "Configuration in database downloaded"
     }
     error_messages = {
         'missing_email':'Email is required.',
@@ -249,7 +251,8 @@ def feed_text(params):
         'template_not_found': 'Template database (mahi.db) not found.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.'
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.',
+        'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file'
     }
     message = ""
     result = ""
