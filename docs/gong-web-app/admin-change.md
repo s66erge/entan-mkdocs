@@ -185,7 +185,7 @@ def add_center(new_center_name, new_timezone, routing_info, new_center_location,
                 timezone=new_timezone,
                 gong_db_name=new_gong_db_name,
                 location=new_center_location,
-                routing_port=int(routing_info),
+                routing_info=routing_info,
                 other_course=config_hex,
                 status="free",
                 created_by=""

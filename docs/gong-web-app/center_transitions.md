@@ -110,7 +110,7 @@ async def wait_until(model, until_hour, minutes=0):
 async def transfer_new_db(model):
     # FIXME try 3 times at 10 min. intervals
     localDBPath = Path(utils.get_db_path())
-    port = model.centers[model.center_name].routing_port
+    port = model.centers[model.center_name].routing_info
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
             remoteDBPath = Path(utils.Globals.PI_FOLDER_TEST)
@@ -120,7 +120,7 @@ async def transfer_new_db(model):
             remoteDBPath = Path("/home/pi/prod")
             db_file = model.centers[model.center_name].save_db_file
 
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,port)
+        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
         localDBFilePath = localDBPath / db_file
         await asyncio.to_thread(send2pi.file_upload, localDBFilePath, remoteDBPath, ssh_session)
     except Exception as e:
@@ -132,7 +132,7 @@ async def transfer_new_db(model):
 async def get_version_prod(model):
     # FIXME try 3 times at 10 min. intervals
     localDBPath = Path(utils.get_db_path())
-    port = model.centers[model.center_name].routing_port
+    port = model.centers[model.center_name].routing_info
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
             folder = utils.Globals.PI_FOLDER_TEST
@@ -141,7 +141,7 @@ async def get_version_prod(model):
         else:
             # FIXME after discussion with Ivan        
             remoteDBFilePath = Path("/home/pi/prod")
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,port)
+        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
         await asyncio.to_thread(send2pi.file_download, remoteDBFilePath, localDBPath, ssh_session)
         file_transfered = localDBPath / file
         with open(file_transfered, 'r') as f:

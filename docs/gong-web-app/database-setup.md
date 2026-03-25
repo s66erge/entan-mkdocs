@@ -20,7 +20,7 @@ import libs.utils as utils
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
-class Center: center_name: str; timezone: str; gong_db_name: str; location: str; routing_port: int; other_course: str; status: str; created_by: str; status_start: str
+class Center: center_name: str; timezone: str; gong_db_name: str; location: str; routing_info: str; other_course: str; status: str; created_by: str; status_start: str
 class Planner: user_email: str; center_name: str
 
 class Coming_periods: start_date: str; period_type: str
@@ -103,9 +103,9 @@ def init_data(roles, users, centers, planners):
     }
     """).strip('\n')
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name=gong_db_name("Mahi"), location="1396", timezone="Europe/Paris", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
-        centers.insert(center_name="Pajjota", gong_db_name=gong_db_name("Pajjota"), location="1370", timezone="Europe/Brussels", routing_port= 7011, other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
-        centers.insert(center_name="Testx", gong_db_name=gong_db_name("Testx"), location="1396", timezone="America/Chicago", routing_port= 7012, other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Mahi", gong_db_name=gong_db_name("Mahi"), location="1396", timezone="Europe/Paris", routing_info="7012", other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Pajjota", gong_db_name=gong_db_name("Pajjota"), location="1370", timezone="Europe/Brussels", routing_info="7011", other_course=oc_pajj, status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Testx", gong_db_name=gong_db_name("Testx"), location="1396", timezone="America/Chicago", routing_info="7012", other_course=oc_mahi,  status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
 
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)

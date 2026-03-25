@@ -129,7 +129,7 @@ def show_centers_form(centers):
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
                 Input(type="text", placeholder="tz timezone (see: en.wikipedia.org/wiki/List_of_tz_database_time_zones)", name="new_timezone", required=True),
-                Input(type="text", placeholder="Internet routing information", name="routing_port", required=True),
+                Input(type="text", placeholder="Internet routing information", name="routing_info", required=True),
                 Input(type="text", placeholder="Center location number (see: dhamma.org)", name="new_center_location", required=True),
                 Select(
                     Option("Center planning and config to copy", value="", selected=True, disabled=True),
