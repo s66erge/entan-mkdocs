@@ -116,10 +116,7 @@ def show_centers_table(centers):
                     Td(c.status),
                     Td(c.created_by), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback",
-                         hx_confirm="Are you ABSOLUTELY sure you want to delete this center?"),
-                       Span(style="display: inline-block; width: 20px;"),
-                       A("Download config", hx_post=f"/download_center_config/{c.center_name}", hx_target="#centers-feedback")
-                    )
+                         hx_confirm="Are you ABSOLUTELY sure you want to delete this center?"))
                 ) for c in sorted(centers(), key=lambda x: x.center_name)]
             )
         )

@@ -117,7 +117,8 @@ def delete_center(center_name, users, centers, planners, db_path):
             message = {'error' : 'center_not_found'}
         else:
             gong_db_name = center_info[0].gong_db_name  ## [1]
-            db_file_path = f'{db_path}{gong_db_name}'  ## [1]
+            db_file_path = f'{db_path}{gong_db_name}'
+            config_path = f'{db_path}{center_name}.xlsx'  ## [1]
             center_planners = planners("center_name = ?", (center_name,))  ## [2]
 
             if center_planners:  ## [2]
@@ -129,6 +130,8 @@ def delete_center(center_name, users, centers, planners, db_path):
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
+                if os.path.exists(config_path):
+                    os.remove(config_path)
                 message = {'success' : 'center_deleted'}
 
         return Div(
