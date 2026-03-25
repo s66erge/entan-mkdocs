@@ -190,14 +190,14 @@ def save_db_plan_timetable(center_name, centers):
     return Path(dest_db_file)
 
 async def check_save_show_plan(session, plan, centers, mess):
-    selected_name = session["center"]
+    selected_name = session[utils.Skey.CENTER]
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
     await asyncio.to_thread(utils.save_center_data, selected_name, "planning", new_draft_plan)
     return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
-    selected_name = session["center"]
+    selected_name = session[utils.Skey.CENTER]
     plan = utils.get_center_data(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
@@ -206,7 +206,7 @@ async def delete_line(session, centers, index):
 
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
-    selected_name = session["center"]
+    selected_name = session[utils.Skey.CENTER]
     plan = utils.get_center_data(selected_name, "planning")
     # Create new plan line with user input
     new_line = {

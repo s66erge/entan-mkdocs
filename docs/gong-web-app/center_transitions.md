@@ -66,8 +66,8 @@ async def check_center_free(state_mach, center_lock, this_user):
         return center_is_free
 
 def abandon_edit(session, csms):
-    this_center = session["center"]
-    session["center"] = ""
+    this_center = session[utils.Skey.CENTER]
+    session[utils.Skey.CENTER] = ""
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
@@ -76,8 +76,8 @@ def abandon_edit(session, csms):
     return  Redirect('/dashboard')
 
 def timer_done(session, csms):
-    this_center = session["center"]
-    session["center"] = ""
+    this_center = session[utils.Skey.CENTER]
+    session[utils.Skey.CENTER] = ""
     csms[this_center].edit_timer_done()
     csms[this_center].model.user = None    
     return  Redirect('/dashboard')

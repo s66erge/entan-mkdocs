@@ -14,6 +14,15 @@ from datetime import datetime, date, timedelta
 
 temp_paths = {}
 
+class Skey:
+    AUTH = "auth"
+    ROLE = "role"
+    CENTER = "center"
+    PLANOK = "planOK"
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
+
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
@@ -44,7 +53,7 @@ def get_db_path():
     return root + "data/"
 
 def dev_comp_or_user(session):
-    return isa_dev_computer() or session["auth"] == Globals.DEV_USER
+    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]

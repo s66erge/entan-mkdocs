@@ -210,7 +210,7 @@ async def download_config(session, request, centers):
         center_obj = centers[center_name]
         plancheck.get_excel_from_db(center_obj)
         filename = center_name + ".xlsx"
-        session["filename"] = filename
+        session[utils.Skey.CENTER] = center_name
         return Redirect("/download_it")
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')

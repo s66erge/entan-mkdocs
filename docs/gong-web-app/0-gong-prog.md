@@ -109,8 +109,8 @@ def home():
 
 @rt('/logout')
 def post(session):
-    del session["auth"]
-    del session["role"]
+    del session[utils.Skey.AUTH]
+    del session[utils.Skey.ROLE]
     return Redirect('/login')
 
 @rt('/dashboard')
@@ -148,7 +148,7 @@ def get(request):
 
 @rt('/planning_page')
 async def get(session, center: str):
-    session["center"] = center
+    session[utils.Skey.CENTER] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:
         utils.create_temp_path(center)
@@ -162,24 +162,24 @@ def get(session, center: str):
 
 @rt('/planning/abandon_edit')
 def get(session):
-    utils.delete_temp_path(session["center"])
+    utils.delete_temp_path(session[utils.Skey.CENTER])
     return transit.abandon_edit(session, states.csms)
 
 @rt('/planning/timer_done')
 def get(session):
-    utils.delete_temp_path(session["center"])
+    utils.delete_temp_path(session[utils.Skey.CENTER])
     return transit.timer_done(session, states.csms)
 
 @rt('/save-center-db')
 async def get(session):
-    state_mach = states.csms[session["center"]]
-    if not session["planOK"]:
+    state_mach = states.csms[session[utils.Skey.CENTER]]
+    if not session[utils.Skey.PLANOK]:
         return utils.feedback_to_user({"error": "plan_not_ok"})
-    save_db_path = planning.save_db_plan_timetable(session["center"], centers)
+    save_db_path = planning.save_db_plan_timetable(session[utils.Skey.CENTER], centers)
     state_mach.model.save_db_path = save_db_path
-    utils.delete_temp_path(session["center"])
+    utils.delete_temp_path(session[utils.Skey.CENTER])
     state_mach.progress()   # from 'edit' to 'wait_01'
-    return Redirect(f"/status_page?center={session["center"]}")
+    return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
 
 ```
 
@@ -194,13 +194,13 @@ def get(session):
 
 @rt('/planning/check_show_dhamma')
 async def get(session, request):
-    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
+    merged_plan = await fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
                         utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
     return await planning.check_save_show_plan(session, merged_plan, centers, {})
 
 @rt('/planning/saved_plan')
 async def get(session):
-    plan = utils.get_center_data(session["center"], "planning")
+    plan = utils.get_center_data(session[utils.Skey.CENTER], "planning")
     return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
 
 @rt('/planning/delete_line/{idx}')
@@ -262,7 +262,8 @@ async def get(session, request):
 
 @rt("/download_it")
 async def get(session):
-    filename = session["filename"]
+    center = session[utils.Skey.CENTER]
+    filename = center + ".xlsx"
     file_path = utils.get_db_path() + filename
     return FileResponse(
         file_path,
