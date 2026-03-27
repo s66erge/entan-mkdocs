@@ -13,7 +13,8 @@ pending_tasks = {}
 
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#user-transitions>>[init]
 
-async def check_center_free(state_mach, center_lock, this_user):
+async def check_center_free(state_mach, this_user):
+    center_lock = utils.clocks[state_mach.model.center_name]
     async with center_lock:
         center_is_free = False
         tnow = datetime.now(timezone.utc)

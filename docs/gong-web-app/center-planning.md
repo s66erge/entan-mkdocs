@@ -41,9 +41,8 @@ Then:
 #| id: planning-page
 
 # @rt('/planning_page')
-async def planning_page(session, selected_name, centers, csms, clocks):
+async def planning_page(session, selected_name, centers, csms):
     session['planOK'] = False
-    center_lock = clocks[selected_name]
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
         Span(

@@ -14,9 +14,11 @@ and these functions can update multiple other DOM elements with `hx_swap_oob="tr
 import email
 import shutil
 from fasthtml.common import *
+from datetime import datetime, timezone
 import libs.dbset as dbset
 import libs.admin as admin
 import libs.utils as utils
+import libs.states as states
 from libs.authpass import get_password_hash
 
 
@@ -164,38 +166,40 @@ def add_center(new_center_name, center_template, users, centers, db_path):
     template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
     config_hex = centers[center_template].other_course
 
-    try:
-        if new_center_name == "" or center_template == "":
-            message = {"error" : "missing_fields"}
+    #try:
+    if new_center_name == "" or center_template == "":
+        message = {"error" : "missing_fields"}
 
-        elif centers("center_name = ?", (new_center_name,)):
-            message = {"error" : "center_exists"}
+    elif centers("center_name = ?", (new_center_name,)):
+        message = {"error" : "center_exists"}
 
-        elif os.path.exists(db_file_path):
-            message = {"error" : 'db_file_exists'}
+    elif os.path.exists(db_file_path):
+        message = {"error" : 'db_file_exists'}
 
-        elif not os.path.exists(template_db):
-            message = {'error' : 'template_not_found'}
+    elif not os.path.exists(template_db):
+        message = {'error' : 'template_not_found'}
 
-        else:  ## [2]
-            shutil.copy2(template_db, db_file_path)
-            centers.insert(
-                center_name=new_center_name,
-                other_course=config_hex,
-                status="free",
-                created_by=""
-            )
-            message = {'success': 'center_added'}
-
-        return Div(
-            Div(utils.feedback_to_user(message)),
-            Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
-            ## [3]
-            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+    else:  ## [2]
+        shutil.copy2(template_db, db_file_path)
+        centers.insert(
+            center_name=new_center_name,
+            other_course=config_hex,
+            status="free",
+            created_by="",
+            status_start=datetime.now(timezone.utc)
         )
-    except Exception as e:
-        return Redirect(f'/db_error?etext={e}')
+        states.add_center_state_machine(new_center_name, centers)
+        message = {'success': 'center_added'}
+
+    return Div(
+        Div(utils.feedback_to_user(message)),
+        Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+        Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
+        ## [3]
+        Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+    )
+    #except Exception as e:
+    #    return Redirect(f'/db_error?etext={e}')
 ```
 [1] Ensure gong_db_name ends with .db  
 [2] Create the new database by copying mahi.db and update center table  

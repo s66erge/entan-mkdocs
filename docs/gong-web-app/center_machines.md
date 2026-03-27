@@ -15,6 +15,7 @@ import libs.dbset as dbset
 import libs.transit as transit
 
 csms = {}
+clocks = {}
 
 <<state-machine>>
 <<abstract-with-persistency>>
@@ -103,25 +104,27 @@ class CenterState(StateMachine):
 ### State machines creation and access
 
 1 state machine per center.
-To create them: csms = create_center_state_machines()
+To create them: csms = init_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
 ```python
 #| id: create-centers-sms
 
-def create_center_state_machines(centers):
-    clocks = {}
+def add_center_state_machine(name, centers):
+    center_state = CenterDataModel(center_name=name, centers=centers)
+    sm = CenterState(model=center_state)
+    the_listener = HistoryListener(model=center_state)
+    sm.add_listener(the_listener)
+    csms[name] = sm
+    clocks[name] = asyncio.Lock()
+
+def init_center_state_machines(centers):
     db2 = dbset.get_central_db()
     centers_list = db2.t.center()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
-        center_state = CenterDataModel(center_name=name, centers=centers)
-        sm = CenterState(model=center_state)
-        the_listener = HistoryListener(model=center_state)
-        sm.add_listener(the_listener)
-        csms[name] = sm
-        clocks[name] = asyncio.Lock()
-    return clocks
+        add_center_state_machine(name, centers)
+
 ```
 
 ### DBPersistentModel: Concrete model strategy

@@ -69,7 +69,7 @@ centers = db.create(dbset.Center, pk='center_name')
 planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 
 dbset.init_data(roles, users, centers, planners)
-clocks = states.create_center_state_machines(centers)
+states.init_center_state_machines(centers)
 
 async def workflow_supervisor():
     while True:
@@ -149,10 +149,10 @@ def get(request):
 @rt('/planning_page')
 async def get(session, center: str):
     session[utils.Skey.CENTER] = center
-    enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
+    enter_edit_OK = await transit.check_center_free(states.csms[center], session['auth'])
     if enter_edit_OK:
         utils.create_temp_path(center)
-        return await planning.planning_page(session, center, centers, states.csms, clocks)
+        return await planning.planning_page(session, center, centers, states.csms)
     else:
         return Redirect(f"/status_page?center={center}")
 

@@ -50,7 +50,8 @@ async def check_and_advance(center: str, csms):
 ```python
 #| id: user-transitions
 
-async def check_center_free(state_mach, center_lock, this_user):
+async def check_center_free(state_mach, this_user):
+    center_lock = utils.clocks[state_mach.model.center_name]
     async with center_lock:
         center_is_free = False
         tnow = datetime.now(timezone.utc)
@@ -87,7 +88,7 @@ def timer_done(session, csms):
 # State machines creation and access
 
 1 state machine per center.
-To create them: csms = create_center_state_machines()
+To create them: csms = init_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
 ```python
