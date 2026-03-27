@@ -6,18 +6,39 @@
 - route or function not implemented yet
 
 
-```{.python file = libs/utils.py}
+```python
+#| file: libs/utils.py 
+
 import socket
 import tempfile
 import calendar
+import json
+import pandas as pd
 from zoneinfo import ZoneInfo
-from myFasthtml import *
-# import resend # moved to "myFasthtml.py"
-# import markdown2 # moved to "myFasthtml.py"
+from fasthtml.common import *
+import resend 
+import markdown2
 import os
 from datetime import datetime, date, timedelta
 
 temp_paths = {}
+
+class Skey: # session keys
+    AUTH = "auth"
+    ROLE = "role"
+    CENTER = "center"
+    PLANOK = "planOK"
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
+
+class Pkey: # parameters keys
+    TIMEZON = "timezon"
+    LOCATION = "location"
+    ROUTING = "routing"
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
 
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
@@ -29,32 +50,26 @@ class Globals:
     PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
-
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-<<dummy>>
 <<isdev-computer>>
 <<istest-db>>
 <<send-email>>
 <<display-markdown>>
 <<temp-files>>
+<<excel-inside-db>>
 <<plus-months-days>>
 <<feedback-to-user>>
-```
-### Dummy start
-
-```{.python #dummy}
-def dummy():
-    return "dummy"
 ```
 
 ### Check if the current computer is a development machine
 
 This function checks if the program runs on one of a predefined list of development machines. This is useful to determine whether to use a local or remote base URL for building the registation link.
 
-```{.python #isdev-computer}
+```python
+#| id: isdev-computer
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
@@ -70,13 +85,14 @@ def get_db_path():
     return root + "data/"
 
 def dev_comp_or_user(session):
-    return isa_dev_computer() or session["auth"] == Globals.DEV_USER
+    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
 
 ```
 
 ### Check if current db is a teporary db in memory
 
-```{.python #istest-db}
+```python
+#| id: istest-db
 def isa_db_test(db):
     return 'Database <apsw.Connection object ""' in str(db)
 ```
@@ -100,7 +116,8 @@ Using: *send_email(subject, body, recipients)*
 - body = "This is a test email sent from Python."
 - recipients = ["recipient1@gmail.com"]  : list of recipients 
 
-```{.python #send-email}
+```python
+#| id: send-email
 
 def send_email(subject, body, recipients):
     # using resend
@@ -118,7 +135,8 @@ def send_email(subject, body, recipients):
 
 ### Managing temp files
 
-```{.python #temp-files}
+```python
+#| id: temp-files
 
 def create_temp_path(center):
     temp_dir = get_db_path() + Globals.SUBDIR_TEMP 
@@ -136,19 +154,81 @@ def wipe_all_temps():
         file_path = os.path.join(temp_dir, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
+def get_all_center_data(center):
+    temp_path = temp_paths[center]
+    with open(temp_path, 'r') as f:
+        content = f.read()
+        return json.loads(content) if content else {}
+
+def save_all_center_data(center, data):
+    temp_path = temp_paths[center]
+    with open(temp_path, "w") as f:
+        f.write(json.dumps(data, default=str))
+
+def get_center_data(center, key):
+    center_data = get_all_center_data(center)
+    return center_data[key]
+
+def save_center_data(center, key, data):
+    center_data = get_all_center_data(center)
+    center_data[key] = data
+    save_all_center_data(center, center_data)
+
+```
+
+### Managing parameters in excel files stored in the db
+
+```python
+#| id: excel-inside-db
+
+def load_excel_in_db(center, centers):
+    file_path = get_db_path() + center + ".xlsx"
+    with open(file_path, 'rb') as f:
+        binary_data = f.read()
+    hex_data = binary_data.hex()
+    centers.update(center_name=center, other_course=hex_data)
+
+def get_excel_from_db(center_obj):
+    if center_obj == "all_centers":
+        file_path = get_db_path() + "all_centers.xlsx"
+    else:
+        binary_data = bytes.fromhex(center_obj.other_course)
+        file_path = get_db_path() + center_obj.center_name + ".xlsx"
+        with open(file_path, 'wb') as f:
+            f.write(binary_data)
+    return file_path
+
+def dicts_from_excel_in_db(center_obj, sheet):
+    file_path = get_excel_from_db(center_obj)
+    df = pd.read_excel(file_path, sheet_name=sheet)
+    result = df.to_dict('records')
+    return result
+
+def params_from_excel_in_db(center_obj):
+    list_of_dicts = dicts_from_excel_in_db(center_obj, "params")
+    one_dict = {item["name"]: item["value"] for item in list_of_dicts}
+    return one_dict
+
 ```
 
 ### Displaying the content of a markdown file
 
 This function reads a markdown file name, without the extension '.md', then finds the file in the 'md-text' directory and converts it to HTML using the `markdown2` library, which is then returned as a NotStr object for rendering in the app.
 
-```{.python #display-markdown}
+```python
+#| id: display-markdown
 
-def display_markdown(file_name:str):
+def display_markdown(file_name:str, insert=None):
     file_path = os.path.join('md-text', f"{file_name}.md")
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
-            html_content = markdown2.markdown(f.read())
+            content = f.read()
+            if insert and "{{" in content and "}}" in content:
+                new_content = content.split("{{", 1)[0] + insert + content.split("}}", 1)[1]
+            else:
+                new_content = content
+            html_content = markdown2.markdown(new_content)
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
@@ -159,7 +239,8 @@ def display_markdown(file_name:str):
 Return an ISO date string num_months and num_days after date_str (YYYY-MM-DD).
 Uses divmod to compute year/month rollover and preserves end-of-month.
 
-```{.python #plus-months-days}
+```python
+#| id: plus-months-days
 
 def add_months_days(date_str, num_months, num_days):
     dt = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -186,7 +267,8 @@ def seconds_to_hours_minutes(total_seconds):
 
 ### Success/error message
 
-```{.python #feedback-to-user}
+```python
+#| id: feedback-to-user
 
 def feed_text(params):
     # query_params = dict(request.query_params)
@@ -200,7 +282,10 @@ def feed_text(params):
         'center_deleted': 'Center and associated database deleted successfully!',
         'planner_deleted': 'Planner association deleted successfully!',
         'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
-        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.'
+        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.',
+        'show_plan': 'Here is the plan you already worked on.',
+        'config_uploaded': "New configuration loaded in database",
+        'config_downloaded': "Configuration in database downloaded"
     }
     error_messages = {
         'missing_email':'Email is required.',
@@ -219,7 +304,8 @@ def feed_text(params):
         'template_not_found': 'Template database (mahi.db) not found.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.'
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.',
+        'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file'
     }
     message = ""
     result = ""

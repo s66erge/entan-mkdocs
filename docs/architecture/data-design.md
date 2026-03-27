@@ -10,8 +10,7 @@ As of today, this app is managing the gong planning for:
 - Dhamma Mahi (mahi.db)
 - Dhamma Pajjota (pajjota.db)
 
-
-TODO describe the entities
+### ER diagrams
 
 ```mermaid
 erDiagram

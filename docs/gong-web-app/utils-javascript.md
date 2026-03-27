@@ -1,7 +1,7 @@
 # JS utilities
 
-```{.python file=libs/utilsJS.py}
-
+```python
+#| file: libs/utilsJS.py 
 <<block-navigation>>
 <<client-timer>>
 ```
@@ -10,7 +10,8 @@
 
 Except for links/buttons with class='allownavigation'
 
-```{.python #block-navigation}
+```python
+#| id: block-navigation
 JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation
@@ -59,7 +60,8 @@ window.onbeforeunload = function() { return "Unsaved changes!";};
 ```
 
 
-```{.python #client-timer}
+```python
+#| id: client-timer
 JS_CLIENT_TIMER = """
 function startCountdown(seconds, elementId) {
     const element = document.getElementById(elementId);

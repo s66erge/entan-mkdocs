@@ -2,8 +2,8 @@
 
 
 
-```{.python file=libs/authpass.py}
-
+```python
+#| file: libs/authpass.py 
 from functools import wraps
 from passlib.context import CryptContext
 from fasthtml.common import *
@@ -18,7 +18,8 @@ from libs.utils import isa_dev_computer, send_email, feedback_to_user
 
 The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!
 
-```{.python #register}
+```python
+#| id: register
 def MyForm(btn_text, target):
     return Form(
         Input(id="email", type="email", placeholder="Email", required=True),
@@ -103,7 +104,8 @@ def logincheck(session, email, password, users):
 ```
 
 
-```{.python #admin_required}
+```python
+#| id: admin_required
 
 def admin_required(handler):
     @wraps(handler)

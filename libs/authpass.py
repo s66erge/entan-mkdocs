@@ -1,5 +1,4 @@
 # ~/~ begin <<docs/gong-web-app/authentipass.md#libs/authpass.py>>[init]
-
 from functools import wraps
 from passlib.context import CryptContext
 from fasthtml.common import *

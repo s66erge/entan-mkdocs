@@ -1,6 +1,8 @@
 # Send database to center rasperry Pi
 
-```{.python file=libs/send2pi.py}
+```python
+#| file: libs/send2pi.py 
+
 import paramiko 
 from scp import SCPClient   # scp module of paramiko
 from pathlib import Path
@@ -24,7 +26,8 @@ Transfer the database file (localDBfilePath) the remote control center using SCP
 - destination path on the remote control center is given by remoteDBpath (e.g. "/home/pi/test" for both Pajjota and Mahi)
 - should be used after a successful connection to the remote control center (RPI) through the jumpbox (RPI TUNNEL)
 
-```{.python #file_upload}
+```python
+#| id: file_upload
 def file_upload(localDBfilePath: Path, remoteDBpath: Path, session: paramiko.SSHClient):
     scp = SCPClient(session.get_transport())  # type: ignore
     # We will use Path().as_posix() to deal with the linux filesystem on the RPI !
@@ -36,7 +39,8 @@ def file_upload(localDBfilePath: Path, remoteDBpath: Path, session: paramiko.SSH
 
 
 
-```{.python #file_download}
+```python
+#| id: file_download
 def file_download(remoteDBfilePath: Path, localDBpath: Path, session: paramiko.SSHClient):
     scp = SCPClient(session.get_transport())  # type: ignore
     # We will use Path().as_posix() to deal with the linux filesystem on the RPI !
@@ -53,7 +57,8 @@ ou alors
 - localDBfilepath = Path("C:/Users/Serge/Desktop/mahi.db")
  
 
-```{.python #main_program}
+```python
+#| id: main_program
 if __name__ == "__main__":
     localDBpath = Path("F:/myWinFolders/MyStuff/Downloads")
     localDBfilePath = localDBpath / "test.tmp"
@@ -78,7 +83,8 @@ param rthjPort: the port on which the RPI is listening for
 
 Returns the SSH session if the connection is successful, None otherwise.
 
-```{.python #session_connect}
+```python
+#| id: session_connect
 
 def session_connect(rthjPort: int) -> paramiko.SSHClient | None:
     jumpbox_public_addr = "itadic.run.place"

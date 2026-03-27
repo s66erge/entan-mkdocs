@@ -9,14 +9,14 @@ This is a passwordless authentication:
 - The website looks for a record in the users database table with the token
 - If it can find a record, the user will be logged in (again by storing information in the session)
 
-```{.python file=libs/auth.py}
-import os
-import socket
+```python
+#| file: libs/auth.py 
+
 import secrets
 import string
 from datetime import datetime, timedelta
 from functools import wraps
-from myFasthtml import *
+from fasthtml.common import *
 import libs.utils as utils
 
 <<build-serve-login-form>>
@@ -31,7 +31,8 @@ import libs.utils as utils
 
 The actual form element is extracted into a MyForm() function. Its not really needed this time, since we don't use it a second time!
 
-```{.python #build-serve-login-form}
+```python
+#| id: build-serve-login-form
 def signin_form():
     return Form(
         Input(id='email', type='email', placeholder='foo@bar.com'),
@@ -96,7 +97,8 @@ If everything went well, we return a success message to the user. Remember, the 
 
 Also I want to disable the submit button and show a message that the magic link has been sent. To do this, we use one of the most powerful features of HTMX, out-of-band swaps. In HTMX you can update more than one piece of UI by setting the hx-swap-oob attribute to true on an element. HTMX will then swap in the returned element at the location of the element with the same id (#submit-btn in this case). You can read more about HTMX's out-of-band swaps [here](https://htmx.org/docs/#oob_swaps).
 
-```{.python #handling-form}
+```python
+#| id: handling-form
 def _generate_login_code(length: int = 6) -> str:
     # e.g. 6-digit numeric code
     digits = string.digits
@@ -145,7 +147,8 @@ In production mode - remote or local within railway CLI -, we can use the smtpli
 
 In dev mode, lets just mock sending the email by printing the email content to the console.
 
-```{.python #send-link}
+```python
+#| id: send-link
 
 def send_login_code_email(email_address: str, code: str):
     email_subject = "Your sign-in code for The App"
@@ -180,7 +183,8 @@ If a user has been found using this query, we will save his or hers email in the
 
 We do this to keep our database clean. Imagine a hacker enters thousands of random email addresses into our beautiful sign in form and therefore creates thousands of records in our database. To keep our database clean, we can use this is_active column to delete all inactive database records periodically using cron jobs.
 
-```{.python #verify-link}
+```python
+#| id: verify-link
 
 """
 @rt('/verify_code')
@@ -196,9 +200,9 @@ def verify_code(session, code, timezon, users):
 
     User = users.dataclass()
     session.clear()
-    session['auth'] = user.email
-    session['role'] = user.role_name
-    session['center'] = ""
+    session[utils.Skey.AUTH] = user.email
+    session[utils.Skey.ROLE] = user.role_name
+    session[utils.Skey.CENTER] = ""
 
     users.update(
         email=user.email,
@@ -212,7 +216,8 @@ def verify_code(session, code, timezon, users):
     # return Script("window.location.href = '/dashboard';")
 ```
 
-```{.python #admin_required}
+```python
+#| id: admin_required
 
 def admin_required(handler):
     @wraps(handler)

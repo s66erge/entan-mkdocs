@@ -8,13 +8,17 @@ All these functions are called with these htmx ([intro](../architecture/ui-archi
 - `hx_target=` id of DOM element where the resulting html will be placed  
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
 
-```{.python file=libs/adchan.py}
+```python
+#| file: libs/adchan.py 
+
 import email
 import shutil
-from myFasthtml import *
-from libs.admin import *
-from libs.utils import isa_db_test, feedback_to_user
+from fasthtml.common import *
+import libs.dbset as dbset
+import libs.admin as admin
+import libs.utils as utils
 from libs.authpass import get_password_hash
+
 
 <<delete-user>>
 <<add-user>>
@@ -24,7 +28,8 @@ from libs.authpass import get_password_hash
 <<add-planner>>
 ```
 
-```{.python #delete-user}
+```python
+#| id: delete-user
 
 # @rt('/delete_user/{email}')
 def delete_user(email, users, planners, centers):
@@ -45,10 +50,10 @@ def delete_user(email, users, planners, centers):
             message = {"success": "user_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -59,7 +64,8 @@ def delete_user(email, users, planners, centers):
 [4] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-```{.python #add-user}
+```python
+#| id: add-user
 # @rt('/add_user')
 
 def add_user(new_user_email, name ,role_name, users, roles, centers):
@@ -86,11 +92,11 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
             message = {"success": "user_added"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
-            Div(show_users_form(roles), hx_swap_oob="true", id="users-form"),
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
+            Div(admin.show_users_form(roles), hx_swap_oob="true", id="users-form"),
             ## [2]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -99,7 +105,8 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
 [2] rebuild the dropdown of the planners form to show changed users/centers
 <br><br> 
 
-```{.python #delete-center}
+```python
+#| id: delete-center
 
 # @rt('/delete_center/{center_name}')
 
@@ -109,8 +116,9 @@ def delete_center(center_name, users, centers, planners, db_path):
         if not center_info:
             message = {'error' : 'center_not_found'}
         else:
-            gong_db_name = center_info[0].gong_db_name  ## [1]
-            db_file_path = f'{db_path}{gong_db_name}'  ## [1]
+            gong_db_name = dbset.gong_db_name(center_name)  ## [1]
+            db_file_path = f'{db_path}{gong_db_name}'
+            config_path = f'{db_path}{center_name}.xlsx'  ## [1]
             center_planners = planners("center_name = ?", (center_name,))  ## [2]
 
             if center_planners:  ## [2]
@@ -122,13 +130,15 @@ def delete_center(center_name, users, centers, planners, db_path):
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
+                if os.path.exists(config_path):
+                    os.remove(config_path)
                 message = {'success' : 'center_deleted'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         print(e)
@@ -142,19 +152,20 @@ def delete_center(center_name, users, centers, planners, db_path):
 [6] rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
-```{.python #add-center}
+```python
+#| id: add-center
 
 # @rt('/add_center')
-
-def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path):
+def add_center(new_center_name, center_template, users, centers, db_path):
     ## [1]
-    if not new_gong_db_name.endswith('.db'):
-        new_gong_db_name += '.db'
+    print(f"template: {center_template}")
+    new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
-    template_db = f'{db_path}{db_template}'
+    template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
+    config_hex = centers[center_template].other_course
 
     try:
-        if new_center_name == "" or new_gong_db_name == "" or new_center_location == "" or db_template == "":
+        if new_center_name == "" or center_template == "":
             message = {"error" : "missing_fields"}
 
         elif centers("center_name = ?", (new_center_name,)):
@@ -170,21 +181,18 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
             shutil.copy2(template_db, db_file_path)
             centers.insert(
                 center_name=new_center_name,
-                timezone=new_timezone,
-                gong_db_name=new_gong_db_name,
-                location=new_center_location,
-                other_course="{}",
+                other_course=config_hex,
                 status="free",
                 created_by=""
             )
             message = {'success': 'center_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            Div(show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
+            Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
             ## [3]
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
@@ -194,7 +202,8 @@ def add_center(new_center_name, new_timezone, new_gong_db_name, new_center_locat
 [3] rebuild the dropdown of the planners form to show changed users/center
 <br><br>
 
-```{.python #delete-planner}
+```python
+#| id: delete-planner
 
 # @rt('/delete_planner/{user_email}/{center_name}')
 def delete_planner(user_email, center_name, planners):
@@ -208,8 +217,8 @@ def delete_planner(user_email, center_name, planners):
             message = {"success" : "planner_deleted"}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
         )
 
     except Exception as e:
@@ -219,7 +228,8 @@ def delete_planner(user_email, center_name, planners):
 [2] proceed with deletion
 <br><br>
 
-```{.python #add-planner}
+```python
+#| id: add-planner
 
 # @rt('/add_planner')
 
@@ -245,9 +255,9 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
             message = {'success' : 'planner_added'}
 
         return Div(
-            Div(feedback_to_user(message)),
-            Div(show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
-            Div(show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
+            Div(utils.feedback_to_user(message)),
+            Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
+            Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')

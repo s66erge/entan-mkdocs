@@ -11,7 +11,7 @@
 
 Summary with relevant fields
     
-```json
+```{.json}
 {
     "courses": [
     {

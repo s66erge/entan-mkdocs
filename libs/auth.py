@@ -1,11 +1,10 @@
 # ~/~ begin <<docs/gong-web-app/authenticate.md#libs/auth.py>>[init]
-import os
-import socket
+
 import secrets
 import string
 from datetime import datetime, timedelta
 from functools import wraps
-from myFasthtml import *
+from fasthtml.common import *
 import libs.utils as utils
 
 # ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
@@ -136,9 +135,9 @@ def verify_code(session, code, timezon, users):
 
     User = users.dataclass()
     session.clear()
-    session['auth'] = user.email
-    session['role'] = user.role_name
-    session['center'] = ""
+    session[utils.Skey.AUTH] = user.email
+    session[utils.Skey.ROLE] = user.role_name
+    session[utils.Skey.CENTER] = ""
 
     users.update(
         email=user.email,

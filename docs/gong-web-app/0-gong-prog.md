@@ -3,9 +3,10 @@
 ### Program start
 
 
-```{.python file=main.py}
+```python
+#| file: main.py
 
-from myFasthtml import *
+from fasthtml.common import *  # (1)
 import asyncio
 import libs.states as states
 import libs.auth as auth
@@ -26,13 +27,21 @@ import libs.transit as transit
 <<initialize-program>>
 <<login-authenticate>>
 <<consult-centers-plans>>
+<<start-save-plan-times>>
 <<courses-planning>>
+<<timetables-changes>>
 <<users-admin>>
 <<other-routes>>
 
 ```
 
-```{.python #initialize-program}
+1. Another annotation MERMAID2  - Found superfences config: 'custom_fences': 'name': 'mermaid', 'class': 'mermaid', 'format': function fence_mermaid at 0x000002B15DA79D00
+
+### Initializations
+
+```python
+#| id: initialize-program
+
 custom_styles = Style("""
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }
@@ -72,8 +81,10 @@ async def start_supervisor():
     asyncio.create_task(workflow_supervisor())
 
 ```
+### Routes for authentication
 
-```{.python #login-authenticate}
+```python
+#| id: login-authenticate
 
 @rt('/login')
 def get():
@@ -98,8 +109,8 @@ def home():
 
 @rt('/logout')
 def post(session):
-    del session['auth']
-    del session['role']
+    del session[utils.Skey.AUTH]
+    del session[utils.Skey.ROLE]
     return Redirect('/login')
 
 @rt('/dashboard')
@@ -107,7 +118,10 @@ def get(session):
     return cdash.dashboard(session, users, planners)
 ```
 
-```{.python #consult-centers-plans}
+### Routes for consulting plannings/timetables
+
+```python
+#| id: consult-centers-plans
 
 @rt('/consult_page')
 def get(session, request):
@@ -127,11 +141,14 @@ def get(request):
 
 ```
 
-```{.python #courses-planning}
+### Routes to start/save planning and timetables
+
+```python
+#| id: start-save-plan-times
 
 @rt('/planning_page')
 async def get(session, center: str):
-    session["center"] = center
+    session[utils.Skey.CENTER] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], clocks[center], session['auth'])
     if enter_edit_OK:
         utils.create_temp_path(center)
@@ -141,7 +158,35 @@ async def get(session, center: str):
 
 @rt('/status_page')
 def get(session, center: str):
-    return planning.status_page(session, center, centers, users, states.csms)
+    return cdash.status_page(session, center, centers, users, states.csms)
+
+@rt('/planning/abandon_edit')
+def get(session):
+    utils.delete_temp_path(session[utils.Skey.CENTER])
+    return transit.abandon_edit(session, states.csms)
+
+@rt('/planning/timer_done')
+def get(session):
+    utils.delete_temp_path(session[utils.Skey.CENTER])
+    return transit.timer_done(session, states.csms)
+
+@rt('/save-center-db')
+async def get(session):
+    state_mach = states.csms[session[utils.Skey.CENTER]]
+    if not session[utils.Skey.PLANOK]:
+        return utils.feedback_to_user({"error": "plan_not_ok"})
+    save_db_path = planning.save_db_plan_timetable(session[utils.Skey.CENTER], centers)
+    state_mach.model.save_db_path = save_db_path
+    utils.delete_temp_path(session[utils.Skey.CENTER])
+    state_mach.progress()   # from 'edit' to 'wait_01'
+    return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
+
+```
+
+### Routes for planning modification
+
+```python
+#| id: courses-planning
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -149,9 +194,14 @@ def get(session):
 
 @rt('/planning/check_show_dhamma')
 async def get(session, request):
-    merged_plan = await fetch.fetch_dhamma_courses(centers, session["center"],
+    merged_plan = await fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
                         utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
     return await planning.check_save_show_plan(session, merged_plan, centers, {})
+
+@rt('/planning/saved_plan')
+async def get(session):
+    plan = utils.get_center_data(session[utils.Skey.CENTER], "planning")
+    return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
 
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
@@ -161,28 +211,21 @@ async def post(session, idx: int):
 async def post(session, ptype: str, start: str):
     return await planning.add_line(session, centers, ptype, start)
 
-@rt('/planning/abandon_edit')
-def get(session):
-    utils.delete_temp_path(session["center"])
-    return transit.abandon_edit(session, states.csms)
+```
 
-@rt('/save-center-db')
-# FIXME move getting user offset to dashboard ?
-async def get(session):
-    state_mach = states.csms[session["center"]]
-    if not session["planOK"]:
-        return utils.feedback_to_user({"error": "plan_not_ok"})
-    save_db_path = planning.save_db_plan_timetable(session["center"], centers)
-    state_mach.model.save_db_path = save_db_path
-    utils.delete_temp_path(session["center"])
-    # await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)
-    state_mach.progress()   # from 'edit' to 'wait_01'
-    return Redirect(f"/status_page?center={session["center"]}")
+### Routes for timetables changes
+
+```python
+#| id: timetables-changes
+
 
 
 ```
 
-```{.python #users-admin}
+### Routes for admin
+
+```python
+#| id: users-admin
 
 @rt('/admin_page')
 @admin_required
@@ -206,8 +249,27 @@ def post(session, center_name: str):
 
 @rt('/add_center')
 @admin_required
-def post(session, new_center_name: str = "", new_timezone: str = "", new_gong_db_name: str = "", new_center_location: str = "", db_template: str = ""):
-    return adchan.add_center(new_center_name, new_timezone, new_gong_db_name, new_center_location, db_template, users, centers, db_path)
+def post(session, new_center_name: str = "", center_template: str = ""):
+    return adchan.add_center(new_center_name, center_template, users, centers, db_path)
+
+@rt('/upload_config')
+async def post(file: UploadFile, center_name: str):
+    return await admin.upload_config(file, center_name, centers)
+
+@rt('/download_config/{center_name}')
+async def get(session, request):
+    return await admin.download_config(session, request, centers)
+
+@rt("/download_it")
+async def get(session):
+    center = session[utils.Skey.CENTER]
+    filename = center + ".xlsx"
+    file_path = utils.get_db_path() + filename
+    return FileResponse(
+        file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=filename
+    )
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
@@ -221,8 +283,10 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 ```
 
-```{.python #other-routes}
+### Other routes
 
+```python
+#| id: other-routes
 @rt('/no_access_right')
 def get():
     return Main(

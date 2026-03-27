@@ -1,0 +1,61 @@
+/* Brighter Dark Modern background */
+.md-typeset pre > code {
+  background-color: #2a2d31 !important;   /* brighter than #24262a */
+  color: #ffffff !important;              /* pure bright text */
+}
+
+/* Comments — darker, richer green */
+.md-typeset .c,
+.md-typeset .c1,
+.md-typeset .cm {
+  color: #5fbf5f !important;   /* darker green, still vivid */
+  font-style: italic;
+}
+
+/* Keywords (def, return, import, class, etc.) */
+.md-typeset .k {
+  color: #ff9dff !important;              /* brighter purple */
+  font-weight: 700;
+}
+
+/* Strings — deeper, more saturated orange */
+.md-typeset .s,
+.md-typeset .s1,
+.md-typeset .s2 {
+  color: #ff8c42 !important;   /* strong orange, zero yellow tint */
+  font-weight: 600;
+}
+
+/* Function names */
+.md-typeset .nf {
+  color: #fff8a6 !important;              /* bright pastel yellow */
+  font-weight: 700;
+}
+
+/* Module names in imports (import os) */
+.md-typeset .nn {
+  color: #a6e8ff !important;              /* brighter cyan */
+  font-weight: 700;
+}
+
+/* Imported symbols (from x import Y) */
+.md-typeset .na,
+.md-typeset .n {
+  color: #a6e8ff !important;              /* same bright cyan */
+}
+
+/* Numbers */
+.md-typeset .mi {
+  color: #d2ffcc !important;              /* bright mint */
+  font-weight: 700;
+}
+
+/* Operators */
+.md-typeset .o {
+  color: #ffffff !important;
+}
+
+/* Punctuation */
+.md-typeset .p {
+  color: #ffffff !important;
+}

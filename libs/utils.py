@@ -1,15 +1,35 @@
 # ~/~ begin <<docs/gong-web-app/utilities.md#libs/utils.py>>[init]
+
 import socket
 import tempfile
 import calendar
+import json
+import pandas as pd
 from zoneinfo import ZoneInfo
-from myFasthtml import *
-# import resend # moved to "myFasthtml.py"
-# import markdown2 # moved to "myFasthtml.py"
+from fasthtml.common import *
+import resend 
+import markdown2
 import os
 from datetime import datetime, date, timedelta
 
 temp_paths = {}
+
+class Skey: # session keys
+    AUTH = "auth"
+    ROLE = "role"
+    CENTER = "center"
+    PLANOK = "planOK"
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
+
+class Pkey: # parameters keys
+    TIMEZON = "timezon"
+    LOCATION = "location"
+    ROUTING = "routing"
+    @classmethod
+    def get(cls, name, default=None):
+        return getattr(cls, name, default)
 
 class Globals:
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
@@ -21,15 +41,10 @@ class Globals:
     PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
-
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-# ~/~ begin <<docs/gong-web-app/utilities.md#dummy>>[init]
-def dummy():
-    return "dummy"
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#isdev-computer>>[init]
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
@@ -46,7 +61,7 @@ def get_db_path():
     return root + "data/"
 
 def dev_comp_or_user(session):
-    return isa_dev_computer() or session["auth"] == Globals.DEV_USER
+    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
@@ -70,11 +85,16 @@ def send_email(subject, body, recipients):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 
-def display_markdown(file_name:str):
+def display_markdown(file_name:str, insert=None):
     file_path = os.path.join('md-text', f"{file_name}.md")
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
-            html_content = markdown2.markdown(f.read())
+            content = f.read()
+            if insert and "{{" in content and "}}" in content:
+                new_content = content.split("{{", 1)[0] + insert + content.split("}}", 1)[1]
+            else:
+                new_content = content
+            html_content = markdown2.markdown(new_content)
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
@@ -97,6 +117,58 @@ def wipe_all_temps():
         file_path = os.path.join(temp_dir, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
+def get_all_center_data(center):
+    temp_path = temp_paths[center]
+    with open(temp_path, 'r') as f:
+        content = f.read()
+        return json.loads(content) if content else {}
+
+def save_all_center_data(center, data):
+    temp_path = temp_paths[center]
+    with open(temp_path, "w") as f:
+        f.write(json.dumps(data, default=str))
+
+def get_center_data(center, key):
+    center_data = get_all_center_data(center)
+    return center_data[key]
+
+def save_center_data(center, key, data):
+    center_data = get_all_center_data(center)
+    center_data[key] = data
+    save_all_center_data(center, center_data)
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/utilities.md#excel-inside-db>>[init]
+
+def load_excel_in_db(center, centers):
+    file_path = get_db_path() + center + ".xlsx"
+    with open(file_path, 'rb') as f:
+        binary_data = f.read()
+    hex_data = binary_data.hex()
+    centers.update(center_name=center, other_course=hex_data)
+
+def get_excel_from_db(center_obj):
+    if center_obj == "all_centers":
+        file_path = get_db_path() + "all_centers.xlsx"
+    else:
+        binary_data = bytes.fromhex(center_obj.other_course)
+        file_path = get_db_path() + center_obj.center_name + ".xlsx"
+        with open(file_path, 'wb') as f:
+            f.write(binary_data)
+    return file_path
+
+def dicts_from_excel_in_db(center_obj, sheet):
+    file_path = get_excel_from_db(center_obj)
+    df = pd.read_excel(file_path, sheet_name=sheet)
+    result = df.to_dict('records')
+    return result
+
+def params_from_excel_in_db(center_obj):
+    list_of_dicts = dicts_from_excel_in_db(center_obj, "params")
+    one_dict = {item["name"]: item["value"] for item in list_of_dicts}
+    return one_dict
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 
@@ -136,7 +208,10 @@ def feed_text(params):
         'center_deleted': 'Center and associated database deleted successfully!',
         'planner_deleted': 'Planner association deleted successfully!',
         'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
-        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.'
+        'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.',
+        'show_plan': 'Here is the plan you already worked on.',
+        'config_uploaded': "New configuration loaded in database",
+        'config_downloaded': "Configuration in database downloaded"
     }
     error_messages = {
         'missing_email':'Email is required.',
@@ -155,7 +230,8 @@ def feed_text(params):
         'template_not_found': 'Template database (mahi.db) not found.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
-        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.'
+        'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.',
+        'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file'
     }
     message = ""
     result = ""

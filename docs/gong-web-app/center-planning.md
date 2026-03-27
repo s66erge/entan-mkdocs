@@ -2,14 +2,17 @@
 
 Will only be reachable for authenticated users and planner for the selected center.
 
-```{.python file=libs/planning.py}
+```python
+#| file: libs/planning.py 
+
 import asyncio
 import json
 import os
 import shutil
-from datetime import datetime, timezone
+from tabulate import tabulate
+from datetime import datetime
 from zoneinfo import ZoneInfo
-from myFasthtml import *
+from fasthtml.common import *
 import libs.utils as utils
 import libs.cdash as cdash 
 import libs.plancheck as plancheck
@@ -34,29 +37,38 @@ Then:
 - available: load the main menu for changing center planning
 - not available: explain to the user to wait for current changes to enter production at center 
 
-```{.python #planning-page}
+```python
+#| id: planning-page
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, centers, csms, clocks):
     session['planOK'] = False
     center_lock = clocks[selected_name]
     return Main(
-        Div(utils.display_markdown("planning-t")),
+        Div(utils.display_markdown("planning-t", selected_name)),
         Span(
             Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
-            Span('/planning/abandon_edit', id="timer-redirect", style="display: none;"),
-            Button(f"Modify {selected_name} planning",
+            Span('/planning/timer_done', id="timer-redirect", style="display: none;"),
+            Button(f"(re)Start planning",
                 hx_get=f"/planning/load_dhamma_db",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
-            Button(f"Modify {selected_name} timetables",
+            Button(f"Load saved plan",
+                hx_get=f"/planning/saved_plan",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button(f"(re)Start timetables",
+                hx_get="/unfinished?goto_dash=NO",
+                hx_target="#planning-periods"),
+            Span(style="display: inline-block; width: 20px;"),
+            Button(f"Load saved timetables",
                 hx_get="/unfinished?goto_dash=NO",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("", id="offset", type="hidden"),
-            Button(f"SAVE CHANGES to {selected_name}", id="save-btn",
+            Button(f"SAVE ALL CHANGES", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
                 cls="allownavigation") if utils.dev_comp_or_user(session) else None,
@@ -72,37 +84,14 @@ async def planning_page(session, selected_name, centers, csms, clocks):
         cls="container"
     )
 
-#@rt('/status_page')
-def status_page(session, center_name, centers, users, csms):
-    email = session["auth"]
-    user_timezone = users[email].timezone
-    center_obj = centers[center_name]
-    ct_timezone = center_obj.timezone
-    state_mach = csms[center_name]
-    state = state_mach.configuration[0].id
-    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
-    return Main(
-        cdash.top_menu(session['role']),
-        Div(utils.display_markdown(mark_file)),
-        H3(f"Center {center_name}"),
-        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
-        P(f"UTC time: {utils.short_iso(datetime.now())}"),
-        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
-        P(f"Current state: {state}"),
-        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
-        H3("Center states history"),
-        Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
-        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
-        cls="container"
-    )
-
-
 ```
 
 ### Create colored html table of current plan
 
-```{.python #create-html-table}
-def show_draft_plan_table(draft_plan, mess):
+```python
+#| id: create-html-table
+
+def show_draft_plan_table(draft_plan, center_obj, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
@@ -135,7 +124,8 @@ def show_draft_plan_table(draft_plan, mess):
         )
 
     today = datetime.now().date()
-    period_options = [Option(item['period_type'], value=item['period_type']) for item in plancheck.get_dhamm_org_types_list()]
+    _, period_types_in_db = plancheck.get_period_types_in_db(center_obj)
+    period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
     form = Form(
         Div(
             Label("Period type:"),
@@ -169,7 +159,8 @@ def show_draft_plan_table(draft_plan, mess):
 
 ### Load from dhamma.org and show the merged and checked center plan
 
-```{.python #load-show-center-plan}
+```python
+#| id: load-show-center-plan
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
@@ -182,8 +173,8 @@ def load_dhamma_db(session):
     )
 
 def save_db_plan_timetable(center_name, centers):
-    source_db_file = utils.get_db_path() + "/" + center_name.lower() + ".ok.db"
-    dest_db_file = utils.get_db_path() + "/" + center_name.lower() + ".sending.db"
+    source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
+    dest_db_file = utils.get_db_path() + dbset.gong_db_name(center_name, "sending")
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
     shutil.copy2(Path(source_db_file), Path(dest_db_file))
@@ -193,29 +184,21 @@ def save_db_plan_timetable(center_name, centers):
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
     coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
-    for record in get_plan(utils.temp_paths[center_name]):
+    for record in utils.get_center_data(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
     return Path(dest_db_file)
 
-def get_plan(temp_path):
-    with open(temp_path, 'r') as f:
-        return json.loads(f.read())
-
-def save_plan(temp_path, plan):
-    with open(temp_path, "w") as f:
-        f.write(json.dumps(plan, default=str))
-
 async def check_save_show_plan(session, plan, centers, mess):
-    selected_name = session["center"]
+    selected_name = session[utils.Skey.CENTER]
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(save_plan, utils.temp_paths[selected_name], new_draft_plan)
-    return show_draft_plan_table(new_draft_plan, mess)
+    await asyncio.to_thread(utils.save_center_data, selected_name, "planning", new_draft_plan)
+    return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
-    selected_name = session["center"]
-    plan = get_plan(utils.temp_paths[selected_name])
+    selected_name = session[utils.Skey.CENTER]
+    plan = utils.get_center_data(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -223,8 +206,8 @@ async def delete_line(session, centers, index):
 
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
-    selected_name = session["center"]
-    plan = get_plan(utils.temp_paths[selected_name])
+    selected_name = session[utils.Skey.CENTER]
+    plan = utils.get_center_data(selected_name, "planning")
     # Create new plan line with user input
     new_line = {
         "start_date": start,
