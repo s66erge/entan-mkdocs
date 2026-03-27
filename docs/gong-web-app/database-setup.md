@@ -20,7 +20,7 @@ import libs.utils as utils
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
-class Center: center_name: str; timezone: str; gong_db_name: str; location: str; routing_info: str; other_course: str; status: str; created_by: str; status_start: str
+class Center: center_name: str; other_course: str; status: str; created_by: str; status_start: str
 class Planner: user_email: str; center_name: str
 
 class Coming_periods: start_date: str; period_type: str
@@ -46,16 +46,6 @@ def gong_db_name(center_name, middle="ok"):
 
 ```python
 #| id: getdb-path
-"""
-def get_db_path():
-    if isa_dev_computer():
-        root = ""
-    elif os.environ.get('Github_CI') == 'true': # Github CI actions
-        root = ""
-    else:   # Railway production permanent storage
-        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    return root + "data/"
-"""
 
 # on postgreSQL
 def get_central_db():
@@ -70,7 +60,7 @@ def get_central_db():
     #return Database("postgresql://postgres:route66@db:5432/postgres")
 
 # on SQLite
-#def get_central_db():
+# def get_central_db():
 #    return database(get_db_path() + "gongUsers.db")
 
 ```
@@ -87,9 +77,9 @@ def init_data(roles, users, centers, planners):
         roles.insert(role_name="user", description="regular user")
 
     if not centers():
-        centers.insert(center_name="Mahi", gong_db_name=gong_db_name("Mahi"), location="1396", timezone="Europe/Paris", routing_info="7012", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
-        centers.insert(center_name="Pajjota", gong_db_name=gong_db_name("Pajjota"), location="1370", timezone="Europe/Brussels", routing_info="7011", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
-        centers.insert(center_name="Testx", gong_db_name=gong_db_name("Testx"), location="1396", timezone="America/Chicago", routing_info="7012", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Mahi", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Pajjota", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
+        centers.insert(center_name="Testx", status="free", created_by="", status_start="2026-01-08T16:35:42+00:00")
 
     if not users():
         users.insert(email="spegoff@authentica.eu", name="sp1", role_name="admin", is_active=True, magic_link_token=None, magic_link_expiry=None)

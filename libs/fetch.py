@@ -153,15 +153,17 @@ def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
-    dhamma_types = plancheck.dict_from_excel_in_db("all_centers", "dhamma_course")
+    dhamma_types = utils.dicts_from_excel_in_db("all_centers", "dhamma_course")
     #print(tabulate(dhamma_types, headers="keys"))
-    replacement = plancheck.dict_from_excel_in_db(center_obj,"replacement")
-    inside = plancheck.dict_from_excel_in_db(center_obj,"inside")
+    replacement = utils.dicts_from_excel_in_db(center_obj,"replacement")
+    inside = utils.dicts_from_excel_in_db(center_obj,"inside")
     #print(tabulate(replacement, headers="keys"))
+    # dhamma_location = f"location_{center_obj.location}"
+    params = utils.params_from_excel_in_db(center_obj)
+    dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
     periods_db_center, date_current_course = plancheck.coming_center_courses(center_obj)  ## [1-3]
 
-    dhamma_location = f"location_{center_obj.location}"
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]

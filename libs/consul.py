@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 from fasthtml.common import *
 import libs.cdash as cdash
 import libs.utils as utils
+import libs.dbset as dbset
 
 
 # ~/~ begin <<docs/gong-web-app/center-consult.md#consult-page>>[init]
@@ -48,7 +49,7 @@ def consult_select_db(request, centers, db_path):
     if not selected_name:
         return Div(P("No center selected."))
     Center = centers.dataclass()
-    selected_db = centers[selected_name].gong_db_name
+    selected_db = dbset.gong_db_name(centers[selected_name].center_name)
 
     dbfile_path = Path(db_path) / selected_db
     if not dbfile_path.exists():

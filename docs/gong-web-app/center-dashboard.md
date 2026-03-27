@@ -76,7 +76,9 @@ def status_page(session, center_name, centers, users, csms):
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
-    ct_timezone = center_obj.timezone
+    # ct_timezone = center_obj.timezone
+    params = utils.params_from_excel_in_db(center_obj)
+    ct_timezone = params[utils.Pkey.TIMEZON]
     state_mach = csms[center_name]
     state = state_mach.configuration[0].id
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"

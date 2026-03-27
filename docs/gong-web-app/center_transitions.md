@@ -94,7 +94,9 @@ To access the sm for one center: sm = csms["Mahi"]
 #| id: system-transitions
 
 async def wait_until(model, until_hour, minutes=0):
-    center_tz = ZoneInfo(model.centers[model.center_name].timezone)
+    # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
+    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
     if model.center_name == utils.Globals.TEST_CENTER:
         delay = utils.Globals.SHORT_DELAY
     else:
@@ -110,7 +112,8 @@ async def wait_until(model, until_hour, minutes=0):
 async def transfer_new_db(model):
     # FIXME try 3 times at 10 min. intervals
     localDBPath = Path(utils.get_db_path())
-    port = model.centers[model.center_name].routing_info
+    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    port = int(params[utils.Pkey.ROUTING])
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
             remoteDBPath = Path(utils.Globals.PI_FOLDER_TEST)
@@ -126,13 +129,16 @@ async def transfer_new_db(model):
     except Exception as e:
         return {"error": f"ssh transfer production db failed: {e}"}
     else:
-        center_tz = ZoneInfo(model.centers[model.center_name].timezone)
+        params = utils.params_from_excel_in_db(model.centers[model.center_name])
+        center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
+        # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
         return {"success": f"production db sent at {datetime.now(center_tz).isoformat()} center time"}
 
 async def get_version_prod(model):
     # FIXME try 3 times at 10 min. intervals
     localDBPath = Path(utils.get_db_path())
-    port = model.centers[model.center_name].routing_info
+    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    port = int(params[utils.Pkey.ROUTING])
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
             folder = utils.Globals.PI_FOLDER_TEST
@@ -155,7 +161,10 @@ async def get_version_prod(model):
 
 async def check_version_prod(model):
     # FIXME after discussion with Ivan
-    now_at_center = datetime.now(ZoneInfo(model.centers[model.center_name].timezone))
+    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    center_tz = params[utils.Pkey.TIMEZON]  
+    # now_at_center = datetime.now(ZoneInfo(model.centers[model.center_name].timezone))
+    now_at_center = datetime.now(ZoneInfo(center_tz))
     date_at_center = now_at_center.date().isoformat()
     if  date_at_center == model.version_prod:
         return {"success": f"production version OK at center date: {date_at_center}"}

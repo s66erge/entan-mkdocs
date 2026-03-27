@@ -2,6 +2,7 @@
 
 from fasthtml.common import *
 import libs.utils as utils
+import libs.dbset as dbset
 import libs.plancheck as plancheck
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
@@ -45,13 +46,11 @@ def show_centers_table(centers):
     return Main(
         Table(
             Thead(
-                Tr(Th("Name"), Th("timezone"), Th("Gong DB Name"), Th("status"), Th("current user"), Th("Actions"))
+                Tr(Th("Name"), Th("status"), Th("current user"), Th("Actions"))
             ),
             Tbody(
                 *[Tr(
                     Td(c.center_name),
-                    Td(c.timezone),
-                    Td(c.gong_db_name),
                     Td(c.status),
                     Td(c.created_by), 
                     Td(A("Delete", hx_post=f"/delete_center/{c.center_name}", hx_target="#centers-feedback",
@@ -67,9 +66,6 @@ def show_centers_form(centers):
         Div(
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
-                Input(type="text", placeholder="tz timezone (see: en.wikipedia.org/wiki/List_of_tz_database_time_zones)", name="new_timezone", required=True),
-                Input(type="text", placeholder="Internet routing information", name="routing_info", required=True),
-                Input(type="text", placeholder="Center location number (see: dhamma.org)", name="new_center_location", required=True),
                 Select(
                     Option("Center planning and config to copy", value="", selected=True, disabled=True),
                     *[Option(c, value=c) for c in center_names],
@@ -171,6 +167,7 @@ def upload_form(centers):
                 hx_confirm="Are you ABSOLUTELY sure to change this center configuration?")(
             Select(
                 Option("Select Center", value="", selected=True, disabled=True),
+                Option("All Centers", value="ALL"),
                 *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                 name="center_name", required=True
             ),
@@ -183,6 +180,7 @@ def download_form(centers):
     return Form(hx_get="/download_config", hx_target="#config-feedback")(
             Select(
                 Option("Select Center", value="", selected=True, disabled=True),
+                Option("All Centers", value="ALL"),
                 *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                 name="center_name", required=True
             ),
@@ -197,7 +195,7 @@ async def upload_config(file: UploadFile, center_name: str, centers):
             filebuffer = await file.read()
             upload_dir = Path(utils.get_db_path())
             (upload_dir / file.filename).write_bytes(filebuffer)
-            plancheck.load_excel_in_db(center_name, centers)
+            utils.load_excel_in_db(center_name, centers)
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')
@@ -208,8 +206,7 @@ async def download_config(session, request, centers):
         params = dict(request.query_params)
         center_name = params.get("center_name")
         center_obj = centers[center_name]
-        plancheck.get_excel_from_db(center_obj)
-        filename = center_name + ".xlsx"
+        utils.get_excel_from_db(center_obj)
         session[utils.Skey.CENTER] = center_name
         return Redirect("/download_it")
     except Exception as e:

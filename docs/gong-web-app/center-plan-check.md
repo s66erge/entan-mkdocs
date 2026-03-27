@@ -8,8 +8,8 @@ Will only be reachable for authenticated users and planner for the selected cent
 from fasthtml.common import *
 from datetime import date
 from tabulate import tabulate
-import pandas as pd
 import libs.utils as utils
+import libs.dbset as dbset
 
 <<this-center-courses>>
 <<obtain-durations>>
@@ -85,7 +85,7 @@ def add_end_dates(plan, center_obj):
 
 def coming_center_courses(center_obj):
     #center = center_obj.center_name
-    selected_db = center_obj.gong_db_name
+    selected_db = dbset.gong_db_name(center_obj.center_name)
     db_center = database(utils.get_db_path() + selected_db)
 
     periods = db_center.t.coming_periods
@@ -98,7 +98,7 @@ def coming_center_courses(center_obj):
         {
             'start_date': p.start_date,
             'period_type': p.period_type,
-            'source' : f"{center_obj.center_name.lower()}_db"
+            'source' : selected_db
 
         }
         for p in periods_db_center_obj  ## [3]
@@ -112,30 +112,8 @@ def coming_center_courses(center_obj):
 ```python
 #| id: obtain-durations
 
-def load_excel_in_db(center, centers):
-    file_path = utils.get_db_path() + center + ".xlsx"
-    with open(file_path, 'rb') as f:
-        binary_data = f.read()
-    hex_data = binary_data.hex()
-    centers.update(center_name=center, other_course=hex_data)
-
-def get_excel_from_db(center_obj):
-    if center_obj == "all_centers":
-        file_path = utils.get_db_path() + "all_centers.xlsx"
-    else:
-        binary_data = bytes.fromhex(center_obj.other_course)
-        file_path = utils.get_db_path() + center_obj.center_name + ".xlsx"
-        with open(file_path, 'wb') as f:
-            f.write(binary_data)
-    return file_path
-
-def dict_from_excel_in_db(center_obj, sheet):
-    file_path = get_excel_from_db(center_obj)
-    df = pd.read_excel(file_path, sheet_name=sheet)
-    return df.to_dict('records')
-
 def get_period_types_in_db(center_obj):
-    selected_db = center_obj.gong_db_name
+    selected_db = dbset.gong_db_name(center_obj.center_name)
     db_center = database(utils.get_db_path() + selected_db)
     period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
     return db_center, period_types_in_db

@@ -116,7 +116,7 @@ def delete_center(center_name, users, centers, planners, db_path):
         if not center_info:
             message = {'error' : 'center_not_found'}
         else:
-            gong_db_name = center_info[0].gong_db_name  ## [1]
+            gong_db_name = dbset.gong_db_name(center_name)  ## [1]
             db_file_path = f'{db_path}{gong_db_name}'
             config_path = f'{db_path}{center_name}.xlsx'  ## [1]
             center_planners = planners("center_name = ?", (center_name,))  ## [2]
@@ -156,7 +156,7 @@ def delete_center(center_name, users, centers, planners, db_path):
 #| id: add-center
 
 # @rt('/add_center')
-def add_center(new_center_name, new_timezone, routing_info, new_center_location, center_template, users, centers, db_path):
+def add_center(new_center_name, center_template, users, centers, db_path):
     ## [1]
     print(f"template: {center_template}")
     new_gong_db_name = dbset.gong_db_name(new_center_name)
@@ -165,8 +165,7 @@ def add_center(new_center_name, new_timezone, routing_info, new_center_location,
     config_hex = centers[center_template].other_course
 
     try:
-        if new_center_name == "" or new_center_location == "" or center_template == "" \
-        or new_timezone == "" or new_center_location == "" or routing_info == "":
+        if new_center_name == "" or center_template == "":
             message = {"error" : "missing_fields"}
 
         elif centers("center_name = ?", (new_center_name,)):
@@ -182,10 +181,6 @@ def add_center(new_center_name, new_timezone, routing_info, new_center_location,
             shutil.copy2(template_db, db_file_path)
             centers.insert(
                 center_name=new_center_name,
-                timezone=new_timezone,
-                gong_db_name=new_gong_db_name,
-                location=new_center_location,
-                routing_info=routing_info,
                 other_course=config_hex,
                 status="free",
                 created_by=""
