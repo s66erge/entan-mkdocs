@@ -8,13 +8,14 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 import libs.utils as utils
 import libs.send2pi as send2pi
+import libs.states as states
 
 pending_tasks = {}
 
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#user-transitions>>[init]
 
 async def check_center_free(state_mach, this_user):
-    center_lock = utils.clocks[state_mach.model.center_name]
+    center_lock = states.clocks[state_mach.model.center_name]
     async with center_lock:
         center_is_free = False
         tnow = datetime.now(timezone.utc)

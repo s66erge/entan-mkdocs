@@ -305,7 +305,8 @@ def feed_text(params):
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
         'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.',
-        'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file'
+        'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file',
+        'center_not_free': 'Cannot delete a center which is not in the "free" state: its planning is currently under modification'
     }
     message = ""
     result = ""

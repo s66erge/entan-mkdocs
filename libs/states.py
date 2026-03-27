@@ -63,6 +63,9 @@ class CenterState(StateMachine):
 
     # ACTIONS ---------------------------------
 
+    def on_enter_free(self):
+        self.model.clear_user()
+
     def on_exit_free(self):
         self.model.last_result = None
 
@@ -125,10 +128,10 @@ class CenterDataModel(AbstractPersistentModel):
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
         self.centers.update(
-            center_name=self.center_name, 
-            status=value,
-            status_start=now_utc,
-            created_by=self.user
+            center_name = self.center_name, 
+            status = value,
+            status_start = now_utc,
+            created_by = self.user
         )
 
     def get_start_time(self):
@@ -144,8 +147,18 @@ class CenterDataModel(AbstractPersistentModel):
             self.user = row.created_by
         return self.user
 
+    def clear_user(self):
+        self.centers.update(
+            center_name = self.center_name, 
+            created_by = None
+        )
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
+
+def delete_state_machine(center_name):
+    del csms[center_name]
+    del clocks[center_name]
 
 def add_center_state_machine(name, centers):
     center_state = CenterDataModel(center_name=name, centers=centers)

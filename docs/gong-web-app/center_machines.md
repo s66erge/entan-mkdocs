@@ -79,6 +79,9 @@ class CenterState(StateMachine):
 
     # ACTIONS ---------------------------------
 
+    def on_enter_free(self):
+        self.model.clear_user()
+
     def on_exit_free(self):
         self.model.last_result = None
 
@@ -109,6 +112,10 @@ To access the sm for one center: sm = csms["Mahi"]
 
 ```python
 #| id: create-centers-sms
+
+def delete_state_machine(center_name):
+    del csms[center_name]
+    del clocks[center_name]
 
 def add_center_state_machine(name, centers):
     center_state = CenterDataModel(center_name=name, centers=centers)
@@ -159,10 +166,10 @@ class CenterDataModel(AbstractPersistentModel):
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
         self.centers.update(
-            center_name=self.center_name, 
-            status=value,
-            status_start=now_utc,
-            created_by=self.user
+            center_name = self.center_name, 
+            status = value,
+            status_start = now_utc,
+            created_by = self.user
         )
 
     def get_start_time(self):
@@ -177,6 +184,12 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user
+
+    def clear_user(self):
+        self.centers.update(
+            center_name = self.center_name, 
+            created_by = None
+        )
 
 ```
 
