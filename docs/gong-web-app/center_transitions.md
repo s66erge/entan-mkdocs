@@ -12,8 +12,9 @@ from fasthtml.common import *
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from minio.error import S3Error, MinioException
 import libs.utils as utils
-import libs.send2pi as send2pi
+import libs.minio as minio
 import libs.states as states
 
 pending_tasks = {}
@@ -97,8 +98,8 @@ To access the sm for one center: sm = csms["Mahi"]
 
 async def wait_until(model, until_hour, minutes=0):
     # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
+    # params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
     if model.center_name == utils.Globals.TEST_CENTER:
         delay = utils.Globals.SHORT_DELAY
     else:
@@ -113,51 +114,34 @@ async def wait_until(model, until_hour, minutes=0):
 
 async def transfer_new_db(model):
     # FIXME try 3 times at 10 min. intervals
-    localDBPath = Path(utils.get_db_path())
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    port = int(params[utils.Pkey.ROUTING])
     try:
-        if model.center_name == utils.Globals.TEST_CENTER:
-            remoteDBPath = Path(utils.Globals.PI_FOLDER_TEST)
-            db_file = utils.Globals.PI_FILE_TEST
-        else:
-            # FIXME after discussion with Ivan        
-            remoteDBPath = Path("/home/pi/prod")
-            db_file = model.centers[model.center_name].save_db_file
-
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
-        localDBFilePath = localDBPath / db_file
-        await asyncio.to_thread(send2pi.file_upload, localDBFilePath, remoteDBPath, ssh_session)
-    except Exception as e:
-        return {"error": f"ssh transfer production db failed: {e}"}
+        center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+        center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
+        file_complete = utils.get_db_path() + model.save_db_filename
+        minio_object = model.center_name + "/" + model.save_db_filename.replace("sending", center_date)
+        await asyncio.to_thread(minio.file_upload, minio.minio_client,
+                                utils.Globals.PI_BUCKET, minio_object, file_complete)
+    except (S3Error, MinioException, RuntimeError) as e:
+        return {"error": f"saving new db to minio failed: {e}"}
     else:
-        params = utils.params_from_excel_in_db(model.centers[model.center_name])
-        center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
-        # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
         return {"success": f"production db sent at {datetime.now(center_tz).isoformat()} center time"}
 
 async def get_version_prod(model):
     # FIXME try 3 times at 10 min. intervals
-    localDBPath = Path(utils.get_db_path())
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    port = int(params[utils.Pkey.ROUTING])
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
-            folder = utils.Globals.PI_FOLDER_TEST
-            file = utils.Globals.PI_FILE_TEST
-            remoteDBFilePath = Path(folder + "/" + file)
-        else:
-            # FIXME after discussion with Ivan        
-            remoteDBFilePath = Path("/home/pi/prod")
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
-        await asyncio.to_thread(send2pi.file_download, remoteDBFilePath, localDBPath, ssh_session)
-        file_transfered = localDBPath / file
-        with open(file_transfered, 'r') as f:
+            minio_object = model.center_name + "/" + utils.Globals.PI_FILE_TEST
+        else:        
+            minio_object = model.center_name + "/" + utils.Globals.PI_FILE_JSON
+        file_downloaded =  utils.get_db_path() + utils.Globals.PI_FILE_JSON
+        await asyncio.to_thread(minio.file_download, minio.minio_client,
+                                utils.Globals.PI_BUCKET, minio_object, file_downloaded)
+        with open(file_downloaded, 'r') as f:
             data = json.load(f)
             print(data)
         model.version_prod = data["date"]
-    except Exception as e:
-        return {"error": f"ssh get production version failed: {e}"}
+    except (S3Error, MinioException, RuntimeError) as e:
+        return {"error": f"getting json from minio failed: {e}"}
     else:
        return {"success": f"production version is {data["date"]}"}
 

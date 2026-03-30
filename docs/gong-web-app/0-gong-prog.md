@@ -21,6 +21,7 @@ import libs.adchan as adchan
 import libs.utils as utils
 import libs.states as states
 import libs.transit as transit
+import libs.minio as minio
 
 #  from starlette.testclient import TestClient
 
@@ -62,6 +63,7 @@ app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before
 db_path = utils.get_db_path()
 db = dbset.get_central_db()
 utils.wipe_all_temps()
+minio.minio_client = minio.create_minio_client()
 
 roles = db.create(dbset.Role, pk='role_name')
 users = db.create(dbset.User, pk='email')
@@ -175,8 +177,9 @@ async def get(session):
     state_mach = states.csms[session[utils.Skey.CENTER]]
     if not session[utils.Skey.PLANOK]:
         return utils.feedback_to_user({"error": "plan_not_ok"})
-    save_db_path = planning.save_db_plan_timetable(session[utils.Skey.CENTER], centers)
-    state_mach.model.save_db_path = save_db_path
+    save_db_file = planning.save_db_plan_timetable(session[utils.Skey.CENTER], centers)
+    state_mach.model.save_db_filename = save_db_file
+    state_mach.model.center_params = utils.params_from_excel_in_db(centers[session[utils.Skey.CENTER]])
     utils.delete_temp_path(session[utils.Skey.CENTER])
     state_mach.progress()   # from 'edit' to 'wait_01'
     return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")

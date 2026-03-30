@@ -14,6 +14,9 @@ from datetime import datetime, date, timedelta
 
 temp_paths = {}
 
+S3client = None # global S3 client, initialized from main.py and used in utils
+
+
 class Skey: # session keys
     AUTH = "auth"
     ROLE = "role"
@@ -37,8 +40,10 @@ class Globals:
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
-    PI_FOLDER_TEST = "/home/pi/test"  # PI folder used for ssh get/put tests
-    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with PI
+    PI_BUCKET = "dhamma-gong-databases"  # PI folder used for ssh get/put tests
+    # FIXME check with Ivan
+    PI_FILE_JSON = "info.json"  # file used for getting PI production date
+    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with minio
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
     @classmethod
@@ -137,6 +142,8 @@ def save_center_data(center, key, data):
     center_data = get_all_center_data(center)
     center_data[key] = data
     save_all_center_data(center, center_data)
+
+
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#excel-inside-db>>[init]

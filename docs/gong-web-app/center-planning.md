@@ -173,7 +173,8 @@ def load_dhamma_db(session):
 
 def save_db_plan_timetable(center_name, centers):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
-    dest_db_file = utils.get_db_path() + dbset.gong_db_name(center_name, "sending")
+    filename = dbset.gong_db_name(center_name, "sending")
+    dest_db_file = utils.get_db_path() + filename
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
     shutil.copy2(Path(source_db_file), Path(dest_db_file))
@@ -186,7 +187,7 @@ def save_db_plan_timetable(center_name, centers):
     for record in utils.get_center_data(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
-    return Path(dest_db_file)
+    return filename
 
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session[utils.Skey.CENTER]
