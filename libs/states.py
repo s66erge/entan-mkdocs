@@ -38,25 +38,30 @@ class CenterState(StateMachine):
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
+    save_db = State("Saving new planning in database")
     wait_01 = State("Waiting for 1am at center timezone")
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
     getting_prod = State("Getting production version after center restart")
     version_check = State("Checking production version")
+    w_reco_save = State("Saving new planning failed, waiting for recovery")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("getting prod version failed, waiting for production recovery")
     w_reco_version = State("wrong_db_version, waiting for recovery")
 
-    progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
-            | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
+    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
+            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
+            | getting_prod.to(version_check) | version_check.to(free)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
+    reco_save_done    = Event(w_reco_save.to(wait_01), name='recovery of saving new db done')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
 
-    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) \
+            | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
@@ -69,14 +74,17 @@ class CenterState(StateMachine):
     def on_exit_free(self):
         self.model.last_result = None
 
+    def on_enter_save_db(self):
+        run_sm_action(self.model, transit.save_db_plan_times)
+
     def on_enter_wait_01(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=1)
+        run_sm_action(self.model, transit.wait_until, until_hour=0, minutes=40)
 
     def on_enter_transfer(self):
         run_sm_action(self.model, transit.transfer_new_db)
 
     def on_enter_wait_02(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=2, minutes=20)
+        run_sm_action(self.model, transit.wait_until, until_hour=1, minutes=20)
 
     def on_enter_getting_prod(self):
         run_sm_action(self.model, transit.get_version_prod)

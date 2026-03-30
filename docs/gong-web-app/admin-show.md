@@ -7,8 +7,7 @@ Will only be reachable for signed in admin users.
 
 from fasthtml.common import *
 import libs.utils as utils
-import libs.dbset as dbset
-import libs.plancheck as plancheck
+import libs.states as states
 
 <<show-users>>
 <<show-centers>>
@@ -210,8 +209,11 @@ def download_form(centers):
         ),
 
 async def upload_config(file: UploadFile, center_name: str, centers):
+    state = states.csms[center_name].configuration[0].id
     if file.filename != f"{center_name}.xlsx":
         mess = {"error": "bad_config_filename"}
+    elif state != "free":
+        mess = {"error": "center_not_free"}
     else:
         try:
             filebuffer = await file.read()
@@ -233,9 +235,5 @@ async def download_config(session, request, centers):
         return Redirect("/download_it")
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
-
-
-
-
 
 ```

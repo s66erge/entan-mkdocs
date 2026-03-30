@@ -10,6 +10,7 @@ from minio.error import S3Error, MinioException
 import libs.utils as utils
 import libs.minio as minio
 import libs.states as states
+import libs.planning as planning
 
 pending_tasks = {}
 
@@ -72,6 +73,18 @@ async def check_and_advance(center: str, csms):
         return
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
+
+async def save_db_plan_times(model):
+    # FIXME try 3 times at 10 min. intervals
+    try:
+        save_db_file = planning.save_db_plan_timetable(model.center_name, model.centers)
+        model.save_db_filename = save_db_file
+        model.center_params = utils.params_from_excel_in_db(model.centers[model.center_name])
+        await asyncio.to_thread(utils.delete_temp_path, model.center_name)
+    except RuntimeError as e:
+        return {"error": f"saving new db failed: {e}"}
+    else:
+        return {"success": f"new db saved as {save_db_file}"}
 
 async def wait_until(model, until_hour, minutes=0):
     # center_tz = ZoneInfo(model.centers[model.center_name].timezone)

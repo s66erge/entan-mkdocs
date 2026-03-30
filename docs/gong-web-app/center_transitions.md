@@ -124,7 +124,7 @@ async def transfer_new_db(model):
     except (S3Error, MinioException, RuntimeError) as e:
         return {"error": f"saving new db to minio failed: {e}"}
     else:
-        return {"success": f"production db sent at {datetime.now(center_tz).isoformat()} center time"}
+        return {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
 
 async def get_version_prod(model):
     # FIXME try 3 times at 10 min. intervals

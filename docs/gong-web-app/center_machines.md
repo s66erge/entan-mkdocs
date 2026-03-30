@@ -86,13 +86,13 @@ class CenterState(StateMachine):
         self.model.last_result = None
 
     def on_enter_wait_01(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=1)
+        run_sm_action(self.model, transit.wait_until, until_hour=0, minutes=40)
 
     def on_enter_transfer(self):
         run_sm_action(self.model, transit.transfer_new_db)
 
     def on_enter_wait_02(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=2, minutes=20)
+        run_sm_action(self.model, transit.wait_until, until_hour=1, minutes=20)
 
     def on_enter_getting_prod(self):
         run_sm_action(self.model, transit.get_version_prod)
