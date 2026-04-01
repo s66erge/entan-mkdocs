@@ -14,9 +14,6 @@ from datetime import datetime, date, timedelta
 
 temp_paths = {}
 
-S3client = None # global S3 client, initialized from main.py and used in utils
-
-
 class Skey: # session keys
     AUTH = "auth"
     ROLE = "role"
@@ -40,7 +37,8 @@ class Globals:
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
-    PI_BUCKET = "dhamma-gong-databases"  # PI folder used for ssh get/put tests
+    CENTER_BUCKET = "centers-data" # bucket name for local center data 
+    PI_BUCKET = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
     # FIXME check with Ivan
     PI_FILE_JSON = "info.json"  # file used for getting PI production date
     PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with minio

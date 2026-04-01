@@ -174,14 +174,10 @@ def get(session):
 
 @rt('/save-center-db')
 async def get(session):
-    state_mach = states.csms[session[utils.Skey.CENTER]]
     if not session[utils.Skey.PLANOK]:
         return utils.feedback_to_user({"error": "plan_not_ok"})
-    save_db_file = planning.save_db_plan_timetable(session[utils.Skey.CENTER], centers)
-    state_mach.model.save_db_filename = save_db_file
-    state_mach.model.center_params = utils.params_from_excel_in_db(centers[session[utils.Skey.CENTER]])
-    utils.delete_temp_path(session[utils.Skey.CENTER])
-    state_mach.progress()   # from 'edit' to 'wait_01'
+    state_mach = states.csms[session[utils.Skey.CENTER]]
+    state_mach.progress()   # from 'edit' to 'save_db'
     return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
 
 ```

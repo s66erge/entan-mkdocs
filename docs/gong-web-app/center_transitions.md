@@ -16,6 +16,7 @@ from minio.error import S3Error, MinioException
 import libs.utils as utils
 import libs.minio as minio
 import libs.states as states
+import libs.planning as planning
 
 pending_tasks = {}
 
@@ -96,9 +97,19 @@ To access the sm for one center: sm = csms["Mahi"]
 ```python
 #| id: system-transitions
 
+async def save_db_plan_times(model):
+    # FIXME try 3 times at 10 min. intervals
+    try:
+        save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
+        model.save_db_filename = save_db_file
+        model.center_params = utils.params_from_excel_in_db(model.centers[model.center_name])
+        await asyncio.to_thread(utils.delete_temp_path, model.center_name)
+    except RuntimeError as e:
+        return {"error": f"saving new db failed: {e}"}
+    else:
+        return {"success": f"new db saved as {save_db_file}"}
+
 async def wait_until(model, until_hour, minutes=0):
-    # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
-    # params = utils.params_from_excel_in_db(model.centers[model.center_name])
     center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
     if model.center_name == utils.Globals.TEST_CENTER:
         delay = utils.Globals.SHORT_DELAY
@@ -119,8 +130,7 @@ async def transfer_new_db(model):
         center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
         file_complete = utils.get_db_path() + model.save_db_filename
         minio_object = model.center_name + "/" + model.save_db_filename.replace("sending", center_date)
-        await asyncio.to_thread(minio.file_upload, minio.minio_client,
-                                utils.Globals.PI_BUCKET, minio_object, file_complete)
+        await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
     except (S3Error, MinioException, RuntimeError) as e:
         return {"error": f"saving new db to minio failed: {e}"}
     else:
@@ -134,8 +144,7 @@ async def get_version_prod(model):
         else:        
             minio_object = model.center_name + "/" + utils.Globals.PI_FILE_JSON
         file_downloaded =  utils.get_db_path() + utils.Globals.PI_FILE_JSON
-        await asyncio.to_thread(minio.file_download, minio.minio_client,
-                                utils.Globals.PI_BUCKET, minio_object, file_downloaded)
+        await asyncio.to_thread(minio.file_download, utils.Globals.PI_BUCKET, minio_object, file_downloaded)
         with open(file_downloaded, 'r') as f:
             data = json.load(f)
             print(data)
@@ -149,7 +158,6 @@ async def check_version_prod(model):
     # FIXME after discussion with Ivan
     params = utils.params_from_excel_in_db(model.centers[model.center_name])
     center_tz = params[utils.Pkey.TIMEZON]  
-    # now_at_center = datetime.now(ZoneInfo(model.centers[model.center_name].timezone))
     now_at_center = datetime.now(ZoneInfo(center_tz))
     date_at_center = now_at_center.date().isoformat()
     if  date_at_center == model.version_prod:
