@@ -8,6 +8,7 @@ Will only be reachable for authenticated users.
 from fasthtml.common import *
 from datetime import datetime
 import libs.utils as utils
+import libs.minio as minio
 
 <<dashboard>>
 <<status-page>>
@@ -77,7 +78,7 @@ def status_page(session, center_name, centers, users, csms):
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
     # ct_timezone = center_obj.timezone
-    params = utils.params_from_excel_in_db(center_obj)
+    params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
     state_mach = csms[center_name]
     state = state_mach.configuration[0].id

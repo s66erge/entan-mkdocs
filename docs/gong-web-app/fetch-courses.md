@@ -16,6 +16,7 @@ from datetime import date
 from fasthtml.common import *
 import libs.plancheck as plancheck
 import libs.utils as utils
+import libs.minio as minio
 
 <<fetch-api>>
 <<period-type>>
@@ -173,14 +174,14 @@ def check_within(deletion_check, this_row, other_row):
 
 def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     cleaned = []
-    default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    # default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
     delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
         row_bef = cleaned[-1] if len(cleaned) > 0 else {}
         row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
         to_delete = [d for d in delete_list if d["period_type"] == row["period_type"]]
         deletion_check = to_delete[0]["container"] if to_delete else "@TOKEEP@"
-        if row["period_type"] == default_type or deletion_check == "@ALL@":
+        if  deletion_check == "@ALL@": # or row["period_type"] == default_type:
             continue
         elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
             continue
@@ -190,13 +191,12 @@ def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
-    dhamma_types = utils.dicts_from_excel_in_db("all_centers", "dhamma_course")
+    dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
     #print(tabulate(dhamma_types, headers="keys"))
-    replacement = utils.dicts_from_excel_in_db(center_obj,"replacement")
-    inside = utils.dicts_from_excel_in_db(center_obj,"inside")
+    replacement = minio.dicts_from_excel_minio(center,"replacement")
+    inside = minio.dicts_from_excel_minio(center,"inside")
     #print(tabulate(replacement, headers="keys"))
-    # dhamma_location = f"location_{center_obj.location}"
-    params = utils.params_from_excel_in_db(center_obj)
+    params = minio.params_from_excel_minio(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
     periods_db_center, date_current_course = plancheck.coming_center_courses(center_obj)  ## [1-3]

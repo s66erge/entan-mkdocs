@@ -12,6 +12,7 @@ import libs.utils as utils
 import libs.cdash as cdash 
 import libs.plancheck as plancheck
 import libs.dbset as dbset
+import libs.minio as minio
 import libs.utilsJS as utilsJS
 
 # ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
@@ -106,7 +107,7 @@ async def save_db_plan_timetable(center_name, centers):
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
     coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
-    for record in utils.get_center_data(center_name, "planning"):
+    for record in minio.get_center_temp_data(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
     return filename
@@ -114,13 +115,13 @@ async def save_db_plan_timetable(center_name, centers):
 async def check_save_show_plan(session, plan, centers, mess):
     selected_name = session[utils.Skey.CENTER]
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(utils.save_center_data, selected_name, "planning", new_draft_plan)
+    await asyncio.to_thread(minio.save_center_temp_data, selected_name, "planning", new_draft_plan)
     return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
     selected_name = session[utils.Skey.CENTER]
-    plan = utils.get_center_data(selected_name, "planning")
+    plan = minio.get_center_temp_data(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -129,7 +130,7 @@ async def delete_line(session, centers, index):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session[utils.Skey.CENTER]
-    plan = utils.get_center_data(selected_name, "planning")
+    plan = minio.get_center_temp_data(selected_name, "planning")
     # Create new plan line with user input
     new_line = {
         "start_date": start,

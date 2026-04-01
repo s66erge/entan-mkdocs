@@ -2,9 +2,11 @@
 
 import os
 import json
+from io import BytesIO
+import libs.utils as utils
+import pandas as pd 
 from minio import Minio
 from minio.error import S3Error, MinioException
-import libs.utils as utils 
 
 minio_client = None # global S3 client, initialized from main.py and used in transit
 
@@ -27,7 +29,7 @@ def create_minio_client():
         )
     else: # production
         client = Minio(
-            endpoint ="bucket-production-6009.up.railway.app:443",
+            endpoint ="bucket.railway.internal:9000",
             access_key = "dhamma-gong-on-local-serge",
             secret_key = os.environ["MINIO_USER1_SECRET"],
             secure = True,
@@ -37,7 +39,7 @@ def create_minio_client():
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/minio_access.md#get-objects-alist>>[init]
 
-def minio_get_objects_list(bucket, prefix, recursive=False):
+def get_objects_list(bucket, prefix, recursive=False):
     listob = []
     for obj in minio_client.list_objects(bucket, prefix=prefix, recursive=recursive):
         listob.append(obj.object_name)
@@ -76,8 +78,50 @@ def save_center_temp_data(center, key, data):
     data_json = json.dumps(data)
     raw = data_json.encode("utf-8")     # b'{"date": "2026-03-30"}'
     length = len(raw)
-    minio_client.put_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}", raw, length)  
+    stream = BytesIO(raw)
+    minio_client.put_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}", stream, length)  
     return
+
+def remove_center_temp_data(center):
+    list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, f"{center}/temp/")
+    print(list_obj)
+    for the_object in list_obj:
+        minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+    return
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/minio_access.md#get-save-excel-files>>[init]
+
+def save_excel_minio(center):
+    if center == "all_centers":
+        file_path = f"{utils.get_db_path()}all_centers.xlsx"
+        the_object = "all_centers.xlsx"
+    else:
+        file_path = f"{utils.get_db_path()}{center}.xlsx"
+        the_object = f"{center}/{center}.xlsx"
+    file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+
+def get_excel_minio(center):
+    if center == "all_centers":
+        file_path = f"{utils.get_db_path()}all_centers.xlsx"
+        the_object = "all_centers.xlsx"
+    else:
+        file_path = f"{utils.get_db_path()}{center}.xlsx"
+        the_object = f"{center}/{center}.xlsx"
+    file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    return file_path
+
+def dicts_from_excel_minio(center, sheet):
+    file_path = get_excel_minio(center)
+    df = pd.read_excel(file_path, sheet_name=sheet)
+    result = df.to_dict('records')
+    return result
+
+def params_from_excel_minio(center):
+    list_of_dicts = dicts_from_excel_minio(center, "params")
+    one_dict = {item["name"]: item["value"] for item in list_of_dicts}
+    return one_dict
+
 
 # ~/~ end
 

@@ -102,8 +102,8 @@ async def save_db_plan_times(model):
     try:
         save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
         model.save_db_filename = save_db_file
-        model.center_params = utils.params_from_excel_in_db(model.centers[model.center_name])
-        await asyncio.to_thread(utils.delete_temp_path, model.center_name)
+        model.center_params = minio.params_from_excel_minio(model.center_name)
+        await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
     except RuntimeError as e:
         return {"error": f"saving new db failed: {e}"}
     else:
@@ -156,7 +156,7 @@ async def get_version_prod(model):
 
 async def check_version_prod(model):
     # FIXME after discussion with Ivan
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    params = minio.params_from_excel_minio(model.center_name)
     center_tz = params[utils.Pkey.TIMEZON]  
     now_at_center = datetime.now(ZoneInfo(center_tz))
     date_at_center = now_at_center.date().isoformat()

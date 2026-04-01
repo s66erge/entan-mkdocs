@@ -40,7 +40,6 @@ app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before
 
 db_path = utils.get_db_path()
 db = dbset.get_central_db()
-utils.wipe_all_temps()
 minio.minio_client = minio.create_minio_client()
 
 roles = db.create(dbset.Role, pk='role_name')
@@ -120,7 +119,6 @@ async def get(session, center: str):
     session[utils.Skey.CENTER] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], session['auth'])
     if enter_edit_OK:
-        utils.create_temp_path(center)
         return await planning.planning_page(session, center, centers, states.csms)
     else:
         return Redirect(f"/status_page?center={center}")
@@ -131,12 +129,12 @@ def get(session, center: str):
 
 @rt('/planning/abandon_edit')
 def get(session):
-    utils.delete_temp_path(session[utils.Skey.CENTER])
+    minio.remove_center_temp_data(session[utils.Skey.CENTER])
     return transit.abandon_edit(session, states.csms)
 
 @rt('/planning/timer_done')
 def get(session):
-    utils.delete_temp_path(session[utils.Skey.CENTER])
+    minio.remove_center_temp_data(session[utils.Skey.CENTER])
     return transit.timer_done(session, states.csms)
 
 @rt('/save-center-db')
@@ -162,7 +160,7 @@ async def get(session, request):
 
 @rt('/planning/saved_plan')
 async def get(session):
-    plan = utils.get_center_data(session[utils.Skey.CENTER], "planning")
+    plan = minio.get_center_temp_data(session[utils.Skey.CENTER], "planning")
     return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
 
 @rt('/planning/delete_line/{idx}')
@@ -208,11 +206,11 @@ def post(session, new_center_name: str = "", center_template: str = ""):
 
 @rt('/upload_config')
 async def post(file: UploadFile, center_name: str):
-    return await admin.upload_config(file, center_name, centers)
+    return await admin.upload_config(file, center_name)
 
 @rt('/download_config/{center_name}')
 async def get(session, request):
-    return await admin.download_config(session, request, centers)
+    return await admin.download_config(session, request)
 
 @rt("/download_it")
 async def get(session):

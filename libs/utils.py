@@ -26,7 +26,8 @@ class Skey: # session keys
 class Pkey: # parameters keys
     TIMEZON = "timezon"
     LOCATION = "location"
-    ROUTING = "routing"
+    GONG_ID = "gong_id"
+    TARGETS = "targerts"
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
@@ -101,79 +102,6 @@ def display_markdown(file_name:str, insert=None):
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#temp-files>>[init]
-
-def create_temp_path(center):
-    temp_dir = get_db_path() + Globals.SUBDIR_TEMP 
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, dir=temp_dir) as tmp_file:
-        temp_paths[center] = tmp_file.name
-
-def delete_temp_path(center):
-    if center in temp_paths and os.path.exists(temp_paths[center]):
-        os.unlink(temp_paths[center])
-    temp_paths[center] = ""
-
-def wipe_all_temps():
-    temp_dir =  get_db_path() + Globals.SUBDIR_TEMP
-    for filename in os.listdir(temp_dir):
-        file_path = os.path.join(temp_dir, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-def get_all_center_data(center):
-    temp_path = temp_paths[center]
-    with open(temp_path, 'r') as f:
-        content = f.read()
-        return json.loads(content) if content else {}
-
-def save_all_center_data(center, data):
-    temp_path = temp_paths[center]
-    with open(temp_path, "w") as f:
-        f.write(json.dumps(data, default=str))
-
-def get_center_data(center, key):
-    center_data = get_all_center_data(center)
-    return center_data[key]
-
-def save_center_data(center, key, data):
-    center_data = get_all_center_data(center)
-    center_data[key] = data
-    save_all_center_data(center, center_data)
-
-
-
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#excel-inside-db>>[init]
-
-def load_excel_in_db(center, centers):
-    file_path = get_db_path() + center + ".xlsx"
-    with open(file_path, 'rb') as f:
-        binary_data = f.read()
-    hex_data = binary_data.hex()
-    centers.update(center_name=center, other_course=hex_data)
-
-def get_excel_from_db(center_obj):
-    if center_obj == "all_centers":
-        file_path = get_db_path() + "all_centers.xlsx"
-    else:
-        binary_data = bytes.fromhex(center_obj.other_course)
-        file_path = get_db_path() + center_obj.center_name + ".xlsx"
-        with open(file_path, 'wb') as f:
-            f.write(binary_data)
-    return file_path
-
-def dicts_from_excel_in_db(center_obj, sheet):
-    file_path = get_excel_from_db(center_obj)
-    df = pd.read_excel(file_path, sheet_name=sheet)
-    result = df.to_dict('records')
-    return result
-
-def params_from_excel_in_db(center_obj):
-    list_of_dicts = dicts_from_excel_in_db(center_obj, "params")
-    one_dict = {item["name"]: item["value"] for item in list_of_dicts}
-    return one_dict
-
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 
