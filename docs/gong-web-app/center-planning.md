@@ -149,7 +149,7 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
         Tbody(*rows)
     )
     return Div(
-        H2("Plan with 'www.google.org' added for 12 months from current course start"),
+        H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
         Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
         table,
         form,
