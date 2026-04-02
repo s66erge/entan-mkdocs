@@ -209,7 +209,6 @@ async def download_config(session, request):
         params = dict(request.query_params)
         center_name = params.get("center_name")
         await asyncio.to_thread(minio.get_excel_minio, center_name)
-        #minio.get_excel_minio(center_name)
         session[utils.Skey.CENTER] = center_name
         return Redirect("/download_it")
     except Exception as e:

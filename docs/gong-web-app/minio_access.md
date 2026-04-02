@@ -116,7 +116,6 @@ def save_center_temp_data(center, key, data):
 
 def remove_center_temp_data(center):
     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, f"{center}/temp/")
-    print(list_obj)
     for the_object in list_obj:
         minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
     return
