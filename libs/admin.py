@@ -181,7 +181,7 @@ def download_form(centers):
     return Form(hx_get="/download_config/", hx_target="#config-feedback")(
             Select(
                 Option("Select Center", value="", selected=True, disabled=True),
-                Option("All Centers", value="ALL"),
+                Option("All Centers", value="all_centers"),
                 *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                 name="center_name", required=True
             ),
