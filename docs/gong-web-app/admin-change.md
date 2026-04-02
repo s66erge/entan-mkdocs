@@ -14,9 +14,11 @@ and these functions can update multiple other DOM elements with `hx_swap_oob="tr
 import email
 import shutil
 from fasthtml.common import *
+from datetime import datetime, timezone
 import libs.dbset as dbset
 import libs.admin as admin
 import libs.utils as utils
+import libs.states as states
 from libs.authpass import get_password_hash
 
 
@@ -120,13 +122,18 @@ def delete_center(center_name, users, centers, planners, db_path):
             db_file_path = f'{db_path}{gong_db_name}'
             config_path = f'{db_path}{center_name}.xlsx'  ## [1]
             center_planners = planners("center_name = ?", (center_name,))  ## [2]
+            state = states.csms[center_name].configuration[0].id
 
-            if center_planners:  ## [2]
+            if state != "free":
+                message = {'error' : "center_not_free"}
+
+            elif center_planners:  ## [2]
                 user_emails = [p.user_email for p in center_planners]  ## [3]
                 users_list = ", ".join(user_emails)
                 message = {'error' : 'center_has_planners','users' : f'{users_list}'}
 
             else:  ## [4]
+                states.delete_state_machine(center_name)
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
@@ -162,6 +169,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
     new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
     template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
+    # FIXME copy the excel file for the new center !
     config_hex = centers[center_template].other_course
 
     try:
@@ -179,12 +187,15 @@ def add_center(new_center_name, center_template, users, centers, db_path):
 
         else:  ## [2]
             shutil.copy2(template_db, db_file_path)
+            # FIXME copy the excel file for the new center !
             centers.insert(
                 center_name=new_center_name,
                 other_course=config_hex,
                 status="free",
-                created_by=""
+                created_by="",
+                status_start=datetime.now(timezone.utc)
             )
+            states.add_center_state_machine(new_center_name, centers)
             message = {'success': 'center_added'}
 
         return Div(

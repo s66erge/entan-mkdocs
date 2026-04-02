@@ -6,14 +6,18 @@ from fasthtml.common import *
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from minio.error import S3Error, MinioException
 import libs.utils as utils
-import libs.send2pi as send2pi
+import libs.minio as minio
+import libs.states as states
+import libs.planning as planning
 
 pending_tasks = {}
 
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#user-transitions>>[init]
 
-async def check_center_free(state_mach, center_lock, this_user):
+async def check_center_free(state_mach, this_user):
+    center_lock = states.clocks[state_mach.model.center_name]
     async with center_lock:
         center_is_free = False
         tnow = datetime.now(timezone.utc)
@@ -70,10 +74,20 @@ async def check_and_advance(center: str, csms):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
 
+async def save_db_plan_times(model):
+    # FIXME try 3 times at 10 min. intervals
+    try:
+        save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
+        model.save_db_filename = save_db_file
+        model.center_params = minio.params_from_excel_minio(model.center_name)
+        await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
+    except RuntimeError as e:
+        return {"error": f"saving new db failed: {e}"}
+    else:
+        return {"success": f"new db saved as {save_db_file}"}
+
 async def wait_until(model, until_hour, minutes=0):
-    # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
+    center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
     if model.center_name == utils.Globals.TEST_CENTER:
         delay = utils.Globals.SHORT_DELAY
     else:
@@ -88,59 +102,39 @@ async def wait_until(model, until_hour, minutes=0):
 
 async def transfer_new_db(model):
     # FIXME try 3 times at 10 min. intervals
-    localDBPath = Path(utils.get_db_path())
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    port = int(params[utils.Pkey.ROUTING])
     try:
-        if model.center_name == utils.Globals.TEST_CENTER:
-            remoteDBPath = Path(utils.Globals.PI_FOLDER_TEST)
-            db_file = utils.Globals.PI_FILE_TEST
-        else:
-            # FIXME after discussion with Ivan        
-            remoteDBPath = Path("/home/pi/prod")
-            db_file = model.centers[model.center_name].save_db_file
-
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
-        localDBFilePath = localDBPath / db_file
-        await asyncio.to_thread(send2pi.file_upload, localDBFilePath, remoteDBPath, ssh_session)
-    except Exception as e:
-        return {"error": f"ssh transfer production db failed: {e}"}
+        center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+        center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
+        file_complete = utils.get_db_path() + model.save_db_filename
+        minio_object = model.center_name + "/" + model.save_db_filename.replace("sending", center_date)
+        await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
+    except (S3Error, MinioException, RuntimeError) as e:
+        return {"error": f"saving new db to minio failed: {e}"}
     else:
-        params = utils.params_from_excel_in_db(model.centers[model.center_name])
-        center_tz = ZoneInfo(params[utils.Pkey.TIMEZON])
-        # center_tz = ZoneInfo(model.centers[model.center_name].timezone)
-        return {"success": f"production db sent at {datetime.now(center_tz).isoformat()} center time"}
+        return {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
 
 async def get_version_prod(model):
     # FIXME try 3 times at 10 min. intervals
-    localDBPath = Path(utils.get_db_path())
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
-    port = int(params[utils.Pkey.ROUTING])
     try:
         if model.center_name == utils.Globals.TEST_CENTER:
-            folder = utils.Globals.PI_FOLDER_TEST
-            file = utils.Globals.PI_FILE_TEST
-            remoteDBFilePath = Path(folder + "/" + file)
-        else:
-            # FIXME after discussion with Ivan        
-            remoteDBFilePath = Path("/home/pi/prod")
-        ssh_session = await asyncio.to_thread(send2pi.session_connect,int(port))
-        await asyncio.to_thread(send2pi.file_download, remoteDBFilePath, localDBPath, ssh_session)
-        file_transfered = localDBPath / file
-        with open(file_transfered, 'r') as f:
+            minio_object = model.center_name + "/" + utils.Globals.PI_FILE_TEST
+        else:        
+            minio_object = model.center_name + "/" + utils.Globals.PI_FILE_JSON
+        file_downloaded =  utils.get_db_path() + utils.Globals.PI_FILE_JSON
+        await asyncio.to_thread(minio.file_download, utils.Globals.PI_BUCKET, minio_object, file_downloaded)
+        with open(file_downloaded, 'r') as f:
             data = json.load(f)
             print(data)
         model.version_prod = data["date"]
-    except Exception as e:
-        return {"error": f"ssh get production version failed: {e}"}
+    except (S3Error, MinioException, RuntimeError) as e:
+        return {"error": f"getting json from minio failed: {e}"}
     else:
        return {"success": f"production version is {data["date"]}"}
 
 async def check_version_prod(model):
     # FIXME after discussion with Ivan
-    params = utils.params_from_excel_in_db(model.centers[model.center_name])
+    params = minio.params_from_excel_minio(model.center_name)
     center_tz = params[utils.Pkey.TIMEZON]  
-    # now_at_center = datetime.now(ZoneInfo(model.centers[model.center_name].timezone))
     now_at_center = datetime.now(ZoneInfo(center_tz))
     date_at_center = now_at_center.date().isoformat()
     if  date_at_center == model.version_prod:

@@ -15,6 +15,7 @@ import libs.dbset as dbset
 import libs.transit as transit
 
 csms = {}
+clocks = {}
 
 <<state-machine>>
 <<abstract-with-persistency>>
@@ -53,42 +54,53 @@ class CenterState(StateMachine):
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
+    save_db = State("Saving new planning in database")
     wait_01 = State("Waiting for 1am at center timezone")
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
     getting_prod = State("Getting production version after center restart")
     version_check = State("Checking production version")
+    w_reco_save = State("Saving new planning failed, waiting for recovery")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("getting prod version failed, waiting for production recovery")
     w_reco_version = State("wrong_db_version, waiting for recovery")
 
-    progress = free.to(edit) | edit.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
-            | wait_02.to(getting_prod) | getting_prod.to(version_check) | version_check.to(free)
+    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
+            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
+            | getting_prod.to(version_check) | version_check.to(free)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
+    reco_save_done    = Event(w_reco_save.to(wait_01), name='recovery of saving new db done')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
     reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
 
-    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) \
+            | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
     # ACTIONS ---------------------------------
 
+    def on_enter_free(self):
+        self.model.clear_user()
+
     def on_exit_free(self):
         self.model.last_result = None
 
+    def on_enter_save_db(self):
+        run_sm_action(self.model, transit.save_db_plan_times)
+
     def on_enter_wait_01(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=1)
+        run_sm_action(self.model, transit.wait_until, until_hour=0, minutes=40)
 
     def on_enter_transfer(self):
         run_sm_action(self.model, transit.transfer_new_db)
 
     def on_enter_wait_02(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=2, minutes=20)
+        run_sm_action(self.model, transit.wait_until, until_hour=1, minutes=20)
 
     def on_enter_getting_prod(self):
         run_sm_action(self.model, transit.get_version_prod)
@@ -103,25 +115,31 @@ class CenterState(StateMachine):
 ### State machines creation and access
 
 1 state machine per center.
-To create them: csms = create_center_state_machines()
+To create them: csms = init_center_state_machines()
 To access the sm for one center: sm = csms["Mahi"]
 
 ```python
 #| id: create-centers-sms
 
-def create_center_state_machines(centers):
-    clocks = {}
+def delete_state_machine(center_name):
+    del csms[center_name]
+    del clocks[center_name]
+
+def add_center_state_machine(name, centers):
+    center_state = CenterDataModel(center_name=name, centers=centers)
+    sm = CenterState(model=center_state)
+    the_listener = HistoryListener(model=center_state)
+    sm.add_listener(the_listener)
+    csms[name] = sm
+    clocks[name] = asyncio.Lock()
+
+def init_center_state_machines(centers):
     db2 = dbset.get_central_db()
     centers_list = db2.t.center()
     names = [c.get("center_name") for c in centers_list]
     for name in names:
-        center_state = CenterDataModel(center_name=name, centers=centers)
-        sm = CenterState(model=center_state)
-        the_listener = HistoryListener(model=center_state)
-        sm.add_listener(the_listener)
-        csms[name] = sm
-        clocks[name] = asyncio.Lock()
-    return clocks
+        add_center_state_machine(name, centers)
+
 ```
 
 ### DBPersistentModel: Concrete model strategy
@@ -142,7 +160,8 @@ class CenterDataModel(AbstractPersistentModel):
         self.user = user
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
-        self.save_db_path = None  # new production db to be sent
+        self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
+        self.save_db_filename = None  # new production db filenameto be sent
         self.version_prod = None  # production version date storage location
 
     def _read_state(self):
@@ -156,10 +175,10 @@ class CenterDataModel(AbstractPersistentModel):
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
         self.centers.update(
-            center_name=self.center_name, 
-            status=value,
-            status_start=now_utc,
-            created_by=self.user
+            center_name = self.center_name, 
+            status = value,
+            status_start = now_utc,
+            created_by = self.user
         )
 
     def get_start_time(self):
@@ -174,6 +193,12 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.user = row.created_by
         return self.user
+
+    def clear_user(self):
+        self.centers.update(
+            center_name = self.center_name, 
+            created_by = None
+        )
 
 ```
 

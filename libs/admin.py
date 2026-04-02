@@ -2,8 +2,8 @@
 
 from fasthtml.common import *
 import libs.utils as utils
-import libs.dbset as dbset
-import libs.plancheck as plancheck
+import libs.states as states
+import libs.minio as minio
 
 # ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
 def show_users_table(users):
@@ -167,7 +167,7 @@ def upload_form(centers):
                 hx_confirm="Are you ABSOLUTELY sure to change this center configuration?")(
             Select(
                 Option("Select Center", value="", selected=True, disabled=True),
-                Option("All Centers", value="ALL"),
+                Option("All Centers", value="all_centers"),
                 *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
                 name="center_name", required=True
             ),
@@ -187,34 +187,31 @@ def download_form(centers):
             Button("Download", type="submit", hx_swap="none"),
         ),
 
-async def upload_config(file: UploadFile, center_name: str, centers):
+async def upload_config(file: UploadFile, center_name: str):
     if file.filename != f"{center_name}.xlsx":
         mess = {"error": "bad_config_filename"}
+    elif center_name != "all_centers" and states.csms[center_name].configuration[0].id != "free":
+        mess = {"error": "center_not_free"}
     else:
         try:
             filebuffer = await file.read()
             upload_dir = Path(utils.get_db_path())
             (upload_dir / file.filename).write_bytes(filebuffer)
-            utils.load_excel_in_db(center_name, centers)
+            minio.save_excel_minio(center_name)
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')
     return Div(utils.feedback_to_user(mess))
 
-async def download_config(session, request, centers):
+async def download_config(session, request):
     try:
         params = dict(request.query_params)
         center_name = params.get("center_name")
-        center_obj = centers[center_name]
-        utils.get_excel_from_db(center_obj)
+        minio.get_excel_minio(center_name)
         session[utils.Skey.CENTER] = center_name
         return Redirect("/download_it")
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
-
-
-
-
 
 # ~/~ end
 # ~/~ end
