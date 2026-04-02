@@ -209,11 +209,11 @@ async def post(file: UploadFile, center_name: str):
     return await admin.upload_config(file, center_name)
 
 @rt('/download_config/{center_name}')
-def get(session, request):
-    return admin.download_config(session, request)
+async def get(session, request):
+    return await admin.download_config(session, request)
 
 @rt("/download_it")
-def get(session):
+async def get(session):
     center = session[utils.Skey.CENTER]
     filename = center + ".xlsx"
     file_path = utils.get_db_path() + filename
