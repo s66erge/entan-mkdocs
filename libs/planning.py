@@ -8,9 +8,11 @@ from tabulate import tabulate
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
+from wcwidth import center
 import libs.utils as utils
 import libs.cdash as cdash 
 import libs.plancheck as plancheck
+import libs.fetch as fetch
 import libs.dbset as dbset
 import libs.minio as minio
 import libs.utilsJS as utilsJS
@@ -112,8 +114,13 @@ async def save_db_plan_timetable(center_name, centers):
     dest_db.close()
     return filename
 
-async def check_save_show_plan(session, plan, centers, mess):
+async def check_save_show_plan(session, start_plan, centers, mess):
     selected_name = session[utils.Skey.CENTER]
+    inside = minio.dicts_from_excel_minio(selected_name,"inside")
+    dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
+
+    plan = fetch.sort_clean(start_plan, dhamma_types, inside)
+
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
     await asyncio.to_thread(minio.save_center_temp_data, selected_name, "planning", new_draft_plan)
     return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)

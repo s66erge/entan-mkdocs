@@ -162,12 +162,12 @@ def get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement):
     ]
     return periods_dhamma_org
 
-def check_within(deletion_check, this_row, other_row):
-    if other_row.get("period_type", "") != deletion_check:
+def check_within(deletion_check, this_row, row_aft):
+    if row_aft.get("period_type", "") != deletion_check:
         return False
     this_start = date.fromisoformat(this_row.get("start_date"))
-    other_start = date.fromisoformat(other_row.get("start_date"))
-    other_end = date.fromisoformat(other_row.get("end_date"))
+    other_start = date.fromisoformat(row_aft.get("start_date"))
+    other_end = date.fromisoformat(row_aft.get("end_date"))
     if this_start >= other_start and this_start < other_end:
         return True
     return False
@@ -177,17 +177,30 @@ def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     # default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
     delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
-        row_bef = cleaned[-1] if len(cleaned) > 0 else {}
-        row_aft = periods_dhamma_org[i+1] if i < len(periods_dhamma_org) - 1 else {}
-        to_delete = [d for d in delete_list if d["period_type"] == row["period_type"]]
+        if i == 0:
+            cleaned.append(row)
+            continue
+        row_bef = periods_dhamma_org[i-1]
+        to_delete = [d for d in delete_list if d["period_type"] == row["period_type"] \
+                     and d["container"] == row_bef["period_type"]]
         deletion_check = to_delete[0]["container"] if to_delete else "@TOKEEP@"
         if  deletion_check == "@ALL@": # or row["period_type"] == default_type:
             continue
-        elif check_within(deletion_check, row, row_bef) or check_within(deletion_check, row, row_aft):
+        elif check_within(deletion_check, row, row_bef):
             continue
         else:
             cleaned.append(row)
     return cleaned
+
+def sort_clean(aplan, dhamma_types, inside):
+    # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
+    # this keeps the first sorting order ok for identical start_dates
+    sorted_plan = sorted(sorted(aplan, key=lambda x: x['end_date'], reverse=True),
+                      key=lambda x: x['start_date'])
+    dedup = deduplicate(sorted_plan)
+    dedup_cleaned = clean_dhamma_courses(dedup, dhamma_types, inside)
+    return dedup_cleaned
+
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
@@ -205,18 +218,17 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
 
     extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
     #print(tabulate(extracted, headers="keys"))
-    periods_dhamma_org = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
+    periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))
-    cleaned_dhamma_org = clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside)
 
-    merged = periods_db_center + cleaned_dhamma_org
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
-    mer_sort = sorted(sorted(merged, key=lambda x: x['end_date'], reverse=True),
+    dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
                       key=lambda x: x['start_date'])
-    deduplicated = deduplicate(mer_sort)
-
-    return deduplicated
+    # print(tabulate(dhamma_sort, headers="keys"))
+    merged = periods_db_center + dhamma_sort
+    dedup_cleaned = sort_clean(merged, dhamma_types, inside)
+    return dedup_cleaned
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)
 [2] get the start date for the last course just before today = current course - or service

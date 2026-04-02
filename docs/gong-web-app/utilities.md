@@ -204,7 +204,7 @@ def feed_text(params):
         'user_deleted': 'User deleted successfully!',
         'center_deleted': 'Center and associated database deleted successfully!',
         'planner_deleted': 'Planner association deleted successfully!',
-        'new_course': 'New line added. Please review the plan and submit changes to update the center gong.',
+        'new_course': 'New line added if did not exist already. Please review the plan and submit changes to update the center gong.',
         'line_deleted': 'Line deleted. Please review the plan and submit changes to update the center gong.',
         'show_plan': 'Here is the plan you already worked on.',
         'config_uploaded': "New configuration loaded in database",

@@ -169,6 +169,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
     new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
     template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
+    # FIXME copy the excel file for the new center !
     config_hex = centers[center_template].other_course
 
     try:
@@ -186,6 +187,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
 
         else:  ## [2]
             shutil.copy2(template_db, db_file_path)
+            # FIXME copy the excel file for the new center !
             centers.insert(
                 center_name=new_center_name,
                 other_course=config_hex,
