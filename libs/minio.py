@@ -32,7 +32,7 @@ def create_minio_client():
             endpoint ="bucket.railway.internal:9000",
             access_key = "dhamma-gong-on-local-serge",
             secret_key = os.environ["MINIO_USER1_SECRET"],
-            secure = True,
+            secure = False,
         )
     return client
 
