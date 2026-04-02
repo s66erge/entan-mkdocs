@@ -5,6 +5,7 @@ Will only be reachable for signed in admin users.
 ```python
 #| file: libs/admin.py 
 
+import asyncio
 from fasthtml.common import *
 import libs.utils as utils
 import libs.states as states
@@ -219,16 +220,17 @@ async def upload_config(file: UploadFile, center_name: str):
             filebuffer = await file.read()
             upload_dir = Path(utils.get_db_path())
             (upload_dir / file.filename).write_bytes(filebuffer)
-            minio.save_excel_minio(center_name)
+            await asyncio.to_thread(minio.get_excel_minio, center_name)
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')
     return Div(utils.feedback_to_user(mess))
 
-async def download_config(session, request):
+def download_config(session, request):
     try:
         params = dict(request.query_params)
         center_name = params.get("center_name")
+        #await asyncio.to_thread(minio.get_excel_minio, center_name)
         minio.get_excel_minio(center_name)
         session[utils.Skey.CENTER] = center_name
         return Redirect("/download_it")
