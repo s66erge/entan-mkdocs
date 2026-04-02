@@ -178,7 +178,7 @@ def upload_form(centers):
 
 def download_form(centers):
     sorted_centers = sorted(centers(), key=lambda x: x.center_name)
-    return Form(hx_get="/download_config", hx_target="#config-feedback")(
+    return Form(hx_get="/download_config/", hx_target="#config-feedback")(
             Select(
                 Option("Select Center", value="", selected=True, disabled=True),
                 Option("All Centers", value="ALL"),
