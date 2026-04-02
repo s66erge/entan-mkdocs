@@ -8,7 +8,6 @@ from tabulate import tabulate
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
-from wcwidth import center
 import libs.utils as utils
 import libs.cdash as cdash 
 import libs.plancheck as plancheck
