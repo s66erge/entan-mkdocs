@@ -185,6 +185,13 @@ async def planning_page(session, selected_name, centers, csms):
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
                 cls="allownavigation") if utils.dev_comp_or_user(session) else None,
+        ),
+        Br(), Br(),
+        Span(
+            Button("Download PDF", onclick="window.print()"),
+            Span(style="display: inline-block; width: 20px;"),
+            A("open consult tab", href="/consult_page", target="_blank", cls="allownavigation"),
+            # Button("Open a consult tab", hx_on={"click": "openInBackground('/consult_page')"}, cls="btn"),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")

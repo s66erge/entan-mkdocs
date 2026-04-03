@@ -75,7 +75,7 @@ def get_types_with_duration(center_obj):
         times_last_day = [row.get("time") for row in list(db_center.t.timetables())
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
         item["time_end_last_day"] = max(times_last_day)
-        if "repeating" in last_day_type :
+        if "repeat" in last_day_type :
             item["tags"] = "V"
         else:
             item["tags"] = "F"
@@ -87,6 +87,14 @@ def get_types_with_duration(center_obj):
 def check_plan(session, plan, selected_name, centers):
     center_obj = centers[selected_name]
     types_with_duration = get_types_with_duration(center_obj)
+
+    # FIXME to move to timetables page when ready
+    # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
+    # this keeps the first sorting order ok for identical start_dates
+    types_sorted = sorted(sorted(types_with_duration, key=lambda x: x['tags']), 
+                            key=lambda x: x['duration'], reverse=True)
+    print(tabulate(types_sorted, headers="keys"))
+
     _, period_types_in_db =  get_period_types_in_db(center_obj)
     session['planOK'] = True
     for idx, row in enumerate(plan):
