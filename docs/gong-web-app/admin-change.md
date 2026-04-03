@@ -19,6 +19,7 @@ import libs.dbset as dbset
 import libs.admin as admin
 import libs.utils as utils
 import libs.states as states
+import libs.minio as minio
 from libs.authpass import get_password_hash
 
 
@@ -120,7 +121,6 @@ def delete_center(center_name, users, centers, planners, db_path):
         else:
             gong_db_name = dbset.gong_db_name(center_name)  ## [1]
             db_file_path = f'{db_path}{gong_db_name}'
-            config_path = f'{db_path}{center_name}.xlsx'  ## [1]
             center_planners = planners("center_name = ?", (center_name,))  ## [2]
             state = states.csms[center_name].configuration[0].id
 
@@ -137,8 +137,7 @@ def delete_center(center_name, users, centers, planners, db_path):
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
-                if os.path.exists(config_path):
-                    os.remove(config_path)
+                minio.remove_excel_minio(center_name)
                 message = {'success' : 'center_deleted'}
 
         return Div(
@@ -169,8 +168,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
     new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
     template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
-    # FIXME copy the excel file for the new center !
-    config_hex = centers[center_template].other_course
+    state = states.csms[center_template].configuration[0].id
 
     try:
         if new_center_name == "" or center_template == "":
@@ -185,12 +183,16 @@ def add_center(new_center_name, center_template, users, centers, db_path):
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
+        elif state != "free":
+            message = {'error' : 'template_not_free'}
+
         else:  ## [2]
             shutil.copy2(template_db, db_file_path)
-            # FIXME copy the excel file for the new center !
+            excel_template_path = minio.get_excel_minio(center_template)
+            shutil.copy2(excel_template_path, f'{db_path}{new_center_name}.xlsx')
+            minio.save_excel_minio(new_center_name)
             centers.insert(
                 center_name=new_center_name,
-                other_course=config_hex,
                 status="free",
                 created_by="",
                 status_start=datetime.now(timezone.utc)

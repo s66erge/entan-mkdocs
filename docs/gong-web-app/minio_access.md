@@ -146,6 +146,14 @@ def get_excel_minio(center):
     file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     return file_path
 
+def remove_excel_minio(center):
+    config_path = f'{utils.get_db_path()}{center}.xlsx'
+    if os.path.exists(config_path):
+        os.remove(config_path)
+    the_object = f"{center}/{center}.xlsx"
+    minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+    return
+
 def dicts_from_excel_minio(center, sheet):
     file_path = get_excel_minio(center)
     df = pd.read_excel(file_path, sheet_name=sheet)

@@ -27,7 +27,7 @@ def check_plan(session, plan, selected_name, centers):
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
     types_sorted = sorted(sorted(types_with_duration, key=lambda x: x['tags']), 
-                            key=lambda x: x['duration'], reverse=True)
+                            key=lambda x: x['duration'])
     print(tabulate(types_sorted, headers="keys"))
 
     _, period_types_in_db =  get_period_types_in_db(center_obj)
