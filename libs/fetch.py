@@ -137,7 +137,7 @@ def check_within(deletion_check, this_row, row_aft):
 
 def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     cleaned = []
-    # default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    # default_type = next((x for x in dhamma_types if x.get("tags") == "X"), {}).get('period_type',"")  # Default type
     delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
         if i == 0:

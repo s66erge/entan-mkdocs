@@ -36,7 +36,8 @@ class Pkey: # parameters keys
     TIMEZON = "timezon"
     LOCATION = "location"
     GONG_ID = "gong_id"
-    TARGETS = "targerts"
+    TARGETS = "targets"
+    DEFAULT_PERIOD = "default_period"
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
