@@ -21,6 +21,7 @@ import libs.adchan as adchan
 import libs.utils as utils
 import libs.states as states
 import libs.transit as transit
+import libs.timings as timings
 import libs.minio as minio
 
 #  from starlette.testclient import TestClient
@@ -152,7 +153,7 @@ async def get(session, center: str):
     session[utils.Skey.CENTER] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], session['auth'])
     if enter_edit_OK:
-        return await planning.planning_page(session, center, centers, states.csms)
+        return await planning.planning_page(session, center, states.csms)
     else:
         return Redirect(f"/status_page?center={center}")
 
@@ -215,7 +216,10 @@ async def post(session, ptype: str, start: str):
 ```python
 #| id: timetables-changes
 
-
+@rt('/timings/load_center_periods')
+async def get(session):
+    timings.load_periods_timetables(session, centers)  # in pandas and minio
+    return timings.show_center_periods(session, centers)
 
 ```
 

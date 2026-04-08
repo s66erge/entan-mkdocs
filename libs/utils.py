@@ -12,8 +12,6 @@ import markdown2
 import os
 from datetime import datetime, date, timedelta
 
-temp_paths = {}
-
 class Skey: # session keys
     AUTH = "auth"
     ROLE = "role"

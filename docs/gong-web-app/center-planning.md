@@ -43,8 +43,9 @@ Then:
 #| id: planning-page
 
 # @rt('/planning_page')
-async def planning_page(session, selected_name, centers, csms):
+async def planning_page(session, selected_name, csms):
     session['planOK'] = False
+    csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
         Span(
@@ -59,8 +60,8 @@ async def planning_page(session, selected_name, centers, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/unfinished?goto_dash=NO",
-                hx_target="#planning-periods"),
+                hx_get="/timings/load_center_periods",
+                hx_target="#center-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",
                 hx_get="/unfinished?goto_dash=NO",
@@ -88,7 +89,10 @@ async def planning_page(session, selected_name, centers, csms):
         Script(utilsJS.JS_CLIENT_TIMER),
         Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
-        Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
+        Div(id="planning-periods"),    # filled by /planning/load_dhamma_db
+        Div(id="center-periods"),      # filled by /timings/show_periods 
+        Div(id="periods-struct"),      # filled by /timings/show_days 
+        Div(id="timetables"),          # filled by /timings/show_timetables
         cls="container"
     )
 
@@ -158,6 +162,11 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
         Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
+
+        Div("",hx_swap_oob="true",id="center-periods"),
+        Div("",hx_swap_oob="true",id="periods-struct"),
+        Div("",hx_swap_oob="true",id="timetables"),
+
         table,
         form,
         id="planning-periods"
@@ -169,6 +178,7 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
 
 ```python
 #| id: load-show-center-plan
+
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
