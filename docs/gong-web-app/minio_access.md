@@ -7,6 +7,7 @@
 
 import os
 import json
+import fastparquet
 from io import BytesIO
 import libs.utils as utils
 import pandas as pd 
@@ -100,6 +101,34 @@ def file_download(bucket, the_object, file_to_write):
 ```python
 #| id: get-save-temp-files
 
+# FIXME continue here
+
+def get_center_temp_df(center, df_name):
+    file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
+    the_object = f"{center}/temp/{df_name}.parquet"
+    file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    df = pd.read_parquet(file_path)
+    os.remove(file_path)
+    return df
+
+def save_df_center_temp(center, df_name, df):
+    file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
+    df.to_parquet(file_path)
+    the_object = f"{center}/temp/{df_name}.parquet"
+    file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    os.remove(file_path)
+    return
+
+def get_center_temp_list_of_dicts(center, key):
+    df = get_center_temp_df(center, key)
+    return df.to_dict(orient='records')
+
+def save_center_temp_list_of_dicts(center, key, data):
+    df = pd.DataFrame(data)
+    save_df_center_temp(center, key, df)
+    return
+
+"""
 def get_center_temp_data(center, key):
     r2 = minio_client.get_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}")  
     raw = r2.read()                    # b'{"date": "2026-03-30"}'
@@ -113,7 +142,7 @@ def save_center_temp_data(center, key, data):
     stream = BytesIO(raw)
     minio_client.put_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}", stream, length)  
     return
-
+"""
 def remove_center_temp_data(center):
     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, f"{center}/temp/")
     for the_object in list_obj:

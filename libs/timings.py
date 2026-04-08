@@ -27,7 +27,9 @@ def show_center_periods(session, centers):
     table = plancheck.get_types_with_duration(center_obj)
     heads={"period_type": "Period type", "duration": "Duration", "time_start_first_day": "Tims start on first day", "time_end_last_day": "Time end on last day"}
     df = pd.DataFrame(table)
-    html_content = df.to_html(index=False)
+    minio.save_df_center_temp(center, "center_periods", df)
+    df2 = minio.get_center_temp_df(center, "center_periods")
+    html_content = df2.to_html(index=False)
     return Div(
         H2("Center periods"),
         Div("",hx_swap_oob="true",id="planning-periods"),

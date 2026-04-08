@@ -186,10 +186,10 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
 
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
-    dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
-                      key=lambda x: x['start_date'])
+    #dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
+    #                  key=lambda x: x['start_date'])
     # print(tabulate(dhamma_sort, headers="keys"))
-    merged = periods_db_center + dhamma_sort
+    merged = periods_db_center + periods_dhamma
     dedup_cleaned = sort_clean(merged, dhamma_types, inside)
     return dedup_cleaned
 # ~/~ end

@@ -198,7 +198,7 @@ async def get(session, request):
 
 @rt('/planning/saved_plan')
 async def get(session):
-    plan = minio.get_center_temp_data(session[utils.Skey.CENTER], "planning")
+    plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
     return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
 
 @rt('/planning/delete_line/{idx}')
@@ -218,7 +218,7 @@ async def post(session, ptype: str, start: str):
 
 @rt('/timings/load_center_periods')
 async def get(session):
-    timings.load_periods_timetables(session, centers)  # in pandas and minio
+    # timings.load_periods_timetables(session, centers)  # in pandas and minio
     return timings.show_center_periods(session, centers)
 
 ```

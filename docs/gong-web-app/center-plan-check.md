@@ -24,14 +24,6 @@ def check_plan(session, plan, selected_name, centers):
     center_obj = centers[selected_name]
     types_with_duration = get_types_with_duration(center_obj)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
-
-    # FIXME to move to timetables page when ready
-    # Sort by tags first then RE_SORT EVERYTHING by duration ascending
-    # this keeps the first sorting order ok for identical duration
-    types_sorted = sorted(sorted(types_with_duration, key=lambda x: x['tags']), 
-                            key=lambda x: x['duration'])
-    print(tabulate(types_sorted, headers="keys"))
-
     _, period_types_in_db =  get_period_types_in_db(center_obj)
     session['planOK'] = True
     for idx, row in enumerate(plan):
@@ -158,6 +150,10 @@ def get_types_with_duration(center_obj):
         else:
             item["tags"] = "V"
         types_duration.append(item)
-    return types_duration
+    # Sort by duration first then RE_SORT EVERYTHING by tags descending
+    # this keeps the first sorting order ok for identical tags
+    types_sorted = sorted(sorted(types_duration, key=lambda x: x['duration'], reverse=True), 
+                        key=lambda x: x['tags'])
+    return types_sorted
 
 ```
