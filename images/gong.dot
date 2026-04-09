@@ -1,0 +1,61 @@
+// dot -Tpdf gong.dot -o gong.pdf
+// on the web: edotor.net
+digraph {
+    node [shape=rect]
+    VARIABLES[label="VARIABLES\n\
+    YPE: yesterday period at end of day\n\
+    TPS: today period at start of day\n\
+    TPE: today period at end of day\n\
+    YDN: yesterday day number (only for fixed YPE)\n\
+    TDNS: today day number (only for fixed YPE)\n\
+    TLTS: today last time of TPS\n\
+    TSTE: today start time of TPE (=0 if TPE = TPS)\n\
+    PPT: planning period for today"]
+
+    VARIABLES -> AT_MIDNIGHT
+    VARIABLES -> EVERY_MINUTE
+
+    AT_MIDNIGHT -> q01
+    q01[shape=diamond,label="q01\nis YPE a fixed period?"]
+    q02[shape=diamond,label="q02\nPPT empty?"]
+    q03[shape=diamond, label="q03\nis TDNS the last day?"]
+    q04[shape=diamond,label="q04\nis PPT empty?"]
+
+    a01[shape=rectangle,label="a01\nTDNS = YDN + 1"] 
+    a02[label="a02\nTPS = YPE"]
+    a03[label="a03\nTPE = PPT"]
+    a04[label="a04\nTPE = default period"]
+    a05[label="a05\nTPS = YPE\n compute TLTS\n compute TSTE"]
+    a06[label="a06\nTPS = PPT"]
+    a07[label="a07\nTPE = TPS\n compute TLTS\nTSTE = 0"]
+
+    q01 -> a01 [label=" yes"]
+    q01 -> q02 [xlabel=" no"]
+    q02 -> a02 [label=" yes"]
+    q02 -> a06 [label=" no"]
+    q03 -> a02 [label=" no"]
+    q03 -> q04 [label=" yes"]
+    q04 -> a03 [label=" no"]
+    q04 -> a04 [label=" yes"]
+    a01 -> q03
+    a02 -> a07
+    a03 -> a05
+    a04 -> a05
+    a06 -> a07
+
+    EVERY_MINUTE -> q05
+    q05[shape=diamond,label="q05\nTPE == TPS ?"]
+    q06[shape=diamond,label="q06\nare we before TLTS ?"]
+    q07[shape=diamond,label="q07\nare we before TSTE ?"]
+
+    a10[label="a10\nif gong to play now @TPS\n play it"]
+    a11[label="a11\nif gong to play now @TPE\n play it"]
+    a12[label="a12\ndo NOTHING"]
+
+    q05 -> a10 [label=" yes"]
+    q05 -> q06 [label=" no"]
+    q06 -> a10 [label=" yes"]
+    q06 -> q07 [label=" no"]
+    q07 -> a11 [label=" no"]
+    q07 -> a12 [label=" yes"]
+    }

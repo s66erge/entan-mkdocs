@@ -13,6 +13,7 @@ csms = {}
 clocks = {}
 
 # ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+
 class HistoryListener:
     def __init__(self, model):
         self.max_size = 30

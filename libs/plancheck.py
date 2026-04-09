@@ -5,6 +5,7 @@ from datetime import date
 from tabulate import tabulate
 import libs.utils as utils
 import libs.dbset as dbset
+import libs.minio as minio
 
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#this-center-courses>>[init]
 
@@ -58,6 +59,7 @@ def get_period_types_in_db(center_obj):
 
 def get_types_with_duration(center_obj):
     db_center, period_types_in_db = get_period_types_in_db(center_obj)
+    params_from_excel = minio.params_from_excel_minio(center_obj.center_name)
     types_duration = []
     for vt in period_types_in_db:
         item = {}
@@ -75,18 +77,25 @@ def get_types_with_duration(center_obj):
         times_last_day = [row.get("time") for row in list(db_center.t.timetables())
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
         item["time_end_last_day"] = max(times_last_day)
-        if "repeating" in last_day_type :
-            item["tags"] = "V"
-        else:
+        if not "repeat" in last_day_type :
             item["tags"] = "F"
+        elif params_from_excel.get(utils.Pkey.DEFAULT_PERIOD, "") == vt:
+            item["tags"] = "X"
+        else:
+            item["tags"] = "V"
         types_duration.append(item)
-    return types_duration
+    # Sort by duration first then RE_SORT EVERYTHING by tags descending
+    # this keeps the first sorting order ok for identical tags
+    types_sorted = sorted(sorted(types_duration, key=lambda x: x['duration'], reverse=True), 
+                        key=lambda x: x['tags'])
+    return types_sorted
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
 def check_plan(session, plan, selected_name, centers):
     center_obj = centers[selected_name]
     types_with_duration = get_types_with_duration(center_obj)
+    default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
     _, period_types_in_db =  get_period_types_in_db(center_obj)
     session['planOK'] = True
     for idx, row in enumerate(plan):
@@ -117,7 +126,10 @@ def check_plan(session, plan, selected_name, centers):
                 next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
                                         if t.get("period_type") == next_pt), None)
                 if this_end_time > next_start_time:
-                    row["check"] = "CHECK Time overlap"
+                    if pt == default_period or next_pt == default_period:                   
+                        row["check"] = "OK Time overlap"
+                    else:
+                        row["check"] = "CHECK Time overtap"
                 else:
                     row["check"] = "OK same day"
             elif delta_days > 1:

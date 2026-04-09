@@ -1,0 +1,61 @@
+digraph CenterState {
+    label="CenterState";
+    fontname="Arial";
+    fontsize="10pt";
+    rankdir="TB";
+    compound="true";
+    subgraph centerstate_anchor_initial {
+        label="";
+        peripheries=0;
+        margin=0;
+        centerstate_anchor [label="", shape="point", style="filled", fontsize="1pt", fixedsize="true", width=0.2, height=0.2, fillcolor="black"];
+    }
+    subgraph cluster_centerstate_anchor_atomic {
+        label="";
+        peripheries=0;
+        cluster="true";
+        free [label="Planning free to be edited\nentry / on_enter_free\nexit / on_exit_free", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, penwidth=2, fillcolor="turquoise"];
+        edit [label="Planning is being edited", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        save_db [label="Saving new planning in database\nentry / on_enter_save_db", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        wait_01 [label="Waiting for 1am at center timezone\nentry / on_enter_wait_01", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        transfer [label="Transferring planning to center\nentry / on_enter_transfer", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        wait_02 [label="Waiting for 2am at center timezone\nentry / on_enter_wait_02", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        getting_prod [label="Getting production version after center restart\nentry / on_enter_getting_prod", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        version_check [label="Checking production version\nentry / on_enter_version_check", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        w_reco_save [label="Saving new planning failed, waiting for recovery", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        w_reco_trans [label="Planning send failed, waiting for file transfer recovery", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        w_reco_prod [label="getting prod version failed, waiting for production recovery", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+        w_reco_version [label="wrong_db_version, waiting for recovery", shape="rectangle", style="rounded, filled", fontname="Arial", fontsize="10pt", peripheries=1, fillcolor="white"];
+    }
+    centerstate_anchor -> free [label="", color="blue", fontname="Arial", fontsize="9pt"];
+    free -> edit [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    free -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    edit -> save_db [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    edit -> free [label="abandon_changes", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    edit -> free [label="edit_timer_done", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    edit -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    save_db -> wait_01 [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    save_db -> w_reco_save [label="problem", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    save_db -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    wait_01 -> transfer [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    wait_01 -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    transfer -> wait_02 [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    transfer -> w_reco_trans [label="problem", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    transfer -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    wait_02 -> getting_prod [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    wait_02 -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    getting_prod -> version_check [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    getting_prod -> w_reco_prod [label="problem", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    getting_prod -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    version_check -> free [label="progress", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    version_check -> w_reco_version [label="problem", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    version_check -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_save -> wait_01 [label="reco_save_done", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_save -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_trans -> wait_02 [label="reco_trans_done", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_trans -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_prod -> version_check [label="reco_prod_done", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_prod -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_version -> free [label="reco_version_done", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+    w_reco_version -> free [label="force_to_free", color="blue", fontname="Arial", fontsize="9pt", minlen=1];
+}

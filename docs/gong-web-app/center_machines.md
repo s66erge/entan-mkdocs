@@ -1,5 +1,36 @@
 # Center state machines
 
+## Synchronisation between Rasperry Pi and web program
+
+Synchro by reading and writing files on a shared s3 server: 
+- Server public endpoint : bucket-production-6009.up.railway.app:443
+- Bucket : dhamma-gong-database
+
+00h45 : Web program writes the new center gong db file in the bucket
+- f"{center_name}/sending{file-ISO_date}.db"
+- example: mahi/sending2024-04-09.db
+
+01h00 : Rasperry Pi 
+- reads the file if it is there
+- IF the file is there
+  - IF the date in the file name is today's date
+    - message = f"OK: {today_ISO_date}"
+    - restarts with the new db file
+  - ELSE # dates do not match
+    - message = f"wrong_date: {file_ISO_date}"
+    - restarts on the same db as before
+  - writes the message in the bucket:
+    - in the file: "f"{center_name}/settings.json"
+    - in a dict of dict with access key: 'general' then 'db_version'
+- ELSE # no file there
+  - restarts on the same db as before
+
+01h20 : Web program
+- reads the settings.json file, if there
+- delete the files : .db and/or settings.json 
+
+## State machine for center state (and data) management 
+
 The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
 
 ```python
@@ -27,8 +58,10 @@ clocks = {}
 
 see: https://python-statemachine.readthedocs.io/en/latest/index.html
 
+
 ```python
 #| id: state-machine
+
 class HistoryListener:
     def __init__(self, model):
         self.max_size = 30

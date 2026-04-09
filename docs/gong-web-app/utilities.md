@@ -21,8 +21,6 @@ import markdown2
 import os
 from datetime import datetime, date, timedelta
 
-temp_paths = {}
-
 class Skey: # session keys
     AUTH = "auth"
     ROLE = "role"
@@ -36,7 +34,8 @@ class Pkey: # parameters keys
     TIMEZON = "timezon"
     LOCATION = "location"
     GONG_ID = "gong_id"
-    TARGETS = "targerts"
+    TARGETS = "targets"
+    DEFAULT_PERIOD = "default_period"
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
@@ -49,9 +48,9 @@ class Globals:
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
     CENTER_BUCKET = "centers-data" # bucket name for local center data 
     PI_BUCKET = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
-    # FIXME check with Ivan
-    PI_FILE_JSON = "info.json"  # file used for getting PI production date
-    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with minio
+    PI_FILE_JSON = "settings.json"  # file used for getting PI production date
+    PI_FILE_KEY1 = "general"     # 1st key to find production date in PI_FILE_JSON
+    PI_FILE_KEY2 = "db_version"  # 2nd key to find production date
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
     @classmethod
@@ -229,7 +228,8 @@ def feed_text(params):
         'center_has_planners': f'Cannot delete center. Center is still associated with users: {params.get("users", "")}. Please remove all planner associations first.',
         'last_planner_for_center': f'Cannot delete planner. This is the last planner for center: "{params.get("center", "")}". Each center must have at least one planner.',
         'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file',
-        'center_not_free': 'Cannot delete a center or modify its config when not in the "free" state: its planning is currently under modification'
+        'center_not_free': 'Cannot delete a center or modify its config when not in the "free" state: its planning is currently under modification',
+        'template_not_free': 'Cannot copy a template if it is not free: being modified'
     }
     message = ""
     result = ""

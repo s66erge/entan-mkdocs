@@ -174,7 +174,7 @@ def check_within(deletion_check, this_row, row_aft):
 
 def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     cleaned = []
-    # default_type = next((x for x in dhamma_types if x.get("tags") == "D"), {}).get('period_type',"")  # Default type
+    # default_type = next((x for x in dhamma_types if x.get("tags") == "X"), {}).get('period_type',"")  # Default type
     delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
         if i == 0:
@@ -223,10 +223,10 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
 
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
-    dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
-                      key=lambda x: x['start_date'])
+    #dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
+    #                  key=lambda x: x['start_date'])
     # print(tabulate(dhamma_sort, headers="keys"))
-    merged = periods_db_center + dhamma_sort
+    merged = periods_db_center + periods_dhamma
     dedup_cleaned = sort_clean(merged, dhamma_types, inside)
     return dedup_cleaned
 ```

@@ -2,6 +2,7 @@
 
 import os
 import json
+import fastparquet
 from io import BytesIO
 import libs.utils as utils
 import pandas as pd 
@@ -68,6 +69,32 @@ def file_download(bucket, the_object, file_to_write):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/minio_access.md#get-save-temp-files>>[init]
 
+def get_center_temp_df(center, df_name):
+    file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
+    the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    df = pd.read_parquet(file_path)
+    os.remove(file_path)
+    return df
+
+def save_df_center_temp(center, df_name, df):
+    file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
+    df.to_parquet(file_path)
+    the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    os.remove(file_path)
+    return
+
+def get_center_temp_list_of_dicts(center, key):
+    df = get_center_temp_df(center, key)
+    return df.to_dict(orient='records')
+
+def save_center_temp_list_of_dicts(center, key, data):
+    df = pd.DataFrame(data)
+    save_df_center_temp(center, key, df)
+    return
+
+"""
 def get_center_temp_data(center, key):
     r2 = minio_client.get_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}")  
     raw = r2.read()                    # b'{"date": "2026-03-30"}'
@@ -81,9 +108,10 @@ def save_center_temp_data(center, key, data):
     stream = BytesIO(raw)
     minio_client.put_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}", stream, length)  
     return
-
+"""
 def remove_center_temp_data(center):
-    list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, f"{center}/temp/")
+    location = f"{center.lower()}/temp/"
+    list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)
     for the_object in list_obj:
         minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
     return
@@ -97,7 +125,7 @@ def save_excel_minio(center):
         the_object = "all_centers.xlsx"
     else:
         file_path = f"{utils.get_db_path()}{center}.xlsx"
-        the_object = f"{center}/{center}.xlsx"
+        the_object = f"{center.lower()}/{center}.xlsx"
     file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
 
 def get_excel_minio(center):
@@ -106,9 +134,17 @@ def get_excel_minio(center):
         the_object = "all_centers.xlsx"
     else:
         file_path = f"{utils.get_db_path()}{center}.xlsx"
-        the_object = f"{center}/{center}.xlsx"
+        the_object = f"{center.lower()}/{center}.xlsx"
     file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     return file_path
+
+def remove_excel_minio(center):
+    config_path = f'{utils.get_db_path()}{center}.xlsx'
+    if os.path.exists(config_path):
+        os.remove(config_path)
+    the_object = f"{center.lower()}/{center}.xlsx"
+    minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+    return
 
 def dicts_from_excel_minio(center, sheet):
     file_path = get_excel_minio(center)

@@ -43,8 +43,9 @@ Then:
 #| id: planning-page
 
 # @rt('/planning_page')
-async def planning_page(session, selected_name, centers, csms):
+async def planning_page(session, selected_name, csms):
     session['planOK'] = False
+    csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
         Span(
@@ -59,8 +60,8 @@ async def planning_page(session, selected_name, centers, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/unfinished?goto_dash=NO",
-                hx_target="#planning-periods"),
+                hx_get="/timings/load_center_periods",
+                hx_target="#center-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",
                 hx_get="/unfinished?goto_dash=NO",
@@ -73,6 +74,13 @@ async def planning_page(session, selected_name, centers, csms):
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
                 cls="allownavigation") if utils.dev_comp_or_user(session) else None,
+        ),
+        Br(), Br(),
+        Span(
+            Button("Download PDF", onclick="window.print()"),
+            Span(style="display: inline-block; width: 20px;"),
+            A("open consult tab", href="/consult_page", target="_blank", cls="allownavigation"),
+            # Button("Open a consult tab", hx_on={"click": "openInBackground('/consult_page')"}, cls="btn"),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")
@@ -81,7 +89,10 @@ async def planning_page(session, selected_name, centers, csms):
         Script(utilsJS.JS_CLIENT_TIMER),
         Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
-        Div(id="planning-periods"),          # filled by /planning/load_dhamma_db
+        Div(id="planning-periods"),    # filled by /planning/load_dhamma_db
+        Div(id="center-periods"),      # filled by /timings/show_periods 
+        Div(id="periods-struct"),      # filled by /timings/show_days 
+        Div(id="timetables"),          # filled by /timings/show_timetables
         cls="container"
     )
 
@@ -151,6 +162,11 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
         Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
+
+        Div("",hx_swap_oob="true",id="center-periods"),
+        Div("",hx_swap_oob="true",id="periods-struct"),
+        Div("",hx_swap_oob="true",id="timetables"),
+
         table,
         form,
         id="planning-periods"
@@ -162,6 +178,7 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
 
 ```python
 #| id: load-show-center-plan
+
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
     return Div(
@@ -186,7 +203,7 @@ async def save_db_plan_timetable(center_name, centers):
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
     coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
-    for record in minio.get_center_temp_data(center_name, "planning"):
+    for record in minio.get_center_temp_list_of_dicts(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
     dest_db.close()
     return filename
@@ -199,13 +216,13 @@ async def check_save_show_plan(session, start_plan, centers, mess):
     plan = fetch.sort_clean(start_plan, dhamma_types, inside)
 
     new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
-    await asyncio.to_thread(minio.save_center_temp_data, selected_name, "planning", new_draft_plan)
+    await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
     return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, centers, index):
     selected_name = session[utils.Skey.CENTER]
-    plan = minio.get_center_temp_data(selected_name, "planning")
+    plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
@@ -214,7 +231,7 @@ async def delete_line(session, centers, index):
 #@rt('/planning/add_line')
 async def add_line(session, centers, ptype, start):
     selected_name = session[utils.Skey.CENTER]
-    plan = minio.get_center_temp_data(selected_name, "planning")
+    plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     # Create new plan line with user input
     new_line = {
         "start_date": start,
