@@ -25,7 +25,9 @@ Synchro by reading and writing files on a shared s3 server:
 - ELSE # no file there
   - restarts on the same db as before
 
-01h20 : Web program reads the settings.json file, if there.  
+01h20 : Web program
+- reads the settings.json file, if there
+- delete the files : .db and/or settings.json 
 
 ## State machine for center state (and data) management 
 

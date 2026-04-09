@@ -48,9 +48,9 @@ class Globals:
     SHORT_DELAY = 3 # seconds: waiting time before uploading file to Pi IN DEV MODE
     CENTER_BUCKET = "centers-data" # bucket name for local center data 
     PI_BUCKET = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
-    # FIXME check with Ivan
-    PI_FILE_JSON = "info.json"  # file used for getting PI production date
-    PI_FILE_TEST = "test22.json"  # file used for ssh get/put tests with minio
+    PI_FILE_JSON = "settings.json"  # file used for getting PI production date
+    PI_FILE_KEY1 = "general"     # 1st key to find production date in PI_FILE_JSON
+    PI_FILE_KEY2 = "db_version"  # 2nd key to find production date
     DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
     TEST_CENTER = "Testx" # used for testing in DEV mode
     @classmethod
