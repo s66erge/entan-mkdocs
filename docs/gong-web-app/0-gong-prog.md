@@ -194,20 +194,21 @@ def get(session):
 async def get(session, request):
     merged_plan = await fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
                         utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
-    return await planning.check_save_show_plan(session, merged_plan, centers, {})
+    return await planning.check_save_show_plan(session, merged_plan, {})
 
 @rt('/planning/saved_plan')
 async def get(session):
     plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
-    return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
+    return await planning.check_save_show_plan(session, plan, {"success": "show_plan"})
+
 
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
-    return await planning.delete_line(session, centers, idx)
+    return await planning.delete_line(session, idx)
 
 @rt('/planning/add_line')
 async def post(session, ptype: str, start: str):
-    return await planning.add_line(session, centers, ptype, start)
+    return await planning.add_line(session, ptype, start)
 
 ```
 
@@ -218,8 +219,8 @@ async def post(session, ptype: str, start: str):
 
 @rt('/timings/load_center_periods')
 async def get(session):
-    # timings.load_periods_timetables(session, centers)  # in pandas and minio
-    return timings.show_center_periods(session, centers)
+    timings.load_periods_timetables(session)  # in pandas from minio
+    return timings.show_center_periods(session)
 
 ```
 

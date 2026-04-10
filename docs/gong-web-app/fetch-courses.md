@@ -212,7 +212,7 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     params = minio.params_from_excel_minio(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
-    periods_db_center, date_current_course = plancheck.coming_center_courses(center_obj)  ## [1-3]
+    periods_db_center, date_current_course = plancheck.coming_center_courses(center)  ## [1-3]
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
 
