@@ -12,8 +12,8 @@ from minio.error import S3Error, MinioException
 minio_client = None # global S3 client, initialized from main.py and used in transit
 
 # on: F:\Other-apps\minio
-# .\minio.exe server . --license .\minio.license
-# console:  http://127.0.0.1:9001
+# .\minio.exe server . --address ":9005" --console-address ":9006" --license .\minio.license
+# console:  http://127.0.0.1:9005
 
 # https://docs.min.io/enterprise/aistor-object-store/developers/sdk/python/
 

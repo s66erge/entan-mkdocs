@@ -8,6 +8,7 @@ import pandas as pd
 from tabulate import tabulate
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from urllib.parse import quote_plus
 from fasthtml.common import *
 import libs.utils as utils
 import libs.cdash as cdash 
@@ -17,41 +18,35 @@ import libs.dbset as dbset
 import libs.minio as minio
 import libs.utilsJS as utilsJS
 
-# ~/~ begin <<docs/gong-web-app/center-timings.md#load-show-timetables>>[init]
+
+# ~/~ begin <<docs/gong-web-app/center-timings.md#check-show-period-types>>[init]
 
 # @rt('/timings/load_center_periods')
 def show_center_periods(session):
     center = session[utils.Skey.CENTER]
     center_periods_df = minio.get_center_temp_df(center, "center_periods")
-    html_periods = center_periods_df.to_html(index=False)
-    errors_df = check_timetables(session)
+    center_periods_df["Actions"] = center_periods_df['period_type'].apply(
+        lambda pt: A("Select",
+            hx_get=f"/timings/select_period?period_type={quote_plus(pt)}",
+            hx_target="#periods-struct"
+        )
+    )
+    html_periods = center_periods_df.to_html(index=False, escape=False)
+    errors_df = check_timings(session)
     html_errors = errors_df.to_html(index=False) if not errors_df.empty else None
     return Div(
+        Div("",hx_swap_oob="true",id="show-timetables"),
         H2("Center periods"),
         Div("",hx_swap_oob="true",id="planning-periods"),
         Div(Safe(html_periods)),
-        Div(Safe(html_errors)) if html_errors else None,
+        Div(H3("Timing errors"),
+            Safe(html_errors)) if html_errors else None,
+        Div(id="periods-struct"),
+        Div(id="show-timetables"),
+
     )
 
-def load_periods_timetables(session):
-    center = session[utils.Skey.CENTER]
-    selected_db = dbset.gong_db_name(center)
-    table = plancheck.get_types_with_duration(center)
-    center_periods_df = pd.DataFrame(table)
-    center_periods_df['check'] = "OK"
-    minio.save_df_center_temp(center, "center_periods", center_periods_df)
-    db_center = database(utils.get_db_path() + selected_db)
-    periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
-    minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
-    gongs_df = pd.DataFrame(list(db_center.t.gongs()))
-    minio.save_df_center_temp(center, "gongs", gongs_df) 
-    targets_df = pd.DataFrame(list(db_center.t.targets()))
-    minio.save_df_center_temp(center, "targets", targets_df)
-    timetables_df = pd.DataFrame(list(db_center.t.timetables()))
-    minio.save_df_center_temp(center, "timetables", timetables_df)
-    return
-
-def check_timetables(session):
+def check_timings(session):
     center = session[utils.Skey.CENTER]
     center_periods_df = minio.get_center_temp_df(center, "center_periods")
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
@@ -106,10 +101,84 @@ def check_timetables(session):
     )
     return errors2_df
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-timings.md#create-periods-table>>[init]
+# ~/~ begin <<docs/gong-web-app/center-timings.md#load-save-timings>>[init]
 
-def something():
-    return None
+def load_timings(session):
+    center = session[utils.Skey.CENTER]
+    selected_db = dbset.gong_db_name(center)
+    table = plancheck.get_types_with_duration(center)
+    center_periods_df = pd.DataFrame(table)
+    minio.save_df_center_temp(center, "center_periods", center_periods_df)
+    db_center = database(utils.get_db_path() + selected_db)
+    periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
+    minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
+    gongs_df = pd.DataFrame(list(db_center.t.gongs()))
+    minio.save_df_center_temp(center, "gongs", gongs_df) 
+    targets_df = pd.DataFrame(list(db_center.t.targets()))
+    minio.save_df_center_temp(center, "targets", targets_df)
+    timetables_df = pd.DataFrame(list(db_center.t.timetables()))
+    minio.save_df_center_temp(center, "timetables", timetables_df)
+    return
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-timings.md#show-struct-timetable>>[init]
+
+# @rt('/timings/select_period')
+def select_period(session, period_type):
+    center = session[utils.Skey.CENTER]
+    periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    filtered = periods_struct_df[periods_struct_df["period_type"] == period_type]
+    filtered["Actions"] = filtered['day_type'].apply(
+        lambda dt: A("Select",
+            hx_get=f"/timings/select_timetable?period_type={quote_plus(period_type)}&day_type={quote_plus(dt)}",
+            hx_target="#show-timetables"
+        )
+    )
+    html_struct = filtered.to_html(index=False, escape=False)
+    return Div(
+        Div("",hx_swap_oob="true",id="show-timetables"),
+        H3(f"Structure for period type: '{period_type}'"),
+        Safe(html_struct),
+    )
+
+# @rt('/timings/select_timetable')
+def select_timetable(session, period_type, day_type):
+    center = session[utils.Skey.CENTER]
+    timetables_df = minio.get_center_temp_df(center, "timetables")
+    timetables_df["Actions"] = timetables_df.index.to_series().apply(
+        lambda idx: A("Delete",
+            hx_get=f"/timings/delete_timetable_row?idx={idx}",
+            hx_target="#timetables"
+        )
+    )
+    filtered = timetables_df[
+        (timetables_df["period_type"] == period_type) &
+        (timetables_df["day_type"] == day_type)]
+    html_timetables = filtered.to_html(index=False, escape=False)
+    return Div(
+        H3(f"Timetable for day type: '{day_type}' in period type: '{period_type}'"),
+        Safe(html_timetables)
+    )
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/center-timings.md#delete-timetable-struct>>[init]
+
+# @rt('/timings/delete_timetable_row')
+def delete_timetable_row(session, request):
+    params = dict(request.query_params)
+    idx = params.get("idx")
+    center = session[utils.Skey.CENTER]
+    timetables_df = minio.get_center_temp_df(center, "timetables")
+    period_type = timetables_df.loc[int(idx), "period_type"]
+    day_type = timetables_df.loc[int(idx), "day_type"]
+    new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
+    minio.save_df_center_temp(center, "timetables", new_timetable)
+    return Div(
+        #Div("",hx_swap_oob="true",id="show-timetables"),
+        Div("",hx_swap_oob="true",id="periods-struct"),
+        show_center_periods(session),
+        select_period(session, period_type)
+    )
 
 # ~/~ end
 

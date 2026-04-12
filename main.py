@@ -178,8 +178,26 @@ async def post(session, ptype: str, start: str):
 
 @rt('/timings/load_center_periods')
 async def get(session):
-    timings.load_periods_timetables(session)  # in pandas from minio
+    timings.load_timings(session)  # in pandas from minio
     return timings.show_center_periods(session)
+
+@rt('/timings/select_period')
+def get(session, request):
+    params = dict(request.query_params)
+    period_type = params.get("period_type")
+    return timings.select_period(session, period_type)
+
+@rt('/timings/select_timetable')
+def get(session, request):
+    params = dict(request.query_params)
+    period_type = params.get("period_type")
+    day_type = params.get("day_type")
+    return timings.select_timetable(session, period_type, day_type)
+
+@rt('/timings/delete_timetable_row')
+def get(session, request):
+    return timings.delete_timetable_row(session, request)
+
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]

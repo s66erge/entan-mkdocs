@@ -162,8 +162,8 @@ def show_draft_plan_table(draft_plan, center, mess):
         Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
 
         Div("",hx_swap_oob="true",id="center-periods"),
-        Div("",hx_swap_oob="true",id="periods-struct"),
-        Div("",hx_swap_oob="true",id="timetables"),
+        #Div("",hx_swap_oob="true",id="periods-struct"),
+        #Div("",hx_swap_oob="true",id="timetables"),
 
         table,
         form,
