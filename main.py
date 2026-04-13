@@ -176,9 +176,13 @@ async def post(session, ptype: str, start: str):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#timetables-changes>>[init]
 
-@rt('/timings/load_center_periods')
+@rt('/timings/timingsubpage')
 async def get(session):
     timings.load_timings(session)  # in pandas from minio
+    return timings.load_timingsubpage(session)
+
+@rt('/timings/center_periods')
+def get(session):
     return timings.show_center_periods(session)
 
 @rt('/timings/select_period')

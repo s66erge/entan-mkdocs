@@ -60,8 +60,8 @@ async def planning_page(session, selected_name, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/timings/load_center_periods",
-                hx_target="#timetables"),
+                hx_get="/timings/timingsubpage",
+                hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",
                 hx_get="/unfinished?goto_dash=NO",
@@ -90,7 +90,7 @@ async def planning_page(session, selected_name, csms):
         Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
         Div(id="planning-periods"),    # filled by /planning/load_dhamma_db
-        Div(id="timetables"),          # filled by ALL /timings ...timetables
+        Div(id="timingsubpage"),       # filled by /timings/timingsubpage      
         cls="container"
     )
 

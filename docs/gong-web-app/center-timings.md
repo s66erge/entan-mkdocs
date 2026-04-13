@@ -25,13 +25,13 @@ import libs.utilsJS as utilsJS
 
 
 <<check-show-period-types>>
-<<load-save-timings>>
 <<show-struct-timetable>>
 <<delete-timetable-struct>>
+<<load-save-timings>>
 
 ```
 
-### Load and save timetables
+### Load, check and save timetables
 
 ```python
 #| id: load-save-timings
@@ -52,39 +52,6 @@ def load_timings(session):
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
     return
-
-```
-
-
-### Period types 
-
-```python
-#| id: check-show-period-types
-
-# @rt('/timings/load_center_periods')
-def show_center_periods(session):
-    center = session[utils.Skey.CENTER]
-    center_periods_df = minio.get_center_temp_df(center, "center_periods")
-    center_periods_df["Actions"] = center_periods_df['period_type'].apply(
-        lambda pt: A("Select",
-            hx_get=f"/timings/select_period?period_type={quote_plus(pt)}",
-            hx_target="#periods-struct"
-        )
-    )
-    html_periods = center_periods_df.to_html(index=False, escape=False)
-    errors_df = check_timings(session)
-    html_errors = errors_df.to_html(index=False) if not errors_df.empty else None
-    return Div(
-        Div("",hx_swap_oob="true",id="show-timetables"),
-        H2("Center periods"),
-        Div("",hx_swap_oob="true",id="planning-periods"),
-        Div(Safe(html_periods)),
-        Div(H3("Timing errors"),
-            Safe(html_errors)) if html_errors else None,
-        Div(id="periods-struct"),
-        Div(id="show-timetables"),
-
-    )
 
 def check_timings(session):
     center = session[utils.Skey.CENTER]
@@ -140,6 +107,51 @@ def check_timings(session):
         lambda x: int(x) if isinstance(x, float) and pd.notna(x) else ""
     )
     return errors2_df
+
+```
+
+
+### Period types 
+
+```python
+#| id: check-show-period-types
+
+# @rt('/timings/load_center_periods')
+
+def load_timingsubpage(session):
+    center = session[utils.Skey.CENTER]
+    return Div(
+        Div("",hx_swap_oob="true",id="planning-periods"),
+        #Div("",hx_swap_oob="true",id="timetables"),
+        Div(hx_get= "/timings/center_periods",
+            hx_target="#center-periods",
+            hx_trigger="load"),
+        Div("", id= "center-periods"),
+        Div("", id= "periods-struct"),
+        Div("", id= "show-times"),
+    )
+
+def show_center_periods(session):
+    center = session[utils.Skey.CENTER]
+    center_periods_df = minio.get_center_temp_df(center, "center_periods")
+    center_periods_df["Actions"] = center_periods_df['period_type'].apply(
+        lambda pt: A("Select",
+            hx_get=f"/timings/select_period?period_type={quote_plus(pt)}",
+            hx_target="#periods-struct"
+        )
+    )
+    html_periods = center_periods_df.to_html(index=False, escape=False)
+    errors_df = check_timings(session)
+    html_errors = errors_df.to_html(index=False) if not errors_df.empty else None
+    return Div(
+        Div("",hx_swap_oob="true",id="periods-struct"),
+        Div("",hx_swap_oob="true",id="show-times"),
+        H2("Center periods"),
+        Div(Safe(html_periods)),
+        Div(H3("Timing errors"),
+            Safe(html_errors)) if html_errors else None,
+    )
+
 ```
 
 ### Show the selected structure table and a selected timetable
@@ -148,19 +160,19 @@ def check_timings(session):
 #| id: show-struct-timetable
 
 # @rt('/timings/select_period')
-def select_period(session, period_type):
+def select_period(session, period_type, clear_show_times=True):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     filtered = periods_struct_df[periods_struct_df["period_type"] == period_type]
     filtered["Actions"] = filtered['day_type'].apply(
         lambda dt: A("Select",
             hx_get=f"/timings/select_timetable?period_type={quote_plus(period_type)}&day_type={quote_plus(dt)}",
-            hx_target="#show-timetables"
+            hx_target="#show-times"
         )
     )
     html_struct = filtered.to_html(index=False, escape=False)
     return Div(
-        Div("",hx_swap_oob="true",id="show-timetables"),
+        Div("",hx_swap_oob="true",id="show-times") if clear_show_times else None,
         H3(f"Structure for period type: '{period_type}'"),
         Safe(html_struct),
     )
@@ -172,13 +184,13 @@ def select_timetable(session, period_type, day_type):
     timetables_df["Actions"] = timetables_df.index.to_series().apply(
         lambda idx: A("Delete",
             hx_get=f"/timings/delete_timetable_row?idx={idx}",
-            hx_target="#timetables"
+            hx_target="#center-periods"
         )
     )
     filtered = timetables_df[
         (timetables_df["period_type"] == period_type) &
         (timetables_df["day_type"] == day_type)]
-    html_timetables = filtered.to_html(index=False, escape=False)
+    html_timetables = filtered.fillna("").to_html(index=False, escape=False)
     return Div(
         H3(f"Timetable for day type: '{day_type}' in period type: '{period_type}'"),
         Safe(html_timetables)
@@ -202,10 +214,10 @@ def delete_timetable_row(session, request):
     new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
     minio.save_df_center_temp(center, "timetables", new_timetable)
     return Div(
-        #Div("",hx_swap_oob="true",id="show-timetables"),
-        Div("",hx_swap_oob="true",id="periods-struct"),
         show_center_periods(session),
-        select_period(session, period_type)
+        Div(select_period(session, period_type, clear_show_times=False), 
+            hx_swap_oob="true", id="periods-struct"),
+        Div(select_timetable(session, period_type, day_type), hx_swap_oob="true", id="show-times")
     )
 
 ```
