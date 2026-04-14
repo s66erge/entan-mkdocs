@@ -156,11 +156,39 @@ def timetable_form(session, period_type, day_type):
                 # Comment field
                 Textarea(name="comment", rows=3, placeholder="Enter comment..."),
                 Button("Save gong timing", type="submit", cls="btn btn-primary"),
-                hx_post="/timings/add_timetable",
+                hx_post="/timings/add_timetable_row",
                 hx_target="#feedback-times",
             )
         )
     )
+
+# @rt('/timings/add_timetable')
+def add_timetable_row(session, request, period_type, day_type, time, gong_id, auto, targets, comment):
+    center = session[utils.Skey.CENTER]
+    try:
+        new_data = {
+            "period_type": period_type,
+            "day_type": day_type,
+            "time": time,
+            "gong_id": int(gong_id),
+            "auto": auto,
+            "targets": targets.join(" "),
+            "comment": comment
+        }
+        timetables_df = minio.get_center_temp_df(center, "timetables")
+        timetables_df = pd.concat([timetables_df, pd.DataFrame([new_data])], ignore_index=True)
+
+        minio.save_df_center_temp(center, "timetables", timetables_df)
+
+        # Signal success to the user
+        session['flash_message'] = {"success": "Timetable added successfully!"}
+
+        return Redirect(f"/timings/timingsubpage")
+
+    except Exception as e:
+          utils.logging.error(f"Failed to write timetable to df: {e}")
+          return utils.feedback_to_user({"error": f"Failed to save timetable due to a backend error: {e.__class__.__name__}"})
+
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-timings.md#load-save-timings>>[init]

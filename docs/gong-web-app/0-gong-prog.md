@@ -243,7 +243,10 @@ def get(session, request):
 def get(session, request):
     return timings.delete_timetable_row(session, request)
 
-
+@rt('/timings/add_timetable_row')
+async def post(session, request, period_type: str, day_type: str, time: str, gong_id: str,
+               auto: str = "0", targets: list = None, comment: str = ""):
+    return await timings.add_timetable_row(session, request, period_type, day_type, time, gong_id, auto, targets, comment)
 ```
 
 ### Routes for admin
