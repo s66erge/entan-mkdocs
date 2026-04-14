@@ -218,9 +218,9 @@ async def post(session, ptype: str, start: str):
 #| id: timetables-changes
 
 @rt('/timings/timingsubpage')
-async def get(session):
+async def get(request, session):
     timings.load_timings(session)  # in pandas from minio
-    return timings.load_timingsubpage(session)
+    return timings.load_timingsubpage(request, session)
 
 @rt('/timings/center_periods')
 def get(session):
@@ -237,7 +237,7 @@ def get(session, request):
     params = dict(request.query_params)
     period_type = params.get("period_type")
     day_type = params.get("day_type")
-    return timings.select_timetable(session, period_type, day_type)
+    return timings.select_timetable(session, params, period_type, day_type)
 
 @rt('/timings/delete_timetable_row')
 def get(session, request):

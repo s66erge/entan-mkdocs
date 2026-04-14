@@ -23,7 +23,8 @@ import libs.utilsJS as utilsJS
 
 # @rt('/timings/load_center_periods')
 
-def load_timingsubpage(session):
+def load_timingsubpage(request, session):
+    params = dict(request.query_params)
     center = session[utils.Skey.CENTER]
     return Div(
         Div("",hx_swap_oob="true",id="planning-periods"),
@@ -33,6 +34,7 @@ def load_timingsubpage(session):
             hx_trigger="load"),
         Div("", id= "center-periods"),
         Div("", id= "periods-struct"),
+        # Div(utils.feedback_to_user(params), id="feedback-times"),
         Div("", id= "show-times"),
     )
 
@@ -79,7 +81,7 @@ def select_period(session, period_type, clear_show_times=True):
     )
 
 # @rt('/timings/select_timetable')
-def select_timetable(session, period_type, day_type):
+def select_timetable(session, params, period_type, day_type):
     center = session[utils.Skey.CENTER]
     timetables_df = minio.get_center_temp_df(center, "timetables")
     timetables_df["Actions"] = timetables_df.index.to_series().apply(
@@ -94,7 +96,9 @@ def select_timetable(session, period_type, day_type):
     html_timetables = filtered.fillna("").to_html(index=False, escape=False)
     return Div(
         H3(f"Timetable for day type: '{day_type}' in period type: '{period_type}'"),
-        Safe(html_timetables)
+        Div(utils.feedback_to_user(params), id="feedback-times"),
+        Safe(html_timetables),
+        timetable_form(session, period_type, day_type)
     )
 
 # ~/~ end
@@ -114,7 +118,48 @@ def delete_timetable_row(session, request):
         show_center_periods(session),
         Div(select_period(session, period_type, clear_show_times=False), 
             hx_swap_oob="true", id="periods-struct"),
-        Div(select_timetable(session, period_type, day_type), hx_swap_oob="true", id="show-times")
+        Div(select_timetable(session, {"success": "time_deleted"}, period_type, day_type), hx_swap_oob="true", id="show-times")
+    )
+
+def timetable_form(session, period_type, day_type):
+    """Create a timetable form for new entries"""    
+    center = session[utils.Skey.CENTER]
+    gongs_df = minio.get_center_temp_df(center, "gongs")
+    targets = minio.get_center_temp_df(center, "targets")["shortname"].tolist()
+    return Main(
+        Div( 
+            Form(
+                Input(type="hidden", name="period_type", value=period_type),
+                Input(type="hidden", name="day_type", value=day_type),
+                # Time input
+                Span(Label("Time"), 
+                    Input(type="time", name="time", value="", cls="form-control", required=True),
+                ),
+                # Gong ID dropdown
+                Span(Label("Gong"),
+                    Select(
+                        *[Option(id, value=id) for id in gongs_df['id'].unique()],
+                        name="gong_id", required=True
+                    )
+                ),
+                # Auto checkbox
+                Div(Label("Auto", cls="form-check-label"),
+                    Input(type="checkbox", name="auto", value="1"),
+                ),
+                # Targets (default to "CC")
+                Span(Label("Targets"),
+                    Select(
+                        *[Option(target, value=target) for target in targets],
+                        name="targets", multiple=True, required=True
+                    )
+                ),
+                # Comment field
+                Textarea(name="comment", rows=3, placeholder="Enter comment..."),
+                Button("Save gong timing", type="submit", cls="btn btn-primary"),
+                hx_post="/timings/add_timetable",
+                hx_target="#center-periods",
+            )
+        )
     )
 
 # ~/~ end
@@ -148,10 +193,7 @@ def check_timings(session):
     errors_df = pd.DataFrame(columns=["period_type", "error", "day_type", "time", "gong_id", "targets"])
 
     day_number_sets_for_period_types_dict = (
-    periods_struct_df.groupby("period_type")["day"]
-       .apply(set)
-       .to_dict()
-    )
+        periods_struct_df.groupby("period_type")["day"].apply(set).to_dict())
     for period_type, day_numbers in day_number_sets_for_period_types_dict.items():
         if 0 not in day_numbers:
             errors_df.loc[len(errors_df)] = {
@@ -178,6 +220,11 @@ def check_timings(session):
                            ["period_type", "day_type", "time", "gong_id"]]    
     invalid_gongs["error"] = "Invalid gong_id"
 
+    duplicated_times = timetables_df[timetables_df.duplicated(
+        subset=["period_type", "day_type", "time"], keep=False)]
+    duplicated_times = duplicated_times[["period_type", "day_type", "time"]]
+    duplicated_times["error"] = "Duplicated time"
+
     valid_targets = set(targets_df["shortname"])
     invalid_targets = timetables_df.loc[
         ~timetables_df["targets"].str.split().apply(lambda t: set(t).issubset(valid_targets)),
@@ -185,7 +232,7 @@ def check_timings(session):
     ]
     invalid_targets["error"] = "At least one invalid target"
 
-    errors_df = pd.concat([errors_df, invalid_day_types, invalid_gongs,invalid_targets], ignore_index=True)
+    errors_df = pd.concat([errors_df, invalid_day_types, duplicated_times, invalid_gongs,invalid_targets], ignore_index=True)
     errors2_df = errors_df.fillna("")
     errors2_df["gong_id"] = errors2_df["gong_id"].apply(
         lambda x: int(x) if isinstance(x, float) and pd.notna(x) else ""
