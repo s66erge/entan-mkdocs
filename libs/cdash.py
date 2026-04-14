@@ -14,6 +14,9 @@ def top_menu(role):
                 Li(A("Dashboard", href="/dashboard")),
                 Li(A("Contact", href="/unfinished")),
                 Li(A("About", href="/unfinished")),
+                Span(style="display: inline-block; width: 100px;"),
+                Button("Download PDF", onclick="window.print()"),
+
             ),
             Button("Logout", hx_post="/logout"),
     )
