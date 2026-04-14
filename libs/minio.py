@@ -12,8 +12,8 @@ from minio.error import S3Error, MinioException
 minio_client = None # global S3 client, initialized from main.py and used in transit
 
 # on: F:\Other-apps\minio
-# .\minio.exe server . --license .\minio.license
-# console:  http://127.0.0.1:9001
+# .\minio.exe server . --address ":9005" --console-address ":9006" --license .\minio.license
+# console:  http://127.0.0.1:9005
 
 # https://docs.min.io/enterprise/aistor-object-store/developers/sdk/python/
 
@@ -23,7 +23,7 @@ minio_client = None # global S3 client, initialized from main.py and used in tra
 def create_minio_client():
     if utils.isa_dev_computer():
         client = Minio(
-            endpoint ="localhost:9000",
+            endpoint ="localhost:9005",
             access_key = "dhamma-gong-on-local",
             secret_key = os.environ["MINIO_USER1_SECRET"],
             secure = False,
@@ -94,21 +94,6 @@ def save_center_temp_list_of_dicts(center, key, data):
     save_df_center_temp(center, key, df)
     return
 
-"""
-def get_center_temp_data(center, key):
-    r2 = minio_client.get_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}")  
-    raw = r2.read()                    # b'{"date": "2026-03-30"}'
-    text = raw.decode("utf-8")         # '{"date": "2026-03-30"}'
-    return json.loads(text)            # {'date': '2026-03-30'}
-
-def save_center_temp_data(center, key, data):
-    data_json = json.dumps(data)
-    raw = data_json.encode("utf-8")     # b'{"date": "2026-03-30"}'
-    length = len(raw)
-    stream = BytesIO(raw)
-    minio_client.put_object(utils.Globals.CENTER_BUCKET, f"{center}/temp/{key}", stream, length)  
-    return
-"""
 def remove_center_temp_data(center):
     location = f"{center.lower()}/temp/"
     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)

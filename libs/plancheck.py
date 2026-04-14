@@ -9,8 +9,8 @@ import libs.minio as minio
 
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#this-center-courses>>[init]
 
-def add_end_dates(plan, center_obj):
-    types_with_duration = get_types_with_duration(center_obj)
+def add_end_dates(plan, center):
+    types_with_duration = get_types_with_duration(center)
     for i in range(len(plan)):
         if 'end_date' not in plan[i] or plan[i]['end_date'] is None:
             this_type = list(filter(lambda x: x.get("period_type") == plan[i]['period_type'], types_with_duration))[0]
@@ -24,9 +24,8 @@ def add_end_dates(plan, center_obj):
                 plan[i]['end_date'] = utils.add_months_days(plan[i]['start_date'], 0, this_type.get("duration") -1)
     return plan
 
-def coming_center_courses(center_obj):
-    #center = center_obj.center_name
-    selected_db = dbset.gong_db_name(center_obj.center_name)
+def coming_center_courses(center):
+    selected_db = dbset.gong_db_name(center)
     db_center = database(utils.get_db_path() + selected_db)
 
     periods = db_center.t.coming_periods
@@ -45,21 +44,21 @@ def coming_center_courses(center_obj):
         for p in periods_db_center_obj  ## [3]
     ]
     sorted_periods = sorted(periods_db_center, key=lambda x: x['start_date'])
-    sorted_periods_ends = add_end_dates(sorted_periods, center_obj)
+    sorted_periods_ends = add_end_dates(sorted_periods, center)
     return sorted_periods_ends, date_current_course
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
 
-def get_period_types_in_db(center_obj):
-    selected_db = dbset.gong_db_name(center_obj.center_name)
+def get_period_types_in_db(center):
+    selected_db = dbset.gong_db_name(center)
     db_center = database(utils.get_db_path() + selected_db)
     period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
     return db_center, period_types_in_db
 
-def get_types_with_duration(center_obj):
-    db_center, period_types_in_db = get_period_types_in_db(center_obj)
-    params_from_excel = minio.params_from_excel_minio(center_obj.center_name)
+def get_types_with_duration(center):
+    db_center, period_types_in_db = get_period_types_in_db(center)
+    params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
     for vt in period_types_in_db:
         item = {}
@@ -71,12 +70,12 @@ def get_types_with_duration(center_obj):
                  if row.get("period_type") == vt and row.get("day") == 0), None)
         times_day_0 = [row.get("time") for row in list(db_center.t.timetables())
                  if row.get("period_type") == vt and row.get("day_type") == day_0_type] 
-        item["time_start_first_day"] = min(times_day_0)
+        item["time_start_first_day"] = min(times_day_0, default=None)
         last_day_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
                  if row.get("period_type") == vt and row.get("day") == max(days)), None)
         times_last_day = [row.get("time") for row in list(db_center.t.timetables())
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
-        item["time_end_last_day"] = max(times_last_day)
+        item["time_end_last_day"] = max(times_last_day, default=None)
         if not "repeat" in last_day_type :
             item["tags"] = "F"
         elif params_from_excel.get(utils.Pkey.DEFAULT_PERIOD, "") == vt:
@@ -92,11 +91,10 @@ def get_types_with_duration(center_obj):
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
-def check_plan(session, plan, selected_name, centers):
-    center_obj = centers[selected_name]
-    types_with_duration = get_types_with_duration(center_obj)
+def check_plan(session, plan, center):
+    types_with_duration = get_types_with_duration(center)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
-    _, period_types_in_db =  get_period_types_in_db(center_obj)
+    _, period_types_in_db =  get_period_types_in_db(center)
     session['planOK'] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
@@ -125,7 +123,9 @@ def check_plan(session, plan, selected_name, centers):
                 next_pt = plan[idx + 1].get("period_type")
                 next_start_time = next((t.get("time_start_first_day") for t in types_with_duration
                                         if t.get("period_type") == next_pt), None)
-                if this_end_time > next_start_time:
+                if this_end_time is None or next_start_time is None:
+                    row["check"] = "Missing time info"
+                elif this_end_time > next_start_time:
                     if pt == default_period or next_pt == default_period:                   
                         row["check"] = "OK Time overlap"
                     else:

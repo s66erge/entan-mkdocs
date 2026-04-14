@@ -26,6 +26,7 @@ class Skey: # session keys
     ROLE = "role"
     CENTER = "center"
     PLANOK = "planOK"
+    PARAMS = "params"
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)

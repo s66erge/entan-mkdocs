@@ -60,8 +60,8 @@ async def planning_page(session, selected_name, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/timings/load_center_periods",
-                hx_target="#center-periods"),
+                hx_get="/timings/timingsubpage",
+                hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",
                 hx_get="/unfinished?goto_dash=NO",
@@ -90,9 +90,7 @@ async def planning_page(session, selected_name, csms):
         Script(utilsJS.JS_BLOCK_NAV),
         P(""), 
         Div(id="planning-periods"),    # filled by /planning/load_dhamma_db
-        Div(id="center-periods"),      # filled by /timings/show_periods 
-        Div(id="periods-struct"),      # filled by /timings/show_days 
-        Div(id="timetables"),          # filled by /timings/show_timetables
+        Div(id="timingsubpage"),       # filled by /timings/timingsubpage      
         cls="container"
     )
 
@@ -103,7 +101,7 @@ async def planning_page(session, selected_name, csms):
 ```python
 #| id: create-html-table
 
-def show_draft_plan_table(draft_plan, center_obj, mess):
+def show_draft_plan_table(draft_plan, center, mess):
     # Create an HTML table from a draft plan list of dictionaries
     rows = []
     for idx, plan_line in enumerate(sorted(draft_plan, key=lambda x: getattr(x, "start_date", ""))):
@@ -136,7 +134,7 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
         )
 
     today = datetime.now().date()
-    _, period_types_in_db = plancheck.get_period_types_in_db(center_obj)
+    _, period_types_in_db = plancheck.get_period_types_in_db(center)
     period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
     form = Form(
         Div(
@@ -164,8 +162,8 @@ def show_draft_plan_table(draft_plan, center_obj, mess):
         Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
 
         Div("",hx_swap_oob="true",id="center-periods"),
-        Div("",hx_swap_oob="true",id="periods-struct"),
-        Div("",hx_swap_oob="true",id="timetables"),
+        #Div("",hx_swap_oob="true",id="periods-struct"),
+        #Div("",hx_swap_oob="true",id="timetables"),
 
         table,
         form,
@@ -208,28 +206,28 @@ async def save_db_plan_timetable(center_name, centers):
     dest_db.close()
     return filename
 
-async def check_save_show_plan(session, start_plan, centers, mess):
+async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
     dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
 
     plan = fetch.sort_clean(start_plan, dhamma_types, inside)
 
-    new_draft_plan = plancheck.check_plan(session, plan, selected_name, centers)
+    new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
-    return show_draft_plan_table(new_draft_plan, centers[selected_name], mess)
+    return show_draft_plan_table(new_draft_plan, selected_name, mess)
 
 # @rt('/planning/delete_line')
-async def delete_line(session, centers, index):
+async def delete_line(session, index):
     selected_name = session[utils.Skey.CENTER]
     plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return await check_save_show_plan(session, plan, centers, {"success": "line_deleted"})
+    return await check_save_show_plan(session, plan, {"success": "line_deleted"})
 
 #@rt('/planning/add_line')
-async def add_line(session, centers, ptype, start):
+async def add_line(session, ptype, start):
     selected_name = session[utils.Skey.CENTER]
     plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     # Create new plan line with user input
@@ -244,6 +242,6 @@ async def add_line(session, centers, ptype, start):
     plan.append(new_line)    
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
-    plancomp = plancheck.add_end_dates(plansor, centers[selected_name])
-    return await check_save_show_plan(session, plancomp, centers, {"success" : "new_course"})
+    plancomp = plancheck.add_end_dates(plansor, selected_name)
+    return await check_save_show_plan(session, plancomp, {"success" : "new_course"})
 ```

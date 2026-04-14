@@ -157,28 +157,51 @@ def get(session):
 async def get(session, request):
     merged_plan = await fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
                         utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
-    return await planning.check_save_show_plan(session, merged_plan, centers, {})
+    return await planning.check_save_show_plan(session, merged_plan, {})
 
 @rt('/planning/saved_plan')
 async def get(session):
     plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
-    return await planning.check_save_show_plan(session, plan, centers, {"success": "show_plan"})
+    return await planning.check_save_show_plan(session, plan, {"success": "show_plan"})
+
 
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
-    return await planning.delete_line(session, centers, idx)
+    return await planning.delete_line(session, idx)
 
 @rt('/planning/add_line')
 async def post(session, ptype: str, start: str):
-    return await planning.add_line(session, centers, ptype, start)
+    return await planning.add_line(session, ptype, start)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#timetables-changes>>[init]
 
-@rt('/timings/load_center_periods')
-async def get(session):
-    # timings.load_periods_timetables(session, centers)  # in pandas and minio
-    return timings.show_center_periods(session, centers)
+@rt('/timings/timingsubpage')
+async def get(request, session):
+    timings.load_timings(session)  # in pandas from minio
+    return timings.load_timingsubpage(request, session)
+
+@rt('/timings/center_periods')
+def get(session):
+    return timings.show_center_periods(session)
+
+@rt('/timings/select_period')
+def get(session, request):
+    params = dict(request.query_params)
+    period_type = params.get("period_type")
+    return timings.select_period(session, period_type)
+
+@rt('/timings/select_timetable')
+def get(session, request):
+    params = dict(request.query_params)
+    period_type = params.get("period_type")
+    day_type = params.get("day_type")
+    return timings.select_timetable(session, params, period_type, day_type)
+
+@rt('/timings/delete_timetable_row')
+def get(session, request):
+    return timings.delete_timetable_row(session, request)
+
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]
