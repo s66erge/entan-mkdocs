@@ -157,7 +157,7 @@ def timetable_form(session, period_type, day_type):
                 Textarea(name="comment", rows=3, placeholder="Enter comment..."),
                 Button("Save gong timing", type="submit", cls="btn btn-primary"),
                 hx_post="/timings/add_timetable",
-                hx_target="#center-periods",
+                hx_target="#feedback-times",
             )
         )
     )
