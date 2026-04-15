@@ -243,7 +243,13 @@ def get(session, request):
 
 @rt('/timings/delete_timetable_row')
 def get(session, request):
-    return timechan.delete_timetable_row(session, request)
+    params = dict(request.query_params)
+    idx = params.get("idx")
+    return timechan.change_timetable_row(session, request, idx, "", dupli=False)
+
+@rt('/timings/duplicate_timetable_row')
+def post(session, request, index: int, new_time: str):
+    return timechan.change_timetable_row(session, request, index, new_time, dupli=True)
 
 @rt('/timings/add_timetable_row')
 def post(session, request, period_type: str, day_type: str, time: str, gong_id: str,

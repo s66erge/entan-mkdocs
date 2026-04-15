@@ -178,9 +178,22 @@ def select_timetable(session, params, period_type, day_type):
     center = session[utils.Skey.CENTER]
     timetables_df = minio.get_center_temp_df(center, "timetables")
     timetables_df["Actions"] = timetables_df.index.to_series().apply(
-        lambda idx: A("Delete",
-            hx_get=f"/timings/delete_timetable_row?idx={idx}",
-            hx_target="#center-periods"
+        lambda idx: Div(
+            A("Delete",
+                hx_get=f"/timings/delete_timetable_row?idx={idx}",
+                hx_target="#center-periods"
+            ),
+            Form(
+                Input(type="hidden", name="index", value=idx),
+                Input(type="time", name="new_time", required=True, 
+                    style="flex: 0 0 auto; max-width: 100px;"),
+                Button("Duplicate", type="submit", 
+                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 80px;"),
+                hx_post=f"/timings/duplicate_timetable_row",
+                hx_target="#center-periods",
+                style="display: inline-flex; align-items: center; gap: 0.2rem; "
+            ),            
+            style="display: inline-flex; align-items: center; gap: 25px;"
         )
     )
     filtered = timetables_df[

@@ -9,21 +9,31 @@ import libs.timings as timings
 # ~/~ begin <<docs/gong-web-app/timings-change.md#delete-timetable-struct>>[init]
 
 # @rt('/timings/delete_timetable_row')
-def delete_timetable_row(session, request):
-    params = dict(request.query_params)
-    idx = params.get("idx")
+def change_timetable_row(session, request, idx, new_time, dupli):
     center = session[utils.Skey.CENTER]
     timetables_df = minio.get_center_temp_df(center, "timetables")
     period_type = timetables_df.loc[int(idx), "period_type"]
     day_type = timetables_df.loc[int(idx), "day_type"]
     time = timetables_df.loc[int(idx), "time"]
-    new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
+    if dupli:
+        if ((timetables_df["period_type"] == period_type) & (timetables_df["day_type"] == day_type) & (timetables_df["time"] == new_time)).any():
+            new_timetable = timetables_df
+            message = {"error": "time_already_exists", 'time': new_time}
+        else:
+            new_row = timetables_df.loc[int(idx)].copy()
+            new_row["time"] = new_time
+            new_timetable = pd.concat([timetables_df, pd.DataFrame([new_row])], ignore_index=True)
+            new_timetable = new_timetable.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
+            message = {"success": "time_duplicated", 'new_time': new_time}
+    else:
+        new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
+        message = {"success": "time_deleted", 'time': time}
     minio.save_df_center_temp(center, "timetables", new_timetable)
     return Div(
         timings.show_center_periods(session),
         Div(timings.select_period(session, period_type, clear_show_times=False), 
             hx_swap_oob="true", id="periods-struct"),
-        Div(timings.select_timetable(session, {"success": "time_deleted", 'time': time}, period_type, day_type),
+        Div(timings.select_timetable(session, message, period_type, day_type),
             hx_swap_oob="true", id="show-times")
     )
 
