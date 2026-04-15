@@ -17,7 +17,7 @@ from fasthtml.common import *
 from datetime import datetime, timezone
 import libs.dbset as dbset
 import libs.admin as admin
-import libs.utils as utils
+import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
 from libs.authpass import get_password_hash
@@ -53,7 +53,7 @@ def delete_user(email, users, planners, centers):
             message = {"success": "user_deleted"}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             ## [4]
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -95,7 +95,7 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
             message = {"success": "user_added"}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             Div(admin.show_users_form(roles), hx_swap_oob="true", id="users-form"),
             ## [2]
@@ -141,7 +141,7 @@ def delete_center(center_name, users, centers, planners, db_path):
                 message = {'success' : 'center_deleted'}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             ## [6]
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
@@ -201,7 +201,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
             message = {'success': 'center_added'}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
             ## [3]
@@ -230,7 +230,7 @@ def delete_planner(user_email, center_name, planners):
             message = {"success" : "planner_deleted"}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None
         )
 
@@ -268,7 +268,7 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
             message = {'success' : 'planner_added'}
 
         return Div(
-            Div(utils.feedback_to_user(message)),
+            Div(messages.feedback_to_user(message)),
             Div(admin.show_planners_table(planners), hx_swap_oob="true", id="planners-table") if "success" in message else None,
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form")
         )

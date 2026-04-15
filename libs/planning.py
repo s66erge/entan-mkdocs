@@ -1,15 +1,12 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 
 import asyncio
-import json
 import os
 import shutil
-from tabulate import tabulate
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from fasthtml.common import *
 import libs.utils as utils
-import libs.cdash as cdash 
+import libs.messages as messages
 import libs.plancheck as plancheck
 import libs.fetch as fetch
 import libs.dbset as dbset
@@ -76,7 +73,7 @@ def show_draft_plan_table(draft_plan, center, mess):
     )
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
-        Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
+        Div(messages.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
 
         Div("",hx_swap_oob="true",id="center-periods"),
         #Div("",hx_swap_oob="true",id="periods-struct"),

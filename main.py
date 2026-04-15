@@ -13,9 +13,11 @@ import libs.fetch as fetch
 import libs.admin as admin
 import libs.adchan as adchan
 import libs.utils as utils
+import libs.messages as messages
 import libs.states as states
 import libs.transit as transit
 import libs.timings as timings
+import libs.timechan as timechan
 import libs.minio as minio
 
 #  from starlette.testclient import TestClient
@@ -141,7 +143,7 @@ def get(session):
 @rt('/save-center-db')
 async def get(session):
     if not session[utils.Skey.PLANOK]:
-        return utils.feedback_to_user({"error": "plan_not_ok"})
+        return messages.feedback_to_user({"error": "plan_not_ok"})
     state_mach = states.csms[session[utils.Skey.CENTER]]
     state_mach.progress()   # from 'edit' to 'save_db'
     return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
@@ -200,12 +202,14 @@ def get(session, request):
 
 @rt('/timings/delete_timetable_row')
 def get(session, request):
-    return timings.delete_timetable_row(session, request)
+    return timechan.delete_timetable_row(session, request)
 
 @rt('/timings/add_timetable_row')
-async def post(session, request, period_type: str, day_type: str, time: str, gong_id: str,
-               auto: str = "0", targets: list = None, comment: str = ""):
-    return await timings.add_timetable_row(session, request, period_type, day_type, time, gong_id, auto, targets, comment)
+def post(session, request, period_type: str, day_type: str, time: str, gong_id: str,
+               auto: str = "0", targets: list[str] = None, comment: str = ""):
+    print(targets)
+    return timechan.add_timetable_row(session, request, period_type, day_type, time,
+                                     gong_id, auto, targets, comment)
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]
 
@@ -289,7 +293,7 @@ def db_error(session, etext: str):
     return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Head(Title("Database error")),
-        Body(Div(utils.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        Body(Div(messages.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
         (A("Dashboard", href="/dashboard")),
         cls="container"
     )

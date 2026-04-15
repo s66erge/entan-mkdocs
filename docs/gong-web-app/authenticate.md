@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 from functools import wraps
 from fasthtml.common import *
 import libs.utils as utils
+import libs.messages as messages
+
 
 <<build-serve-login-form>>
 <<handling-form>>
@@ -112,7 +114,7 @@ def post(email: str):
 
 def create_code(email, users):
     if not email:
-        return (utils.feedback_to_user({'error': 'missing_email'}))
+        return (messages.feedback_to_user({'error': 'missing_email'}))
 
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
@@ -126,7 +128,7 @@ def create_code(email, users):
         )
         send_login_code_email(email, login_code)
         return (
-            P(utils.feedback_to_user({'success': 'login_code_sent'}), id="success"),
+            P(messages.feedback_to_user({'success': 'login_code_sent'}), id="success"),
             HttpHeader('HX-Reswap', 'outerHTML'),
             Button("Code sent", type="submit", id="submit-btn", disabled=True, hx_swap_oob="true"),
             Div(code_form(), id='code_form', hx_swap_oob="true")
@@ -134,7 +136,7 @@ def create_code(email, users):
     except IndexError:
         # Handle case when no user is found
         return Div(
-            utils.feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
+            messages.feedback_to_user({'error': 'not_registered', 'email': f"{email}"}),
         )
 
 ```
@@ -196,7 +198,7 @@ def verify_code(session, code, timezon, users):
     try:
         user = users("magic_link_token = ? AND magic_link_expiry > ?", (code, nowstr))[0]
     except IndexError:
-        return utils.feedback_to_user({'error': 'invalid_or_expired_code'})
+        return messages.feedback_to_user({'error': 'invalid_or_expired_code'})
 
     User = users.dataclass()
     session.clear()

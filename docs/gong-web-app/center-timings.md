@@ -5,28 +5,19 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```python
 #| file: libs/timings.py 
 
-import asyncio
-import json
-import os
-import shutil
 import pandas as pd
-from tabulate import tabulate
-from datetime import datetime
-from zoneinfo import ZoneInfo
 from urllib.parse import quote_plus
 from fasthtml.common import *
+from libs import timechan
 import libs.utils as utils
-import libs.cdash as cdash 
+import libs.messages as messages
 import libs.plancheck as plancheck
-import libs.fetch as fetch
 import libs.dbset as dbset
 import libs.minio as minio
-import libs.utilsJS as utilsJS
-
+import libs.timechan as timechan
 
 <<check-show-period-types>>
 <<show-struct-timetable>>
-<<delete-timetable-struct>>
 <<load-save-timings>>
 
 ```
@@ -131,7 +122,7 @@ def load_timingsubpage(request, session):
             hx_trigger="load"),
         Div("", id= "center-periods"),
         Div("", id= "periods-struct"),
-        # Div(utils.feedback_to_user(params), id="feedback-times"),
+        # Div(messages.feedback_to_user(params), id="feedback-times"),
         Div("", id= "show-times"),
     )
 
@@ -152,6 +143,7 @@ def show_center_periods(session):
         Div("",hx_swap_oob="true",id="show-times"),
         H2("Center periods"),
         Div(Safe(html_periods)),
+        # FIXME message if no errors
         Div(H3("Timing errors"),
             Safe(html_errors)) if html_errors else None,
     )
@@ -197,103 +189,10 @@ def select_timetable(session, params, period_type, day_type):
     html_timetables = filtered.fillna("").to_html(index=False, escape=False)
     return Div(
         H3(f"Timetable for day type: '{day_type}' in period type: '{period_type}'"),
-        Div(utils.feedback_to_user(params), id="feedback-times"),
+        Div(messages.feedback_to_user(params), id="feedback-times"),
         Safe(html_timetables),
-        timetable_form(session, period_type, day_type)
+        timechan.timetable_form(session, period_type, day_type)
     )
-
-```
-
-### Delete a row in the timetable or in the structure table
-
-```python
-#| id: delete-timetable-struct
-
-# @rt('/timings/delete_timetable_row')
-def delete_timetable_row(session, request):
-    params = dict(request.query_params)
-    idx = params.get("idx")
-    center = session[utils.Skey.CENTER]
-    timetables_df = minio.get_center_temp_df(center, "timetables")
-    period_type = timetables_df.loc[int(idx), "period_type"]
-    day_type = timetables_df.loc[int(idx), "day_type"]
-    new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
-    minio.save_df_center_temp(center, "timetables", new_timetable)
-    return Div(
-        show_center_periods(session),
-        Div(select_period(session, period_type, clear_show_times=False), 
-            hx_swap_oob="true", id="periods-struct"),
-        Div(select_timetable(session, {"success": "time_deleted"}, period_type, day_type), hx_swap_oob="true", id="show-times")
-    )
-
-def timetable_form(session, period_type, day_type):
-    """Create a timetable form for new entries"""    
-    center = session[utils.Skey.CENTER]
-    gongs_df = minio.get_center_temp_df(center, "gongs")
-    targets = minio.get_center_temp_df(center, "targets")["shortname"].tolist()
-    return Main(
-        Div( 
-            Form(
-                Input(type="hidden", name="period_type", value=period_type),
-                Input(type="hidden", name="day_type", value=day_type),
-                # Time input
-                Span(Label("Time"), 
-                    Input(type="time", name="time", value="", cls="form-control", required=True),
-                ),
-                # Gong ID dropdown
-                Span(Label("Gong"),
-                    Select(
-                        *[Option(id, value=id) for id in gongs_df['id'].unique()],
-                        name="gong_id", required=True
-                    )
-                ),
-                # Auto checkbox
-                Div(Label("Auto", cls="form-check-label"),
-                    Input(type="checkbox", name="auto", value="1"),
-                ),
-                # Targets (default to "CC")
-                Span(Label("Targets"),
-                    Select(
-                        *[Option(target, value=target) for target in targets],
-                        name="targets", multiple=True, required=True
-                    )
-                ),
-                # Comment field
-                Textarea(name="comment", rows=3, placeholder="Enter comment..."),
-                Button("Save gong timing", type="submit", cls="btn btn-primary"),
-                hx_post="/timings/add_timetable_row",
-                hx_target="#feedback-times",
-            )
-        )
-    )
-
-# @rt('/timings/add_timetable')
-def add_timetable_row(session, request, period_type, day_type, time, gong_id, auto, targets, comment):
-    center = session[utils.Skey.CENTER]
-    try:
-        new_data = {
-            "period_type": period_type,
-            "day_type": day_type,
-            "time": time,
-            "gong_id": int(gong_id),
-            "auto": auto,
-            "targets": targets.join(" "),
-            "comment": comment
-        }
-        timetables_df = minio.get_center_temp_df(center, "timetables")
-        timetables_df = pd.concat([timetables_df, pd.DataFrame([new_data])], ignore_index=True)
-
-        minio.save_df_center_temp(center, "timetables", timetables_df)
-
-        # Signal success to the user
-        session['flash_message'] = {"success": "Timetable added successfully!"}
-
-        return Redirect(f"/timings/timingsubpage")
-
-    except Exception as e:
-          utils.logging.error(f"Failed to write timetable to df: {e}")
-          return utils.feedback_to_user({"error": f"Failed to save timetable due to a backend error: {e.__class__.__name__}"})
-
 
 ```
 

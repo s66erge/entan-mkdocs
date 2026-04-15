@@ -3,6 +3,7 @@
 import asyncio
 from fasthtml.common import *
 import libs.utils as utils
+import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
 
@@ -134,25 +135,25 @@ def show_page(request, users, roles, centers, planners):
         Div(utils.display_markdown("admin-t")),
 
         H2("Users"),
-        Div(utils.feedback_to_user(params), id="users-feedback"),
+        Div(messages.feedback_to_user(params), id="users-feedback"),
         Div(show_users_table(users), id="users-table"),
         H4("Add New User"),
         Div(show_users_form(roles), id="users-form"),
 
         H2("Centers"),
-        Div(utils.feedback_to_user(params), id="centers-feedback"),
+        Div(messages.feedback_to_user(params), id="centers-feedback"),
         Div(show_centers_table(centers), id="centers-table"),
         H4("Add New Center"),
         Div(show_centers_form(centers), id="centers-form"),
 
         H2("Planners"),
-        Div(utils.feedback_to_user(params), id="planners-feedback"),
+        Div(messages.feedback_to_user(params), id="planners-feedback"),
         Div(show_planners_table(planners), id="planners-table"),
         H4("Add New Planner"),
         Div(show_planners_form(users, centers), id="planners-form"),
 
         H2("Center configuration"),
-        Div(utils.feedback_to_user(params), id="config-feedback"),
+        Div(messages.feedback_to_user(params), id="config-feedback"),
         H4("Upload a new configuration excel file and copy it in database"),
         upload_form(centers),
         H4("Download a center configuration excel file from the database"),
@@ -202,7 +203,7 @@ async def upload_config(file: UploadFile, center_name: str):
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')
-    return Div(utils.feedback_to_user(mess))
+    return Div(messages.feedback_to_user(mess))
 
 async def download_config(session, request):
     try:
