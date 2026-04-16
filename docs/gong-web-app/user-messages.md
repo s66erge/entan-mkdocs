@@ -39,7 +39,7 @@ def feed_text(params):
         'not_registered':f'Email "{params.get("email", "")}" is not registered, try again or send a message to xxx@xxx.xx to get registered',
         'invalid_or_expired_code': 'The code is invalid ot expired. Check if if it is correct. Or refresh the page to ask for another code.',
         'missing_fields': 'Please fill in all required fields.',
-        'plan_not_ok': 'Correct the planning errors before saving this plan',
+        'plan_not_ok': 'Correct the planning errors before saving this plan: click "Load saved plan" and suppress the red indicators.',
         'user_exists': 'User with this email already exists.',
         'center_exists': 'Center with this name already exists.',
         'planner_exists': 'This planner association already exists.',
@@ -55,7 +55,9 @@ def feed_text(params):
         'bad_config_filename': 'The filename does not match the center name and/or is nor a .xslx excel file',
         'center_not_free': 'Cannot delete a center or modify its config when not in the "free" state: its planning is currently under modification',
         'template_not_free': 'Cannot copy a template if it is not free: being modified',
-        'time_already_exists': f'Time already exists in the planning: {params.get("time", "")}.'
+        'time_already_exists': f'Time already exists in the planning: {params.get("time", "")}.',
+        'timings_not_ok': 'Correct the timings errors before saving this plan: click "Load saved timetables" and suppress all lines in table "Timing errors".',
+        'plan_not_saved': 'Create an initial plan with "(re)Start planning" before loading a saved plan'
     }
     message = ""
     result = ""

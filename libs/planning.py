@@ -120,11 +120,11 @@ async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
     dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
-
     plan = fetch.sort_clean(start_plan, dhamma_types, inside)
-
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
+
+    session[utils.Skey.SAVED_PLAN] = True
     return show_draft_plan_table(new_draft_plan, selected_name, mess)
 
 # @rt('/planning/delete_line')
@@ -159,7 +159,6 @@ async def add_line(session, ptype, start):
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, csms):
-    session['planOK'] = False
     csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),

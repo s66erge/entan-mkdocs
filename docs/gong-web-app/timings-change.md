@@ -11,17 +11,31 @@ import libs.utils as utils
 import libs.minio as minio
 import libs.timings as timings
 
-<<delete-timetable-struct>>
+
+<<change-struct>>
+<<change-timetables>>
 
 ```
 
-### Delete a row in the timetable or in the structure table
+### Modify structures
 
 ```python
-#| id: delete-timetable-struct
+#| id: change-struct
+
+# @rt('/timings/change_day_type')
+def change_day_type(session, index, day_type):
+    return
+
+```
+
+
+### Modify timetables
+
+```python
+#| id: change-timetables
 
 # @rt('/timings/delete_timetable_row')
-def change_timetable_row(session, request, idx, new_time, dupli):
+def change_timetable_row(session, idx, new_time, dupli):
     center = session[utils.Skey.CENTER]
     timetables_df = minio.get_center_temp_df(center, "timetables")
     period_type = timetables_df.loc[int(idx), "period_type"]
@@ -82,9 +96,8 @@ def timetable_form(session, period_type, day_type):
                         name="targets", multiple=True, required=True
                     )
                 ),
-                # Comment field
                 Textarea(name="comment", rows=3, placeholder="Enter comment..."),
-                Button("Save gong timing", type="submit", cls="btn btn-primary"),
+                Button("Save new gong timing or modify an existing time", type="submit"),
                 hx_post="/timings/add_timetable_row",
                 hx_target="#center-periods",
             )
@@ -92,7 +105,7 @@ def timetable_form(session, period_type, day_type):
     )
 
 # @rt('/timings/add_timetable')
-def add_timetable_row(session, request, period_type, day_type, time, gong_id, auto, targets, comment):
+def add_timetable_row(session, period_type, day_type, time, gong_id, auto, targets, comment):
     center = session[utils.Skey.CENTER]
     new_data = {
         "period_type": period_type,

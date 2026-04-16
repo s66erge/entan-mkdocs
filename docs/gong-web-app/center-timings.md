@@ -42,6 +42,7 @@ def load_timings(session):
     minio.save_df_center_temp(center, "targets", targets_df)
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
+    session[utils.Skey.SAVED_TIMES] = True
     return
 
 def check_timings(session):
@@ -128,6 +129,7 @@ def load_timingsubpage(request, session):
 
 def show_center_periods(session):
     center = session[utils.Skey.CENTER]
+    session[utils.Skey.TIMESOK] = True
     center_periods_df = minio.get_center_temp_df(center, "center_periods")
     center_periods_df["Actions"] = center_periods_df['period_type'].apply(
         lambda pt: A("Select",
@@ -137,15 +139,16 @@ def show_center_periods(session):
     )
     html_periods = center_periods_df.to_html(index=False, escape=False)
     errors_df = check_timings(session)
-    html_errors = errors_df.to_html(index=False) if not errors_df.empty else None
+    if len(errors_df) > 0:
+        session[utils.Skey.TIMESOK] = False
+        html_errors = errors_df.to_html(index=False)
     return Div(
         Div("",hx_swap_oob="true",id="periods-struct"),
         Div("",hx_swap_oob="true",id="show-times"),
         H2("Center periods"),
         Div(Safe(html_periods)),
-        # FIXME message if no errors
         Div(H3("Timing errors"),
-            Safe(html_errors)) if html_errors else None,
+            Safe(html_errors)) if len(errors_df) > 0 else H3("No timing errors found"),
     )
 
 ```
@@ -159,11 +162,31 @@ def show_center_periods(session):
 def select_period(session, period_type, clear_show_times=True):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    timetables_df = minio.get_center_temp_df(center, "timetables")
+    day_types = timetables_df[timetables_df["period_type"] == period_type]['day_type'].unique()
+    print(list(day_types))
     filtered = periods_struct_df[periods_struct_df["period_type"] == period_type]
-    filtered["Actions"] = filtered['day_type'].apply(
-        lambda dt: A("Select",
-            hx_get=f"/timings/select_timetable?period_type={quote_plus(period_type)}&day_type={quote_plus(dt)}",
-            hx_target="#show-times"
+    filtered["Actions"] = filtered.index.to_series().apply(
+        lambda idx: Div(
+            A("Detail timings",
+                hx_get=f"/timings/select_timetable?period_type={quote_plus(period_type)}&day_type={quote_plus(filtered.at[idx,"day_type"])}",
+                hx_target="#show-times"
+            ),
+            Form(
+                Input(type="hidden", name="index", value=idx),
+                Input(list="day_type", name="day_type", required=True,
+                        style="flex: 0 0 auto; width: 250px;"),
+                Datalist(
+                    *[Option(dt, value=dt) for dt in list(day_types)],
+                    id="day_type",
+                ),
+                Button("Choose day_type or create new one", type="submit", 
+                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 260px;"),
+                hx_post=f"/timings/change_day_type",
+                hx_target="#center-periods",
+                style="display: inline-flex; align-items: center; gap: 0.2rem;"
+            ),            
+            style="display: inline-flex; align-items: center; gap: 50px;"
         )
     )
     html_struct = filtered.to_html(index=False, escape=False)
@@ -186,12 +209,12 @@ def select_timetable(session, params, period_type, day_type):
             Form(
                 Input(type="hidden", name="index", value=idx),
                 Input(type="time", name="new_time", required=True, 
-                    style="flex: 0 0 auto; max-width: 100px;"),
+                    style="flex: 0 0 auto; width: 100px;"),
                 Button("Duplicate", type="submit", 
                     style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 80px;"),
                 hx_post=f"/timings/duplicate_timetable_row",
                 hx_target="#center-periods",
-                style="display: inline-flex; align-items: center; gap: 0.2rem; "
+                style="display: inline-flex; align-items: center; gap: 0.2rem;"
             ),            
             style="display: inline-flex; align-items: center; gap: 25px;"
         )

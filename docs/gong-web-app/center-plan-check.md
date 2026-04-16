@@ -24,7 +24,7 @@ def check_plan(session, plan, center):
     types_with_duration = get_types_with_duration(center)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
     _, period_types_in_db =  get_period_types_in_db(center)
-    session['planOK'] = True
+    session[utils.Skey.PLANOK] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
             row["check"] = "OK"
@@ -66,7 +66,7 @@ def check_plan(session, plan, center):
             else:
                 row["check"] = "OK"
         if not (row["check"].startswith("OK") or row["check"].startswith("CHECK")):
-            session['planOK'] = False
+            session[utils.Skey.PLANOK] = False
     return plan
 ```
 
