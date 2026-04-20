@@ -1,419 +1,1390 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+
+<html class="no-js" lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://s66erge.github.io/entan-mkdocs/gong-web-app/0-gong-prog/" />
-      <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Gong main program - Gong system and apps for Vipassane centers</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
-    <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-    
-      <script>
-        // Current page data
-        var mkdocs_page_name = "Gong main program";
-        var mkdocs_page_input_path = "gong-web-app\\0-gong-prog.md";
-        var mkdocs_page_url = "/entan-mkdocs/gong-web-app/0-gong-prog/";
-      </script>
-    
-    <!--[if lt IE 9]>
-      <script src="../../js/html5shiv.min.js"></script>
-    <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script> 
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://s66erge.github.io/entan-mkdocs/gong-web-app/0-gong-prog/" rel="canonical"/>
+<link href="../../gong-players/intro/" rel="prev"/>
+<link href="../admin-change/" rel="next"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
+<title>Gong main program - Gong system and apps for Vipassane centers</title>
+<link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
 </head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
-          <a href="../.." class="icon icon-home"> Gong system and apps for Vipassane centers
-        </a><div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
-  </form>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#gong-main-program">
+          Skip to content
+        </a>
 </div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
-                </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Architecture</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/aintro/">Overall architecture</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/data-design/">Database design</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../architecture/ui-archi/">UI architecture</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Gong players</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../gong-players/intro/">Intro</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Gong web app</span></p>
-              <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Gong main program</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#program-start">Program start</a>
-    </li>
-    </ul>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../admin-change/">Admin change functions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../admin-show/">Admin page</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../authenticate/">Authentication with a code by email</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../authentipass/">Authentication with passwords</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center-consult/">Center consult page</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center-dashboard/">Center dashboard page</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center-plan-check/">Center planning page</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center-planning/">Center planning page</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center_machines/">Center state machines</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../center_transitions/">Center machines transitions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../database-setup/">Database setup and init</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../fetch-courses/">Get schedule from dhamma.org and merge into center schedule</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../send_db_to_pi/">Send database to center rasperry Pi</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../utilities/">Utilities</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../utils-javascript/">JS utilities</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Obtain schedule</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../obtain-schedule/API/">dhamma.org courses API</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Setup deploy</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/a-python-environ/">The python environment</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/entangled/">Entangled</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/mkdocs/">MkDocs</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../setup-deploy/railway/">Railway</a>
-                  </li>
-              </ul>
-      </div>
-    </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../..">Gong system and apps for Vipassane centers</a>
-        
-      </nav>
-      <div class="wy-nav-content">
-        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Gong web app</li>
-      <li class="breadcrumb-item active">Gong main program</li>
-    <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/s66erge/entan-mkdocs/edit/master/docs/gong-web-app/0-gong-prog.md" class="icon icon-github"> Edit on GitHub</a>
-    </li>
-  </ul>
-  <hr/>
+<div data-md-component="announce">
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-            <div class="section" itemprop="articleBody">
-              
-                <h1 id="gong-main-program">Gong main program<a class="headerlink" href="#gong-main-program" title="Permanent link">#</a></h1>
-<h3 id="program-start">Program start<a class="headerlink" href="#program-start" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">myFasthtml</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.states</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">states</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">auth</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">admin_required</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.cdash</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cdash</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.consul</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">consul</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dbset</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.planning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">planning</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.fetch</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fetch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.admin</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">admin</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.adchan</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">adchan</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utils</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.states</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">states</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">libs.transit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">transit</span>
-
-<span class="c1">#  from starlette.testclient import TestClient</span>
-
-<span class="o">&lt;&lt;</span><span class="n">initialize</span><span class="o">-</span><span class="n">program</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">login</span><span class="o">-</span><span class="n">authenticate</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">consult</span><span class="o">-</span><span class="n">centers</span><span class="o">-</span><span class="n">plans</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">courses</span><span class="o">-</span><span class="n">planning</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">users</span><span class="o">-</span><span class="n">admin</span><span class="o">&gt;&gt;</span>
-<span class="o">&lt;&lt;</span><span class="n">other</span><span class="o">-</span><span class="n">routes</span><span class="o">&gt;&gt;</span>
-</code></pre></div>
-<div id="initialize-program" class="highlight"><pre><span></span><code><span class="n">custom_styles</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">.mw-960 { max-width: 960px; }</span>
-<span class="s2">.mw-480 { max-width: 480px; }</span>
-<span class="s2">.mx-auto { margin-left: auto; margin-right: auto; }</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">css</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s1">&#39;:root {--pico-font-size: 95% ; --pico-font-family: Roboto;}&#39;</span><span class="p">)</span>
-<span class="n">htmxsse</span> <span class="o">=</span> <span class="n">Script</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;https://unpkg.com/htmx-ext-sse@2.2.1/sse.js&quot;</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">before</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
-   <span class="n">auth</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">scope</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-   <span class="k">if</span> <span class="ow">not</span> <span class="n">auth</span><span class="p">:</span> <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
-
-<span class="n">bware</span> <span class="o">=</span> <span class="n">Beforeware</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;/favicon\.ico&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;/static/.*&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;.*\.css&#39;</span><span class="p">,</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;/create_magic_link&#39;</span><span class="p">,</span> <span class="s1">&#39;/verify_code&#39;</span><span class="p">,</span> <span class="s1">&#39;/create_code&#39;</span> <span class="p">])</span>
-
-<span class="n">app</span><span class="p">,</span> <span class="n">rt</span> <span class="o">=</span> <span class="n">fast_app</span><span class="p">(</span><span class="n">live</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Gong Users&quot;</span><span class="p">,</span> <span class="n">favicon</span><span class="o">=</span><span class="s2">&quot;favicon.ico&quot;</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="n">bware</span><span class="p">,</span> <span class="n">hdrs</span><span class="o">=</span><span class="p">(</span><span class="n">picolink</span><span class="p">,</span><span class="n">css</span><span class="p">,</span><span class="n">custom_styles</span><span class="p">,</span><span class="n">htmxsse</span><span class="p">),)</span>
-<span class="c1"># client = TestClient(app)</span>
-
-<span class="n">db_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span>
-<span class="n">db</span> <span class="o">=</span> <span class="n">dbset</span><span class="o">.</span><span class="n">get_central_db</span><span class="p">()</span>
-<span class="n">utils</span><span class="o">.</span><span class="n">wipe_all_temps</span><span class="p">()</span>
-
-<span class="n">roles</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Role</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">&#39;role_name&#39;</span><span class="p">)</span>
-<span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">User</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">&#39;email&#39;</span><span class="p">)</span>
-<span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Center</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">&#39;center_name&#39;</span><span class="p">)</span>
-<span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Planner</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;user_email&#39;</span><span class="p">,</span> <span class="s1">&#39;center_name&#39;</span><span class="p">))</span>
-
-<span class="n">dbset</span><span class="o">.</span><span class="n">init_data</span><span class="p">(</span><span class="n">roles</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
-<span class="n">clocks</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">create_center_state_machines</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">workflow_supervisor</span><span class="p">():</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">center</span> <span class="ow">in</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">transit</span><span class="o">.</span><span class="n">check_and_advance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">&quot;startup&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_supervisor</span><span class="p">():</span>
-    <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">workflow_supervisor</span><span class="p">())</span>
-</code></pre></div>
-<div id="login-authenticate" class="highlight"><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/create_code&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">create_code</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/verify_code&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">timezon</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timezone&#39;</span><span class="p">,</span> <span class="s1">&#39;UTC&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">verify_code</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">timezon</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span> 
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">&quot;home-t&quot;</span><span class="p">)),</span>
-        <span class="n">A</span><span class="p">(</span><span class="s2">&quot;Login&quot;</span><span class="p">,</span><span class="n">href</span><span class="o">=</span><span class="s2">&quot;/login&quot;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">&quot;button&quot;</span><span class="p">),</span>
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
-    <span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">]</span>
-    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">cdash</span><span class="o">.</span><span class="n">dashboard</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
-</code></pre></div>
-<div id="consult-centers-plans" class="highlight"><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult_page&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_db&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_period&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/consult/select_timetable&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-</code></pre></div>
-<div id="courses-planning" class="highlight"><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning_page&#39;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">center</span>
-    <span class="n">enter_edit_OK</span> <span class="o">=</span> <span class="k">await</span> <span class="n">transit</span><span class="o">.</span><span class="n">check_center_free</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">[</span><span class="n">center</span><span class="p">],</span> <span class="n">clocks</span><span class="p">[</span><span class="n">center</span><span class="p">],</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">enter_edit_OK</span><span class="p">:</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">create_temp_path</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">planning_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">,</span> <span class="n">clocks</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/status_page?center=</span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/status_page&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">planning</span><span class="o">.</span><span class="n">status_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning/load_dhamma_db&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">planning</span><span class="o">.</span><span class="n">load_dhamma_db</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning/check_show_dhamma&#39;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">merged_plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="o">.</span><span class="n">fetch_dhamma_courses</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">],</span>
-                        <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">MONTHS_TO_FETCH</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">DAYS_TO_FETCH</span><span class="p">)</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">merged_plan</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="p">{})</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning/delete_line/</span><span class="si">{idx}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">delete_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning/add_line&#39;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/planning/abandon_edit&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="n">utils</span><span class="o">.</span><span class="n">delete_temp_path</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">transit</span><span class="o">.</span><span class="n">abandon_edit</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/save-center-db&#39;</span><span class="p">)</span>
-<span class="c1"># FIXME move getting user offset to dashboard ?</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
-    <span class="n">state_mach</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">[</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;planOK&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;plan_not_ok&quot;</span><span class="p">})</span>
-    <span class="n">save_db_path</span> <span class="o">=</span> <span class="n">planning</span><span class="o">.</span><span class="n">save_db_plan_timetable</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">],</span> <span class="n">centers</span><span class="p">)</span>
-    <span class="n">state_mach</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_db_path</span> <span class="o">=</span> <span class="n">save_db_path</span>
-    <span class="n">utils</span><span class="o">.</span><span class="n">delete_temp_path</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">])</span>
-    <span class="c1"># await transit.send_check_center_db(session, centers, states.csms, offset, save_db_path)</span>
-    <span class="n">state_mach</span><span class="o">.</span><span class="n">progress</span><span class="p">()</span>   <span class="c1"># from &#39;edit&#39; to &#39;wait_01&#39;</span>
-    <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/status_page?center=</span><span class="si">{</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div>
-<div id="users-admin" class="highlight"><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/admin_page&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">admin</span><span class="o">.</span><span class="n">show_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">roles</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/delete_user/</span><span class="si">{email}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_user</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">planners</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/add_user&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_user_email</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_user</span><span class="p">(</span><span class="n">new_user_email</span><span class="p">,</span> <span class="n">name</span> <span class="p">,</span><span class="n">role_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">roles</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/delete_center/</span><span class="si">{center_name}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_center</span><span class="p">(</span><span class="n">center_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/add_center&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_center_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">new_timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">new_gong_db_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">new_center_location</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">db_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_center</span><span class="p">(</span><span class="n">new_center_name</span><span class="p">,</span> <span class="n">new_timezone</span><span class="p">,</span> <span class="n">new_gong_db_name</span><span class="p">,</span> <span class="n">new_center_location</span><span class="p">,</span> <span class="n">db_template</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/delete_planner/</span><span class="si">{user_email}</span><span class="s1">/</span><span class="si">{center_name}</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user_email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_planner</span><span class="p">(</span><span class="n">user_email</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/add_planner&#39;</span><span class="p">)</span>
-<span class="nd">@admin_required</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_planner_user_email</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">new_planner_center_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_planner</span><span class="p">(</span><span class="n">new_planner_user_email</span><span class="p">,</span> <span class="n">new_planner_center_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
-</code></pre></div>
-<div id="other-routes" class="highlight"><pre><span></span><code><span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/no_access_right&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">))),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="s2">&quot;Access Denied&quot;</span><span class="p">),</span>
-            <span class="n">P</span><span class="p">(</span><span class="s2">&quot;You do not have permission to access this page.&quot;</span><span class="p">)),</span>
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
-    <span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/unfinished&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
-    <span class="n">goto_dash</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;goto_dash&quot;</span><span class="p">,</span> <span class="s2">&quot;YES&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)))</span> <span class="k">if</span> <span class="n">goto_dash</span> <span class="o">==</span> <span class="s2">&quot;YES&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Div</span><span class="p">(</span><span class="n">H3</span><span class="p">(</span><span class="s2">&quot;This feature is not yet implemented.&quot;</span><span class="p">))</span>
-        <span class="c1">#cls=&quot;container&quot;</span>
-    <span class="p">)</span>
-
-<span class="nd">@rt</span><span class="p">(</span><span class="s1">&#39;/db_error&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">db_error</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">etext</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Html</span><span class="p">(</span>
-        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">))),</span>
-        <span class="n">Head</span><span class="p">(</span><span class="n">Title</span><span class="p">(</span><span class="s2">&quot;Database error&quot;</span><span class="p">)),</span>
-        <span class="n">Body</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;db_error&#39;</span><span class="p">,</span> <span class="s1">&#39;etext&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">etext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}))),</span>
-        <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">&quot;Dashboard&quot;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)),</span>
-        <span class="bp">cls</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>
-    <span class="p">)</span>
-
-<span class="n">serve</span><span class="p">()</span>
-</code></pre></div>
-              
-            </div>
-          </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../gong-players/intro/" class="btn btn-neutral float-left" title="Intro"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../admin-change/" class="btn btn-neutral float-right" title="Admin change functions">Next <span class="icon icon-circle-arrow-right"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Gong system and apps for Vipassane centers" class="md-header__button md-logo" data-md-component="logo" href="../.." title="Gong system and apps for Vipassane centers">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Gong system and apps for Vipassane centers
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Gong main program
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/s66erge/entan-mkdocs" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
   </div>
-
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-          
-        </div>
-      </div>
-
-    </section>
-
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--integrated" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Gong system and apps for Vipassane centers" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="Gong system and apps for Vipassane centers">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    Gong system and apps for Vipassane centers
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/s66erge/entan-mkdocs" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
   </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
 
-  <div class="rst-versions" role="note" aria-label="Versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
-    
-        <span>
-          <a href="https://github.com/s66erge/entan-mkdocs" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
-        </span>
-    
-    
-      <span><a href="../../gong-players/intro/" style="color: #fcfcfc">&laquo; Previous</a></span>
-    
-    
-      <span><a href="../admin-change/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
-</div>
-    <script src="../../js/jquery-3.6.0.min.js"></script>
-    <script>var base_url = "../..";</script>
-    <script src="../../js/theme_extra.js"></script>
-    <script src="../../js/theme.js"></script>
-      <script src="../../search/main.js"></script>
-    <script>
-        jQuery(function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        });
-    </script>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    Architecture
+  
 
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/aintro/">
+<span class="md-ellipsis">
+    
+  
+    Overall architecture
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/data-design/">
+<span class="md-ellipsis">
+    
+  
+    Database design
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/ui-archi/">
+<span class="md-ellipsis">
+    
+  
+    UI architecture
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    Gong players
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Gong players
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../gong-players/intro/">
+<span class="md-ellipsis">
+    
+  
+    Intro
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    Gong web app
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Gong web app
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Gong main program
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Gong main program
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#program-start">
+<span class="md-ellipsis">
+      
+        Program start
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#initializations">
+<span class="md-ellipsis">
+      
+        Initializations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-for-authentication">
+<span class="md-ellipsis">
+      
+        Routes for authentication
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-for-consulting-planningstimetables">
+<span class="md-ellipsis">
+      
+        Routes for consulting plannings/timetables
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-to-startsave-planning-and-timetables">
+<span class="md-ellipsis">
+      
+        Routes to start/save planning and timetables
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-for-planning-modification">
+<span class="md-ellipsis">
+      
+        Routes for planning modification
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-for-timetables-changes">
+<span class="md-ellipsis">
+      
+        Routes for timetables changes
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#routes-for-admin">
+<span class="md-ellipsis">
+      
+        Routes for admin
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#other-routes">
+<span class="md-ellipsis">
+      
+        Other routes
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../admin-change/">
+<span class="md-ellipsis">
+    
+  
+    Admin change functions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../admin-show/">
+<span class="md-ellipsis">
+    
+  
+    Admin page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../authenticate/">
+<span class="md-ellipsis">
+    
+  
+    Authentication with a code by email
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../authentipass/">
+<span class="md-ellipsis">
+    
+  
+    Authentication with passwords
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center-consult/">
+<span class="md-ellipsis">
+    
+  
+    Center consult page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center-dashboard/">
+<span class="md-ellipsis">
+    
+  
+    Center dashboard page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center-plan-check/">
+<span class="md-ellipsis">
+    
+  
+    Center planning page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center-planning/">
+<span class="md-ellipsis">
+    
+  
+    Center planning page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center-timings/">
+<span class="md-ellipsis">
+    
+  
+    Timetables page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center_machines/">
+<span class="md-ellipsis">
+    
+  
+    Center state machines
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../center_transitions/">
+<span class="md-ellipsis">
+    
+  
+    Center machines transitions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../database-setup/">
+<span class="md-ellipsis">
+    
+  
+    Database setup and init
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../fetch-courses/">
+<span class="md-ellipsis">
+    
+  
+    Get schedule from dhamma.org and merge into center schedule
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../minio_access/">
+<span class="md-ellipsis">
+    
+  
+    Get/send file/data to minio for center rasperry Pi and local files
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../timings-change/">
+<span class="md-ellipsis">
+    
+  
+    Change timetables page
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-messages/">
+<span class="md-ellipsis">
+    
+  
+    Messages to the user
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../utilities/">
+<span class="md-ellipsis">
+    
+  
+    Utilities
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../utils-javascript/">
+<span class="md-ellipsis">
+    
+  
+    JS utilities
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    Obtain schedule
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Obtain schedule
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../obtain-schedule/API/">
+<span class="md-ellipsis">
+    
+  
+    dhamma.org courses API
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    Setup deploy
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Setup deploy
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../setup-deploy/a-python-environ/">
+<span class="md-ellipsis">
+    
+  
+    The python environment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../setup-deploy/entangled/">
+<span class="md-ellipsis">
+    
+  
+    Entangled
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../setup-deploy/mkdocs/">
+<span class="md-ellipsis">
+    
+  
+    MkDocs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../setup-deploy/railway/">
+<span class="md-ellipsis">
+    
+  
+    Railway
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="gong-main-program">Gong main program<a class="headerlink" href="#gong-main-program" title="Permanent link">#</a></h1>
+<h3 id="program-start">Program start<a class="headerlink" href="#program-start" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span>
+<span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span>
+<span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span>
+<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1">#| file: main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fasthtml.common</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>  <span class="c1"># (1)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.states</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">states</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">auth</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">libs.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">admin_required</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.cdash</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cdash</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.consul</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">consul</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.dbset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dbset</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.planning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">planning</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.fetch</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fetch</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.admin</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">admin</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.adchan</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">adchan</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">utils</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.messages</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">messages</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.states</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">states</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.transit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">transit</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.timings</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">timings</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.timechan</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">timechan</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="kn">import</span><span class="w"> </span><span class="nn">libs.minio</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">minio</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="c1">#  from starlette.testclient import TestClient</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="o">&lt;&lt;</span><span class="n">initialize</span><span class="o">-</span><span class="n">program</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="o">&lt;&lt;</span><span class="n">login</span><span class="o">-</span><span class="n">authenticate</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="o">&lt;&lt;</span><span class="n">consult</span><span class="o">-</span><span class="n">centers</span><span class="o">-</span><span class="n">plans</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="o">&lt;&lt;</span><span class="n">start</span><span class="o">-</span><span class="n">save</span><span class="o">-</span><span class="n">plan</span><span class="o">-</span><span class="n">times</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="o">&lt;&lt;</span><span class="n">courses</span><span class="o">-</span><span class="n">planning</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="o">&lt;&lt;</span><span class="n">timetables</span><span class="o">-</span><span class="n">changes</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="o">&lt;&lt;</span><span class="n">users</span><span class="o">-</span><span class="n">admin</span><span class="o">&gt;&gt;</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="o">&lt;&lt;</span><span class="n">other</span><span class="o">-</span><span class="n">routes</span><span class="o">&gt;&gt;</span>
+</span></code></pre></div></td></tr></table></div>
+<ol>
+<li>Another annotation MERMAID2  - Found superfences config: 'custom_fences': 'name': 'mermaid', 'class': 'mermaid', 'format': function fence_mermaid at 0x000002B15DA79D00</li>
+</ol>
+<h3 id="initializations">Initializations<a class="headerlink" href="#initializations" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span>
+<span class="normal"><a href="#__codelineno-1-15">15</a></span>
+<span class="normal"><a href="#__codelineno-1-16">16</a></span>
+<span class="normal"><a href="#__codelineno-1-17">17</a></span>
+<span class="normal"><a href="#__codelineno-1-18">18</a></span>
+<span class="normal"><a href="#__codelineno-1-19">19</a></span>
+<span class="normal"><a href="#__codelineno-1-20">20</a></span>
+<span class="normal"><a href="#__codelineno-1-21">21</a></span>
+<span class="normal"><a href="#__codelineno-1-22">22</a></span>
+<span class="normal"><a href="#__codelineno-1-23">23</a></span>
+<span class="normal"><a href="#__codelineno-1-24">24</a></span>
+<span class="normal"><a href="#__codelineno-1-25">25</a></span>
+<span class="normal"><a href="#__codelineno-1-26">26</a></span>
+<span class="normal"><a href="#__codelineno-1-27">27</a></span>
+<span class="normal"><a href="#__codelineno-1-28">28</a></span>
+<span class="normal"><a href="#__codelineno-1-29">29</a></span>
+<span class="normal"><a href="#__codelineno-1-30">30</a></span>
+<span class="normal"><a href="#__codelineno-1-31">31</a></span>
+<span class="normal"><a href="#__codelineno-1-32">32</a></span>
+<span class="normal"><a href="#__codelineno-1-33">33</a></span>
+<span class="normal"><a href="#__codelineno-1-34">34</a></span>
+<span class="normal"><a href="#__codelineno-1-35">35</a></span>
+<span class="normal"><a href="#__codelineno-1-36">36</a></span>
+<span class="normal"><a href="#__codelineno-1-37">37</a></span>
+<span class="normal"><a href="#__codelineno-1-38">38</a></span>
+<span class="normal"><a href="#__codelineno-1-39">39</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1">#| id: initialize-program</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="n">custom_styles</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s2">"""</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="s2">.mw-960 { max-width: 960px; }</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="s2">.mw-480 { max-width: 480px; }</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="s2">.mx-auto { margin-left: auto; margin-right: auto; }</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="s2">"""</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="n">css</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="s1">':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}'</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9"></a><span class="n">htmxsse</span> <span class="o">=</span> <span class="n">Script</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="k">def</span><span class="w"> </span><span class="nf">before</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12"></a>   <span class="n">auth</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">scope</span><span class="p">[</span><span class="s1">'auth'</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'auth'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13"></a>   <span class="k">if</span> <span class="ow">not</span> <span class="n">auth</span><span class="p">:</span> <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14"></a>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="n">bware</span> <span class="o">=</span> <span class="n">Beforeware</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">'/favicon\.ico'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'/static/.*'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'.*\.css'</span><span class="p">,</span><span class="s1">'/login'</span><span class="p">,</span><span class="s1">'/'</span><span class="p">,</span> <span class="s1">'/create_magic_link'</span><span class="p">,</span> <span class="s1">'/verify_code'</span><span class="p">,</span> <span class="s1">'/create_code'</span> <span class="p">])</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="n">app</span><span class="p">,</span> <span class="n">rt</span> <span class="o">=</span> <span class="n">fast_app</span><span class="p">(</span><span class="n">live</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Gong Users"</span><span class="p">,</span> <span class="n">favicon</span><span class="o">=</span><span class="s2">"favicon.ico"</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="n">bware</span><span class="p">,</span> <span class="n">hdrs</span><span class="o">=</span><span class="p">(</span><span class="n">picolink</span><span class="p">,</span><span class="n">css</span><span class="p">,</span><span class="n">custom_styles</span><span class="p">,</span><span class="n">htmxsse</span><span class="p">),)</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18"></a><span class="c1"># client = TestClient(app)</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19"></a>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20"></a><span class="n">db_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21"></a><span class="n">db</span> <span class="o">=</span> <span class="n">dbset</span><span class="o">.</span><span class="n">get_central_db</span><span class="p">()</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="n">minio</span><span class="o">.</span><span class="n">minio_client</span> <span class="o">=</span> <span class="n">minio</span><span class="o">.</span><span class="n">create_minio_client</span><span class="p">()</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23"></a>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24"></a><span class="n">roles</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Role</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">'role_name'</span><span class="p">)</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25"></a><span class="n">users</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">User</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">'email'</span><span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26"></a><span class="n">centers</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Center</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="s1">'center_name'</span><span class="p">)</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27"></a><span class="n">planners</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dbset</span><span class="o">.</span><span class="n">Planner</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="p">(</span><span class="s1">'user_email'</span><span class="p">,</span> <span class="s1">'center_name'</span><span class="p">))</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28"></a>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29"></a><span class="n">dbset</span><span class="o">.</span><span class="n">init_data</span><span class="p">(</span><span class="n">roles</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30"></a><span class="n">states</span><span class="o">.</span><span class="n">init_center_state_machines</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31"></a>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">workflow_supervisor</span><span class="p">():</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34"></a>        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35"></a>        <span class="k">for</span> <span class="n">center</span> <span class="ow">in</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">:</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36"></a>            <span class="k">await</span> <span class="n">transit</span><span class="o">.</span><span class="n">check_and_advance</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37"></a><span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">"startup"</span><span class="p">)</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_supervisor</span><span class="p">():</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">workflow_supervisor</span><span class="p">())</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-for-authentication">Routes for authentication<a class="headerlink" href="#routes-for-authentication" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span>
+<span class="normal"><a href="#__codelineno-2-11">11</a></span>
+<span class="normal"><a href="#__codelineno-2-12">12</a></span>
+<span class="normal"><a href="#__codelineno-2-13">13</a></span>
+<span class="normal"><a href="#__codelineno-2-14">14</a></span>
+<span class="normal"><a href="#__codelineno-2-15">15</a></span>
+<span class="normal"><a href="#__codelineno-2-16">16</a></span>
+<span class="normal"><a href="#__codelineno-2-17">17</a></span>
+<span class="normal"><a href="#__codelineno-2-18">18</a></span>
+<span class="normal"><a href="#__codelineno-2-19">19</a></span>
+<span class="normal"><a href="#__codelineno-2-20">20</a></span>
+<span class="normal"><a href="#__codelineno-2-21">21</a></span>
+<span class="normal"><a href="#__codelineno-2-22">22</a></span>
+<span class="normal"><a href="#__codelineno-2-23">23</a></span>
+<span class="normal"><a href="#__codelineno-2-24">24</a></span>
+<span class="normal"><a href="#__codelineno-2-25">25</a></span>
+<span class="normal"><a href="#__codelineno-2-26">26</a></span>
+<span class="normal"><a href="#__codelineno-2-27">27</a></span>
+<span class="normal"><a href="#__codelineno-2-28">28</a></span>
+<span class="normal"><a href="#__codelineno-2-29">29</a></span>
+<span class="normal"><a href="#__codelineno-2-30">30</a></span>
+<span class="normal"><a href="#__codelineno-2-31">31</a></span>
+<span class="normal"><a href="#__codelineno-2-32">32</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1">#| id: login-authenticate</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a>    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/create_code'</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9"></a>    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">create_code</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/verify_code'</span><span class="p">)</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13"></a>    <span class="n">timezon</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'timezone'</span><span class="p">,</span> <span class="s1">'UTC'</span><span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14"></a>    <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">verify_code</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">timezon</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span> 
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18"></a>    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19"></a>        <span class="n">Div</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">display_markdown</span><span class="p">(</span><span class="s2">"home-t"</span><span class="p">)),</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20"></a>        <span class="n">A</span><span class="p">(</span><span class="s2">"Login"</span><span class="p">,</span><span class="n">href</span><span class="o">=</span><span class="s2">"/login"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"button"</span><span class="p">),</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21"></a>        <span class="bp">cls</span><span class="o">=</span><span class="s2">"container"</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22"></a>    <span class="p">)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23"></a>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/logout'</span><span class="p">)</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26"></a>    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">AUTH</span><span class="p">]</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27"></a>    <span class="k">del</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">ROLE</span><span class="p">]</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28"></a>    <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">)</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29"></a>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/dashboard'</span><span class="p">)</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32"></a>    <span class="k">return</span> <span class="n">cdash</span><span class="o">.</span><span class="n">dashboard</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-for-consulting-planningstimetables">Routes for consulting plannings/timetables<a class="headerlink" href="#routes-for-consulting-planningstimetables" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-3-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-3-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-3-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-3-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-3-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-3-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-3-10">10</a></span>
+<span class="normal"><a href="#__codelineno-3-11">11</a></span>
+<span class="normal"><a href="#__codelineno-3-12">12</a></span>
+<span class="normal"><a href="#__codelineno-3-13">13</a></span>
+<span class="normal"><a href="#__codelineno-3-14">14</a></span>
+<span class="normal"><a href="#__codelineno-3-15">15</a></span>
+<span class="normal"><a href="#__codelineno-3-16">16</a></span>
+<span class="normal"><a href="#__codelineno-3-17">17</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1">#| id: consult-centers-plans</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/consult_page'</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5"></a>    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/consult/select_db'</span><span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9"></a>    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_db</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/consult/select_period'</span><span class="p">)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13"></a>    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_period</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/consult/select_timetable'</span><span class="p">)</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17"></a>    <span class="k">return</span> <span class="n">consul</span><span class="o">.</span><span class="n">consult_select_timetable</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-to-startsave-planning-and-timetables">Routes to start/save planning and timetables<a class="headerlink" href="#routes-to-startsave-planning-and-timetables" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-4-10">10</a></span>
+<span class="normal"><a href="#__codelineno-4-11">11</a></span>
+<span class="normal"><a href="#__codelineno-4-12">12</a></span>
+<span class="normal"><a href="#__codelineno-4-13">13</a></span>
+<span class="normal"><a href="#__codelineno-4-14">14</a></span>
+<span class="normal"><a href="#__codelineno-4-15">15</a></span>
+<span class="normal"><a href="#__codelineno-4-16">16</a></span>
+<span class="normal"><a href="#__codelineno-4-17">17</a></span>
+<span class="normal"><a href="#__codelineno-4-18">18</a></span>
+<span class="normal"><a href="#__codelineno-4-19">19</a></span>
+<span class="normal"><a href="#__codelineno-4-20">20</a></span>
+<span class="normal"><a href="#__codelineno-4-21">21</a></span>
+<span class="normal"><a href="#__codelineno-4-22">22</a></span>
+<span class="normal"><a href="#__codelineno-4-23">23</a></span>
+<span class="normal"><a href="#__codelineno-4-24">24</a></span>
+<span class="normal"><a href="#__codelineno-4-25">25</a></span>
+<span class="normal"><a href="#__codelineno-4-26">26</a></span>
+<span class="normal"><a href="#__codelineno-4-27">27</a></span>
+<span class="normal"><a href="#__codelineno-4-28">28</a></span>
+<span class="normal"><a href="#__codelineno-4-29">29</a></span>
+<span class="normal"><a href="#__codelineno-4-30">30</a></span>
+<span class="normal"><a href="#__codelineno-4-31">31</a></span>
+<span class="normal"><a href="#__codelineno-4-32">32</a></span>
+<span class="normal"><a href="#__codelineno-4-33">33</a></span>
+<span class="normal"><a href="#__codelineno-4-34">34</a></span>
+<span class="normal"><a href="#__codelineno-4-35">35</a></span>
+<span class="normal"><a href="#__codelineno-4-36">36</a></span>
+<span class="normal"><a href="#__codelineno-4-37">37</a></span>
+<span class="normal"><a href="#__codelineno-4-38">38</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1">#| id: start-save-plan-times</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning_page'</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5"></a>    <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">]</span> <span class="o">=</span> <span class="n">center</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6"></a>    <span class="n">enter_edit_OK</span> <span class="o">=</span> <span class="k">await</span> <span class="n">transit</span><span class="o">.</span><span class="n">check_center_free</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">[</span><span class="n">center</span><span class="p">],</span> <span class="n">session</span><span class="p">[</span><span class="s1">'auth'</span><span class="p">])</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7"></a>    <span class="k">if</span> <span class="n">enter_edit_OK</span><span class="p">:</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8"></a>        <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">PLANOK</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9"></a>        <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">TIMESOK</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10"></a>        <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">SAVED_PLAN</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11"></a>        <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">SAVED_TIMES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">planning_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14"></a>        <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/status_page?center=</span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15"></a>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/status_page'</span><span class="p">)</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18"></a>    <span class="k">return</span> <span class="n">cdash</span><span class="o">.</span><span class="n">status_page</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19"></a>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/abandon_edit'</span><span class="p">)</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22"></a>    <span class="n">minio</span><span class="o">.</span><span class="n">remove_center_temp_data</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">])</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23"></a>    <span class="k">return</span> <span class="n">transit</span><span class="o">.</span><span class="n">abandon_edit</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24"></a>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/timer_done'</span><span class="p">)</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27"></a>    <span class="n">minio</span><span class="o">.</span><span class="n">remove_center_temp_data</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">])</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28"></a>    <span class="k">return</span> <span class="n">transit</span><span class="o">.</span><span class="n">timer_done</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">)</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29"></a>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/save-center-db'</span><span class="p">)</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">PLANOK</span><span class="p">]:</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33"></a>        <span class="k">return</span> <span class="n">messages</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"plan_not_ok"</span><span class="p">})</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">TIMESOK</span><span class="p">]:</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35"></a>        <span class="k">return</span> <span class="n">messages</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"timings_not_ok"</span><span class="p">})</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36"></a>    <span class="n">state_mach</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">csms</span><span class="p">[</span><span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">]]</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37"></a>    <span class="n">state_mach</span><span class="o">.</span><span class="n">progress</span><span class="p">()</span>   <span class="c1"># from 'edit' to 'save_db'</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38"></a>    <span class="k">return</span> <span class="n">Redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/status_page?center=</span><span class="si">{</span><span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-for-planning-modification">Routes for planning modification<a class="headerlink" href="#routes-for-planning-modification" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-5-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-5-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-5-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-5-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-5-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-5-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-5-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-5-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-5-10">10</a></span>
+<span class="normal"><a href="#__codelineno-5-11">11</a></span>
+<span class="normal"><a href="#__codelineno-5-12">12</a></span>
+<span class="normal"><a href="#__codelineno-5-13">13</a></span>
+<span class="normal"><a href="#__codelineno-5-14">14</a></span>
+<span class="normal"><a href="#__codelineno-5-15">15</a></span>
+<span class="normal"><a href="#__codelineno-5-16">16</a></span>
+<span class="normal"><a href="#__codelineno-5-17">17</a></span>
+<span class="normal"><a href="#__codelineno-5-18">18</a></span>
+<span class="normal"><a href="#__codelineno-5-19">19</a></span>
+<span class="normal"><a href="#__codelineno-5-20">20</a></span>
+<span class="normal"><a href="#__codelineno-5-21">21</a></span>
+<span class="normal"><a href="#__codelineno-5-22">22</a></span>
+<span class="normal"><a href="#__codelineno-5-23">23</a></span>
+<span class="normal"><a href="#__codelineno-5-24">24</a></span>
+<span class="normal"><a href="#__codelineno-5-25">25</a></span>
+<span class="normal"><a href="#__codelineno-5-26">26</a></span>
+<span class="normal"><a href="#__codelineno-5-27">27</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="c1">#| id: courses-planning</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/load_dhamma_db'</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5"></a>    <span class="k">return</span> <span class="n">planning</span><span class="o">.</span><span class="n">load_dhamma_db</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/check_show_dhamma'</span><span class="p">)</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9"></a>    <span class="n">merged_plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="o">.</span><span class="n">fetch_dhamma_courses</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">],</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10"></a>                        <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">MONTHS_TO_FETCH</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">Globals</span><span class="o">.</span><span class="n">DAYS_TO_FETCH</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">merged_plan</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12"></a>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/saved_plan'</span><span class="p">)</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">SAVED_PLAN</span><span class="p">]:</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16"></a>        <span class="k">return</span> <span class="n">messages</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"plan_not_saved"</span><span class="p">})</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17"></a>    <span class="n">plan</span> <span class="o">=</span> <span class="n">minio</span><span class="o">.</span><span class="n">get_center_temp_list_of_dicts</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">],</span> <span class="s2">"planning"</span><span class="p">)</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">check_save_show_plan</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="p">{</span><span class="s2">"success"</span><span class="p">:</span> <span class="s2">"show_plan"</span><span class="p">})</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19"></a>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20"></a>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/delete_line/</span><span class="si">{idx}</span><span class="s1">'</span><span class="p">)</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">delete_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/planning/add_line'</span><span class="p">)</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">planning</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-for-timetables-changes">Routes for timetables changes<a class="headerlink" href="#routes-for-timetables-changes" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-6-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-6-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-6-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-6-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-6-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-6-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-6-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-6-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-6-10">10</a></span>
+<span class="normal"><a href="#__codelineno-6-11">11</a></span>
+<span class="normal"><a href="#__codelineno-6-12">12</a></span>
+<span class="normal"><a href="#__codelineno-6-13">13</a></span>
+<span class="normal"><a href="#__codelineno-6-14">14</a></span>
+<span class="normal"><a href="#__codelineno-6-15">15</a></span>
+<span class="normal"><a href="#__codelineno-6-16">16</a></span>
+<span class="normal"><a href="#__codelineno-6-17">17</a></span>
+<span class="normal"><a href="#__codelineno-6-18">18</a></span>
+<span class="normal"><a href="#__codelineno-6-19">19</a></span>
+<span class="normal"><a href="#__codelineno-6-20">20</a></span>
+<span class="normal"><a href="#__codelineno-6-21">21</a></span>
+<span class="normal"><a href="#__codelineno-6-22">22</a></span>
+<span class="normal"><a href="#__codelineno-6-23">23</a></span>
+<span class="normal"><a href="#__codelineno-6-24">24</a></span>
+<span class="normal"><a href="#__codelineno-6-25">25</a></span>
+<span class="normal"><a href="#__codelineno-6-26">26</a></span>
+<span class="normal"><a href="#__codelineno-6-27">27</a></span>
+<span class="normal"><a href="#__codelineno-6-28">28</a></span>
+<span class="normal"><a href="#__codelineno-6-29">29</a></span>
+<span class="normal"><a href="#__codelineno-6-30">30</a></span>
+<span class="normal"><a href="#__codelineno-6-31">31</a></span>
+<span class="normal"><a href="#__codelineno-6-32">32</a></span>
+<span class="normal"><a href="#__codelineno-6-33">33</a></span>
+<span class="normal"><a href="#__codelineno-6-34">34</a></span>
+<span class="normal"><a href="#__codelineno-6-35">35</a></span>
+<span class="normal"><a href="#__codelineno-6-36">36</a></span>
+<span class="normal"><a href="#__codelineno-6-37">37</a></span>
+<span class="normal"><a href="#__codelineno-6-38">38</a></span>
+<span class="normal"><a href="#__codelineno-6-39">39</a></span>
+<span class="normal"><a href="#__codelineno-6-40">40</a></span>
+<span class="normal"><a href="#__codelineno-6-41">41</a></span>
+<span class="normal"><a href="#__codelineno-6-42">42</a></span>
+<span class="normal"><a href="#__codelineno-6-43">43</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="c1">#| id: timetables-changes</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/timingsubpage'</span><span class="p">)</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5"></a>    <span class="n">timings</span><span class="o">.</span><span class="n">load_timings</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>  <span class="c1"># in pandas from minio</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6"></a>    <span class="k">return</span> <span class="n">timings</span><span class="o">.</span><span class="n">load_timingsubpage</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/center_periods'</span><span class="p">)</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10"></a>    <span class="k">return</span> <span class="n">timings</span><span class="o">.</span><span class="n">show_center_periods</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11"></a>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/select_period'</span><span class="p">)</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14"></a>    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15"></a>    <span class="n">period_type</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"period_type"</span><span class="p">)</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16"></a>    <span class="k">return</span> <span class="n">timings</span><span class="o">.</span><span class="n">select_period</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">period_type</span><span class="p">)</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17"></a>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/select_timetable'</span><span class="p">)</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20"></a>    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21"></a>    <span class="n">period_type</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"period_type"</span><span class="p">)</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22"></a>    <span class="n">day_type</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"day_type"</span><span class="p">)</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23"></a>    <span class="k">return</span> <span class="n">timings</span><span class="o">.</span><span class="n">select_timetable</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">period_type</span><span class="p">,</span> <span class="n">day_type</span><span class="p">)</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24"></a>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/delete_timetable_row'</span><span class="p">)</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27"></a>    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28"></a>    <span class="n">idx</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"idx"</span><span class="p">)</span>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29"></a>    <span class="k">return</span> <span class="n">timechan</span><span class="o">.</span><span class="n">change_timetable_row</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">dupli</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30"></a>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/duplicate_timetable_row'</span><span class="p">)</span>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33"></a>    <span class="k">return</span> <span class="n">timechan</span><span class="o">.</span><span class="n">change_timetable_row</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">new_time</span><span class="p">,</span> <span class="n">dupli</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-6-34"><a id="__codelineno-6-34" name="__codelineno-6-34"></a>
+</span><span id="__span-6-35"><a id="__codelineno-6-35" name="__codelineno-6-35"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/add_timetable_row'</span><span class="p">)</span>
+</span><span id="__span-6-36"><a id="__codelineno-6-36" name="__codelineno-6-36"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">period_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">day_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gong_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-6-37"><a id="__codelineno-6-37" name="__codelineno-6-37"></a>               <span class="n">auto</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"0"</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
+</span><span id="__span-6-38"><a id="__codelineno-6-38" name="__codelineno-6-38"></a>    <span class="k">return</span> <span class="n">timechan</span><span class="o">.</span><span class="n">add_timetable_row</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">period_type</span><span class="p">,</span> <span class="n">day_type</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span>
+</span><span id="__span-6-39"><a id="__codelineno-6-39" name="__codelineno-6-39"></a>                                     <span class="n">gong_id</span><span class="p">,</span> <span class="n">auto</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+</span><span id="__span-6-40"><a id="__codelineno-6-40" name="__codelineno-6-40"></a>
+</span><span id="__span-6-41"><a id="__codelineno-6-41" name="__codelineno-6-41"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/timings/change_day_type'</span><span class="p">)</span>
+</span><span id="__span-6-42"><a id="__codelineno-6-42" name="__codelineno-6-42"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">day_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-6-43"><a id="__codelineno-6-43" name="__codelineno-6-43"></a>    <span class="k">return</span> <span class="n">timechan</span><span class="o">.</span><span class="n">change_day_type</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">day_type</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="routes-for-admin">Routes for admin<a class="headerlink" href="#routes-for-admin" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span>
+<span class="normal"><a href="#__codelineno-7-12">12</a></span>
+<span class="normal"><a href="#__codelineno-7-13">13</a></span>
+<span class="normal"><a href="#__codelineno-7-14">14</a></span>
+<span class="normal"><a href="#__codelineno-7-15">15</a></span>
+<span class="normal"><a href="#__codelineno-7-16">16</a></span>
+<span class="normal"><a href="#__codelineno-7-17">17</a></span>
+<span class="normal"><a href="#__codelineno-7-18">18</a></span>
+<span class="normal"><a href="#__codelineno-7-19">19</a></span>
+<span class="normal"><a href="#__codelineno-7-20">20</a></span>
+<span class="normal"><a href="#__codelineno-7-21">21</a></span>
+<span class="normal"><a href="#__codelineno-7-22">22</a></span>
+<span class="normal"><a href="#__codelineno-7-23">23</a></span>
+<span class="normal"><a href="#__codelineno-7-24">24</a></span>
+<span class="normal"><a href="#__codelineno-7-25">25</a></span>
+<span class="normal"><a href="#__codelineno-7-26">26</a></span>
+<span class="normal"><a href="#__codelineno-7-27">27</a></span>
+<span class="normal"><a href="#__codelineno-7-28">28</a></span>
+<span class="normal"><a href="#__codelineno-7-29">29</a></span>
+<span class="normal"><a href="#__codelineno-7-30">30</a></span>
+<span class="normal"><a href="#__codelineno-7-31">31</a></span>
+<span class="normal"><a href="#__codelineno-7-32">32</a></span>
+<span class="normal"><a href="#__codelineno-7-33">33</a></span>
+<span class="normal"><a href="#__codelineno-7-34">34</a></span>
+<span class="normal"><a href="#__codelineno-7-35">35</a></span>
+<span class="normal"><a href="#__codelineno-7-36">36</a></span>
+<span class="normal"><a href="#__codelineno-7-37">37</a></span>
+<span class="normal"><a href="#__codelineno-7-38">38</a></span>
+<span class="normal"><a href="#__codelineno-7-39">39</a></span>
+<span class="normal"><a href="#__codelineno-7-40">40</a></span>
+<span class="normal"><a href="#__codelineno-7-41">41</a></span>
+<span class="normal"><a href="#__codelineno-7-42">42</a></span>
+<span class="normal"><a href="#__codelineno-7-43">43</a></span>
+<span class="normal"><a href="#__codelineno-7-44">44</a></span>
+<span class="normal"><a href="#__codelineno-7-45">45</a></span>
+<span class="normal"><a href="#__codelineno-7-46">46</a></span>
+<span class="normal"><a href="#__codelineno-7-47">47</a></span>
+<span class="normal"><a href="#__codelineno-7-48">48</a></span>
+<span class="normal"><a href="#__codelineno-7-49">49</a></span>
+<span class="normal"><a href="#__codelineno-7-50">50</a></span>
+<span class="normal"><a href="#__codelineno-7-51">51</a></span>
+<span class="normal"><a href="#__codelineno-7-52">52</a></span>
+<span class="normal"><a href="#__codelineno-7-53">53</a></span>
+<span class="normal"><a href="#__codelineno-7-54">54</a></span>
+<span class="normal"><a href="#__codelineno-7-55">55</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1">#| id: users-admin</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/admin_page'</span><span class="p">)</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6"></a>    <span class="k">return</span> <span class="n">admin</span><span class="o">.</span><span class="n">show_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">roles</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7"></a>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/delete_user/</span><span class="si">{email}</span><span class="s1">'</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_user</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">planners</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/add_user'</span><span class="p">)</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_user_email</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span><span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_user</span><span class="p">(</span><span class="n">new_user_email</span><span class="p">,</span> <span class="n">name</span> <span class="p">,</span><span class="n">role_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">roles</span><span class="p">,</span> <span class="n">centers</span><span class="p">)</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17"></a>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/delete_center/</span><span class="si">{center_name}</span><span class="s1">'</span><span class="p">)</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_center</span><span class="p">(</span><span class="n">center_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22"></a>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/add_center'</span><span class="p">)</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_center_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">center_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_center</span><span class="p">(</span><span class="n">new_center_name</span><span class="p">,</span> <span class="n">center_template</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">db_path</span><span class="p">)</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27"></a>
+</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/upload_config'</span><span class="p">)</span>
+</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span><span class="p">,</span> <span class="n">center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-7-30"><a id="__codelineno-7-30" name="__codelineno-7-30"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">admin</span><span class="o">.</span><span class="n">upload_config</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">center_name</span><span class="p">)</span>
+</span><span id="__span-7-31"><a id="__codelineno-7-31" name="__codelineno-7-31"></a>
+</span><span id="__span-7-32"><a id="__codelineno-7-32" name="__codelineno-7-32"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/download_config/</span><span class="si">{center_name}</span><span class="s1">'</span><span class="p">)</span>
+</span><span id="__span-7-33"><a id="__codelineno-7-33" name="__codelineno-7-33"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-7-34"><a id="__codelineno-7-34" name="__codelineno-7-34"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">admin</span><span class="o">.</span><span class="n">download_config</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+</span><span id="__span-7-35"><a id="__codelineno-7-35" name="__codelineno-7-35"></a>
+</span><span id="__span-7-36"><a id="__codelineno-7-36" name="__codelineno-7-36"></a><span class="nd">@rt</span><span class="p">(</span><span class="s2">"/download_it"</span><span class="p">)</span>
+</span><span id="__span-7-37"><a id="__codelineno-7-37" name="__codelineno-7-37"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+</span><span id="__span-7-38"><a id="__codelineno-7-38" name="__codelineno-7-38"></a>    <span class="n">center</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">Skey</span><span class="o">.</span><span class="n">CENTER</span><span class="p">]</span>
+</span><span id="__span-7-39"><a id="__codelineno-7-39" name="__codelineno-7-39"></a>    <span class="n">filename</span> <span class="o">=</span> <span class="n">center</span> <span class="o">+</span> <span class="s2">".xlsx"</span>
+</span><span id="__span-7-40"><a id="__codelineno-7-40" name="__codelineno-7-40"></a>    <span class="n">file_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_db_path</span><span class="p">()</span> <span class="o">+</span> <span class="n">filename</span>
+</span><span id="__span-7-41"><a id="__codelineno-7-41" name="__codelineno-7-41"></a>    <span class="k">return</span> <span class="n">FileResponse</span><span class="p">(</span>
+</span><span id="__span-7-42"><a id="__codelineno-7-42" name="__codelineno-7-42"></a>        <span class="n">file_path</span><span class="p">,</span>
+</span><span id="__span-7-43"><a id="__codelineno-7-43" name="__codelineno-7-43"></a>        <span class="n">media_type</span><span class="o">=</span><span class="s2">"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</span><span class="p">,</span>
+</span><span id="__span-7-44"><a id="__codelineno-7-44" name="__codelineno-7-44"></a>        <span class="n">filename</span><span class="o">=</span><span class="n">filename</span>
+</span><span id="__span-7-45"><a id="__codelineno-7-45" name="__codelineno-7-45"></a>    <span class="p">)</span>
+</span><span id="__span-7-46"><a id="__codelineno-7-46" name="__codelineno-7-46"></a>
+</span><span id="__span-7-47"><a id="__codelineno-7-47" name="__codelineno-7-47"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/delete_planner/</span><span class="si">{user_email}</span><span class="s1">/</span><span class="si">{center_name}</span><span class="s1">'</span><span class="p">)</span>
+</span><span id="__span-7-48"><a id="__codelineno-7-48" name="__codelineno-7-48"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-49"><a id="__codelineno-7-49" name="__codelineno-7-49"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">user_email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">center_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-7-50"><a id="__codelineno-7-50" name="__codelineno-7-50"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">delete_planner</span><span class="p">(</span><span class="n">user_email</span><span class="p">,</span> <span class="n">center_name</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
+</span><span id="__span-7-51"><a id="__codelineno-7-51" name="__codelineno-7-51"></a>
+</span><span id="__span-7-52"><a id="__codelineno-7-52" name="__codelineno-7-52"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/add_planner'</span><span class="p">)</span>
+</span><span id="__span-7-53"><a id="__codelineno-7-53" name="__codelineno-7-53"></a><span class="nd">@admin_required</span>
+</span><span id="__span-7-54"><a id="__codelineno-7-54" name="__codelineno-7-54"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">new_planner_user_email</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">new_planner_center_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
+</span><span id="__span-7-55"><a id="__codelineno-7-55" name="__codelineno-7-55"></a>    <span class="k">return</span> <span class="n">adchan</span><span class="o">.</span><span class="n">add_planner</span><span class="p">(</span><span class="n">new_planner_user_email</span><span class="p">,</span> <span class="n">new_planner_center_name</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">planners</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="other-routes">Other routes<a class="headerlink" href="#other-routes" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-8-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-8-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-8-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-8-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-8-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-8-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-8-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-8-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-8-10">10</a></span>
+<span class="normal"><a href="#__codelineno-8-11">11</a></span>
+<span class="normal"><a href="#__codelineno-8-12">12</a></span>
+<span class="normal"><a href="#__codelineno-8-13">13</a></span>
+<span class="normal"><a href="#__codelineno-8-14">14</a></span>
+<span class="normal"><a href="#__codelineno-8-15">15</a></span>
+<span class="normal"><a href="#__codelineno-8-16">16</a></span>
+<span class="normal"><a href="#__codelineno-8-17">17</a></span>
+<span class="normal"><a href="#__codelineno-8-18">18</a></span>
+<span class="normal"><a href="#__codelineno-8-19">19</a></span>
+<span class="normal"><a href="#__codelineno-8-20">20</a></span>
+<span class="normal"><a href="#__codelineno-8-21">21</a></span>
+<span class="normal"><a href="#__codelineno-8-22">22</a></span>
+<span class="normal"><a href="#__codelineno-8-23">23</a></span>
+<span class="normal"><a href="#__codelineno-8-24">24</a></span>
+<span class="normal"><a href="#__codelineno-8-25">25</a></span>
+<span class="normal"><a href="#__codelineno-8-26">26</a></span>
+<span class="normal"><a href="#__codelineno-8-27">27</a></span>
+<span class="normal"><a href="#__codelineno-8-28">28</a></span>
+<span class="normal"><a href="#__codelineno-8-29">29</a></span>
+<span class="normal"><a href="#__codelineno-8-30">30</a></span>
+<span class="normal"><a href="#__codelineno-8-31">31</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="c1">#| id: other-routes</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/no_access_right'</span><span class="p">)</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">():</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4"></a>    <span class="k">return</span> <span class="n">Main</span><span class="p">(</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5"></a>        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">"/dashboard"</span><span class="p">))),</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6"></a>        <span class="n">Div</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="s2">"Access Denied"</span><span class="p">),</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7"></a>            <span class="n">P</span><span class="p">(</span><span class="s2">"You do not have permission to access this page."</span><span class="p">)),</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8"></a>        <span class="bp">cls</span><span class="o">=</span><span class="s2">"container"</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9"></a>    <span class="p">)</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10"></a>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/unfinished'</span><span class="p">)</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13"></a>    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14"></a>    <span class="n">goto_dash</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"goto_dash"</span><span class="p">,</span> <span class="s2">"YES"</span><span class="p">)</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15"></a>    <span class="k">return</span> <span class="n">Div</span><span class="p">(</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16"></a>        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">"/dashboard"</span><span class="p">)))</span> <span class="k">if</span> <span class="n">goto_dash</span> <span class="o">==</span> <span class="s2">"YES"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17"></a>        <span class="n">Div</span><span class="p">(</span><span class="n">H3</span><span class="p">(</span><span class="s2">"This feature is not yet implemented."</span><span class="p">))</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18"></a>        <span class="c1">#cls="container"</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19"></a>    <span class="p">)</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20"></a>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21"></a><span class="nd">@rt</span><span class="p">(</span><span class="s1">'/db_error'</span><span class="p">)</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22"></a><span class="k">def</span><span class="w"> </span><span class="nf">db_error</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">etext</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23"></a>    <span class="k">return</span> <span class="n">Html</span><span class="p">(</span>
+</span><span id="__span-8-24"><a id="__codelineno-8-24" name="__codelineno-8-24"></a>        <span class="n">Nav</span><span class="p">(</span><span class="n">Li</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">"/dashboard"</span><span class="p">))),</span>
+</span><span id="__span-8-25"><a id="__codelineno-8-25" name="__codelineno-8-25"></a>        <span class="n">Head</span><span class="p">(</span><span class="n">Title</span><span class="p">(</span><span class="s2">"Database error"</span><span class="p">)),</span>
+</span><span id="__span-8-26"><a id="__codelineno-8-26" name="__codelineno-8-26"></a>        <span class="n">Body</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">messages</span><span class="o">.</span><span class="n">feedback_to_user</span><span class="p">({</span><span class="s1">'error'</span><span class="p">:</span> <span class="s1">'db_error'</span><span class="p">,</span> <span class="s1">'etext'</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">etext</span><span class="si">}</span><span class="s1">'</span><span class="p">}))),</span>
+</span><span id="__span-8-27"><a id="__codelineno-8-27" name="__codelineno-8-27"></a>        <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">"/dashboard"</span><span class="p">)),</span>
+</span><span id="__span-8-28"><a id="__codelineno-8-28" name="__codelineno-8-28"></a>        <span class="bp">cls</span><span class="o">=</span><span class="s2">"container"</span>
+</span><span id="__span-8-29"><a id="__codelineno-8-29" name="__codelineno-8-29"></a>    <span class="p">)</span>
+</span><span id="__span-8-30"><a id="__codelineno-8-30" name="__codelineno-8-30"></a>
+</span><span id="__span-8-31"><a id="__codelineno-8-31" name="__codelineno-8-31"></a><span class="n">serve</span><span class="p">()</span>
+</span></code></pre></div></td></tr></table></div>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.instant", "navigation.sections", "content.code.annotate", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
 </body>
 </html>
