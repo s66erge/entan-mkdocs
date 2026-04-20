@@ -175,6 +175,7 @@ def show_draft_plan_table(draft_plan, center, mess):
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
+    # FIXME clear screen before fetching dhamma.org
     return Div(
         P(" Loading this center planning from dhamma.org ..."),
         Div(hx_get=f"/planning/check_show_dhamma", 

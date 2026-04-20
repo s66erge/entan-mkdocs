@@ -6,13 +6,30 @@ import libs.utils as utils
 import libs.minio as minio
 import libs.timings as timings
 
-
 # ~/~ begin <<docs/gong-web-app/timings-change.md#change-struct>>[init]
 
 # @rt('/timings/change_day_type')
 def change_day_type(session, index, day_type):
     return
+"""
+def change_day_type(session, index, day_type):
+    center = session[utils.Skey.CENTER]
+    periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    period_type = periods_struct_df[index, "period_type"]
+    old_day_type = periods_struct_df[index, "day_type"]
+    timetables_df = minio.get_center_temp_df(center, "timetables")
+    all_day_types = timetables_df[timetables_df["period_type"] == period_type]['day_type'].unique()
+    if old_day_type == day_type:
+        message = {"error": "day_type_unchanged"}
+    else:
+        periods_struct_df[index, "day_type"] = day_type
+        if day_type in list(all_day_types):
+            message = {"success": "day_type_changed"}
+        else:
 
+
+    return
+"""
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/timings-change.md#change-timetables>>[init]
 
@@ -34,6 +51,7 @@ def change_timetable_row(session, idx, new_time, dupli):
             new_timetable = new_timetable.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
             message = {"success": "time_duplicated", 'new_time': new_time}
     else:
+        # FIXME check first that this is not the last one
         new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
         message = {"success": "time_deleted", 'time': time}
     minio.save_df_center_temp(center, "timetables", new_timetable)

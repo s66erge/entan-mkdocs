@@ -79,8 +79,10 @@ def select_period(session, period_type, clear_show_times=True):
                     *[Option(dt, value=dt) for dt in list(day_types)],
                     id="day_type",
                 ),
-                Button("Choose day_type or create new one", type="submit", 
-                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 260px;"),
+                # FIXME replace with "Choose day_type or create new one" when ready
+                Button("--- NOT WORKING ---", type="submit",
+                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 260px;",
+                ),
                 hx_post=f"/timings/change_day_type",
                 hx_target="#center-periods",
                 style="display: inline-flex; align-items: center; gap: 0.2rem;"
