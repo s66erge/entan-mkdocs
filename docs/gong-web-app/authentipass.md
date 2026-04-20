@@ -7,7 +7,8 @@
 from functools import wraps
 from passlib.context import CryptContext
 from fasthtml.common import *
-from libs.utils import isa_dev_computer, send_email, feedback_to_user
+import libs.utils as utils
+import libs.messages as messages
 
 <<register>>
 <<admin_required>>

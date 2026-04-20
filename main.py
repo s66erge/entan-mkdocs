@@ -13,9 +13,11 @@ import libs.fetch as fetch
 import libs.admin as admin
 import libs.adchan as adchan
 import libs.utils as utils
+import libs.messages as messages
 import libs.states as states
 import libs.transit as transit
 import libs.timings as timings
+import libs.timechan as timechan
 import libs.minio as minio
 
 #  from starlette.testclient import TestClient
@@ -120,6 +122,10 @@ async def get(session, center: str):
     session[utils.Skey.CENTER] = center
     enter_edit_OK = await transit.check_center_free(states.csms[center], session['auth'])
     if enter_edit_OK:
+        session[utils.Skey.PLANOK] = False
+        session[utils.Skey.TIMESOK] = False
+        session[utils.Skey.SAVED_PLAN] = False
+        session[utils.Skey.SAVED_TIMES] = False
         return await planning.planning_page(session, center, states.csms)
     else:
         return Redirect(f"/status_page?center={center}")
@@ -141,7 +147,9 @@ def get(session):
 @rt('/save-center-db')
 async def get(session):
     if not session[utils.Skey.PLANOK]:
-        return utils.feedback_to_user({"error": "plan_not_ok"})
+        return messages.feedback_to_user({"error": "plan_not_ok"})
+    if not session[utils.Skey.TIMESOK]:
+        return messages.feedback_to_user({"error": "timings_not_ok"})
     state_mach = states.csms[session[utils.Skey.CENTER]]
     state_mach.progress()   # from 'edit' to 'save_db'
     return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
@@ -161,6 +169,8 @@ async def get(session, request):
 
 @rt('/planning/saved_plan')
 async def get(session):
+    if not session[utils.Skey.SAVED_PLAN]:
+        return messages.feedback_to_user({"error": "plan_not_saved"})
     plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
     return await planning.check_save_show_plan(session, plan, {"success": "show_plan"})
 
@@ -200,8 +210,23 @@ def get(session, request):
 
 @rt('/timings/delete_timetable_row')
 def get(session, request):
-    return timings.delete_timetable_row(session, request)
+    params = dict(request.query_params)
+    idx = params.get("idx")
+    return timechan.change_timetable_row(session, idx, "", dupli=False)
 
+@rt('/timings/duplicate_timetable_row')
+def post(session, index: int, new_time: str):
+    return timechan.change_timetable_row(session, index, new_time, dupli=True)
+
+@rt('/timings/add_timetable_row')
+def post(session, period_type: str, day_type: str, time: str, gong_id: str,
+               auto: str = "0", targets: list[str] = None, comment: str = ""):
+    return timechan.add_timetable_row(session, period_type, day_type, time,
+                                     gong_id, auto, targets, comment)
+
+@rt('/timings/change_day_type')
+def post(session, index: int, day_type: str):
+    return timechan.change_day_type(session, index, day_type)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]
@@ -286,7 +311,7 @@ def db_error(session, etext: str):
     return Html(
         Nav(Li(A("Dashboard", href="/dashboard"))),
         Head(Title("Database error")),
-        Body(Div(utils.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
+        Body(Div(messages.feedback_to_user({'error': 'db_error', 'etext': f'{etext}'}))),
         (A("Dashboard", href="/dashboard")),
         cls="container"
     )

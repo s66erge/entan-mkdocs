@@ -1,15 +1,12 @@
 # ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
 
 import asyncio
-import json
 import os
 import shutil
-from tabulate import tabulate
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from fasthtml.common import *
 import libs.utils as utils
-import libs.cdash as cdash 
+import libs.messages as messages
 import libs.plancheck as plancheck
 import libs.fetch as fetch
 import libs.dbset as dbset
@@ -76,7 +73,7 @@ def show_draft_plan_table(draft_plan, center, mess):
     )
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
-        Div(utils.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
+        Div(messages.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
 
         Div("",hx_swap_oob="true",id="center-periods"),
         #Div("",hx_swap_oob="true",id="periods-struct"),
@@ -92,6 +89,7 @@ def show_draft_plan_table(draft_plan, center, mess):
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
+    # FIXME clear screen before fetching dhamma.org
     return Div(
         P(" Loading this center planning from dhamma.org ..."),
         Div(hx_get=f"/planning/check_show_dhamma", 
@@ -123,11 +121,11 @@ async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
     dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
-
     plan = fetch.sort_clean(start_plan, dhamma_types, inside)
-
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
+
+    session[utils.Skey.SAVED_PLAN] = True
     return show_draft_plan_table(new_draft_plan, selected_name, mess)
 
 # @rt('/planning/delete_line')
@@ -162,7 +160,6 @@ async def add_line(session, ptype, start):
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, csms):
-    session['planOK'] = False
     csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
