@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
 
 import aiohttp
+import cloudscraper
 import json
 import re
 import asyncio
@@ -14,8 +15,9 @@ import libs.minio as minio
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
 
 async def fetch_courses_from_dhamma(location, date_start, date_end):
-    url = "https://www.dhamma.org/en-US/courses/do_search"
-    headers = {"User-Agent": "entan-mkdocs-fetcher/1.0"}
+    url = "https://www.dhamma.org/en-US/courses/do_search"    
+    # url = "https://124.26.5.186:443/en-US/courses/do_search"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     all_courses = []
 
     page = 1
@@ -53,6 +55,41 @@ async def fetch_courses_from_dhamma(location, date_start, date_end):
                 break
 
             page += 1
+
+    extracted = [
+        {
+            "course_start_date": c.get("course_start_date"),
+            "course_end_date": c.get("course_end_date"),
+            "raw_course_type": c.get("raw_course_type"),
+            "course_type_anchor": c.get("course_type_anchor"),
+            "course_type": c.get("course_type")
+        }
+        for c in all_courses
+        if c.get("location", {}).get("center_noncenter") != "noncenter"
+    ]
+    return extracted
+
+def fetch_scrap(location, date_start, date_end):
+    scraper = cloudscraper.create_scraper()
+    all_courses = []
+    page = 1
+    while True:
+        print(f"Scraping courses Dhamma {location} - Page {page}...")
+        payload = scraper.post(
+            "https://www.dhamma.org/en-US/courses/do_search",
+            data={
+                "current_state": "OldStudents",
+                "regions[]": location,
+                "daterange": f"{date_start} - {date_end}",
+                "page": page,
+            }
+        ).json()
+        courses = payload.get("courses", [])
+        all_courses.extend(courses)
+        total_pages = payload.get("pages", 0)
+        if page >= total_pages:
+            break
+        page += 1
 
     extracted = [
         {
@@ -179,7 +216,9 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
 
-    extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+    # extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+    extracted = await asyncio.to_thread(fetch_scrap, dhamma_location, date_current_course, end_date)
+
     #print(tabulate(extracted, headers="keys"))
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))
