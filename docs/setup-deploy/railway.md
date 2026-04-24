@@ -7,6 +7,9 @@ Railway is connected to Github : all changes pushed to Github repo branch 'maste
 ## Using a dockerfile to drive the build 
 
 
+## Deplyment run on railway
+
+https://entan-mkdocs-production.up.railway.app
 
 ## Railway CLI
 
