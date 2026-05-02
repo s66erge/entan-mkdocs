@@ -44,6 +44,8 @@ class Pkey: # parameters keys
         return getattr(cls, name, default)
 
 class Globals:
+    DEFAULT_TIME_NEW_DAY_TYPE = "03:53"
+    COMMENT_NEW_DAY_TYPE = "DUMMY FOR NEW DATE TYPE: CHANGE IT"
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
@@ -65,6 +67,7 @@ class Globals:
 <<send-email>>
 <<display-markdown>>
 <<plus-months-days>>
+<<pre-select-fasthtml>>
 
 ```
 
@@ -187,5 +190,49 @@ def seconds_to_hours_minutes(total_seconds):
     hours = total_seconds // 3600
     remaining_minutes = (total_seconds % 3600) // 60
     return hours, remaining_minutes
+
+```
+
+### Helpers to pre-select values in fasthtml input fields
+
+FastHTML (like many frameworks) renders:
+selected=True → selected
+selected=False → selected=""  ← this is the problem
+Browsers interpret any selected attribute — even empty — as selected.
+So the last option wins.
+
+By conditionally adding the attribute only when needed, we avoid that entirely.
+
+Usage for option_selected_one :
+Select(
+    *[option_selected(id, gong_id) for id in gong_ids],
+    name="xxxx", required=True
+)
+
+Usage for option_selected_multi :
+Select(
+    *[option_selected_multi(id, selected_targets) for id in gong_ids],
+    name="xxx", multiple=True, required=True
+)
+
+
+```python
+#| id: pre-select-fasthtml
+
+def option_selected_one(value, current):
+    return Option(
+        value,
+        value=value,
+        **({"selected": True} if value == current else {})
+    )
+
+def option_selected_multi(value, selected_values):
+    # Normalize both sides to strings for safe comparison
+    sv = {str(v) for v in selected_values} if selected_values else set()
+    return Option(
+        value,
+        value=value,
+        **({"selected": True} if str(value) in sv else {})
+    )
 
 ```
