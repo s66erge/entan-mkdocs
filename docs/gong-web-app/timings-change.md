@@ -7,6 +7,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 import pandas as pd
 from fasthtml.common import *
+from wcwidth import center
 import libs.utils as utils
 import libs.minio as minio
 import libs.timings as timings
@@ -15,6 +16,53 @@ import libs.messages as messages
 <<repaint-timings>>
 <<change-timetables>>
 <<change-struct>>
+<<create-period>>
+
+```
+
+### Copy period from a center
+
+```python
+#| id: create-period
+
+# @rt('/timings/create_new_period')
+def create_new_period(session, from_center, new_period, from_period):
+    this_center = session[utils.Skey.CENTER]
+    this_center_periods_df = minio.get_center_temp_df(this_center, "center_periods")
+    if new_period in this_center_periods_df["period_type"].values:
+        day_type = ""
+        message = {"error": "period_already_exists"}
+    else:
+        timings.load_timings(from_center)
+        from_center_periods_df = minio.get_center_temp_df(from_center, "center_periods")
+        new_rows = from_center_periods_df[from_center_periods_df["period_type"] == from_period].copy()
+        new_rows["period_type"] = new_period
+        this_center_periods_df = pd.concat([this_center_periods_df, new_rows], ignore_index=True)
+        this_center_periods_df = this_center_periods_df.sort_values(by=["tags", "period_type"]).reset_index(drop=True)
+        minio.save_df_center_temp(this_center, "center_periods", this_center_periods_df)
+
+        this_center_struct_df = minio.get_center_temp_df(this_center, "periods_struct")
+        from_center_struct_df = minio.get_center_temp_df(from_center, "periods_struct")
+        new_rows = from_center_struct_df[from_center_struct_df["period_type"] == from_period].copy()
+        new_rows["period_type"] = new_period
+        this_center_struct_df = pd.concat([this_center_struct_df, new_rows], ignore_index=True)
+        this_center_struct_df = this_center_struct_df.sort_values(by=["period_type", "day"]).reset_index(drop=True)
+        minio.save_df_center_temp(this_center, "periods_struct", this_center_struct_df)
+
+        this_center_timetables_df = minio.get_center_temp_df(this_center, "timetables")
+        from_center_timetables_df = minio.get_center_temp_df(from_center, "timetables")
+        new_rows = from_center_timetables_df[from_center_timetables_df["period_type"] == from_period].copy()
+        new_rows["period_type"] = new_period
+        params = minio.params_from_excel_minio(this_center)
+        new_rows["gong_id"] = params[utils.Pkey.GONG_ID]
+        new_rows["targets"] = params[utils.Pkey.TARGETS]
+        this_center_timetables_df = pd.concat([this_center_timetables_df, new_rows], ignore_index=True)
+        this_center_timetables_df = this_center_timetables_df.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
+        minio.save_df_center_temp(this_center, "timetables", this_center_timetables_df)
+
+        day_type = new_rows.iloc[0]["day_type"]
+        message = {"success": "period_created"}
+    return repaint(session, new_period, day_type, message, False)
 
 ```
 
@@ -25,12 +73,14 @@ import libs.messages as messages
 
 def repaint(session, period_type, day_type, message, clear_show_times):
     return Div(
-        Div(timings.show_center_periods(session),
-            hx_swap_oob="true", id="center_periods"),
-        Div(timings.select_period(session, period_type, clear_show_times), 
-            hx_swap_oob="true", id="periods-struct"),
-        Div(timings.select_timings(session, period_type, day_type),
-            hx_swap_oob="true", id="show-times"),
+        Div(
+            Div(timings.show_center_periods(session),
+                hx_swap_oob="true", id="center_periods"),
+            Div(timings.select_period(session, period_type, clear_show_times), 
+                hx_swap_oob="true", id="periods-struct"),
+            Div(timings.select_timings(session, period_type, day_type),
+                hx_swap_oob="true", id="show-times")
+        ) if message.get("success") else None,
         Div(messages.feedback_to_user(message))
     )
 
@@ -41,33 +91,17 @@ def repaint(session, period_type, day_type, message, clear_show_times):
 ```python
 #| id: change-struct
 
-# @rt('/timings/add_mod_day_type')
-def add_mod_day_type(session, index, day_type):
+# @rt('/timings/modify_day_type')
+def modify_day_type(session, index, day_type):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     period_type = periods_struct_df.loc[index, "period_type"]
     old_day_type = periods_struct_df.loc[index, "day_type"]
     timetables_df = minio.get_center_temp_df(center, "timetables")
-    all_day_types = timetables_df[timetables_df["period_type"] == period_type]['day_type'].unique()
     if old_day_type == day_type:
         message = {"error": "day_type_unchanged"}
     else:
-        if day_type in list(all_day_types):
-            message = {"success": "day_type_changed"}
-        else:
-            params = minio.params_from_excel_minio(center)
-            add_mod_timetable_row(
-                session,
-                period_type,
-                day_type,
-                -1, # idx -1 forces a new entry
-                utils.Globals.DEFAULT_TIME_NEW_DAY_TYPE,
-                params[utils.Pkey.GONG_ID],
-                0,
-                params[utils.Pkey.TARGETS].split(),
-                utils.Globals.COMMENT_NEW_DAY_TYPE
-            )
-            message = {"success": "day_type_added"}
+        message = {"success": "day_type_changed"}
         periods_struct_df.loc[index, "day_type"] = day_type
         minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
     return repaint(session, period_type, day_type, message, False)
@@ -99,13 +133,13 @@ def dup_last_day(session, idx):
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
     return repaint(session, period_type, day_type, message, False)
 
-def renumber_days_df(df, period_type):
-    # Renumber the 'day' column incrementally from 0
-    # for rows matching the given period_type.
-    mask = df["period_type"] == period_type
-    df.loc[mask, "day"] = range(mask.sum())
-    return df
+def renumber_days_df(periods_struct_df, period_type):
+    # Renumber the 'day' column incrementally from 0 for rows with given period_type.
+    mask = periods_struct_df["period_type"] == period_type
+    periods_struct_df.loc[mask, "day"] = range(mask.sum())
+    return periods_struct_df
 
+# @rt('/timings/renumber_days')
 def renumber_days(session, period_type):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
@@ -116,6 +150,23 @@ def renumber_days(session, period_type):
     message = {"success": "days_renumbered"}
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
     return repaint(session, period_type, day_type, message, False)
+
+# @rt('/timings/create_day_type')
+def create_day_type(session, period_type, new_day_type, day_type):
+    center = session[utils.Skey.CENTER]
+    timetables_df_bef = minio.get_center_temp_df(center, "timetables")
+    all_day_types = timetables_df_bef[timetables_df_bef["period_type"] == period_type]['day_type'].unique()
+    if new_day_type in all_day_types:
+        message = {"error": "day_type_already_exists"}
+    else:
+        filtered = timetables_df_bef[(timetables_df_bef["period_type"] == period_type) &
+                                     (timetables_df_bef["day_type"] == day_type)]
+        filtered["day_type"] = new_day_type
+        timetables_df = pd.concat([timetables_df_bef, filtered], ignore_index=True)
+        timetables_df = timetables_df.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
+        minio.save_df_center_temp(center, "timetables", timetables_df)
+        message = {"success": "day_type_created"}   
+    return repaint(session, period_type, new_day_type, message, False)
 
 ```
 
@@ -131,11 +182,18 @@ def delete_timetable_row(session, idx):
     timetables_df = minio.get_center_temp_df(center, "timetables")
     period_type = timetables_df.loc[int(idx), "period_type"]
     day_type = timetables_df.loc[int(idx), "day_type"]
-    time = timetables_df.loc[int(idx), "time"]
-    # FIXME check first that this is not the last one
-    new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
-    message = {"success": "time_deleted", 'time': time}
-    minio.save_df_center_temp(center, "timetables", new_timetable)
+    filtered_timings = timetables_df[(timetables_df["period_type"] == period_type) &
+                             (timetables_df["day_type"] == day_type)]
+    periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    filtered_struct = periods_struct_df[(periods_struct_df["period_type"] == period_type) &
+                                       (periods_struct_df["day_type"] == day_type)]
+    if len(filtered_timings) == 1 and len(filtered_struct) >= 1:
+        message = {"error": "delete_last_time"}
+    else:
+        time = timetables_df.loc[int(idx), "time"]    
+        new_timetable = timetables_df.drop(index=int(idx)).reset_index(drop=True)
+        message = {"success": "time_deleted", 'time': time}
+        minio.save_df_center_temp(center, "timetables", new_timetable)
     return repaint(session, period_type, day_type, message, False)
 
 # @rt('/timings/load_timing_form')
@@ -233,4 +291,3 @@ def add_mod_timetable_row(session, period_type, day_type, idx, time, gong_id, au
     return repaint(session, period_type, day_type, message, False)
 
 ```
-

@@ -44,8 +44,7 @@ class Pkey: # parameters keys
         return getattr(cls, name, default)
 
 class Globals:
-    DEFAULT_TIME_NEW_DAY_TYPE = "03:53"
-    COMMENT_NEW_DAY_TYPE = "DUMMY FOR NEW DATE TYPE: CHANGE IT"
+    HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month

@@ -40,7 +40,11 @@ def show_center_periods(session):
             hx_target="#feedback-times"  # was: periods-struct
         )
     )
+    center_periods_df['tags'] = center_periods_df['tags'].map(utils.Globals.HTML_TAGS_CENTERS)
     html_periods = center_periods_df.to_html(index=False, escape=False)
+    db = dbset.get_central_db()
+    centers = db.create(dbset.Center, pk='center_name')
+    center_names = [c.center_name for c in centers()]
     message = {"success": "periods_OK"}
     errors_df = check_timings(session)
     if len(errors_df) > 0:
@@ -54,11 +58,60 @@ def show_center_periods(session):
         Div(
             H2("Center periods"),
             Div(Safe(html_periods)),
+            Div(
+                Form(
+                    Span(Label("Select a center to copy a period from:",
+                               style="display: inline-block; width: 260px;"),
+                        Select(
+                            *[Option(c, value=c) for c in center_names],
+                            name="center", required=True,
+                            style="flex: 0 0 auto; width: 150px;"
+                        ),
+                    ),
+                    Button("Get this center periods", type="submit",
+                        style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
+                    ),
+                    hx_post=f"/timings/get_other_center_periods",
+                    hx_target="#period_form_two",
+                    style="display: inline-flex; align-items: center; gap: 0.2rem;"
+                ),            
+                id="period_form_one"
+            ),
+            Div("", id="period_form_two"),
             Div(H3("Timing errors"),
-                Safe(html_errors)) if len(errors_df) > 0 else None,
+                Safe(html_errors)) if len(errors_df) > 0 else None,            
             hx_swap_oob="true", id="center-periods"
         )
     )
+
+def get_other_center_periods(session, center):
+    table = plancheck.get_types_with_duration(center)
+    periods = [row['period_type'] for row in table if row['tags'] == "F"]
+    return Div(
+        Form(
+            Input(type="hidden", name="from_center", value=center),
+            Div(Label("Enter new period name:", style="display: inline-block; width: 180px;"),
+                Input(type="text", name="new_period", required=True,
+                    style="flex: 0 0 auto; width: 200px;")
+            ),
+            Span(style="display: inline-block; width: 20px;"),
+            Span(Label(f"Select a {center} period to copy from:",
+                       style="display: inline-block; width: 260px;"),
+                Select(
+                    *[Option(p, value=p) for p in periods],
+                    name="from_period", required=True,
+                    style="flex: 0 0 auto; width: 150px;"
+                ),
+            ),
+            Button("Create new period", type="submit",
+                style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
+            ),
+            hx_post=f"/timings/create_new_period",
+            hx_target="#feedback-times",
+            style="display: inline-flex; align-items: center; gap: 0.2rem;"
+        ),            
+    )
+
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-timings.md#show-struct-timetable>>[init]
@@ -76,22 +129,22 @@ def select_period(session, period_type, clear_show_times=True):
                         f"?period_type={quote_plus(period_type)}"
                         f"&day_type={quote_plus(periods_struct_df.at[idx,'day_type'])}"),
                 hx_target="#feedback-times"),   # was: show-times 
+                Span(style="display: inline-block; width: 50px;"),
             Form(
                 Input(type="hidden", name="index", value=idx),
-                Input(list="day_type", name="day_type", required=True,
-                        style="flex: 0 0 auto; width: 250px;"),
-                Datalist(
+                Select(
                     *[Option(dt, value=dt) for dt in list(day_types)],
-                    id="day_type",
+                    name="day_type", required=True,
+                    style="flex: 0 0 auto; width: 150px;"
                 ),
-                Button("Choose day_type or create new one", type="submit",
-                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 260px;",
+                Button("Select another day type", type="submit",
+                    style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 200px;",
                 ),
-                hx_post=f"/timings/add_mod_day_type",
+                hx_post=f"/timings/modify_day_type",
                 hx_target="#center-periods",
                 style="display: inline-flex; align-items: center; gap: 0.2rem;"
             ),            
-            style="display: inline-flex; align-items: center; gap: 50px;"
+            #style="display: inline-flex; align-items: center; gap: 50px;"
         )
     )
     filtered = periods_struct_df[periods_struct_df["period_type"] == period_type]
@@ -115,6 +168,27 @@ def select_period(session, period_type, clear_show_times=True):
                 Button(f"Renumber days from 0",
                     hx_get=f"/timings/renumber_days?period_type={quote_plus(period_type)}",
                     hx_target="#feedback-times"),
+                Span(style="display: inline-block; width: 50px;"),
+                Form(
+                    Input(type="hidden", name="period_type", value=period_type),
+                    Div(Label("Enter new day type name:",),
+                        Input(type="text", name="new_day_type", required=True,
+                            style="flex: 0 0 auto; width: 200px;")
+                    ),
+                    Span(Label("copied from day type:"),
+                        Select(
+                            *[Option(dt, value=dt) for dt in list(day_types)],
+                            name="day_type", required=True,
+                            style="flex: 0 0 auto; width: 150px;"
+                        ),
+                    ),
+                    Button("Create new day type", type="submit",
+                        style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
+                    ),
+                    hx_post=f"/timings/create_day_type",
+                    hx_target="#feedback-times",
+                    style="display: inline-flex; align-items: center; gap: 0.2rem;"
+                ),            
             ),
             hx_swap_oob="true", id="periods-struct"
         )
@@ -153,8 +227,7 @@ def select_timings(session, period_type, day_type):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-timings.md#load-save-timings>>[init]
 
-def load_timings(session):
-    center = session[utils.Skey.CENTER]
+def load_timings(center):
     selected_db = dbset.gong_db_name(center)
     table = plancheck.get_types_with_duration(center)
     center_periods_df = pd.DataFrame(table)
@@ -168,12 +241,11 @@ def load_timings(session):
     minio.save_df_center_temp(center, "targets", targets_df)
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
-    session[utils.Skey.SAVED_TIMES] = True
     return
 
 def check_timings(session):
     center = session[utils.Skey.CENTER]
-    center_periods_df = minio.get_center_temp_df(center, "center_periods")
+    # FIXME reload get_types_with_duration
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     gongs_df = minio.get_center_temp_df(center, "gongs")
     targets_df = minio.get_center_temp_df(center, "targets")

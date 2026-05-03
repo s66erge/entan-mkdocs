@@ -228,13 +228,18 @@ async def post(session, ptype: str, start: str):
 #| id: timetables-changes
 
 @rt('/timings/timingsubpage')
-async def get(session):
-    timings.load_timings(session)  # in pandas from minio
+async def get(session, center: str):
+    timings.load_timings(center)  # in pandas and minio from db
+    session[utils.Skey.SAVED_TIMES] = True
     return timings.load_timingsubpage(session)
 
 @rt('/timings/center_periods')
 def get(session):
     return timings.show_center_periods(session)
+
+@rt('/timings/get_other_center_periods')
+def post(session, center: str):
+    return timings.get_other_center_periods(session, center)
 
 @rt('/timings/select_period')
 def get(session, request):
@@ -267,9 +272,9 @@ def post(session, period_type: str, day_type: str, idx: int, time: str, gong_id:
     return timechan.add_mod_timetable_row(session, period_type, day_type, idx, time,
                                      gong_id, auto, targets, comment)
 
-@rt('/timings/add_mod_day_type')
+@rt('/timings/modify_day_type')
 def post(session, index: int, day_type: str):
-    return timechan.add_mod_day_type(session, index, day_type)
+    return timechan.modify_day_type(session, index, day_type)
 
 @rt('/timings/dup_last_day')
 def get(session, idx: int):
@@ -283,9 +288,17 @@ def get(session, idx: int):
 def get(session, period_type: str):
     return timechan.renumber_days(session, period_type)
 
+@rt('/timings/create_day_type')
+def post(session, period_type: str, new_day_type: str, day_type:str):
+    return timechan.create_day_type(session, period_type, new_day_type, day_type)
+
+@rt('/timings/create_new_period')
+def post(session, from_center:str, new_period: str, from_period: str):
+    return timechan.create_new_period(session, from_center, new_period, from_period)
+
 ```
 
-### Routes for admin
+### Routes for adminP
 
 ```python
 #| id: users-admin

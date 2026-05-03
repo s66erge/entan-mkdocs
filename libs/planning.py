@@ -160,6 +160,7 @@ async def add_line(session, ptype, start):
 
 # @rt('/planning_page')
 async def planning_page(session, selected_name, csms):
+    # FIXME load timings into minio for get_types_with_duration
     csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
@@ -175,7 +176,7 @@ async def planning_page(session, selected_name, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/timings/timingsubpage",
+                hx_get=f"/timings/timingsubpage?center={selected_name}",
                 hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",

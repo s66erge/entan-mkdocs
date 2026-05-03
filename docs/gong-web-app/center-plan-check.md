@@ -124,6 +124,7 @@ def get_period_types_in_db(center):
     return db_center, period_types_in_db
 
 def get_types_with_duration(center):
+    # FIXME calculate from minio files, not the db, to avoid reload the db
     db_center, period_types_in_db = get_period_types_in_db(center)
     params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
