@@ -11,6 +11,9 @@ import libs.messages as messages
 # ~/~ begin <<docs/gong-web-app/timings-change.md#repaint-timings>>[init]
 
 def repaint(session, period_type, day_type, message, clear_show_times):
+    mess_periods = None
+    if len(timings.check_timings(session)) == 0:
+        mess_periods = {"success": "periods_OK"}
     return Div(
         Div(
             Div(timings.show_center_periods(session),
@@ -18,7 +21,9 @@ def repaint(session, period_type, day_type, message, clear_show_times):
             Div(timings.select_period(session, period_type, clear_show_times), 
                 hx_swap_oob="true", id="periods-struct"),
             Div(timings.select_timings(session, period_type, day_type),
-                hx_swap_oob="true", id="show-times")
+                hx_swap_oob="true", id="show-times") if day_type else None,
+            Div(messages.feedback_to_user(mess_periods),
+                hx_swap_oob="true", id="feedback-periods") if mess_periods else None,
         ) if message.get("success") else None,
         Div(messages.feedback_to_user(message))
     )
@@ -228,7 +233,6 @@ def create_new_period(session, from_center, new_period, from_period):
     this_center = session[utils.Skey.CENTER]
     this_center_periods_df = minio.get_center_temp_df(this_center, "center_periods")
     if new_period in this_center_periods_df["period_type"].values:
-        day_type = ""
         message = {"error": "period_already_exists"}
     else:
         timings.load_timings(from_center)
@@ -258,9 +262,8 @@ def create_new_period(session, from_center, new_period, from_period):
         this_center_timetables_df = this_center_timetables_df.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
         minio.save_df_center_temp(this_center, "timetables", this_center_timetables_df)
 
-        day_type = new_rows.iloc[0]["day_type"]
         message = {"success": "period_created"}
-    return repaint(session, new_period, day_type, message, False)
+    return repaint(session, new_period, None, message, False)
 
 # ~/~ end
 

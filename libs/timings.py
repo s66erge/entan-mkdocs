@@ -20,7 +20,7 @@ def load_timingsubpage(session):
         Div("",hx_swap_oob="true",id="planning-periods"),
         #Div("",hx_swap_oob="true",id="timetables"),
         Div(hx_get= "/timings/center_periods",
-            hx_target="#feedback-periods",  # was: center-periods
+            hx_target="#feedback-periods",
             hx_trigger="load"),
         Div("", id= "center-periods"),
         Div("", id= "feedback-periods"),
@@ -33,7 +33,9 @@ def load_timingsubpage(session):
 def show_center_periods(session):
     center = session[utils.Skey.CENTER]
     session[utils.Skey.TIMESOK] = True
-    center_periods_df = minio.get_center_temp_df(center, "center_periods")
+    table = plancheck.get_types_with_duration(center)
+    center_periods_df = pd.DataFrame(table)
+    minio.save_df_center_temp(center, "center_periods", center_periods_df)
     center_periods_df["Actions"] = center_periods_df['period_type'].apply(
         lambda pt: A("Select",
             hx_get=f"/timings/select_period?period_type={quote_plus(pt)}",
@@ -229,9 +231,6 @@ def select_timings(session, period_type, day_type):
 
 def load_timings(center):
     selected_db = dbset.gong_db_name(center)
-    table = plancheck.get_types_with_duration(center)
-    center_periods_df = pd.DataFrame(table)
-    minio.save_df_center_temp(center, "center_periods", center_periods_df)
     db_center = database(utils.get_db_path() + selected_db)
     periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
@@ -241,11 +240,13 @@ def load_timings(center):
     minio.save_df_center_temp(center, "targets", targets_df)
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
+    table = plancheck.get_types_with_duration(center)
+    center_periods_df = pd.DataFrame(table)
+    minio.save_df_center_temp(center, "center_periods", center_periods_df)
     return
 
 def check_timings(session):
     center = session[utils.Skey.CENTER]
-    # FIXME reload get_types_with_duration
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     gongs_df = minio.get_center_temp_df(center, "gongs")
     targets_df = minio.get_center_temp_df(center, "targets")

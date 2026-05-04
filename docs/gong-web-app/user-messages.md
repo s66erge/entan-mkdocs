@@ -61,6 +61,7 @@ def feed_text(params):
         'template_not_free': 'Cannot copy a template if it is not free: being modified',
         'time_already_exists': f'Time already exists in the planning: {params.get("time", "")}.',
         'timings_not_ok': 'Correct the timings errors before saving this plan: click "Load saved timetables" and suppress all lines in table "Timing errors".',
+        'timings_not_saved': 'Create initial timings with "(re)Start timetables" before loading saved timetables',
         'user_exists': 'User with this email already exists.',
         'user_has_planners': f'Cannot delete user. User is still associated with centers: {params.get("centers", "")}. Please remove all planner associations first.',
         'user_not_found': 'User not found.',
