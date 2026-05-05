@@ -7,7 +7,6 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 import pandas as pd
 from fasthtml.common import *
-from wcwidth import center
 import libs.utils as utils
 import libs.minio as minio
 import libs.timings as timings
