@@ -250,7 +250,8 @@ def post(session, center: str):
 def get(session, request):
     params = dict(request.query_params)
     period_type = params.get("period_type")
-    return timings.select_period(session, period_type)
+    tags = params.get("tags")
+    return timings.select_period(session, period_type, tags)
 
 @rt('/timings/select_timings')
 def get(session, request):

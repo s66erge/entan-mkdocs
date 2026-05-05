@@ -36,11 +36,13 @@ def show_center_periods(session):
     table = plancheck.get_types_with_duration(center)
     center_periods_df = pd.DataFrame(table)
     minio.save_df_center_temp(center, "center_periods", center_periods_df)
-    center_periods_df["Actions"] = center_periods_df['period_type'].apply(
-        lambda pt: A("Select",
-            hx_get=f"/timings/select_period?period_type={quote_plus(pt)}",
-            hx_target="#feedback-times"  # was: periods-struct
-        )
+    center_periods_df["Actions"] = center_periods_df.apply(
+        lambda row: A("Select",
+            hx_get=(f"/timings/select_period?"
+                    f"period_type={quote_plus(row['period_type'])}"),
+            hx_target="#feedback-times"
+        ),
+        axis=1
     )
     center_periods_df['tags'] = center_periods_df['tags'].map(utils.Globals.HTML_TAGS_CENTERS)
     html_periods = center_periods_df.to_html(index=False, escape=False)
@@ -121,6 +123,8 @@ def get_other_center_periods(session, center):
 # @rt('/timings/select_period')
 def select_period(session, period_type, clear_show_times=True):
     center = session[utils.Skey.CENTER]
+    center_periods_df = minio.get_center_temp_df(center, "center_periods")
+    tags = center_periods_df.loc[center_periods_df["period_type"] == period_type, "tags"].iat[0]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     timetables_df = minio.get_center_temp_df(center, "timetables")
     day_types = timetables_df[timetables_df["period_type"] == period_type]['day_type'].unique()
@@ -145,7 +149,7 @@ def select_period(session, period_type, clear_show_times=True):
                 hx_post=f"/timings/modify_day_type",
                 hx_target="#center-periods",
                 style="display: inline-flex; align-items: center; gap: 0.2rem;"
-            ),            
+            ) if tags == "F" else None,            
             #style="display: inline-flex; align-items: center; gap: 50px;"
         )
     )
@@ -191,7 +195,7 @@ def select_period(session, period_type, clear_show_times=True):
                     hx_target="#feedback-times",
                     style="display: inline-flex; align-items: center; gap: 0.2rem;"
                 ),            
-            ),
+            ) if tags == "F" else None,
             hx_swap_oob="true", id="periods-struct"
         )
     )

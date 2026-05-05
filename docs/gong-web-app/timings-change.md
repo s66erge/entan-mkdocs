@@ -81,6 +81,7 @@ def repaint(session, period_type, day_type, message, clear_show_times):
                 hx_swap_oob="true", id="periods-struct"),
             Div(timings.select_timings(session, period_type, day_type),
                 hx_swap_oob="true", id="show-times") if day_type else None,
+            Div("", hx_swap_oob="true", id="timetable-form"),
             Div(messages.feedback_to_user(mess_periods),
                 hx_swap_oob="true", id="feedback-periods") if mess_periods else None,
         ) if message.get("success") else None,
@@ -107,18 +108,23 @@ def modify_day_type(session, index, day_type):
         message = {"success": "day_type_changed"}
         periods_struct_df.loc[index, "day_type"] = day_type
         minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
-    return repaint(session, period_type, day_type, message, False)
+    return repaint(session, period_type, None, message, False)
 
 # @rt('/timings/del_last_day')
 def del_last_day(session, idx):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     period_type = periods_struct_df.loc[idx, "period_type"]
-    day_type = periods_struct_df.loc[idx-1, "day_type"]
-    periods_struct_df = periods_struct_df.drop(index=int(idx)).reset_index(drop=True)
-    message = {"success": "last_day_deleted"}
-    minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
-    return repaint(session, period_type, day_type, message, False)
+    day_type = periods_struct_df.loc[idx, "day_type"]
+    filtered_struct = periods_struct_df[(periods_struct_df["period_type"] == period_type) &
+                                       (periods_struct_df["day_type"] == day_type)]
+    if len(filtered_struct) == 1:
+        message = {"error": "delete_last_day"}
+    else:
+        periods_struct_df = periods_struct_df.drop(index=int(idx)).reset_index(drop=True)
+        message = {"success": "last_day_deleted"}
+        minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
+    return repaint(session, period_type, None, message, False)
 
 # @rt('/timings/dup_last_day')
 def dup_last_day(session, idx):
@@ -134,7 +140,7 @@ def dup_last_day(session, idx):
     periods_struct_df.loc[idx+1, "day"] = day + 1
     message = {"success": "last_day_duplicated"}
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
-    return repaint(session, period_type, day_type, message, False)
+    return repaint(session, period_type, None, message, False)
 
 def renumber_days_df(periods_struct_df, period_type):
     # Renumber the 'day' column incrementally from 0 for rows with given period_type.
@@ -152,7 +158,7 @@ def renumber_days(session, period_type):
     periods_struct_df = renumber_days_df(periods_struct_df, period_type)
     message = {"success": "days_renumbered"}
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
-    return repaint(session, period_type, day_type, message, False)
+    return repaint(session, period_type, None, message, False)
 
 # @rt('/timings/create_day_type')
 def create_day_type(session, period_type, new_day_type, day_type):
