@@ -73,12 +73,18 @@ async def check_and_advance(center: str, csms):
         return
 
 async def retry_on_error(func, *args, retries=3, delay=60, **kwargs):
-    for attempt in range(1, retries + 1):
+    if args[0].center_name == utils.Globals.TEST_CENTER:
+        delay0 = utils.Globals.SHORT_DELAY
+        retries0 = 1
+    else:
+        delay0 = delay
+        retries0 = retries
+    for attempt in range(1, retries0 + 1):
         result = await func(*args, **kwargs)
         # Only retry if the function returns {"error": ...}
         if isinstance(result, dict) and "error" in result:
-            if attempt < retries:
-                await asyncio.sleep(delay)
+            if attempt < retries0:
+                await asyncio.sleep(delay0)
                 continue
             return result  # final failure after max retries
         else:

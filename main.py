@@ -174,7 +174,6 @@ async def get(session):
     plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
     return await planning.check_save_show_plan(session, plan, {"success": "show_plan"})
 
-
 @rt('/planning/delete_line/{idx}')
 async def post(session, idx: int):
     return await planning.delete_line(session, idx)
@@ -187,13 +186,24 @@ async def post(session, ptype: str, start: str):
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#timetables-changes>>[init]
 
 @rt('/timings/timingsubpage')
-async def get(request, session):
-    timings.load_timings(session)  # in pandas from minio
-    return timings.load_timingsubpage(request, session)
+async def get(session, center: str):
+    timings.load_timings(center)  # in pandas and minio from db
+    session[utils.Skey.SAVED_TIMES] = True
+    return timings.load_timingsubpage(session)
+
+@rt('/timings/saved_timings')
+async def get(session):
+    if not session[utils.Skey.SAVED_TIMES]:
+        return messages.feedback_to_user({"error": "timings_not_saved"})
+    return timings.load_timingsubpage(session)
 
 @rt('/timings/center_periods')
 def get(session):
     return timings.show_center_periods(session)
+
+@rt('/timings/get_other_center_periods')
+def post(session, center: str):
+    return timings.get_other_center_periods(session, center)
 
 @rt('/timings/select_period')
 def get(session, request):
@@ -201,32 +211,54 @@ def get(session, request):
     period_type = params.get("period_type")
     return timings.select_period(session, period_type)
 
-@rt('/timings/select_timetable')
+@rt('/timings/select_timings')
 def get(session, request):
     params = dict(request.query_params)
     period_type = params.get("period_type")
     day_type = params.get("day_type")
-    return timings.select_timetable(session, params, period_type, day_type)
+    return timings.select_timings(session, period_type, day_type)
+
+@rt('/timings/load_timing_form')
+def get(session, request):
+    params = dict(request.query_params)
+    idx = params.get("idx")
+    return timechan.load_timing_form(session, idx)
 
 @rt('/timings/delete_timetable_row')
 def get(session, request):
     params = dict(request.query_params)
     idx = params.get("idx")
-    return timechan.change_timetable_row(session, idx, "", dupli=False)
+    return timechan.delete_timetable_row(session, idx)
 
-@rt('/timings/duplicate_timetable_row')
-def post(session, index: int, new_time: str):
-    return timechan.change_timetable_row(session, index, new_time, dupli=True)
-
-@rt('/timings/add_timetable_row')
-def post(session, period_type: str, day_type: str, time: str, gong_id: str,
+@rt('/timings/add_mod_timetable_row')
+def post(session, period_type: str, day_type: str, idx: int, time: str, gong_id: str,
                auto: str = "0", targets: list[str] = None, comment: str = ""):
-    return timechan.add_timetable_row(session, period_type, day_type, time,
+    return timechan.add_mod_timetable_row(session, period_type, day_type, idx, time,
                                      gong_id, auto, targets, comment)
 
-@rt('/timings/change_day_type')
+@rt('/timings/modify_day_type')
 def post(session, index: int, day_type: str):
-    return timechan.change_day_type(session, index, day_type)
+    return timechan.modify_day_type(session, index, day_type)
+
+@rt('/timings/dup_last_day')
+def get(session, idx: int):
+    return timechan.dup_last_day(session, idx)
+
+@rt('/timings/del_last_day')
+def get(session, idx: int):
+    return timechan.del_last_day(session, idx)
+
+@rt('/timings/renumber_days')
+def get(session, period_type: str):
+    return timechan.renumber_days(session, period_type)
+
+@rt('/timings/create_day_type')
+def post(session, period_type: str, new_day_type: str, day_type:str):
+    return timechan.create_day_type(session, period_type, new_day_type, day_type)
+
+@rt('/timings/create_new_period')
+def post(session, from_center:str, new_period: str, from_period: str):
+    return timechan.create_new_period(session, from_center, new_period, from_period)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]

@@ -3,6 +3,8 @@
 import asyncio
 import os
 import shutil
+import sqlite3
+import pandas as pd
 from datetime import datetime
 from fasthtml.common import *
 import libs.utils as utils
@@ -48,7 +50,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         )
 
     today = datetime.now().date()
-    _, period_types_in_db = plancheck.get_period_types_in_db(center)
+    period_types_in_db = plancheck.get_period_types_in_db(center)
     period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
     form = Form(
         Div(
@@ -89,15 +91,21 @@ def show_draft_plan_table(draft_plan, center, mess):
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
-    # FIXME clear screen before fetching dhamma.org
     return Div(
-        P(" Loading this center planning from dhamma.org ..."),
-        Div(hx_get=f"/planning/check_show_dhamma", 
-            hx_target="#planning-periods",
-            hx_trigger="load",  # Triggers when this div loads
-            style="display: none;"),
-        id="planning-periods"
+        Div("", hx_swap_oob="true", id="timingsubpage"),
+        Div(
+            P(" Loading this center planning from dhamma.org ..."),
+            Div(hx_get=f"/planning/check_show_dhamma", 
+                hx_target="#planning-periods",
+                hx_trigger="load",  # Triggers when this div loads
+                style="display: none;"),
+            id="planning-periods"
+        )
     )
+
+def replace_table(conn, name, df):
+    df.to_sql(name, conn, if_exists="replace", index=False)
+
 
 async def save_db_plan_timetable(center_name, centers):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
@@ -108,13 +116,27 @@ async def save_db_plan_timetable(center_name, centers):
     await asyncio.to_thread(shutil.copy2, Path(source_db_file), Path(dest_db_file))
 
     dest_db = database(dest_db_file)
-    dest_db.execute("DROP TABLE coming_periods")
     #for t in dest_db.t:
     #    dest_db.execute(f"DROP TABLE {str(t)}")
+    dest_db.execute("DROP TABLE coming_periods")
     coming_periods = dest_db.create(dbset.Coming_periods, pk='start_date')
     for record in minio.get_center_temp_list_of_dicts(center_name, "planning"):
         coming_periods.insert(start_date=record["start_date"], period_type=record["period_type"])
+
+    dest_db.execute("DROP TABLE periods_struct")
+    periods_struct = dest_db.create(dbset.Periods_struct, pk=('period_type', 'day'))
+    for record in minio.get_center_temp_list_of_dicts(center_name, "periods_struct"):
+        periods_struct.insert(period_type=record["period_type"], day=record["day"],
+                              day_type=record["day_type"])
+
+    dest_db.execute("DROP TABLE timetables")
+    timetables = dest_db.create(dbset.Timetables, pk=('period_type', 'day_type', 'time'))
+    for record in minio.get_center_temp_list_of_dicts(center_name, "timetables"):
+        timetables.insert(period_type=record["period_type"], day_type=record["day_type"],
+                          time=record["time"], gong_id=record["gong_id"], auto=record["auto"],
+                          targets=record["targets"], comment=record["comment"])
     dest_db.close()
+
     return filename
 
 async def check_save_show_plan(session, start_plan, mess):
@@ -158,8 +180,18 @@ async def add_line(session, ptype, start):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
+def load_minio_timings_from_db(center):
+    selected_db = dbset.gong_db_name(center)
+    db_center = database(utils.get_db_path() + selected_db)
+    periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
+    minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
+    timetables_df = pd.DataFrame(list(db_center.t.timetables()))
+    minio.save_df_center_temp(center, "timetables", timetables_df)
+    return
+
 # @rt('/planning_page')
 async def planning_page(session, selected_name, csms):
+    load_minio_timings_from_db(selected_name)
     csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
@@ -175,12 +207,12 @@ async def planning_page(session, selected_name, csms):
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"(re)Start timetables",
-                hx_get="/timings/timingsubpage",
+                hx_get=f"/timings/timingsubpage?center={selected_name}",
                 hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
             Button(f"Load saved timetables",
-                hx_get="/unfinished?goto_dash=NO",
-                hx_target="#planning-periods"),
+                hx_get="/timings/saved_timings",
+                hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
             A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),

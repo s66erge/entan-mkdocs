@@ -35,6 +35,7 @@ class Pkey: # parameters keys
         return getattr(cls, name, default)
 
 class Globals:
+    HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
@@ -127,6 +128,25 @@ def seconds_to_hours_minutes(total_seconds):
     hours = total_seconds // 3600
     remaining_minutes = (total_seconds % 3600) // 60
     return hours, remaining_minutes
+
+# ~/~ end
+# ~/~ begin <<docs/gong-web-app/utilities.md#pre-select-fasthtml>>[init]
+
+def option_selected_one(value, current):
+    return Option(
+        value,
+        value=value,
+        **({"selected": True} if value == current else {})
+    )
+
+def option_selected_multi(value, selected_values):
+    # Normalize both sides to strings for safe comparison
+    sv = {str(v) for v in selected_values} if selected_values else set()
+    return Option(
+        value,
+        value=value,
+        **({"selected": True} if str(value) in sv else {})
+    )
 
 # ~/~ end
 

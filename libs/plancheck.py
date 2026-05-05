@@ -51,29 +51,30 @@ def coming_center_courses(center):
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
 
 def get_period_types_in_db(center):
-    selected_db = dbset.gong_db_name(center)
-    db_center = database(utils.get_db_path() + selected_db)
-    period_types_in_db = set(row.get("period_type") for row in list(db_center.t.periods_struct()))
-    return db_center, period_types_in_db
+    periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    period_types_in_db = periods_struct_df['period_type'].unique()
+    return period_types_in_db
 
 def get_types_with_duration(center):
-    db_center, period_types_in_db = get_period_types_in_db(center)
+    period_types_in_db = get_period_types_in_db(center)
+    periods_structs = minio.get_center_temp_list_of_dicts(center, "periods_struct")
+    timetables = minio.get_center_temp_list_of_dicts(center, "timetables")
     params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
     for vt in period_types_in_db:
         item = {}
         item["period_type"] = vt
-        days = [row.get("day") for row in list(db_center.t.periods_struct())
+        days = [row.get("day") for row in periods_structs
                 if row.get("period_type") == vt and row.get("day") is not None]
         item["duration"] = max(days) + 1
-        day_0_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+        day_0_type = next((row.get("day_type") for row in periods_structs
                  if row.get("period_type") == vt and row.get("day") == 0), None)
-        times_day_0 = [row.get("time") for row in list(db_center.t.timetables())
+        times_day_0 = [row.get("time") for row in timetables
                  if row.get("period_type") == vt and row.get("day_type") == day_0_type] 
         item["time_start_first_day"] = min(times_day_0, default=None)
-        last_day_type = next((row.get("day_type") for row in list(db_center.t.periods_struct())
+        last_day_type = next((row.get("day_type") for row in periods_structs
                  if row.get("period_type") == vt and row.get("day") == max(days)), None)
-        times_last_day = [row.get("time") for row in list(db_center.t.timetables())
+        times_last_day = [row.get("time") for row in timetables
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
         item["time_end_last_day"] = max(times_last_day, default=None)
         if not "repeat" in last_day_type :
@@ -94,7 +95,7 @@ def get_types_with_duration(center):
 def check_plan(session, plan, center):
     types_with_duration = get_types_with_duration(center)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
-    _, period_types_in_db =  get_period_types_in_db(center)
+    period_types_in_db =  get_period_types_in_db(center)
     session[utils.Skey.PLANOK] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:
