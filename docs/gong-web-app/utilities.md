@@ -67,6 +67,7 @@ class Globals:
 <<display-markdown>>
 <<plus-months-days>>
 <<pre-select-fasthtml>>
+<<date-time-picker>>
 
 ```
 
@@ -234,4 +235,34 @@ def option_selected_multi(value, selected_values):
         **({"selected": True} if str(value) in sv else {})
     )
 
+```
+
+### Time picker
+
+see: https://flatpickr.js.org/
+
+```python
+#| id: date-time-picker
+
+def TimePicker(name, value=None, id=None, label=None):
+    id = id or f"{name}_picker"
+
+    return Div(
+        Label(label or name.capitalize(), _for=id),
+        Input(
+            id=id,
+            name=name,
+            value=value or "",
+            placeholder="Select date & time",
+            cls="dt-input"
+        ),
+        Script(f"""
+            flatpickr("#{id}", {{
+                enableTime: true,
+                noCalendar: true,
+                time_24hr: true,
+                dateFormat: "H:i"
+            }});
+        """)
+    )
 ```

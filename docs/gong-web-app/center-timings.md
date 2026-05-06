@@ -127,14 +127,23 @@ def load_timingsubpage(session):
 def show_center_periods(session):
     center = session[utils.Skey.CENTER]
     session[utils.Skey.TIMESOK] = True
-    table = plancheck.get_types_with_duration(center)
-    center_periods_df = pd.DataFrame(table)
+    center_periods_df = pd.DataFrame(plancheck.get_types_with_duration(center))
     minio.save_df_center_temp(center, "center_periods", center_periods_df)
     center_periods_df["Actions"] = center_periods_df.apply(
-        lambda row: A("Select",
-            hx_get=(f"/timings/select_period?"
+        lambda row: Span(
+            A("Select",
+            hx_get=("/timings/select_period?"
                     f"period_type={quote_plus(row['period_type'])}"),
             hx_target="#feedback-times"
+            ),
+            Span(style="display: inline-block; width: 20px;"),
+            A("Delete",
+            hx_get=("/timings/delete_period?"
+                    f"period_type={quote_plus(row['period_type'])}"),
+            hx_target="#feedback-times",
+            hx_confirm=("Are you ABSOLUTELY sure you want to delete this period, "
+                        "including ALL its timings?")
+            )
         ),
         axis=1
     )
@@ -183,7 +192,7 @@ def show_center_periods(session):
     )
 
 def get_other_center_periods(session, center):
-    table = plancheck.get_types_with_duration(center)
+    table = plancheck.get_types_with_duration(center, source="db")
     periods = [row['period_type'] for row in table if row['tags'] == "F"]
     return Div(
         Form(

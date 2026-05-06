@@ -50,7 +50,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         )
 
     today = datetime.now().date()
-    period_types_in_db = plancheck.get_period_types_in_db(center)
+    period_types_in_db = plancheck.get_period_types_list(center)
     period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
     form = Form(
         Div(
