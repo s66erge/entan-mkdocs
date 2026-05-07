@@ -149,5 +149,29 @@ def option_selected_multi(value, selected_values):
     )
 
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/utilities.md#date-time-picker>>[init]
+
+def TimePicker(name, value=None, id=None, label=None):
+    id = id or f"{name}_picker"
+
+    return Div(
+        Label(label or name.capitalize(), _for=id),
+        Input(
+            id=id,
+            name=name,
+            value=value or "",
+            placeholder="Select date & time",
+            cls="dt-input"
+        ),
+        Script(f"""
+            flatpickr("#{id}", {{
+                enableTime: true,
+                noCalendar: true,
+                time_24hr: true,
+                dateFormat: "H:i"
+            }});
+        """)
+    )
+# ~/~ end
 
 # ~/~ end

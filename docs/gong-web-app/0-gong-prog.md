@@ -52,7 +52,7 @@ custom_styles = Style("""
 .mx-auto { margin-left: auto; margin-right: auto; }
 """)
 css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
-htmxsse = Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js")
+
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
@@ -60,7 +60,12 @@ def before(req, session):
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 
-app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware, hdrs=(picolink,css,custom_styles,htmxsse),)
+app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware,
+    hdrs=(picolink, css, custom_styles,
+        Link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css', type='text/css'),
+        Script(src="https://cdn.jsdelivr.net/npm/flatpickr"),
+        ),
+    )
 # client = TestClient(app)
 
 db_path = utils.get_db_path()
@@ -300,6 +305,10 @@ def post(session, period_type: str, new_day_type: str, day_type:str):
 @rt('/timings/create_new_period')
 def post(session, from_center:str, new_period: str, from_period: str):
     return timechan.create_new_period(session, from_center, new_period, from_period)
+
+@rt('/timings/delete_period')
+def get(session, period_type: str):
+    return timechan.delete_period(session, period_type)
 
 ```
 

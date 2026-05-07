@@ -1,8 +1,11 @@
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#libs/plancheck.py>>[init]
 
+from turtle import pd
+
 from fasthtml.common import *
 from datetime import date
 from tabulate import tabulate
+import pandas as pd
 import libs.utils as utils
 import libs.dbset as dbset
 import libs.minio as minio
@@ -50,18 +53,29 @@ def coming_center_courses(center):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
 
-def get_period_types_in_db(center):
-    periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+def get_period_types_list(center, source="df"):
+    if source == "df":
+        periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    else: # source == "db"
+        selected_db = dbset.gong_db_name(center)
+        db_center = database(utils.get_db_path() + selected_db)
+        periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
     period_types_in_db = periods_struct_df['period_type'].unique()
     return period_types_in_db
 
-def get_types_with_duration(center):
-    period_types_in_db = get_period_types_in_db(center)
-    periods_structs = minio.get_center_temp_list_of_dicts(center, "periods_struct")
-    timetables = minio.get_center_temp_list_of_dicts(center, "timetables")
+def get_types_with_duration(center, source="df"):
+    period_types_list = get_period_types_list(center, source)
+    if source == "df":
+        periods_structs = minio.get_center_temp_list_of_dicts(center, "periods_struct")
+        timetables = minio.get_center_temp_list_of_dicts(center, "timetables")
+    else: # source == "db"
+        selected_db = dbset.gong_db_name(center)
+        db_center = database(utils.get_db_path() + selected_db)
+        periods_structs = list(db_center.t.periods_struct())
+        timetables = list(db_center.t.timetables())    
     params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
-    for vt in period_types_in_db:
+    for vt in period_types_list:
         item = {}
         item["period_type"] = vt
         days = [row.get("day") for row in periods_structs
@@ -95,7 +109,7 @@ def get_types_with_duration(center):
 def check_plan(session, plan, center):
     types_with_duration = get_types_with_duration(center)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")
-    period_types_in_db =  get_period_types_in_db(center)
+    period_types_in_db =  get_period_types_list(center)
     session[utils.Skey.PLANOK] = True
     for idx, row in enumerate(plan):
         if idx == len(plan) - 1:

@@ -8,6 +8,8 @@ Will only be reachable for authenticated users and planner for the selected cent
 import pandas as pd
 from fasthtml.common import *
 import libs.utils as utils
+import libs.dbset as dbset
+import libs.plancheck as plancheck
 import libs.minio as minio
 import libs.timings as timings
 import libs.messages as messages
@@ -15,14 +17,29 @@ import libs.messages as messages
 <<repaint-timings>>
 <<change-timetables>>
 <<change-struct>>
-<<create-period>>
+<<change-period>>
 
 ```
 
 ### Copy period from a center
 
 ```python
-#| id: create-period
+#| id: change-period
+
+# @rt('/timings/delete_period')
+def delete_period(session, period_type):
+    center = session[utils.Skey.CENTER]
+    center_periods_df = minio.get_center_temp_df(center, "center_periods")
+    center_periods_df = center_periods_df[center_periods_df["period_type"] != period_type].reset_index(drop=True)
+    minio.save_df_center_temp(center, "center_periods", center_periods_df)
+    center_struct_df = minio.get_center_temp_df(center, "periods_struct")
+    center_struct_df = center_struct_df[center_struct_df["period_type"] != period_type].reset_index(drop=True)
+    minio.save_df_center_temp(center, "periods_struct", center_struct_df)
+    center_timetables_df = minio.get_center_temp_df(center, "timetables")
+    center_timetables_df = center_timetables_df[center_timetables_df["period_type"] != period_type].reset_index(drop=True)
+    minio.save_df_center_temp(center, "timetables", center_timetables_df)
+    message = {"success": "period_deleted"}
+    return repaint(session, None, None, message, False)
 
 # @rt('/timings/create_new_period')
 def create_new_period(session, from_center, new_period, from_period):
@@ -31,24 +48,26 @@ def create_new_period(session, from_center, new_period, from_period):
     if new_period in this_center_periods_df["period_type"].values:
         message = {"error": "period_already_exists"}
     else:
-        timings.load_timings(from_center)
-        from_center_periods_df = minio.get_center_temp_df(from_center, "center_periods")
+        from_center_periods_df = pd.DataFrame(plancheck.get_types_with_duration(from_center, source="db"))
         new_rows = from_center_periods_df[from_center_periods_df["period_type"] == from_period].copy()
         new_rows["period_type"] = new_period
         this_center_periods_df = pd.concat([this_center_periods_df, new_rows], ignore_index=True)
         this_center_periods_df = this_center_periods_df.sort_values(by=["tags", "period_type"]).reset_index(drop=True)
         minio.save_df_center_temp(this_center, "center_periods", this_center_periods_df)
 
+        from_selected_db = dbset.gong_db_name(from_center)
+        db_from_center = database(utils.get_db_path() + from_selected_db)
+
+        from_center_struct_df = pd.DataFrame(list(db_from_center.t.periods_struct()))
         this_center_struct_df = minio.get_center_temp_df(this_center, "periods_struct")
-        from_center_struct_df = minio.get_center_temp_df(from_center, "periods_struct")
         new_rows = from_center_struct_df[from_center_struct_df["period_type"] == from_period].copy()
         new_rows["period_type"] = new_period
         this_center_struct_df = pd.concat([this_center_struct_df, new_rows], ignore_index=True)
         this_center_struct_df = this_center_struct_df.sort_values(by=["period_type", "day"]).reset_index(drop=True)
         minio.save_df_center_temp(this_center, "periods_struct", this_center_struct_df)
 
+        from_center_timetables_df = pd.DataFrame(list(db_from_center.t.timetables()))
         this_center_timetables_df = minio.get_center_temp_df(this_center, "timetables")
-        from_center_timetables_df = minio.get_center_temp_df(from_center, "timetables")
         new_rows = from_center_timetables_df[from_center_timetables_df["period_type"] == from_period].copy()
         new_rows["period_type"] = new_period
         params = minio.params_from_excel_minio(this_center)
@@ -77,7 +96,7 @@ def repaint(session, period_type, day_type, message, clear_show_times):
             Div(timings.show_center_periods(session),
                 hx_swap_oob="true", id="center_periods"),
             Div(timings.select_period(session, period_type, clear_show_times), 
-                hx_swap_oob="true", id="periods-struct"),
+                hx_swap_oob="true", id="periods-struct")if period_type else None,
             Div(timings.select_timings(session, period_type, day_type),
                 hx_swap_oob="true", id="show-times") if day_type else None,
             Div("", hx_swap_oob="true", id="timetable-form"),
@@ -230,10 +249,7 @@ def load_timing_form(session, idx):
                 Input(type="hidden", name="period_type", value=period_type),
                 Input(type="hidden", name="day_type", value=day_type),
                 Input(type="hidden", name="idx", value=idx),
-                Div(Label("Time", cls="mr-2", style="width: 60px;"), 
-                    Input(type="time", name="time", value=time_value, cls="form-control",
-                          required=True, style="width: 250px;"),
-                    cls="flex items-center gap-2"),
+                utils.TimePicker(name="time", value=time_value), 
                 Span(Label("Gong"),
                     Select(
                         *[utils.option_selected_one(id, gong_id) for id in gong_ids],
