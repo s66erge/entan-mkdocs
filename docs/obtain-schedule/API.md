@@ -27,12 +27,27 @@ Summary with relevant fields
         "course_type_anchor": "10-Day",
         "course_type": "10 days",
         "location": {
-        "id": 1370,
-        "sub_domain": "pajjota",
-        "dhamma_name": "Dhamma Pajjota",
+            "id": 1370,
+            "sub_domain": "pajjota",
+            "dhamma_name": "Dhamma Pajjota",
+            ...
+            "sub_location": empty, # for Pajjota, else "Brussels" or "Ghent"
+            "center_noncenter": "center", # "noncenter" if not Pajjota
+            ...
+        }
         ...
-        "sub_location": empty, # for Pajjota, else "Brussels" or "Ghent"
-        "center_noncenter": "center", # "noncenter" if not Pajjota
+        "status": [
+            {
+                "color": "Red",
+                "status": "CANCELLED",
+                "label": null,
+                "type": null
+            }
+        ],
+        "service": false,
+        "can_apply_in_progress": false,
+        "can_apply_flag": true,
+        ...
         }
     }
     {other courses...}

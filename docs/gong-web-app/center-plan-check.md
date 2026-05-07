@@ -3,11 +3,10 @@
 Will only be reachable for authenticated users and planner for the selected center.
 
 ```python
-#| file: libs/plancheck.py 
+#| file: libs/plancheck.py
 
 from fasthtml.common import *
 from datetime import date
-from tabulate import tabulate
 import pandas as pd
 import libs.utils as utils
 import libs.dbset as dbset
