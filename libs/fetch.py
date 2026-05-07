@@ -14,6 +14,7 @@ import libs.minio as minio
 
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
 
+"""
 async def fetch_courses_from_dhamma(location, date_start, date_end):
     url = "https://www.dhamma.org/en-US/courses/do_search"    
     # url = "https://124.26.5.186:443/en-US/courses/do_search"
@@ -65,9 +66,12 @@ async def fetch_courses_from_dhamma(location, date_start, date_end):
             "course_type": c.get("course_type")
         }
         for c in all_courses
-        if c.get("location", {}).get("center_noncenter") != "noncenter"
+        if c.get("location", {}).get("center_noncenter") != "noncenter" and \
+            not (c.get("service") == False and c.get("can_apply_in_progress") == False and \
+                 c.get("can_apply_flag") == False)
     ]
     return extracted
+"""
 
 def fetch_scrap(location, date_start, date_end):
     scraper = cloudscraper.create_scraper()
@@ -100,8 +104,9 @@ def fetch_scrap(location, date_start, date_end):
             "course_type": c.get("course_type")
         }
         for c in all_courses
-        if c.get("location", {}).get("center_noncenter") != "noncenter"
-    ]
+        if c.get("location", {}).get("center_noncenter") != "noncenter" and \
+            c.get("status",{})[0].get("status").upper() != "CANCELLED"
+    ]        
     return extracted
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#period-type>>[init]
@@ -215,19 +220,11 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     periods_db_center, date_current_course = plancheck.coming_center_courses(center)  ## [1-3]
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
-
     # extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
     extracted = await asyncio.to_thread(fetch_scrap, dhamma_location, date_current_course, end_date)
-
     #print(tabulate(extracted, headers="keys"))
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))
-
-    # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
-    # this keeps the first sorting order ok for identical start_dates
-    #dhamma_sort = sorted(sorted(periods_dhamma, key=lambda x: x['end_date'], reverse=True),
-    #                  key=lambda x: x['start_date'])
-    # print(tabulate(dhamma_sort, headers="keys"))
     merged = periods_db_center + periods_dhamma
     dedup_cleaned = sort_clean(merged, dhamma_types, inside)
     return dedup_cleaned
