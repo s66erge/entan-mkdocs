@@ -1,7 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/center-plan-check.md#libs/plancheck.py>>[init]
 
-from turtle import pd
-
 from fasthtml.common import *
 from datetime import date
 from tabulate import tabulate

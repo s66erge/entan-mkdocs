@@ -5,8 +5,6 @@ Will only be reachable for authenticated users and planner for the selected cent
 ```python
 #| file: libs/plancheck.py 
 
-from turtle import pd
-
 from fasthtml.common import *
 from datetime import date
 from tabulate import tabulate
