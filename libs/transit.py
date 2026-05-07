@@ -104,10 +104,14 @@ async def wait_until(model, until_hour, minutes=0):
         delay = utils.Globals.SHORT_DELAY
     else:
         now_center = datetime.now(center_tz)
+        print(f"Current time at center: {now_center.isoformat()}")
         next_event = now_center.replace(hour=until_hour, minute=minutes)
-        if now_center.hour >= until_hour and now_center.minute >= minutes:
+        print(f"Next event before scheduled at: {next_event.isoformat()}")
+        if now_center.hour > until_hour or \
+            (now_center.hour == until_hour and now_center.minute >= minutes):
             # If it's already past the target time, schedule for tomorrow
             next_event +=  timedelta(days=1)
+        print(f"Next event after scheduled at: {next_event.isoformat()}")
         delay = (next_event - now_center).total_seconds()
     await asyncio.sleep(delay)
     return {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"} 
