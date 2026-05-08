@@ -186,6 +186,7 @@ def load_minio_timings_from_db(center):
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
+    db_center.close()
     return
 
 # @rt('/planning_page')

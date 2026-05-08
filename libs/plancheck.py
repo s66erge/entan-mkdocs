@@ -30,6 +30,7 @@ def coming_center_courses(center):
 
     periods = db_center.t.coming_periods
     Period = periods.dataclass()
+    db_center.close()
     count_past = sum(1 for item in periods() if date.fromisoformat(item.start_date) < date.today())
     date_current_course = periods()[count_past-1].start_date  ## [2]
 
@@ -57,6 +58,7 @@ def get_period_types_list(center, source="df"):
         selected_db = dbset.gong_db_name(center)
         db_center = database(utils.get_db_path() + selected_db)
         periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
+        db_center.close()
     period_types_in_db = periods_struct_df['period_type'].unique()
     return period_types_in_db
 
@@ -69,7 +71,8 @@ def get_types_with_duration(center, source="df"):
         selected_db = dbset.gong_db_name(center)
         db_center = database(utils.get_db_path() + selected_db)
         periods_structs = list(db_center.t.periods_struct())
-        timetables = list(db_center.t.timetables())    
+        timetables = list(db_center.t.timetables())
+        db_center.close() 
     params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
     for vt in period_types_list:

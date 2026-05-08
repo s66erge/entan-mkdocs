@@ -177,6 +177,8 @@ def check_within(deletion_check, this_row, row_aft):
         return True
     return False
 
+
+# FIXME: show deleted 1 day-type coiurses and created IN BETWEEN
 def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
     cleaned = []
     # default_type = next((x for x in dhamma_types if x.get("tags") == "X"), {}).get('period_type',"")  # Default type
@@ -217,6 +219,7 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     params = minio.params_from_excel_minio(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
+    # FIXME: starts fetching from start of current course ?
     periods_db_center, date_current_course = plancheck.coming_center_courses(center)  ## [1-3]
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
