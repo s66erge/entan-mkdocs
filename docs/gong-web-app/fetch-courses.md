@@ -157,6 +157,7 @@ keep only one with source='BOTH'
 
 ```python
 #| id: deduplicate
+
 def deduplicate(merged):
     deduplicated = []
     i = 0
@@ -166,11 +167,15 @@ def deduplicate(merged):
             next_item = merged[i + 1]
             if (current['start_date'] == next_item['start_date'] and 
                 current['period_type'] == next_item['period_type'] and
-                current['end_date'] == next_item['end_date'] and
+                # current['end_date'] == next_item['end_date'] and
                 current['source'] != next_item['source']):
-                # Mark as BOTH and skip the next one
-                current['source'] = 'BOTH'
-                deduplicated.append(current)
+                # Mark as BOTH and keep the "dhamma.org" one
+                if current['source'] == "dhamma.org":
+                    current['source'] = 'BOTH'
+                    deduplicated.append(current)
+                else:
+                    next_item['source'] = 'BOTH'
+                    deduplicated.append(next_item)
                 i += 2  # skip next item
                 continue
         deduplicated.append(current)
@@ -204,9 +209,7 @@ def get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement):
     ]
     return periods_dhamma_org
 
-def check_within(deletion_check, this_row, row_aft):
-    if row_aft.get("period_type", "") != deletion_check:
-        return False
+def check_within(this_row, row_aft):
     this_start = date.fromisoformat(this_row.get("start_date"))
     other_start = date.fromisoformat(row_aft.get("start_date"))
     other_end = date.fromisoformat(row_aft.get("end_date"))
@@ -214,35 +217,38 @@ def check_within(deletion_check, this_row, row_aft):
         return True
     return False
 
-
-# FIXME: show deleted 1 day-type coiurses and created IN BETWEEN
-def clean_dhamma_courses(periods_dhamma_org, dhamma_types, inside):
+def clean_dhamma_courses(periods_dhamma_org, inside):
     cleaned = []
-    # default_type = next((x for x in dhamma_types if x.get("tags") == "X"), {}).get('period_type',"")  # Default type
     delete_list = [d for d in inside if d["action"] == "delete"]
     for i, row in enumerate(periods_dhamma_org):
         if i == 0:
             cleaned.append(row)
             continue
         row_bef = periods_dhamma_org[i-1]
-        to_delete = [d for d in delete_list if d["period_type"] == row["period_type"] \
-                     and d["container"] == row_bef["period_type"]]
-        deletion_check = to_delete[0]["container"] if to_delete else "@TOKEEP@"
-        if  deletion_check == "@ALL@": # or row["period_type"] == default_type:
-            continue
-        elif check_within(deletion_check, row, row_bef):
+        delete_row = False
+        row_delete_list = [d for d in delete_list if d["period_type"] == row["period_type"]]
+        if row_delete_list:
+            if row_delete_list[0]["container"] == "@ALL@":
+                delete_row = True
+            elif [d for d in row_delete_list if d["container"] == row_bef["period_type"] \
+                                            and check_within(row, row_bef)]:
+                delete_row = True
+            else:
+                delete_row = False
+        if delete_row:
+            row_bef["No_gong"] = row["period_type"]
             continue
         else:
             cleaned.append(row)
     return cleaned
 
-def sort_clean(aplan, dhamma_types, inside):
+def sort_clean(aplan, inside):
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
     sorted_plan = sorted(sorted(aplan, key=lambda x: x['end_date'], reverse=True),
                       key=lambda x: x['start_date'])
     dedup = deduplicate(sorted_plan)
-    dedup_cleaned = clean_dhamma_courses(dedup, dhamma_types, inside)
+    dedup_cleaned = clean_dhamma_courses(dedup, inside)
     return dedup_cleaned
 
 
@@ -256,7 +262,6 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     params = minio.params_from_excel_minio(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
-    # FIXME: starts fetching from start of current course ?
     periods_db_center, date_current_course = plancheck.coming_center_courses(center)  ## [1-3]
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
@@ -266,7 +271,7 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))
     merged = periods_db_center + periods_dhamma
-    dedup_cleaned = sort_clean(merged, dhamma_types, inside)
+    dedup_cleaned = sort_clean(merged, inside)
     return dedup_cleaned
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)

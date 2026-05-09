@@ -282,7 +282,7 @@ def create_new_period(session, from_center, new_period, from_period):
         this_center_timetables_df = pd.concat([this_center_timetables_df, new_rows], ignore_index=True)
         this_center_timetables_df = this_center_timetables_df.sort_values(by=["period_type", "day_type", "time"]).reset_index(drop=True)
         minio.save_df_center_temp(this_center, "timetables", this_center_timetables_df)
-        
+
         db_from_center.close()
         message = {"success": "period_created"}
     return repaint(session, new_period, None, message, False)
