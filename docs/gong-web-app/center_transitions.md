@@ -17,6 +17,7 @@ import libs.utils as utils
 import libs.minio as minio
 import libs.states as states
 import libs.planning as planning
+import libs.dbset as dbset
 
 pending_tasks = {}
 
@@ -145,6 +146,7 @@ async def transfer_new_db_once(model):
     try:
         center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
         center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
+        model.center_date = center_date
         file_complete = utils.get_db_path() + model.save_db_filename
         minio_object = f"{model.center_name.lower()}/sending{center_date}.db"
         await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
@@ -153,30 +155,26 @@ async def transfer_new_db_once(model):
     else:
         return {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
 
-async def get_version_prod(model):
-    return await retry_on_error(get_version_prod_once, model, retries=3, delay=60)
-async def get_version_prod_once(model):
+async def delete_new_db(model):
+    return await retry_on_error(delete_new_db_once, model, retries=3, delay=60)
+async def delete_new_db_once(model):
     try:
-        minio_object = f"{model.center_name.lower()}/{utils.Globals.PI_FILE_JSON}"
-        file_downloaded =  utils.get_db_path() + utils.Globals.PI_FILE_JSON
-        await asyncio.to_thread(minio.file_download, utils.Globals.PI_BUCKET, minio_object, file_downloaded)
-        with open(file_downloaded, 'r') as f:
-            data = json.load(f)
-        model.version_prod = data[utils.Globals.PI_FILE_KEY1][utils.Globals.PI_FILE_KEY2]
+        objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{model.center_name.lower()}")
+        print(objects_in_minio)
+        print(f"receiving{model.center_date}.db")
+        if f"{model.center_name.lower()}/receiving{model.center_date}.db" in objects_in_minio:
+            await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
+                                    f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
+            ok_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name)
+            old_db = database(ok_db_file)
+            old_db.close()
+            os.remove(ok_db_file)
+            os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
+            return {"success": f"production version {model.center_date} deleted"}
+        else:
+           return {"error": f"production version {model.center_date} NOT FOUND"}
     except (S3Error, MinioException, RuntimeError) as e:
-        return {"error": f"getting json from minio failed: {e}"}
-    else:
-       return {"success": f"production version is {data['general']['db_version']}"}
-
-async def check_version_prod(model):
-    params = minio.params_from_excel_minio(model.center_name)
-    center_tz = params[utils.Pkey.TIMEZON]  
-    now_at_center = datetime.now(ZoneInfo(center_tz))
-    date_at_center = now_at_center.date().isoformat()
-    if  date_at_center == model.version_prod:
-        return {"success": f"production version OK at center date: {date_at_center}"}
-    else:
-        return {"error": f"production version is NOT OK with center date: {date_at_center}"}
+        return {"error": f"deleting production db from minio failed: {e}"}
 
 ```
 

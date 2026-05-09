@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from statemachine import State, Event, StateMachine, StateChart
 import libs.dbset as dbset
 import libs.transit as transit
+import libs.utils as utils
 
 csms = {}
 clocks = {}
@@ -43,26 +44,22 @@ class CenterState(StateMachine):
     wait_01 = State("Waiting for 1am at center timezone")
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
-    getting_prod = State("Getting production version after center restart")
-    version_check = State("Checking production version")
+    getting_prod = State("Deleting production version after center restart")
     w_reco_save = State("Saving new planning failed, waiting for recovery")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
-    w_reco_prod = State("getting prod version failed, waiting for production recovery")
-    w_reco_version = State("wrong_db_version, waiting for recovery")
+    w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
     progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
             | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
-            | getting_prod.to(version_check) | version_check.to(free)
+            | getting_prod.to(free)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
     reco_save_done    = Event(w_reco_save.to(wait_01), name='recovery of saving new db done')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
-    reco_prod_done    = Event(w_reco_prod.to(version_check), name='recovery of db in production done')
-    reco_version_done = Event(w_reco_version.to(free), name='OK version of db in production')
+    reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) \
-            | getting_prod.to(w_reco_prod) | version_check.to(w_reco_version)
+    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
@@ -79,19 +76,18 @@ class CenterState(StateMachine):
         run_sm_action(self.model, transit.save_db_plan_times)
 
     def on_enter_wait_01(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=0, minutes=40)
+        run_sm_action(self.model, transit.wait_until,
+                      utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
 
     def on_enter_transfer(self):
         run_sm_action(self.model, transit.transfer_new_db)
 
     def on_enter_wait_02(self):
-        run_sm_action(self.model, transit.wait_until, until_hour=1, minutes=20)
+        run_sm_action(self.model, transit.wait_until,
+                      utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
 
     def on_enter_getting_prod(self):
-        run_sm_action(self.model, transit.get_version_prod)
-
-    def on_enter_version_check(self):  # (1)
-        run_sm_action(self.model, transit.check_version_prod)
+        run_sm_action(self.model, transit.delete_new_db)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -125,7 +121,7 @@ class CenterDataModel(AbstractPersistentModel):
         self.last_result = None   # result of the last operation on this machine
         self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
         self.save_db_filename = None  # new production db filenameto be sent
-        self.version_prod = None  # production version date storage location
+        self.center_date = None  # production version date
 
     def _read_state(self):
         row = self.centers[self.center_name]

@@ -7,6 +7,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 from fasthtml.common import *
 from datetime import date
+from tabulate import tabulate
 import pandas as pd
 import libs.utils as utils
 import libs.dbset as dbset
@@ -62,7 +63,7 @@ def check_plan(session, plan, center):
                 else:
                     row["check"] = "OK same day"
             elif delta_days > 1:
-                row["check"] = f"OK default {delta_days} days"
+                row["check"] = f"CHECK GAP {delta_days} days"
             else:
                 row["check"] = "OK"
         if not (row["check"].startswith("OK") or row["check"].startswith("CHECK")):
@@ -82,7 +83,7 @@ def add_end_dates(plan, center):
             if this_type["tags"] != "F":
                 if i < len(plan) - 1:
                     next_start = plan[i+1].get('start_date')
-                    plan[i]['end_date'] = utils.add_months_days(next_start, 0, -1)
+                    plan[i]['end_date'] = utils.add_months_days(next_start, 0, 0)
                 else:
                     plan[i]['end_date'] = utils.add_months_days(plan[i]['start_date'], 0, 1)
             else:
@@ -93,22 +94,21 @@ def coming_center_courses(center):
     selected_db = dbset.gong_db_name(center)
     db_center = database(utils.get_db_path() + selected_db)
 
-    periods = db_center.t.coming_periods
-    Period = periods.dataclass()
-    count_past = sum(1 for item in periods() if date.fromisoformat(item.start_date) < date.today())
-    date_current_course = periods()[count_past-1].start_date  ## [2]
-
-    periods_db_center_obj = periods()[count_past-1:]  ## [3]
-    periods_db_center = [
+    periods = sorted(db_center.t.coming_periods(), key=lambda x: x["start_date"])
+    count_past = sum(1 for item in periods if date.fromisoformat(item["start_date"]) < date.today())
+    date_current_course = periods[count_past-1]["start_date"]  ## [2]
+    periods_db_center_obj = periods[count_past-1:]  ## [3]
+    sorted_periods = [
         {
-            'start_date': p.start_date,
-            'period_type': p.period_type,
+            'start_date': p["start_date"],
+            'period_type': p["period_type"],
             'source' : selected_db
 
         }
         for p in periods_db_center_obj  ## [3]
     ]
-    sorted_periods = sorted(periods_db_center, key=lambda x: x['start_date'])
+    db_center.close()
+    #sorted_periods = sorted(periods_db_center, key=lambda x: x['start_date'])
     sorted_periods_ends = add_end_dates(sorted_periods, center)
     return sorted_periods_ends, date_current_course
 
@@ -124,6 +124,7 @@ def get_period_types_list(center, source="df"):
         selected_db = dbset.gong_db_name(center)
         db_center = database(utils.get_db_path() + selected_db)
         periods_struct_df = pd.DataFrame(list(db_center.t.periods_struct()))
+        db_center.close()
     period_types_in_db = periods_struct_df['period_type'].unique()
     return period_types_in_db
 
@@ -136,7 +137,8 @@ def get_types_with_duration(center, source="df"):
         selected_db = dbset.gong_db_name(center)
         db_center = database(utils.get_db_path() + selected_db)
         periods_structs = list(db_center.t.periods_struct())
-        timetables = list(db_center.t.timetables())    
+        timetables = list(db_center.t.timetables())
+        db_center.close() 
     params_from_excel = minio.params_from_excel_minio(center)
     types_duration = []
     for vt in period_types_list:

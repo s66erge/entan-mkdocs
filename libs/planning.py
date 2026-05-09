@@ -26,6 +26,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         source = plan_line.get("source")
         check = plan_line.get("check")
         course = plan_line.get("course_type")
+        no_gong = plan_line.get("No_gong", "")
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
         source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
@@ -44,7 +45,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         )
         rows.append(
             Tr(
-                Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(delete_link)
+                Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(no_gong), Td(delete_link)
             )
         )
 
@@ -69,14 +70,14 @@ def show_draft_plan_table(draft_plan, center, mess):
         ),
 
     table = Table(
-        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("Action"),)),
+        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("No_gong"), Th("Action"),)),
         Tbody(*rows)
     )
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
         Div(messages.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
 
-        Div("",hx_swap_oob="true",id="center-periods"),
+        Div("",hx_swap_oob="true",id="timingsubpage"),
         #Div("",hx_swap_oob="true",id="periods-struct"),
         #Div("",hx_swap_oob="true",id="timetables"),
 
@@ -141,11 +142,9 @@ async def save_db_plan_timetable(center_name, centers):
 async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
-    dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
-    plan = fetch.sort_clean(start_plan, dhamma_types, inside)
+    plan = fetch.sort_clean(start_plan, inside)
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
-
     session[utils.Skey.SAVED_PLAN] = True
     return show_draft_plan_table(new_draft_plan, selected_name, mess)
 
@@ -168,7 +167,8 @@ async def add_line(session, ptype, start):
         "period_type": ptype,
         "source": "new input",
         "check": "",
-        "course_type": ""
+        "course_type": "",
+        "No_gong": ""
     }    
     # Add the new line to the plan
     plan.append(new_line)    
@@ -186,6 +186,7 @@ def load_minio_timings_from_db(center):
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df) 
     timetables_df = pd.DataFrame(list(db_center.t.timetables()))
     minio.save_df_center_temp(center, "timetables", timetables_df)
+    db_center.close()
     return
 
 # @rt('/planning_page')

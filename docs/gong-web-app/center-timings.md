@@ -41,6 +41,7 @@ def load_timings(center):
     table = plancheck.get_types_with_duration(center)
     center_periods_df = pd.DataFrame(table)
     minio.save_df_center_temp(center, "center_periods", center_periods_df)
+    db_center.close()
     return
 
 def check_timings(session):

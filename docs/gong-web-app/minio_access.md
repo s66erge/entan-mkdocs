@@ -61,11 +61,18 @@ def create_minio_client():
 ```python
 #| id: get-objects-alist
 
-def get_objects_list(bucket, prefix, recursive=False):
+def get_objects_list(bucket, prefix, recursive=True):
     listob = []
     for obj in minio_client.list_objects(bucket, prefix=prefix, recursive=recursive):
         listob.append(obj.object_name)
     return listob
+
+def delete_object(bucket, prefix, object_name):
+    result = minio_client.remove_object(
+        bucket_name = bucket,
+        object_name = f"{prefix}/{object_name}"
+    )
+    return result
 
 ```
 ### Upload a file

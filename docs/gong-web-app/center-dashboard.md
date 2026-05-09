@@ -77,6 +77,7 @@ def dashboard(session, users, planners):
 
 #@rt('/status_page')
 def status_page(session, center_name, centers, users, csms):
+    # FIXME: show current db date in PI, show xlsx config tables ?
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
     center_obj = centers[center_name]

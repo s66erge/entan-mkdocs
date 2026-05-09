@@ -59,7 +59,7 @@ def consult_select_db(request, centers, db_path):
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
     cps = db.t.coming_periods()
     pers = db.t.periods_struct()
-
+    db.close()
     # Get all period_types from periods_struct and find those not in current rows
     try:
         all_types =  {p.get("period_type") for p in pers}
@@ -122,6 +122,7 @@ def consult_select_period(request, db_path):
         rows_src = list(db.t.periods_struct())
     except Exception:
         rows_src = []
+    db.close()
 
     filtered = [r for r in rows_src if (r.get("period_type") or "").strip() == period_type.strip()]
 
@@ -182,7 +183,7 @@ def consult_select_timetable(request, db_path):
         timetables = list(db.t.timetables())
     except Exception:
         timetables = []
-
+    db.close()
     # Filter where period_type and day_type match
     filtered = [
         t for t in timetables 
