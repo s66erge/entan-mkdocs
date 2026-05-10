@@ -20,7 +20,7 @@ import libs.utils as utils
 
 class Role: role_name: str; description: str
 class User: email: str; name: str; role_name: str; password: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
-class Center: center_name: str; other_course: str; status: str; created_by: str; status_start: str
+class Center: center_name: str; pi_db_date: str; status: str; created_by: str; status_start: str
 class Planner: user_email: str; center_name: str
 
 class Coming_periods: start_date: str; period_type: str

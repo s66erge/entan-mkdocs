@@ -65,20 +65,22 @@ def status_page(session, center_name, centers, users, csms):
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
-    # ct_timezone = center_obj.timezone
+    pi_database_date = center_obj.pi_db_date
     params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
     state_mach = csms[center_name]
     state = state_mach.configuration[0].id
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
+    print(session)
     return Main(
         top_menu(session['role']),
         Div(utils.display_markdown(mark_file)),
         H3(f"Center {center_name}"),
-        P(f"Center timezone: {ct_timezone}, Local time: {utils.short_iso(datetime.now() , ct_timezone)}"),
-        P(f"UTC time: {utils.short_iso(datetime.now())}"),
-        P(f"Your browser timezone: {user_timezone}, local time: {utils.short_iso(datetime.now(), user_timezone)}"),
-        P(f"Current state: {state}"),
+        P(f"Local database in center was installed on: {pi_database_date}"),
+        P(f"Center timezone: {ct_timezone}, local time now: {utils.short_iso(datetime.now() , ct_timezone)}"),
+        P(f"UTC time now: {utils.short_iso(datetime.now())}"),
+        P(f"Your browser timezone: {user_timezone}, local time now: {utils.short_iso(datetime.now(), user_timezone)}"),
+        P(f"Current center state: {state}"),
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
