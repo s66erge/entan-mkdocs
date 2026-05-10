@@ -1,10 +1,9 @@
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#libs/transit.py>>[init]
 
-import json
+import os
 import asyncio
 from fasthtml.common import *
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from zoneinfo import ZoneInfo
 from minio.error import S3Error, MinioException
 import libs.utils as utils
@@ -34,7 +33,6 @@ async def check_center_free(state_mach, this_user):
         return center_is_free
 
 def abandon_edit(session, csms):
-    print(session)
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
