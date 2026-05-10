@@ -41,7 +41,7 @@ from abc import abstractmethod
 import asyncio
 # from fasthtml.common import *
 from datetime import datetime, timezone
-from statemachine import State, Event, StateMachine, StateChart
+from statemachine import State, Event, StateMachine
 import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils

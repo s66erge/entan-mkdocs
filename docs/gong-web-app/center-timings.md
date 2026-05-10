@@ -8,13 +8,11 @@ Will only be reachable for authenticated users and planner for the selected cent
 import pandas as pd
 from urllib.parse import quote_plus
 from fasthtml.common import *
-from libs import timechan
 import libs.utils as utils
 import libs.messages as messages
 import libs.plancheck as plancheck
 import libs.dbset as dbset
 import libs.minio as minio
-import libs.timechan as timechan
 
 <<check-show-period-types>>
 <<show-struct-timetable>>
@@ -179,7 +177,7 @@ def show_center_periods(session):
                     Button("Get this center periods", type="submit",
                         style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
                     ),
-                    hx_post=f"/timings/get_other_center_periods",
+                    hx_post="/timings/get_other_center_periods",
                     hx_target="#period_form_two",
                     style="display: inline-flex; align-items: center; gap: 0.2rem;"
                 ),            
@@ -214,7 +212,7 @@ def get_other_center_periods(session, center):
             Button("Create new period", type="submit",
                 style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
             ),
-            hx_post=f"/timings/create_new_period",
+            hx_post="/timings/create_new_period",
             hx_target="#feedback-times",
             style="display: inline-flex; align-items: center; gap: 0.2rem;"
         ),            
@@ -254,7 +252,7 @@ def select_period(session, period_type, clear_show_times=True):
                 Button("Select another day type", type="submit",
                     style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 200px;",
                 ),
-                hx_post=f"/timings/modify_day_type",
+                hx_post="/timings/modify_day_type",
                 hx_target="#center-periods",
                 style="display: inline-flex; align-items: center; gap: 0.2rem;"
             ) if tags == "F" else None,            
@@ -271,15 +269,15 @@ def select_period(session, period_type, clear_show_times=True):
             H3(f"Structure for period type: '{period_type}'"),
             Safe(html_struct),
             Span(
-                Button(f"Duplicate last day",
+                Button("Duplicate last day",
                     hx_get=f"/timings/dup_last_day?idx={quote_plus(str(last_idx))}",
                     hx_target="#feedback-times"),
                 Span(style="display: inline-block; width: 20px;"),
-                Button(f"Delete last day",
+                Button("Delete last day",
                     hx_get=f"/timings/del_last_day?idx={quote_plus(str(last_idx))}",
                     hx_target="#feedback-times"),
                 Span(style="display: inline-block; width: 20px;"),
-                Button(f"Renumber days from 0",
+                Button("Renumber days from 0",
                     hx_get=f"/timings/renumber_days?period_type={quote_plus(period_type)}",
                     hx_target="#feedback-times"),
                 Span(style="display: inline-block; width: 50px;"),
@@ -299,7 +297,7 @@ def select_period(session, period_type, clear_show_times=True):
                     Button("Create new day type", type="submit",
                         style="flex: 0 0 auto; white-space: nowrap; padding: 0.5rem 0.3rem; width: 160px;",
                     ),
-                    hx_post=f"/timings/create_day_type",
+                    hx_post="/timings/create_day_type",
                     hx_target="#feedback-times",
                     style="display: inline-flex; align-items: center; gap: 0.2rem;"
                 ),            

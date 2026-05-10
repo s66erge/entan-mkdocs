@@ -87,7 +87,6 @@ def status_page(session, center_name, centers, users, csms):
     state_mach = csms[center_name]
     state = state_mach.configuration[0].id
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
-    print(session)
     return Main(
         top_menu(session['role']),
         Div(utils.display_markdown(mark_file)),
