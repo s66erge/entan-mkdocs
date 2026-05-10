@@ -34,6 +34,7 @@ async def check_center_free(state_mach, this_user):
         return center_is_free
 
 def abandon_edit(session, csms):
+    print(session)
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
@@ -137,8 +138,6 @@ async def delete_new_db(model):
 async def delete_new_db_once(model):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{model.center_name.lower()}")
-        print(objects_in_minio)
-        print(f"receiving{model.center_date}.db")
         if f"{model.center_name.lower()}/receiving{model.center_date}.db" in objects_in_minio:
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
                                     f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
@@ -147,6 +146,7 @@ async def delete_new_db_once(model):
             old_db.close()
             os.remove(ok_db_file)
             os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
+            model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
             return {"success": f"production version {model.center_date} deleted"}
         else:
            return {"error": f"production version {model.center_date} NOT FOUND"}

@@ -120,7 +120,7 @@ class CenterDataModel(AbstractPersistentModel):
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
         self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
-        self.save_db_filename = None  # new production db filenameto be sent
+        self.save_db_filename = None  # new production db filenameto to be sent : 'sending...'
         self.center_date = None  # production version date
 
     def _read_state(self):
