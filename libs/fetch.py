@@ -202,6 +202,8 @@ def clean_dhamma_courses(periods_dhamma_org, inside):
             row_bef["No_gong"] = row["period_type"]
             continue
         else:
+            # FIXME: insert a period if there is a gap in the planand
+            # and create a 'fillin' type row in 'inside' sheet of center.xlsx
             cleaned.append(row)
     return cleaned
 
