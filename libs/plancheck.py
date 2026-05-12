@@ -31,6 +31,8 @@ def coming_center_courses(center):
 
     periods = sorted(db_center.t.coming_periods(), key=lambda x: x["start_date"])
     count_past = sum(1 for item in periods if date.fromisoformat(item["start_date"]) < date.today())
+    if count_past == 0:
+        count_past = 1
     date_current_course = periods[count_past-1]["start_date"]  ## [2]
     periods_db_center_obj = periods[count_past-1:]  ## [3]
     sorted_periods = [
@@ -90,7 +92,7 @@ def get_types_with_duration(center, source="df"):
         times_last_day = [row.get("time") for row in timetables
                  if row.get("period_type") == vt and row.get("day_type") == last_day_type] 
         item["time_end_last_day"] = max(times_last_day, default=None)
-        if not "repeat" in last_day_type :
+        if "repeat" not in last_day_type :
             item["tags"] = "F"
         elif params_from_excel.get(utils.Pkey.DEFAULT_PERIOD, "") == vt:
             item["tags"] = "X"
@@ -123,7 +125,7 @@ def check_plan(session, plan, center):
         except Exception:
             row["check"] = "InvalidDate"
         else:
-            if not pt in period_types_in_db:
+            if pt not in period_types_in_db:
                 row["check"] = "NoType"
             elif row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
                 row["check"] = "Duplicated periods"
