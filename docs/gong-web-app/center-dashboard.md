@@ -99,7 +99,7 @@ def status_page(session, center_name, centers, users, csms):
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
-        A("set FREE",href="/planning/abandon_edit") if utils.dev_comp_or_user(session) else None,
+        A("set FREE",href="/planning/abandon_edit") if session[utils.Skey.ROLE] == "admin" else None,
         cls="container"
     )
 

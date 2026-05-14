@@ -1,8 +1,6 @@
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
 
-import aiohttp
 import cloudscraper
-import json
 import re
 import asyncio
 from tabulate import tabulate
@@ -13,65 +11,6 @@ import libs.utils as utils
 import libs.minio as minio
 
 # ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
-
-"""
-async def fetch_courses_from_dhamma(location, date_start, date_end):
-    url = "https://www.dhamma.org/en-US/courses/do_search"    
-    # url = "https://124.26.5.186:443/en-US/courses/do_search"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    all_courses = []
-
-    page = 1
-
-    async with aiohttp.ClientSession(headers=headers) as session:
-        while True:
-            data = {
-                "current_state": "OldStudents",
-                "regions[]": location,
-                "daterange": f"{date_start} - {date_end}",
-                "page": str(page),
-            }
-
-            print(f"Fetching courses Dhamma {location} - Page {page}...")
-            try:
-                async with session.post(url, data=data, timeout=15) as resp:
-                    resp.raise_for_status()
-                    payload = await resp.json()
-            except aiohttp.ClientError as e:
-                print("Request error:", e)
-                return []
-            except asyncio.TimeoutError as e:
-                print("Request timeout:", e)
-                return []
-            except ValueError as e:
-                # JSON decode error
-                print("Invalid JSON:", e)
-                return []
-
-            courses = payload.get("courses", [])
-            all_courses.extend(courses)
-
-            total_pages = payload.get("pages", 0)
-            if page >= total_pages:
-                break
-
-            page += 1
-
-    extracted = [
-        {
-            "course_start_date": c.get("course_start_date"),
-            "course_end_date": c.get("course_end_date"),
-            "raw_course_type": c.get("raw_course_type"),
-            "course_type_anchor": c.get("course_type_anchor"),
-            "course_type": c.get("course_type")
-        }
-        for c in all_courses
-        if c.get("location", {}).get("center_noncenter") != "noncenter" and \
-            not (c.get("service") == False and c.get("can_apply_in_progress") == False and \
-                 c.get("can_apply_flag") == False)
-    ]
-    return extracted
-"""
 
 def fetch_scrap(location, date_start, date_end):
     scraper = cloudscraper.create_scraper()

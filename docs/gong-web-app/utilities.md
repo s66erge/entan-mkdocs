@@ -83,6 +83,9 @@ def isa_dev_computer():
     hostname = socket.gethostname()
     return hostname in DEV_COMPUTERS
 
+def dev_comp_or_user(session):
+    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
+
 def get_db_path():
     if isa_dev_computer():
         root = ""
@@ -91,9 +94,6 @@ def get_db_path():
     else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
-
-def dev_comp_or_user(session):
-    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
 
 ```
 

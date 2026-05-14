@@ -220,7 +220,7 @@ async def planning_page(session, selected_name, csms):
             Button("SAVE ALL CHANGES", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
-                cls="allownavigation") if utils.dev_comp_or_user(session) else None,
+                cls="allownavigation")
         ),
         Br(), Br(),
         Span(
