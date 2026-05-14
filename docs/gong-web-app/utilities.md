@@ -56,8 +56,8 @@ class Globals:
     WAIT02_MINS = 20
     CENTER_BUCKET = "centers-data" # bucket name for local center data 
     PI_BUCKET = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
-    DEV_USER = "spegoff@authentica.eu" # IN PROD: can force state to free AND TEMPORALY SAVE CHANGES
-    TEST_CENTER = "Testx" # used for testing in DEV mode
+    DEV_USER = "spegoff@authentica.eu" # always forces short delay for all centers
+    TEST_CENTER = "Testx" # always uses short delay
     @classmethod
     def get(cls, name, default=None):
         return getattr(cls, name, default)
