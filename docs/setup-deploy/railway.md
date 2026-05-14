@@ -28,7 +28,13 @@ The Railway CLI is used to:
    railway login
    railway link
    ```
-2. run the app localy with the Railway project environment variables:
+
+2. connect to a service via SSH - using the SSH key on bosgame
+   ``` pwsh
+   railway ssh -i C:\Users\serge\.ssh\railway_ssh
+   ```
+
+3. run the app localy with the Railway project environment variables:
    ``` pwsh
    railway run python main.py
    ```
