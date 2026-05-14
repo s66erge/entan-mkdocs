@@ -3,6 +3,7 @@
 from pathlib import Path
 from urllib.parse import quote_plus
 from fasthtml.common import *
+from tabulate import tabulate
 import libs.cdash as cdash
 import libs.utils as utils
 import libs.dbset as dbset
@@ -57,7 +58,8 @@ def consult_select_db(request, centers, db_path):
     db = database(str(dbfile_path))
 
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
-    cps = sorted(db.t.coming_periods(), key=lambda x: getattr(x, "start_date", ""))
+    cps = sorted(db.t.coming_periods(), key=lambda x: (x["start_date"]))
+    print(tabulate(cps, headers="keys"))
     pers = db.t.periods_struct()
     db.close()
     # Get all period_types from periods_struct and find those not in current rows
@@ -131,8 +133,8 @@ def consult_select_period(request, db_path):
 
     tbl_rows = []
     # choose some representative columns (adjust if your schema differs)
-    for r in sorted(filtered, key=lambda x: (getattr(x, "period_type", ""),
-                                             getattr(x, "day_type", ""))):
+    for r in sorted(filtered, key=lambda x: (x.get("period_type", ""),
+                                             x.get("day", ""))):
         ptype = r.get("period_type")
         day = str(r.get("day"))
         dtype = r.get("day_type")
@@ -196,9 +198,9 @@ def consult_select_timetable(request, db_path):
         return Div(P(f"No timetables found with period_type = {period_type} and day_type = {day_type}"))
 
     tbl_rows = []
-    for t in sorted(filtered, key=lambda x: (getattr(x, "period_type", ""),
-                                             getattr(x, "day_type", ""),
-                                             getattr(x, "time", ""))):
+    for t in sorted(filtered, key=lambda x: (x.get("period_type", ""),
+                                             x.get("day_type", ""),
+                                             x.get("time", ""))):
         # Display all fields from timetables row
         if isinstance(t, dict):
             cells = [Td(str(v)) for v in t.values()]
