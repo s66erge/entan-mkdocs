@@ -100,7 +100,9 @@ async def save_db_plan_times(model):
 
 async def wait_until(model, until_hour, minutes=0):
     center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
-    if model.center_name == utils.Globals.TEST_CENTER:
+    if model.center_name == utils.Globals.TEST_CENTER or \
+            model.get_user() == utils.Globals.DEV_USER:
+        print(model.get_user(), model.center_name, " - using short delay for testing")
         delay = utils.Globals.SHORT_DELAY
     else:
         now_center = datetime.now(center_tz)
@@ -137,9 +139,9 @@ async def delete_new_db_once(model):
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
                                     f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
             ok_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name)
-            old_db = database(ok_db_file)
-            old_db.close()
-            os.remove(ok_db_file)
+            old_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name, "old")
+            os.remove(old_db_file)
+            os.rename(ok_db_file, old_db_file)            
             os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
             model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
             return {"success": f"production version {model.center_date} deleted"}
