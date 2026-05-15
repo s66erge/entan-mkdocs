@@ -9,6 +9,8 @@ from fasthtml.common import *
 from datetime import datetime
 import libs.utils as utils
 import libs.minio as minio
+import libs.dbset as dbset
+import pandas as pd
 
 <<dashboard>>
 <<status-page>>
@@ -48,20 +50,22 @@ def dashboard(session, users, planners):
     )
     form = Form(
         select,
-        Button("MODIFY", type="submit", onclick="document.getElementById('myForm').action='/planning_page'"),
-        Button("STATUS", type="submit", onclick="document.getElementById('myForm').action='/status_page'"),
+        Button("SEE THE COMPLETE STATUS AND CONFIGURATION OF THIS CENTER", type="submit", onclick="document.getElementById('myForm').action='/status_page'"),
+        Button("MODIFY CENTER PLANNING: ONLY IF YOU ARE A REGISTERED PLANNER FOR THIS CENTER", 
+               type="submit", onclick="document.getElementById('myForm').action='/planning_page'"),
         action="/default_route",
         id="myForm",
         method="get",
     )
     return Main(
         top_menu(session['role']),
-        Div(Div(utils.display_markdown("dashboard-t")),
-            P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
+        Div(P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
             P(""),
-            P(A("CONSULT", href="/consult_page")),
+            Div(utils.display_markdown("dashboard-t")),
+            P(A("CONSULT THE PLANNING AND TIMETABLES OF ANY CENTER", href="/consult_page",
+                style="font-size: 24px;")),
             Div(
-                P("Choose one of the centers you can modify:"),
+                P("Choose a center:"),
                 form
             ) if len(user_centers) >= 1 else None,
             cls="container"
@@ -77,26 +81,47 @@ def dashboard(session, users, planners):
 
 #@rt('/status_page')
 def status_page(session, center_name, centers, users, csms):
-    # FIXME: show current db date in PI, show xlsx config tables ?
+    state_mach = csms[center_name]
+    state = state_mach.configuration[0].id
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
     pi_database_date = center_obj.pi_db_date
     params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
-    state_mach = csms[center_name]
-    state = state_mach.configuration[0].id
+    db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
+    db_center = database(db_file)
+    gongs_df = pd.DataFrame(db_center.t.gongs())
+    targets_df = pd.DataFrame(db_center.t.targets())
+    db_center.close()
+    replace_df = pd.DataFrame(minio.dicts_from_excel_minio(center_name,"replacement"))
+    inside_df = pd.DataFrame(minio.dicts_from_excel_minio(center_name,"inside"))
+    html_gongs = gongs_df.fillna("").to_html(index=False)
+    html_targets = targets_df.fillna("").to_html(index=False)
+    html_replace = replace_df.fillna("").to_html(index=False)
+    html_inside = inside_df.fillna("").to_html(index=False)
     mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
         top_menu(session['role']),
         Div(utils.display_markdown(mark_file)),
-        H3(f"Center {center_name}"),
-        P(f"Local database in center was installed on: {pi_database_date}"),
-        P(f"Center timezone: {ct_timezone}, local time now: {utils.short_iso(datetime.now() , ct_timezone)}"),
-        P(f"UTC time now: {utils.short_iso(datetime.now())}"),
-        P(f"Your browser timezone: {user_timezone}, local time now: {utils.short_iso(datetime.now(), user_timezone)}"),
-        P(f"Current center state: {state}"),
+        H1(f"{center_name}"),
+        P(f"Current center state: {state}", Br(),
+          f"Local database in center was installed on: {pi_database_date}"),
+        P(f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
+          f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
+          f"UTC time now: {utils.short_iso(datetime.now())}"),
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
+        H3("Center gongs and targets"),
+        Safe(html_gongs),
+        Safe(html_targets),
+        P(f"Default gong id for copied periods: {params[utils.Pkey.GONG_ID]}", Br(),
+          f"Default target(s) for copied periods: {params[utils.Pkey.TARGETS]}"),
+        H3("Configuration"),
+        Div(H4("dhamma.org period types replacement table"),
+            Safe(html_replace)) if len(replace_df) > 0 else P("No data in the 'replacement' table"),
+        Div(H4("gong planning instructions for dhamma.org periods overlaps/gaps"),
+            Safe(html_inside)) if len(inside_df) > 0 else P("No data in the 'overlap/gaps' table"),
+        P(f"Parameters: {params}"),
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
         A("set FREE",href="/planning/abandon_edit") if session[utils.Skey.ROLE] == "admin" else None,
