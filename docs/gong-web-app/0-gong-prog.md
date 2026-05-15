@@ -6,6 +6,8 @@
 ```python
 #| file: main.py
 
+# ruff: noqa: F811
+
 from fasthtml.common import *  # (1)
 import asyncio
 import libs.states as states
@@ -20,7 +22,6 @@ import libs.admin as admin
 import libs.adchan as adchan
 import libs.utils as utils
 import libs.messages as messages
-import libs.states as states
 import libs.transit as transit
 import libs.timings as timings
 import libs.timechan as timechan
@@ -56,7 +57,8 @@ css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
 
 def before(req, session):
    auth = req.scope['auth'] = session.get('auth', None)
-   if not auth: return Redirect('/login')
+   if not auth:
+       return Redirect('/login')
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 

@@ -8,7 +8,6 @@ Will only be reachable for authenticated users.
 from pathlib import Path
 from urllib.parse import quote_plus
 from fasthtml.common import *
-from tabulate import tabulate
 import libs.cdash as cdash
 import libs.utils as utils
 import libs.dbset as dbset
@@ -29,8 +28,8 @@ import libs.dbset as dbset
 # @rt('/consult_page')
 def consult_page(session, centers):
     # Main consult page: select a center and show its coming_periods.
-    Center = centers.dataclass()
-    center_names = [c.center_name for c in centers()]
+    Center = centers.dataclass()  # noqa: F841
+    center_names = sorted([c.center_name for c in centers()])
     form = Form(
         Select(
             Option("Select a center", value="", selected=True, disabled=True),
@@ -68,7 +67,7 @@ def consult_select_db(request, centers, db_path):
     selected_name = params.get("selected_name")
     if not selected_name:
         return Div(P("No center selected."))
-    Center = centers.dataclass()
+    Center = centers.dataclass()  # noqa: F841
     selected_db = dbset.gong_db_name(centers[selected_name].center_name)
 
     dbfile_path = Path(db_path) / selected_db
@@ -78,7 +77,6 @@ def consult_select_db(request, centers, db_path):
 
     # coming_periods table expected fields: start_date, period_type (adjust if field names differ)
     cps = sorted(db.t.coming_periods(), key=lambda x: (x["start_date"]))
-    print(tabulate(cps, headers="keys"))
     pers = db.t.periods_struct()
     db.close()
     # Get all period_types from periods_struct and find those not in current rows

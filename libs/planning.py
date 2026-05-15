@@ -106,7 +106,6 @@ def load_dhamma_db(session):
 def replace_table(conn, name, df):
     df.to_sql(name, conn, if_exists="replace", index=False)
 
-
 async def save_db_plan_timetable(center_name, centers):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
     filename = dbset.gong_db_name(center_name, "sending")
@@ -226,8 +225,9 @@ async def planning_page(session, selected_name, csms):
         Span(
             Button("Download PDF", onclick="window.print()"),
             Span(style="display: inline-block; width: 20px;"),
-            A("open consult tab", href="/consult_page", target="_blank", cls="allownavigation"),
-            # Button("Open a consult tab", hx_on={"click": "openInBackground('/consult_page')"}, cls="btn"),
+            A("open this center status tab", href=f"/status_page?center={selected_name}", target="_blank", cls="allownavigation"),
+            Span(style="display: inline-block; width: 20px;"),
+            A("open all centers consult tab", href="/consult_page", target="_blank", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("Remainning time: "),
             Span("", id="timer", cls="timer-display")

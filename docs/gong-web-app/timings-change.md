@@ -120,7 +120,6 @@ def modify_day_type(session, index, day_type):
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     period_type = periods_struct_df.loc[index, "period_type"]
     old_day_type = periods_struct_df.loc[index, "day_type"]
-    timetables_df = minio.get_center_temp_df(center, "timetables")
     if old_day_type == day_type:
         message = {"error": "day_type_unchanged"}
     else:
@@ -150,7 +149,6 @@ def dup_last_day(session, idx):
     center = session[utils.Skey.CENTER]
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     period_type = periods_struct_df.loc[idx, "period_type"]
-    day_type = periods_struct_df.loc[idx, "day_type"]
     row = periods_struct_df.loc[[idx]]
     day = periods_struct_df.loc[idx, "day"]
     periods_struct_df = pd.concat([periods_struct_df.iloc[:idx+1], row,
@@ -173,7 +171,6 @@ def renumber_days(session, period_type):
     periods_struct_df = minio.get_center_temp_df(center, "periods_struct")
     filtered = periods_struct_df[periods_struct_df["period_type"] == period_type] 
     period_type = filtered.iloc[-1]["period_type"]
-    day_type = filtered.iloc[-1]["day_type"]
     periods_struct_df = renumber_days_df(periods_struct_df, period_type)
     message = {"success": "days_renumbered"}
     minio.save_df_center_temp(center, "periods_struct", periods_struct_df)
