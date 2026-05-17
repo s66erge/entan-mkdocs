@@ -124,6 +124,9 @@ def status_page(session, center_name, centers, users, csms):
         P(f"Parameters: {params}"),
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
+        H4("Download the center database, see the production date above (if needed: CLEAR YOUR BROWSER CACHE)"),
+        A("Download DB", href="/download_db_file"),
+        Br(),Br(),
         A("set FREE",href="/planning/abandon_edit") if session[utils.Skey.ROLE] == "admin" else None,
         cls="container"
     )
