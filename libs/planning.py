@@ -141,7 +141,7 @@ async def save_db_plan_timetable(center_name, centers):
 async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
-    plan = fetch.sort_clean(start_plan, inside)
+    plan = fetch.sort_clean(selected_name,start_plan, inside)
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
     session[utils.Skey.SAVED_PLAN] = True
@@ -191,7 +191,6 @@ def load_minio_timings_from_db(center):
 # @rt('/planning_page')
 async def planning_page(session, selected_name, csms):
     load_minio_timings_from_db(selected_name)
-    csms[selected_name].model.center_params = minio.params_from_excel_minio(selected_name)
     return Main(
         Div(utils.display_markdown("planning-t", selected_name)),
         Span(

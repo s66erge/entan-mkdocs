@@ -156,26 +156,47 @@ def check_within(this_row, row_aft):
         return True
     return False
 
-def clean_dhamma_courses(periods_dhamma_org, inside):
+def clean_dhamma_courses(center, periods_dhamma_org, inside):
     cleaned = []
     delete_list = [d for d in inside if d["action"] == "delete"]
+    insert1_list = [d for d in inside if d["action"] == "insert1"]
     for i, row in enumerate(periods_dhamma_org):
         if i == 0:
             cleaned.append(row)
             continue
         row_bef = periods_dhamma_org[i-1]
-        delete_row = False
         row_delete_list = [d for d in delete_list if d["period_type"] == row["period_type"]]
         if row_delete_list:
             if row_delete_list[0]["container"] == "@ALL@":
-                delete_row = True
+                row_bef["No_gong"] = row["period_type"]
+                continue
             elif [d for d in row_delete_list if d["container"] == row_bef["period_type"] \
                                             and check_within(row, row_bef)]:
-                delete_row = True
+                row_bef["No_gong"] = row["period_type"]
+                continue
             else:
-                delete_row = False
-        if delete_row:
-            row_bef["No_gong"] = row["period_type"]
+                cleaned.append(row)
+                continue
+        elif [d for d in insert1_list if d["container"] == row["period_type"]]:
+            first_period_duration = [d for d in plancheck.get_types_with_duration(center) 
+                                        if d["period_type"] == row["period_type"]][0]["duration"]
+            end_first_period = utils.add_months_days(row["start_date"], 0, first_period_duration - 1)
+            cleaned.append({
+                "start_date": row["start_date"],
+                "end_date": end_first_period,
+                "period_type": insert1_list[0]["period_type"],
+                "source": row["source"] + " + CONFIG."
+                    if not row["source"].endswith("CONFIG.") else row["source"],
+                "course_type": row["course_type"]
+            })
+            cleaned.append({
+                "start_date": utils.add_months_days(end_first_period, 0, 1),
+                "end_date": row["end_date"],
+                "period_type": insert1_list[0]["after"],
+                "source": row["source"] + " + CONFIG."
+                    if not row["source"].endswith("CONFIG.") else row["source"],
+                "course_type": row["course_type"]
+            })
             continue
         else:
             # FIXME: insert a period if there is a gap in the planand
@@ -183,13 +204,13 @@ def clean_dhamma_courses(periods_dhamma_org, inside):
             cleaned.append(row)
     return cleaned
 
-def sort_clean(aplan, inside):
+def sort_clean(center,aplan, inside):
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
     # this keeps the first sorting order ok for identical start_dates
     sorted_plan = sorted(sorted(aplan, key=lambda x: x['end_date'], reverse=True),
                       key=lambda x: x['start_date'])
     dedup = deduplicate(sorted_plan)
-    dedup_cleaned = clean_dhamma_courses(dedup, inside)
+    dedup_cleaned = clean_dhamma_courses(center,dedup, inside)
     return dedup_cleaned
 
 
@@ -212,7 +233,7 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))
     merged = periods_db_center + periods_dhamma
-    dedup_cleaned = sort_clean(merged, inside)
+    dedup_cleaned = sort_clean(center,merged, inside)
     return dedup_cleaned
 ```
 [1] get the path to the center db, the gong db and the spreadsheet (see below)

@@ -55,7 +55,7 @@ def show_center_periods(session):
     html_periods = center_periods_df.to_html(index=False, escape=False)
     db = dbset.get_central_db()
     centers = db.create(dbset.Center, pk='center_name')
-    center_names = [c.center_name for c in centers()]
+    center_names = sorted([c.center_name for c in centers()])
     message = {"success": "periods_OK"}
     errors_df = check_timings(session)
     if len(errors_df) > 0:
@@ -97,7 +97,7 @@ def show_center_periods(session):
 
 def get_other_center_periods(session, center):
     table = plancheck.get_types_with_duration(center, source="db")
-    periods = [row['period_type'] for row in table if row['tags'] == "F"]
+    periods = [row['period_type'] for row in table if row['tags'] in "FV"]
     return Div(
         Form(
             Input(type="hidden", name="from_center", value=center),
@@ -156,7 +156,7 @@ def select_period(session, period_type, clear_show_times=True):
                 hx_post="/timings/modify_day_type",
                 hx_target="#center-periods",
                 style="display: inline-flex; align-items: center; gap: 0.2rem;"
-            ) if tags == "F" else None,            
+            ) if tags in "F" else None,            
             #style="display: inline-flex; align-items: center; gap: 50px;"
         )
     )
