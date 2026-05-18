@@ -11,7 +11,6 @@ import libs.utils as utils
 import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
-import libs.dbset as dbset
 
 <<show-users>>
 <<show-centers>>

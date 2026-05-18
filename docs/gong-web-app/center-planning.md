@@ -160,13 +160,14 @@ def show_draft_plan_table(draft_plan, center, mess):
             Label("Start date:"),
             #Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
             Input(id="date"),
-            Script("""
-                   flatpickr("#date", {
+            Script(f"""
+                   flatpickr("#date", {{
                         dateFormat: "Y-m-d",   // European format
                         altInput: true,
                         altFormat: "Y-m-d",
-                        locale: { firstDayOfWeek: 1 }
-                    });
+                        locale: {{ firstDayOfWeek: 1 }},
+                        defaultDate: "{today}"
+                    }});
                    """),
             Button("Add Period", type="submit")
         ),
