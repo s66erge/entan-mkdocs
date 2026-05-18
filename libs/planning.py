@@ -170,7 +170,7 @@ async def add_line(session, ptype, start):
         "No_gong": ""
     }    
     # Add the new line to the plan
-    plan.append(new_line)    
+    plan.append(new_line)
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = plancheck.add_end_dates(plansor, selected_name)
