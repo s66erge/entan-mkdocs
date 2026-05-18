@@ -100,7 +100,7 @@ keep only one with source='BOTH'
 def deduplicate(merged):
     deduplicated = []
     i = 0
-    while i < len(merged) -1:
+    while i < len(merged):
         current = merged[i]
         if i + 1 < len(merged):
             next_item = merged[i + 1]
@@ -168,11 +168,13 @@ def clean_dhamma_courses(center, periods_dhamma_org, inside):
         row_delete_list = [d for d in delete_list if d["period_type"] == row["period_type"]]
         if row_delete_list:
             if row_delete_list[0]["container"] == "@ALL@":
-                row_bef["No_gong"] = row["period_type"]
+                # row_bef["No_gong"] = row["period_type"]
+                cleaned[-1]["No_gong"] = row["period_type"]
                 continue
             elif [d for d in row_delete_list if d["container"] == row_bef["period_type"] \
                                             and check_within(row, row_bef)]:
-                row_bef["No_gong"] = row["period_type"]
+                # row_bef["No_gong"] = row["period_type"]
+                cleaned[-1]["No_gong"] = row["period_type"]
                 continue
             else:
                 cleaned.append(row)
@@ -181,22 +183,26 @@ def clean_dhamma_courses(center, periods_dhamma_org, inside):
             first_period_duration = [d for d in plancheck.get_types_with_duration(center) 
                                         if d["period_type"] == row["period_type"]][0]["duration"]
             end_first_period = utils.add_months_days(row["start_date"], 0, first_period_duration - 1)
-            cleaned.append({
+            first_row = {
                 "start_date": row["start_date"],
                 "end_date": end_first_period,
                 "period_type": insert1_list[0]["period_type"],
                 "source": row["source"] + " + CONFIG."
                     if not row["source"].endswith("CONFIG.") else row["source"],
-                "course_type": row["course_type"]
-            })
-            cleaned.append({
+                "course_type": row["course_type"],
+                "no_gong": row["no_gong"] if "no_gong" in row else None
+            }
+            cleaned.append(first_row)
+            second_row = {
                 "start_date": utils.add_months_days(end_first_period, 0, 1),
                 "end_date": row["end_date"],
                 "period_type": insert1_list[0]["after"],
                 "source": row["source"] + " + CONFIG."
                     if not row["source"].endswith("CONFIG.") else row["source"],
-                "course_type": row["course_type"]
-            })
+                "course_type": row["course_type"],
+                "no_gong": row["no_gong"] if "no_gong" in row else None
+            }
+            cleaned.append(second_row)
             continue
         else:
             # FIXME: insert a period if there is a gap in the planand
@@ -210,7 +216,7 @@ def sort_clean(center,aplan, inside):
     sorted_plan = sorted(sorted(aplan, key=lambda x: x['end_date'], reverse=True),
                       key=lambda x: x['start_date'])
     dedup = deduplicate(sorted_plan)
-    dedup_cleaned = clean_dhamma_courses(center,dedup, inside)
+    dedup_cleaned = clean_dhamma_courses(center, dedup, inside)
     return dedup_cleaned
 
 
