@@ -54,7 +54,10 @@ def load_minio_timings_from_db(center):
 async def planning_page(session, selected_name, csms):
     load_minio_timings_from_db(selected_name)
     return Main(
-        Div(utils.display_markdown("planning-t", selected_name)),
+        H1(f"Change {selected_name} planning and/or timetables"),
+        # Div(utils.display_markdown("planning-t", selected_name)),
+        utils.toggle_markdown("planning-t", selected_name),
+        Br(),
         Span(
             Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
             Span('/planning/timer_done', id="timer-redirect", style="display: none;"),
@@ -155,7 +158,16 @@ def show_draft_plan_table(draft_plan, center, mess):
                 style="width: 200px"
             ),
             Label("Start date:"),
-            Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
+            #Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
+            Input(id="date"),
+            Script("""
+                   flatpickr("#date", {
+                        dateFormat: "Y-m-d",   // European format
+                        altInput: true,
+                        altFormat: "Y-m-d",
+                        locale: { firstDayOfWeek: 1 }
+                    });
+                   """),
             Button("Add Period", type="submit")
         ),
         hx_post="/planning/add_line",

@@ -7,6 +7,7 @@ Will only be reachable for authenticated users.
 
 from fasthtml.common import *
 from datetime import datetime
+from urllib.parse import quote
 import libs.utils as utils
 import libs.minio as minio
 import libs.dbset as dbset
@@ -87,6 +88,7 @@ def status_page(session, center_name, centers, users, csms):
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
     pi_database_date = center_obj.pi_db_date
+    config_file = minio.get_excel_minio(center_name)
     params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
     db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
@@ -124,11 +126,32 @@ def status_page(session, center_name, centers, users, csms):
         P(f"Parameters: {params}"),
         H3("Center states history"),
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
-        H4("Download the center database, see the production date above (if needed: CLEAR YOUR BROWSER CACHE)"),
-        A("Download DB", href="/download_db_file"),
-        Br(),Br(),
-        A("set FREE",href="/planning/abandon_edit") if session[utils.Skey.ROLE] == "admin" else None,
+        Div(
+            H4("Download the center configuration or database (see the production date above)"),
+            A("Download excel configuration", href=f"/download_file?filepath={config_file}"),
+            Br(),
+            A("Download DB", href=f"/download_file?filepath={db_file}"),
+            Br(),Br(),
+            A("set FREE",href="/planning/abandon_edit") 
+        ) if session[utils.Skey.ROLE] == "admin" else None,
         cls="container"
+    )
+
+async def download_file(file_path):
+    filename = Path(file_path).name
+    extension = Path(file_path).suffix 
+    utf8_filename = quote(filename)
+    headers = {
+        "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=UTF-8''{utf8_filename}",
+        # --- ADD THESE CACHE-BUSTING HEADERS ---
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    }    
+    return FileResponse(
+        file_path,
+        media_type=utils.Globals.MEDIA_TYPES[extension] ,
+        headers=headers
     )
 
 ```
