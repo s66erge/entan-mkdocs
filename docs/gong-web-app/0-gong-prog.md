@@ -9,6 +9,7 @@
 # ruff: noqa: F811
 
 from fasthtml.common import *  # (1)
+from urllib.parse import quote
 import asyncio
 import libs.states as states
 import libs.auth as auth
@@ -367,10 +368,28 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 ```python
 #| id: other-routes
 @rt("/download_file/{filepath}")
-async def get(session, request):
+def get(session, request):
     params = dict(request.query_params)
     file_path = params.get("filepath")
-    return await cdash.download_file(file_path)
+    # return await cdash.download_file(file_path)
+    filename = Path(file_path).name
+    extension = Path(file_path).suffix 
+    utf8_filename = quote(filename)
+    headers = {
+        "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=UTF-8''{utf8_filename}",
+        # --- ADD THESE CACHE-BUSTING HEADERS ---
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "sandbox allow-downloads"
+    }    
+    return FileResponse(
+        file_path,
+        media_type=utils.Globals.MEDIA_TYPES[extension] ,
+        headers=headers
+    )
+
 
 @rt('/no_access_right')
 def get():
