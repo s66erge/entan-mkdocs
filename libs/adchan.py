@@ -1,6 +1,5 @@
 # ~/~ begin <<docs/gong-web-app/admin-change.md#libs/adchan.py>>[init]
 
-import email
 import shutil
 from fasthtml.common import *
 from datetime import datetime, timezone
@@ -127,7 +126,6 @@ def add_center(new_center_name, center_template, users, centers, db_path):
     new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
     template_db = f'{db_path}{dbset.gong_db_name(center_template)}'
-    state = states.csms[center_template].configuration[0].id
 
     try:
         if new_center_name == "" or center_template == "":
@@ -142,10 +140,8 @@ def add_center(new_center_name, center_template, users, centers, db_path):
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
-        elif state != "free":
-            message = {'error' : 'template_not_free'}
-
         else:  ## [2]
+            # FIXME: when making the copy, what about the gong ids and targets ?
             shutil.copy2(template_db, db_file_path)
             excel_template_path = minio.get_excel_minio(center_template)
             shutil.copy2(excel_template_path, f'{db_path}{new_center_name}.xlsx')

@@ -159,7 +159,7 @@ def show_draft_plan_table(draft_plan, center, mess):
             ),
             Label("Start date:"),
             #Input(type="date", name="start", value=today.strftime('%Y-%m-%d'), style="width: 200px"),
-            Input(id="date"),
+            Input(id="date", name="start"),
             Script(f"""
                    flatpickr("#date", {{
                         dateFormat: "Y-m-d",   // European format
