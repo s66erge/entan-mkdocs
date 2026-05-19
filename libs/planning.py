@@ -66,7 +66,7 @@ def show_draft_plan_table(draft_plan, center, mess):
             Input(id="date", name="start"),
             Script(f"""
                    flatpickr("#date", {{
-                        dateFormat: "Y-m-d",   // European format
+                        dateFormat: "Y-m-d",
                         altInput: true,
                         altFormat: "Y-m-d",
                         locale: {{ firstDayOfWeek: 1 }},
