@@ -129,10 +129,10 @@ def status_page(session, center_name, centers, users, csms):
         Div(
             H4("Download the center configuration or database (see the production date above)"),
             A("Download excel configuration", href=f"/download_file?filepath={config_file}",
-              hx_boost="false", download=""),
+              hx_no_process="true", hx_boost="false", download="", target="_blank"),
             Br(),
             A("Download DB", href=f"/download_file?filepath={db_file}",
-              hx_boost="false", download=""),
+              hx_no_process="true", hx_boost="false", download="", target="_blank"),
             Br(),Br(),
             A("set FREE",href="/planning/abandon_edit") 
         ) if session[utils.Skey.ROLE] == "admin" else None,
