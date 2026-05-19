@@ -1,12 +1,14 @@
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
 
+import asyncio
 from fasthtml.common import *
 from datetime import datetime
-from urllib.parse import quote
+import pandas as pd
 import libs.utils as utils
 import libs.minio as minio
 import libs.dbset as dbset
-import pandas as pd
+import libs.messages as messages
+import libs.states as states
 
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
 
@@ -112,18 +114,23 @@ def status_page(session, center_name, centers, users, csms):
         Ul(*[Li(item) for item in csms[center_name].active_listeners[0].entries[::-1]]),
         Div(
             H4("Download the center configuration or database (see the production date above)"),
-            #A("Download excel configuration", href=f"/download_file?filepath={config_file}",
-            #  hx_no_process="true", hx_boost="false", download="", target="_blank"),
             Span(
                 Button("Download Excel configuration", 
                     onclick=f"window.open('/download_file/?filepath={config_file}', '_blank'); return false;",
                     hx_no_process="true", hx_boost="false"),
                 Span(style="display: inline-block; width: 20px;"),
-                #A("Download DB", href=f"/download_file?filepath={db_file}",
-                #  hx_no_process="true", hx_boost="false", download="", target="_blank"),
                 Button("Download database", 
                     onclick=f"window.open('/download_file/?filepath={db_file}', '_blank'); return false;",
                     hx_no_process="true", hx_boost="false")
+            ),
+            Br(),Br(),
+            H4("Upload the center excel configuration"),
+            Div(messages.feedback_to_user(params), id="config-feedback"),
+            Form(hx_post="upload_config", hx_target="#config-feedback",
+                hx_confirm="Are you ABSOLUTELY sure to change this center configuration?")
+                (Input(type="hidden", name="center_name", value=center_name),
+                 Input(type="file", name="file"),
+                 Button("Upload", type="submit"),
             ),
             Br(),Br(),
             A("set FREE",href="/planning/abandon_edit") 
@@ -131,23 +138,21 @@ def status_page(session, center_name, centers, users, csms):
         cls="container"
     )
 
-async def download_file(file_path):
-    filename = Path(file_path).name
-    extension = Path(file_path).suffix 
-    utf8_filename = quote(filename)
-    headers = {
-        "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=UTF-8''{utf8_filename}",
-        # --- ADD THESE CACHE-BUSTING HEADERS ---
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        "Pragma": "no-cache",
-        "Expires": "0",
-        "X-Content-Type-Options": "nosniff"
-    }    
-    return FileResponse(
-        file_path,
-        media_type=utils.Globals.MEDIA_TYPES[extension] ,
-        headers=headers
-    )
+async def upload_config(file: UploadFile, center_name: str):
+    if file.filename != f"{center_name}.xlsx":
+        mess = {"error": "bad_config_filename"}
+    elif center_name != "all_centers" and states.csms[center_name].configuration[0].id != "free":
+        mess = {"error": "center_not_free"}
+    else:
+        try:
+            filebuffer = await file.read()
+            upload_dir = Path(utils.get_db_path())
+            (upload_dir / file.filename).write_bytes(filebuffer)
+            await asyncio.to_thread(minio.save_excel_minio, center_name)
+            mess = {"success": "config_uploaded"}
+        except Exception as e:
+            return Redirect(f'/db_error?etext={e}')
+    return Div(messages.feedback_to_user(mess))
 
 # ~/~ end
 # ~/~ end
