@@ -1,13 +1,9 @@
 # ~/~ begin <<docs/gong-web-app/minio_access.md#libs/minio.py>>[init]
 
 import os
-import json
-import fastparquet
-from io import BytesIO
 import libs.utils as utils
 import pandas as pd 
 from minio import Minio
-from minio.error import S3Error, MinioException
 
 minio_client = None # global S3 client, initialized from main.py and used in transit
 

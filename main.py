@@ -4,7 +4,6 @@
 
 from fasthtml.common import *  # (1)
 import asyncio
-from urllib.parse import quote
 import libs.states as states
 import libs.auth as auth
 from libs.auth import admin_required
@@ -27,6 +26,7 @@ import libs.minio as minio
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#initialize-program>>[init]
 
 custom_styles = Style("""
+.hidden {display: none; }
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }
 .mx-auto { margin-left: auto; margin-right: auto; }
@@ -305,40 +305,6 @@ def post(session, new_center_name: str = "", center_template: str = ""):
 async def post(file: UploadFile, center_name: str):
     return await admin.upload_config(file, center_name)
 
-@rt('/download_config/{center_name}')
-async def get(session, request):
-    return await admin.download_config(session, request)
-
-@rt("/download_xlsx")
-async def get(session):
-    center = session[utils.Skey.CENTER]
-    filename = center + ".xlsx"
-    file_path = utils.get_db_path() + filename
-    return FileResponse(
-        file_path,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename=filename
-    )
-
-@rt("/download_db_file")
-async def get(session):
-    center = session[utils.Skey.CENTER]
-    filename = dbset.gong_db_name(center)
-    file_path = utils.get_db_path() + filename
-    utf8_filename = quote(filename)
-    headers = {
-        "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=UTF-8''{utf8_filename}",
-        # --- ADD THESE CACHE-BUSTING HEADERS ---
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        "Pragma": "no-cache",
-        "Expires": "0"
-    }    
-    return FileResponse(
-        file_path,
-        media_type="application/octet-stream",
-        headers=headers
-    )
-
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
@@ -351,6 +317,12 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#other-routes>>[init]
+@rt("/download_file/{filepath}")
+async def get(session, request):
+    params = dict(request.query_params)
+    file_path = params.get("filepath")
+    return await cdash.download_file(file_path)
+
 @rt('/no_access_right')
 def get():
     return Main(

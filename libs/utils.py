@@ -36,6 +36,8 @@ class Pkey: # parameters keys
 
 class Globals:
     HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
+    MEDIA_TYPES = {".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   ".db": "application/octet-stream"}
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
@@ -106,6 +108,23 @@ def display_markdown(file_name:str, insert=None):
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
+
+def toggle_markdown(md_id: str, content=""):
+    return Div(
+        Button(
+            "Show/Hide help text",
+            onclick=f"document.getElementById('{md_id}').classList.toggle('hidden')",
+            style="background-color: green; height: 24px; line-height: 22px; padding: 1px 5px; width: 200px;",
+            cls="btn"
+        ),
+        Div(
+            display_markdown("planning-t", content),
+            id=f"{md_id}",
+            cls="markdown-block"
+        ),
+        cls="toggle-markdown"
+    )
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
 

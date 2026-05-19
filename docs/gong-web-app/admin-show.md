@@ -11,7 +11,6 @@ import libs.utils as utils
 import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
-import libs.dbset as dbset
 
 <<show-users>>
 <<show-centers>>
@@ -60,8 +59,6 @@ def show_page(request, users, roles, centers, planners):
         Div(messages.feedback_to_user(params), id="config-feedback"),
         H4("Upload a new configuration excel file"),
         upload_xlsx(centers),
-        H4("Download a center configuration excel file"),
-        download_xlsx(centers),
         cls="container",
     )
 ```
@@ -200,18 +197,6 @@ def upload_xlsx(centers):
             Button("Upload", type="submit"),
         ),
 
-def download_xlsx(centers):
-    sorted_centers = sorted(centers(), key=lambda x: x.center_name)
-    return Form(hx_get="/download_config/", hx_target="#config-feedback")(
-            Select(
-                Option("Select Center", value="", selected=True, disabled=True),
-                Option("All Centers", value="all_centers"),
-                *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
-                name="center_name", required=True
-            ),
-            Button("Download", type="submit", hx_swap="none"),
-        ),
-
 async def upload_config(file: UploadFile, center_name: str):
     if file.filename != f"{center_name}.xlsx":
         mess = {"error": "bad_config_filename"}
@@ -227,15 +212,5 @@ async def upload_config(file: UploadFile, center_name: str):
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')
     return Div(messages.feedback_to_user(mess))
-
-async def download_config(session, request):
-    try:
-        params = dict(request.query_params)
-        center_name = params.get("center_name")
-        await asyncio.to_thread(minio.get_excel_minio, center_name)
-        session[utils.Skey.CENTER] = center_name
-        return Redirect("/download_xlsx")
-    except Exception as e:
-        return Redirect(f'/db_error?etext={e}')
 
 ```
