@@ -145,11 +145,11 @@ async def delete_new_db_once(model):
             os.rename(ok_db_file, old_db_file)            
             os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
             model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
-            return {"success": f"production version {model.center_date} deleted"}
+            return {"success": f"confirmation of production version {model.center_date} is OK"}
         else:
-           return {"error": f"production version {model.center_date} NOT FOUND"}
+           return {"error": f"production version {model.center_date} NOT CONFIRMED"}
     except (S3Error, MinioException, RuntimeError) as e:
-        return {"error": f"deleting production db from minio failed: {e}"}
+        return {"error": f"production version {model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
 
 # ~/~ end
 # ~/~ end
