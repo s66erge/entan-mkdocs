@@ -129,6 +129,11 @@ def post(session):
 @rt('/dashboard')
 def get(session):
     return cdash.dashboard(session, users, planners)
+
+@rt('/upload_config')
+async def post(file: UploadFile, center_name: str):
+    return await cdash.upload_config(file, center_name)
+
 ```
 
 ### Routes for consulting plannings/timetables
@@ -347,10 +352,6 @@ def post(session, center_name: str):
 def post(session, new_center_name: str = "", center_template: str = ""):
     return adchan.add_center(new_center_name, center_template, users, centers, db_path)
 
-@rt('/upload_config')
-async def post(file: UploadFile, center_name: str):
-    return await admin.upload_config(file, center_name)
-
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required
 def post(session, user_email: str, center_name: str):
@@ -371,7 +372,6 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 def get(session, request):
     params = dict(request.query_params)
     file_path = params.get("filepath")
-    # return await cdash.download_file(file_path)
     filename = Path(file_path).name
     extension = Path(file_path).suffix 
     utf8_filename = quote(filename)
@@ -388,7 +388,6 @@ def get(session, request):
         media_type=utils.Globals.MEDIA_TYPES[extension],
         headers=headers
     )
-
 
 @rt('/no_access_right')
 def get():

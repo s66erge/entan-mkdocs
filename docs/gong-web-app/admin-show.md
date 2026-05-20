@@ -5,18 +5,14 @@ Will only be reachable for signed in admin users.
 ```python
 #| file: libs/admin.py 
 
-import asyncio
 from fasthtml.common import *
 import libs.utils as utils
 import libs.messages as messages
-import libs.states as states
-import libs.minio as minio
 
 <<show-users>>
 <<show-centers>>
 <<show-planners>>
 <<admin-page>>
-<<up-down-config>>
 ```
 TODO document admin-show
 
@@ -54,13 +50,9 @@ def show_page(request, users, roles, centers, planners):
         Div(show_planners_table(planners), id="planners-table"),
         H4("Add New Planner"),
         Div(show_planners_form(users, centers), id="planners-form"),
-
-        H2("Center configuration"),
-        Div(messages.feedback_to_user(params), id="config-feedback"),
-        H4("Upload a new configuration excel file"),
-        upload_xlsx(centers),
         cls="container",
     )
+
 ```
 
 ```python
@@ -180,37 +172,3 @@ def show_planners_form(users, centers):
     )
 ```
 
-```python
-#| id: up-down-config
-
-def upload_xlsx(centers):
-    sorted_centers = sorted(centers(), key=lambda x: x.center_name)
-    return Form(hx_post="upload_config", hx_target="#config-feedback",
-                hx_confirm="Are you ABSOLUTELY sure to change this center configuration?")(
-            Select(
-                Option("Select Center", value="", selected=True, disabled=True),
-                Option("All Centers", value="all_centers"),
-                *[Option(c.center_name, value=c.center_name) for c in sorted_centers],
-                name="center_name", required=True
-            ),
-            Input(type="file", name="file"),
-            Button("Upload", type="submit"),
-        ),
-
-async def upload_config(file: UploadFile, center_name: str):
-    if file.filename != f"{center_name}.xlsx":
-        mess = {"error": "bad_config_filename"}
-    elif center_name != "all_centers" and states.csms[center_name].configuration[0].id != "free":
-        mess = {"error": "center_not_free"}
-    else:
-        try:
-            filebuffer = await file.read()
-            upload_dir = Path(utils.get_db_path())
-            (upload_dir / file.filename).write_bytes(filebuffer)
-            await asyncio.to_thread(minio.save_excel_minio, center_name)
-            mess = {"success": "config_uploaded"}
-        except Exception as e:
-            return Redirect(f'/db_error?etext={e}')
-    return Div(messages.feedback_to_user(mess))
-
-```

@@ -64,7 +64,7 @@ def fetch_scrap(location, date_start, date_end):
         for c in all_courses
         if c.get("location", {}).get("center_noncenter") != "noncenter" and \
             c.get("status",{})[0].get("status").upper() != "CANCELLED"
-    ]        
+    ]   
     return extracted
 ```
 
