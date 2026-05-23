@@ -104,23 +104,24 @@ def display_markdown(file_name:str, insert=None):
                 new_content = content.split("{{", 1)[0] + insert + content.split("}}", 1)[1]
             else:
                 new_content = content
-            html_content = markdown2.markdown(new_content)
+            html_content = markdown2.markdown(new_content, extras={'breaks': {'on_newline': True, 'on_backslash': True}, 'tables':""})
         return NotStr(html_content)
     else:
         return f"!!! NO markdown file {file_name}.md IN md-text folder !!!"
 
-def toggle_markdown(md_id: str, content=""):
+def toggle_markdown(md_id: str, insert=None, showhelp=False):
+    hidden = "hidden" if not showhelp else ""
     return Div(
         Button(
-            "Show/Hide help text",
+            "Show/Hide help text: ",B(f"{md_id.replace("-", " ").capitalize()}"),
             onclick=f"document.getElementById('{md_id}').classList.toggle('hidden')",
-            style="background-color: green; height: 24px; line-height: 22px; padding: 1px 5px; width: 200px;",
+            style="background-color: olive; height: 24px; line-height: 22px; padding: 1px 5px; width: 400px;",
             cls="btn"
         ),
         Div(
-            display_markdown("planning-t", content),
+            display_markdown(md_id, insert),
             id=f"{md_id}",
-            cls="markdown-block"
+            cls=f"markdown-block {hidden}"
         ),
         cls="toggle-markdown"
     )
