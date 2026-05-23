@@ -118,6 +118,8 @@ def check_plan(session, plan, center):
             continue
         next_start_date = plan[idx + 1].get("start_date")
         pt = row.get("period_type")
+        pt_is_variable = next((t for t in types_with_duration
+                               if t.get("period_type") == pt), {}).get("tags") in "VX"
         try:
             e_this = date.fromisoformat(row.get("end_date"))
             s_next = date.fromisoformat(next_start_date) 
@@ -127,11 +129,11 @@ def check_plan(session, plan, center):
         else:
             if pt not in period_types_in_db:
                 row["check"] = "NoType"
-            elif row.get("start_date") == next_start_date and pt == plan[idx + 1].get("period_type"):
-                row["check"] = "Duplicated periods"
             elif row.get("start_date") == next_start_date:
                 row["check"] = "Same starting date"
-            elif delta_days < 0:
+            elif delta_days < 0 and pt_is_variable:
+                row["check"] = f"CHECK Overlap of {- delta_days} day(s)"
+            elif delta_days < 0 and not pt_is_variable:
                 row["check"] = f"Overlap of {- delta_days} day(s)"
             elif delta_days == 0:
                 this_end_time = next((t.get("time_end_last_day") for t in types_with_duration
@@ -142,7 +144,7 @@ def check_plan(session, plan, center):
                 if this_end_time is None or next_start_time is None:
                     row["check"] = "Missing time info"
                 elif this_end_time > next_start_time:
-                    if pt == default_period or next_pt == default_period:                   
+                    if pt_is_variable or next_pt == default_period:                   
                         row["check"] = "OK Time overlap"
                     else:
                         row["check"] = "CHECK Time overtap"

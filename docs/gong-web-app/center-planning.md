@@ -55,13 +55,14 @@ async def planning_page(session, selected_name, csms):
     load_minio_timings_from_db(selected_name)
     return Main(
         H1(f"Change {selected_name} planning and/or timetables"),
-        # Div(utils.display_markdown("planning-t", selected_name)),
-        utils.toggle_markdown("planning-t", selected_name),
+        utils.toggle_markdown("how-to-save-your-work"),
+        Div("",style="height: 4px;"),  # spacer
+        utils.toggle_markdown("planning-menu-below"),
         Br(),
         Span(
             Span(str(utils.Globals.INITIAL_COUNTDOWN), id="start-time", style="display: none;"),
             Span('/planning/timer_done', id="timer-redirect", style="display: none;"),
-            Button("(re)Start planning",
+            Button("(re)Start getting plans",
                 hx_get="/planning/load_dhamma_db",
                 hx_target="#planning-periods"),
             Span(style="display: inline-block; width: 20px;"),
@@ -83,6 +84,8 @@ async def planning_page(session, selected_name, csms):
             Button("SAVE ALL CHANGES", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
+                hx_confirm=("Are you ABSOLUTELY sure you want to delete this period, "
+                        "including ALL its timings?"),
                 cls="allownavigation")
         ),
         Br(), Br(),
@@ -144,7 +147,6 @@ def show_draft_plan_table(draft_plan, center, mess):
                 Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(no_gong), Td(delete_link)
             )
         )
-
     today = datetime.now().date()
     period_types_in_db = plancheck.get_period_types_list(center)
     period_options = [Option(item, value=item) for item in sorted(list(period_types_in_db))]
@@ -174,7 +176,6 @@ def show_draft_plan_table(draft_plan, center, mess):
         hx_post="/planning/add_line",
         hx_target="#planning-periods",
         ),
-
     table = Table(
         Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("No_gong"), Th("Action"),)),
         Tbody(*rows)
@@ -182,11 +183,8 @@ def show_draft_plan_table(draft_plan, center, mess):
     return Div(
         H2("Current plan with 'www.dhamma.org' added for 12 months from current course start"),
         Div(messages.feedback_to_user(mess), hx_swap_oob="true",id="line-feedback"),
-
         Div("",hx_swap_oob="true",id="timingsubpage"),
-        #Div("",hx_swap_oob="true",id="periods-struct"),
-        #Div("",hx_swap_oob="true",id="timetables"),
-
+        utils.toggle_markdown("current-plan-instructions"),
         table,
         form,
         id="planning-periods"

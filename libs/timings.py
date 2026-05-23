@@ -16,7 +16,7 @@ import libs.minio as minio
 def load_timingsubpage(session):
     return Div(
         Div("",hx_swap_oob="true",id="planning-periods"),
-        #Div("",hx_swap_oob="true",id="timetables"),
+        Div("",hx_swap_oob="true",id="line-feedback"),
         Div(hx_get= "/timings/center_periods",
             hx_target="#feedback-periods",
             hx_trigger="load"),

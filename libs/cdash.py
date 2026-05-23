@@ -4,6 +4,7 @@ import asyncio
 from fasthtml.common import *
 from datetime import datetime
 import pandas as pd
+from resend.request import T
 import libs.utils as utils
 import libs.minio as minio
 import libs.dbset as dbset
@@ -41,24 +42,27 @@ def dashboard(session, users, planners):
     )
     form = Form(
         select,
-        Button("SEE THE COMPLETE STATUS AND CONFIGURATION OF THIS CENTER", type="submit", onclick="document.getElementById('myForm').action='/status_page'"),
-        Button("MODIFY CENTER PLANNING: ONLY IF YOU ARE A REGISTERED PLANNER FOR THIS CENTER", 
-               type="submit", onclick="document.getElementById('myForm').action='/planning_page'"),
+        Button("STATUS AND CONFIGURATION", type="submit", onclick="document.getElementById('myForm').action='/status_page'"),
+        Button("MODIFY GONG PLANNING", 
+               type="submit", onclick="document.getElementById('myForm').action='/planning_page'") if len(user_centers) >= 1 else None,
         action="/default_route",
         id="myForm",
         method="get",
     )
     return Main(
         top_menu(session['role']),
+        H1("Dashboard"),
         Div(P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
-            P(""),
-            Div(utils.display_markdown("dashboard-t")),
-            P(A("CONSULT THE PLANNING AND TIMETABLES OF ANY CENTER", href="/consult_page",
+            P(f"You are a registered planner for the following center(s): {', '.join(user_centers)}") if len(user_centers) >= 1 else P("You are not a registered planner for any center. Please contact your administrator."),
+            utils.display_markdown("dashboard"),
+            P(A("CONSULT PLANNING", href="/consult_page",
                 style="font-size: 24px;")),
+            Br(),
+            Hr(style="border: none; height: 4px; background-color: #3490dc;"),
+            Br(),
             Div(
-                P("Choose a center:"),
                 form
-            ) if len(user_centers) >= 1 else None,
+            ),
             cls="container"
         ),
         cls="container",
