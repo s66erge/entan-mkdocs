@@ -33,7 +33,7 @@ repo_url: https://github.com/s66erge/entan-mkdocs
 
 plugins:
   - search
-  #- entangled
+#  - entangled
   - mermaid2:
       arguments:
          securityLevel: 'loose' 
@@ -70,7 +70,6 @@ theme:
     - navigation.sections
     - content.code.annotate
     - navigation.top
-    - toc.integrate
   palette: 
     #Palette toggle for light mode
     - scheme: default
