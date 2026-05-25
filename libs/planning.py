@@ -34,7 +34,7 @@ def show_draft_plan_table(draft_plan, center, mess):
             case "OK":
                 check_cell = Td(check)
             case "CH":
-                check_cell = Td(check, style="background: orange")
+                check_cell = Td(check, style="background: darkorange")
             case _:
                 check_cell = Td(check, style="background: red")
         # Add delete link for removing this row

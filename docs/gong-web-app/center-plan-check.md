@@ -32,8 +32,7 @@ def check_plan(session, plan, center):
             continue
         next_start_date = plan[idx + 1].get("start_date")
         pt = row.get("period_type")
-        pt_is_variable = next((t for t in types_with_duration
-                               if t.get("period_type") == pt), {}).get("tags") in "VX"
+        pt_is_variable = next((t for t in types_with_duration if t.get("period_type") == pt), {"tags":""}).get("tags") in "VX"
         try:
             e_this = date.fromisoformat(row.get("end_date"))
             s_next = date.fromisoformat(next_start_date) 
