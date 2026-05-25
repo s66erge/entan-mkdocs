@@ -1,9 +1,7 @@
 # ~/~ begin <<docs/gong-web-app/utilities.md#libs/utils.py>>[init]
 
 import socket
-import tempfile
 import calendar
-import json
 import pandas as pd
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
@@ -38,6 +36,7 @@ class Globals:
     HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     MEDIA_TYPES = {".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                    ".db": "application/octet-stream"}
+    ORANGE = "darkorange"
     INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
     SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
