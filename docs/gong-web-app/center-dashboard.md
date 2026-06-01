@@ -9,7 +9,6 @@ import asyncio
 from fasthtml.common import *
 from datetime import datetime
 import pandas as pd
-from resend.request import T
 import libs.utils as utils
 import libs.minio as minio
 import libs.dbset as dbset
@@ -66,11 +65,12 @@ def dashboard(session, users, planners):
         H1("Dashboard"),
         Div(P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
             P(f"You are a registered planner for the following center(s): {', '.join(user_centers)}") if len(user_centers) >= 1 else P("You are not a registered planner for any center. Please contact your administrator."),
+            utils.toggle_markdown("dhamma-org-and-gong-periods"),
             utils.display_markdown("dashboard"),
             P(A("CONSULT PLANNING", href="/consult_page",
                 style="font-size: 24px;")),
             Br(),
-            Hr(style="border: none; height: 4px; background-color: #3490dc;"),
+            Hr(style="border: none; height: 4px; background-color: deepskyblue;"),
             Br(),
             Div(
                 form
@@ -108,10 +108,9 @@ def status_page(session, center_name, centers, users, csms):
     html_targets = targets_df.fillna("").to_html(index=False)
     html_replace = replace_df.fillna("").to_html(index=False)
     html_inside = inside_df.fillna("").to_html(index=False)
-    mark_file = "planning-free-t" if state == "free" else "planning-busy-t"
     return Main(
         top_menu(session['role']),
-        Div(utils.display_markdown(mark_file)),
+        Div(utils.display_markdown("planning-free-t" if state == "free" else "planning-busy-t")),
         H1(f"{center_name}"),
         P(f"Current center state: {state}", Br(),
           f"Local database in center was installed on: {pi_database_date}"),
@@ -120,14 +119,17 @@ def status_page(session, center_name, centers, users, csms):
           f"UTC time now: {utils.short_iso(datetime.now())}"),
         P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
         H3("Center gongs and targets"),
+        utils.toggle_markdown("gongs-and-targets"), Br(),
         Safe(html_gongs),
         Safe(html_targets),
         P(f"Default gong id for copied periods: {params[utils.Pkey.GONG_ID]}", Br(),
           f"Default target(s) for copied periods: {params[utils.Pkey.TARGETS]}"),
         H3("Configuration"),
         Div(H4("dhamma.org period types replacement table"),
+            utils.toggle_markdown("period-type-replacement"), Br(),
             Safe(html_replace)) if len(replace_df) > 0 else P("No data in the 'replacement' table"),
         Div(H4("gong planning instructions for dhamma.org periods overlaps/gaps"),
+            utils.toggle_markdown("period-type-replacement"), Br(),
             Safe(html_inside)) if len(inside_df) > 0 else P("No data in the 'overlap/gaps' table"),
         P(f"Parameters: {params}"),
         H3("Center states history"),

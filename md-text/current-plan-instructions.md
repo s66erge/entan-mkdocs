@@ -15,8 +15,8 @@ You can modify it by deleting a line (Delete link in Action field), adding a new
 | no |  | OK for the gong planning | nothing |
 | no | OK Time overlap | time overlap on same day from a variable period | nothing |
 | <span style="background-color:darkorange">orange</span> | CHECK Time overlap | time operlap on same day with another non variable period | check for conflict |
-| <span style="background-color:darkorange">orange</span> | CHECK Overlap of X days,  | days operlap from a variable to a fixed period, likely combined with a gap(s) after the next period because the next period is inside the current period in dhamma.org |  decide if it is needed to use this period instead of the default period fill the following gap(s) |
-| <span style="background-color:darkorange">orange</span> | CHECK GAP X days | A gap in the plan will be filled with the 'default period' | should be OK, just check |
+| <span style="background-color:darkorange">orange</span> | CHECK Overlap of X days,  | days operlap from a variable to a fixed period, likely combined with gap(s) after the next period because the next period is inside the current period in dhamma.org |  decide if it is needed to use this period instead of the default period to fill these following gap(s) |
+| <span style="background-color:darkorange">orange</span> | CHECK GAP X days | A gap in the plan will be filled with the 'default period': see timetables | should be OK, just check |
 | <span style="background-color:red">--red--</span> | NoType | no type in timetables for this period type | either delete/insert other period type or create one in timetables|
 | <span style="background-color:red">--red--</span> | Same starting time | In the gong plan, 2 periods cannot have the same starting time | modify this and/or next period to suppress the identical starting time |
 | <span style="background-color:red">--red--</span> | Overlap of X days | days overlap from a fixed to a fixed period | modify this and/or next period to suppress the overlap |

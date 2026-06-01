@@ -64,7 +64,7 @@ states.init_center_state_machines(centers)
 
 async def workflow_supervisor():
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(utils.Globals.SUPERVISOR_DELAY)
         for center in states.csms:
             await transit.check_and_advance(center, states.csms)
 @app.on_event("startup")
