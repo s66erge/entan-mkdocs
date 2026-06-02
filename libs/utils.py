@@ -2,7 +2,6 @@
 
 import socket
 import calendar
-import pandas as pd
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
 import resend 
