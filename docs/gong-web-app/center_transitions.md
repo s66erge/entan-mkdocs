@@ -124,18 +124,19 @@ async def save_db_plan_times(model):
 
 async def wait_until(model, until_hour, minutes=0):
     center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+    now_center = datetime.now(center_tz)
+    next_event = now_center.replace(hour=until_hour, minute=minutes)
+    if now_center.hour > until_hour or \
+        (now_center.hour == until_hour and now_center.minute >= minutes):
+        # If it's already past the target time, schedule for tomorrow
+        next_event +=  timedelta(days=1)
     if model.center_name == utils.Globals.TEST_CENTER or \
             model.get_user() == utils.Globals.DEV_USER:
         print(model.get_user(), model.center_name, " - using short delay for testing")
         delay = utils.Globals.SHORT_DELAY
     else:
-        now_center = datetime.now(center_tz)
-        next_event = now_center.replace(hour=until_hour, minute=minutes)
-        if now_center.hour > until_hour or \
-            (now_center.hour == until_hour and now_center.minute >= minutes):
-            # If it's already past the target time, schedule for tomorrow
-            next_event +=  timedelta(days=1)
         delay = (next_event - now_center).total_seconds()
+    print(model.get_user(), model.center_name, " - waiting until ", next_event.isoformat())
     await asyncio.sleep(delay)
     return {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"} 
 
@@ -170,7 +171,7 @@ async def delete_new_db_once(model):
             model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
             return {"success": f"confirmation of production version {model.center_date} is OK"}
         else:
-           return {"error": f"production version {model.center_date} NOT CONFIRMED"}
+           return {"error": f"production file 'receiving{model.center_date}.db' NOT PRESENT in minio"}
     except (S3Error, MinioException, RuntimeError) as e:
         return {"error": f"production version {model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
 

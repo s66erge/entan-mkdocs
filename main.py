@@ -27,6 +27,10 @@ import libs.minio as minio
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#initialize-program>>[init]
 
 custom_styles = Style("""
+blockquote {
+    border-left: 4px solid olive !important;
+    padding-left: 15px;
+}
 .hidden {display: none; }
 .mw-960 { max-width: 960px; }
 .mw-480 { max-width: 480px; }
@@ -64,7 +68,7 @@ states.init_center_state_machines(centers)
 
 async def workflow_supervisor():
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(utils.Globals.SUPERVISOR_DELAY)
         for center in states.csms:
             await transit.check_and_advance(center, states.csms)
 @app.on_event("startup")
