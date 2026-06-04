@@ -173,9 +173,8 @@ def toggle_markdown(md_id: str, insert=None, showhelp=False):
             cls="btn"
         ),
         Div(
-            display_markdown(md_id, insert),
-            Hr(style="border: none; height: 3px; background-color: olive;"),
-
+            Blockquote(display_markdown(md_id, insert)),
+            Hr(style="border: none; height: 3px; background-color: olive"),
             id=f"{md_id}",
             cls=f"markdown-block {hidden}"
         ),
