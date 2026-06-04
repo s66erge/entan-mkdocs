@@ -165,7 +165,10 @@ async def delete_new_db_once(model):
                                     f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
             ok_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name)
             old_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name, "old")
-            os.remove(old_db_file)
+            try:
+                os.remove(old_db_file)
+            except FileNotFoundError:
+                pass
             os.rename(ok_db_file, old_db_file)            
             os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
             model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
