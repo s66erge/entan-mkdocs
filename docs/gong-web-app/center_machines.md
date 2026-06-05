@@ -79,11 +79,6 @@ class HistoryListener:
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
-def run_sm_action(model, action, *args, **kwargs):
-    task = asyncio.create_task(action(model, *args, **kwargs))
-    transit.register_task(model.center_name, task)
-    return task
-
 class CenterState(StateMachine):
 
     free = State("Planning free to be edited", initial=True)
@@ -114,28 +109,43 @@ class CenterState(StateMachine):
 
     # ACTIONS ---------------------------------
 
-    def on_enter_free(self):
-        self.model.clear_user()
+    async def go_next(self, result):
+        self.model.last_result = result
+        if "success" in result:
+            await self.progress()
+            return
+        else:
+            await self.problem()
+            return
 
-    def on_exit_free(self):
+    async def on_enter_free(self):
+        self.model.last_result = {"success": "center is free again"}
+        await asyncio.to_thread(self.model.clear_user)
+
+    def on_exit_edit(self):
         self.model.last_result = None
 
-    def on_enter_save_db(self):
-        run_sm_action(self.model, transit.save_db_plan_times)
+    async def on_enter_save_db(self):
+        result = await transit.save_db_plan_times(self.model)
+        return await self.go_next(result)
 
-    def on_enter_wait_01(self):
-        run_sm_action(self.model, transit.wait_until,
-                      utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+    async def on_enter_wait_01(self):
+        result = await transit.wait_until(self.model,
+                                          utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+        return await self.go_next(result)
 
-    def on_enter_transfer(self):
-        run_sm_action(self.model, transit.transfer_new_db)
+    async def on_enter_transfer(self):
+        result = await transit.transfer_new_db(self.model)
+        return await self.go_next(result)
 
-    def on_enter_wait_02(self):
-        run_sm_action(self.model, transit.wait_until,
-                      utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+    async def on_enter_wait_02(self):
+        result = await transit.wait_until(self.model,
+                                          utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+        return await self.go_next(result)
 
-    def on_enter_getting_prod(self):
-        run_sm_action(self.model, transit.delete_new_db)
+    async def on_enter_getting_prod(self):
+        result = await transit.delete_new_db(self.model)
+        return await self.go_next(result)
 
 ```
 

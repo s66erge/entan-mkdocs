@@ -50,7 +50,7 @@ class Globals:
     MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
     DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
     SUPERVISOR_DELAY = 2 # seconds: waiting time before supervisor can see the state changes
-    SHORT_DELAY = 5 # seconds: waiting time before uploading file to minio IN DEV MODE
+    SHORT_DELAY = 8 # seconds: waiting time before uploading file to minio IN DEV MODE
     WAIT01_HOUR = 0
     WAIT01_MINS = 40
     WAIT02_HOUR = 1
@@ -173,9 +173,8 @@ def toggle_markdown(md_id: str, insert=None, showhelp=False):
             cls="btn"
         ),
         Div(
-            display_markdown(md_id, insert),
-            Hr(style="border: none; height: 3px; background-color: olive;"),
-
+            Blockquote(display_markdown(md_id, insert)),
+            Hr(style="border: none; height: 3px; background-color: olive"),
             id=f"{md_id}",
             cls=f"markdown-block {hidden}"
         ),

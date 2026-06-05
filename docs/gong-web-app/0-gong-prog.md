@@ -88,15 +88,6 @@ planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 dbset.init_data(roles, users, centers, planners)
 states.init_center_state_machines(centers)
 
-async def workflow_supervisor():
-    while True:
-        await asyncio.sleep(utils.Globals.SUPERVISOR_DELAY)
-        for center in states.csms:
-            await transit.check_and_advance(center, states.csms)
-@app.on_event("startup")
-async def start_supervisor():
-    asyncio.create_task(workflow_supervisor())
-
 ```
 ### Routes for authentication
 
@@ -197,7 +188,7 @@ def get(session):
     return transit.timer_done(session, states.csms)
 
 @rt('/save-center-db')
-async def get(session):
+def get(session):
     if not session[utils.Skey.PLANOK]:
         return messages.feedback_to_user({"error": "plan_not_ok"})
     if not session[utils.Skey.TIMESOK]:

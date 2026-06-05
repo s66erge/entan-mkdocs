@@ -66,6 +66,7 @@ def dashboard(session, users, planners):
         Div(P(f"You are logged in as '{u.email}' with role '{u.role_name}'"),
             P(f"You are a registered planner for the following center(s): {', '.join(user_centers)}") if len(user_centers) >= 1 else P("You are not a registered planner for any center. Please contact your administrator."),
             utils.toggle_markdown("dhamma-org-and-gong-periods"),
+            Br(),
             utils.display_markdown("dashboard"),
             P(A("CONSULT PLANNING", href="/consult_page",
                 style="font-size: 24px;")),

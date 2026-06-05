@@ -29,27 +29,7 @@ pending_tasks = {}
 ```python
 #| id: workflow-supervisor
 
-def register_task(center: str, task: asyncio.Task):
-    pending_tasks[center] = task
-
-async def check_and_advance(center: str, csms):
-    sm = csms[center]
-    task = pending_tasks.get(center)
-    if not task:
-        return
-    if not task.done():
-        return
-    result = task.result()
-    del pending_tasks[center]
-    sm.model.last_result = result
-    if "success" in result:
-        sm.progress()
-        return
-    else:
-        sm.problem()
-        return
-
-async def retry_on_error(func, *args, retries=3, delay=60, **kwargs):
+async def retry_on_error(func, *args, retries=3, delay=30, **kwargs):
     if args[0].center_name == utils.Globals.TEST_CENTER:
         delay0 = utils.Globals.SHORT_DELAY
         retries0 = 1
@@ -83,7 +63,7 @@ async def check_center_free(state_mach, this_user):
             state_mach.abandon_changes()
         if state_mach.configuration[0].id == "free":
             state_mach.model.user = this_user
-            state_mach.progress()
+            await state_mach.progress()
             center_is_free = True
         return center_is_free
 
@@ -141,7 +121,7 @@ async def wait_until(model, until_hour, minutes=0):
     return {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"} 
 
 async def transfer_new_db(model):
-    return await retry_on_error(transfer_new_db_once, model, retries=3, delay=60)
+    return await retry_on_error(transfer_new_db_once, model, retries=3, delay=30)
 async def transfer_new_db_once(model):
     try:
         center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
@@ -156,7 +136,7 @@ async def transfer_new_db_once(model):
         return {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
 
 async def delete_new_db(model):
-    return await retry_on_error(delete_new_db_once, model, retries=3, delay=60)
+    return await retry_on_error(delete_new_db_once, model, retries=3, delay=30)
 async def delete_new_db_once(model):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{model.center_name.lower()}")
@@ -165,7 +145,10 @@ async def delete_new_db_once(model):
                                     f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
             ok_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name)
             old_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name, "old")
-            os.remove(old_db_file)
+            try:
+                os.remove(old_db_file)
+            except FileNotFoundError:
+                pass
             os.rename(ok_db_file, old_db_file)            
             os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
             model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)

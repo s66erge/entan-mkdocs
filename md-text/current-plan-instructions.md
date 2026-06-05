@@ -1,6 +1,5 @@
 This plan can only be saved if there are no red cell in the 'Check' field column.
 You can modify it by deleting a line (Delete link in Action field), adding a new line (input form at bottom of the table) or adding/changing period types in the center timetables where you can see complete periods information for this center (top 'timetables' buttons). The plan is completely recalculated after any modification and when you use the top button 'Load saved plan'.
-
 ##### Field information:
 - **Start date**: will be sent to the center gong when plans and timetables are saved.
 - **End date**: used to check the integrity of the plan. Will NOT be sent to the center gong.
@@ -12,8 +11,8 @@ You can modify it by deleting a line (Delete link in Action field), adding a new
 
 | Color | Check text | Explanation | Todo |
 | -------- | -------- | --------- | -----|
-| no |  | OK for the gong planning | nothing |
 | no | OK Time overlap| time overlap on the same day from a variable period | nothing |
+| no |  | OK for the gong planning | nothing |
 | <span style="background-color:darkorange">orange</span> | CHECK Time overlap| time overlap on the same day with another non-variable period | check for conflict |
 | <span style="background-color:darkorange">orange</span> | CHECK Overlap of X days,  | days overlap from a variable to a fixed period, likely combined with one or more gaps after the next period because the next period is inside the current period in dhamma.org |  decide if it is needed to use this period instead of the default period to fill these following gap(s) |
 | <span style="background-color:darkorange">orange</span> | CHECK GAP X days | A gap in the plan will be filled with the 'default period': see timetables | should be OK, just check |
@@ -21,4 +20,3 @@ You can modify it by deleting a line (Delete link in Action field), adding a new
 | <span style="background-color:red">--red--</span> | Same starting time | In the gong plan, 2 periods cannot have the same starting time | modify this or the next period to suppress the identical starting time |
 | <span style="background-color:red">--red--</span> | Overlap of X days | days overlap from a fixed to a fixed period | modify this or the next period to suppress the overlap |
 | <span style="background-color:red">--red--</span> | Missing time info | error in timetables for this period | correct timetable error |
-<hr style="border: none; height: 4px; background-color: #3490dc;">
