@@ -73,8 +73,9 @@ def abandon_edit(session, csms):
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
         csms[this_center].abandon_changes()
         csms[this_center].model.user = None
-    elif session[utils.Skey.ROLE] == "admin" :
-        csms[this_center].force_to_free()
+    elif session[utils.Skey.ROLE] == "admin":
+        print("Admin is abandoning changes for center ",this_center)
+        csms[this_center].send("force_to_free")
     return  Redirect('/dashboard')
 
 def timer_done(session, csms):
@@ -101,6 +102,24 @@ async def save_db_plan_times(model):
     model.center_params = minio.params_from_excel_minio(model.center_name)
     await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
     return {"success": f"new db saved as {save_db_file}"}
+
+def get_delay(model, until_hour, minutes=0):
+    center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+    now_center = datetime.now(center_tz)
+    next_event = now_center.replace(hour=until_hour, minute=minutes)
+    if now_center.hour > until_hour or \
+        (now_center.hour == until_hour and now_center.minute >= minutes):
+        # If it's already past the target time, schedule for tomorrow
+        next_event +=  timedelta(days=1)
+    if model.center_name == utils.Globals.TEST_CENTER or \
+        model.get_user() == utils.Globals.DEV_USER:
+        print(model.get_user(), model.center_name, " - using short delay for testing")
+        delay = utils.Globals.SHORT_DELAY
+    else:
+        delay =  (next_event - now_center).total_seconds() * 1000
+    result = {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"}
+    print(delay, result) 
+    return delay, result
 
 async def wait_until(model, until_hour, minutes=0):
     center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])

@@ -91,7 +91,7 @@ async def planning_page(session, selected_name, csms):
                     document.getElementById('save-btn').classList.toggle('hidden');
                     document.getElementById('abandon').classList.toggle('hidden');
                 """,
-                cls=""
+                cls="allownavigation"
                 ),
             A("  return to STATUS after SAVING ALL CHANGES", id="end-link",
               href=f"/status_page?center={selected_name}", cls="allownavigation hidden"),            
