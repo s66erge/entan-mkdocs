@@ -78,15 +78,23 @@ async def planning_page(session, selected_name, csms):
                 hx_get="/timings/saved_timings",
                 hx_target="#timingsubpage"),
             Span(style="display: inline-block; width: 20px;"),
-            A("return NO CHANGES", href="/planning/abandon_edit", cls="allownavigation"),
+            A("return NO CHANGES", id="abandon", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
             Span("", id="offset", type="hidden"),
             Button("SAVE ALL CHANGES", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
-                hx_confirm=("Are you ABSOLUTELY sure you want to delete this period, "
-                        "including ALL its timings?"),
-                cls="allownavigation")
+                hx_confirm=("Are you ABSOLUTELY sure you want to save your work now? "
+                        "It will then be sent to the center at 1 a.m. center local time"),
+                hx_on_click="""
+                    document.getElementById('end-link').classList.toggle('hidden');
+                    document.getElementById('save-btn').classList.toggle('hidden');
+                    document.getElementById('abandon').classList.toggle('hidden');
+                """,
+                cls=""
+                ),
+            A("  return to STATUS after SAVING ALL CHANGES", id="end-link",
+              href=f"/status_page?center={selected_name}", cls="allownavigation hidden"),            
         ),
         Br(), Br(),
         Span(
