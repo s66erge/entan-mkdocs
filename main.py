@@ -145,14 +145,14 @@ def get(session, center: str):
     return cdash.status_page(session, center, centers, users, states.csms)
 
 @rt('/planning/abandon_edit')
-def get(session):
+async def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return transit.abandon_edit(session, states.csms)
+    return await transit.abandon_edit(session, states.csms)
 
 @rt('/planning/timer_done')
-def get(session):
+async def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return transit.timer_done(session, states.csms)
+    return await transit.timer_done(session, states.csms)
 
 @rt('/save-center-db')
 async def get(session):
@@ -164,7 +164,7 @@ async def get(session):
     print("before")
     await state_mach.send("progress")   # from 'edit' to 'save_db'
     print("after")
-    return Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
+    return #Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]

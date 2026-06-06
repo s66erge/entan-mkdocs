@@ -25,134 +25,107 @@ async def check_center_free(state_mach, this_user):
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
         delta = (tnow-past).total_seconds()
         if state_mach.configuration[0].id == "edit" and delta > utils.Globals.INITIAL_COUNTDOWN:
-            state_mach.abandon_changes()
+            await state_mach.abandon_changes()
         if state_mach.configuration[0].id == "free":
             state_mach.model.user = this_user
             await state_mach.progress()
             center_is_free = True
         return center_is_free
 
-def abandon_edit(session, csms):
+async def abandon_edit(session, csms):
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
     if this_center in csms and csms[this_center].configuration[0].id == "edit":
-        csms[this_center].abandon_changes()
+        await csms[this_center].abandon_changes()
         csms[this_center].model.user = None
     elif session[utils.Skey.ROLE] == "admin":
         print("Admin is abandoning changes for center ",this_center)
-        csms[this_center].send("force_to_free")
+        await csms[this_center].send("force_to_free")
     return  Redirect('/dashboard')
 
-def timer_done(session, csms):
+async def timer_done(session, csms):
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
-    csms[this_center].edit_timer_done()
+    await csms[this_center].edit_timer_done()
     csms[this_center].model.user = None    
     return  Redirect('/dashboard')
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_transitions.md#workflow-supervisor>>[init]
-
-async def retry_on_error(func, *args, retries=3, delay=30, **kwargs):
-    if args[0].center_name == utils.Globals.TEST_CENTER:
-        delay0 = utils.Globals.SHORT_DELAY
-        retries0 = 1
-    else:
-        delay0 = delay
-        retries0 = retries
-    for attempt in range(1, retries0 + 1):
-        result = await func(*args, **kwargs)
-        # Only retry if the function returns {"error": ...}
-        if isinstance(result, dict) and "error" in result:
-            if attempt < retries0:
-                await asyncio.sleep(delay0)
-                continue
-            return result  # final failure after max retries
-        else:
-            return result  # success, stop immediately
-# ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
 
-async def save_db_plan_times(model):
-    save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
-    model.save_db_filename = save_db_file
-    model.center_params = minio.params_from_excel_minio(model.center_name)
-    await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
-    return {"success": f"new db saved as {save_db_file}"}
+async def go_next_as(state_mach, result, delai = 1, sendid = None):
+    state_mach.model.last_result = result
+    if "success" in result:
+        await state_mach.send("progress", delay=delai, send_id=sendid)
+        return
+    else:
+        await state_mach.send("problem")
+        return
 
-def get_delay(model, until_hour, minutes=0):
-    center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+async def save_db_plan_times(sm):
+    save_db_file = await planning.save_db_plan_timetable(sm.model.center_name, sm.model.centers)
+    sm.model.save_db_filename = save_db_file
+    sm.model.center_params = minio.params_from_excel_minio(sm.model.center_name)
+    await asyncio.to_thread(minio.remove_center_temp_data, sm.model.center_name)
+    result = {"success": f"new db saved as {save_db_file}"}
+    return await go_next_as(sm, result)
+
+async def get_delay(sm, delay_id, until_hour, minutes=0):
+    center_tz = ZoneInfo(sm.model.center_params[utils.Pkey.TIMEZON])
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=until_hour, minute=minutes)
     if now_center.hour > until_hour or \
         (now_center.hour == until_hour and now_center.minute >= minutes):
         # If it's already past the target time, schedule for tomorrow
         next_event +=  timedelta(days=1)
-    if model.center_name == utils.Globals.TEST_CENTER or \
-        model.get_user() == utils.Globals.DEV_USER:
-        print(model.get_user(), model.center_name, " - using short delay for testing")
-        delay = utils.Globals.SHORT_DELAY
+    if sm.model.center_name == utils.Globals.TEST_CENTER or \
+        sm.model.get_user() == utils.Globals.DEV_USER:
+        print(sm.model.get_user(), sm.model.center_name, " - using short delay for testing")
+        delay = utils.Globals.SHORT_DELAY * 1000
     else:
         delay =  (next_event - now_center).total_seconds() * 1000
+    sendid = f"{sm.model.center_name}_{delay_id}"
+    sm.model.send_id = sendid
     result = {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"}
-    print(delay, result) 
-    return delay, result
+    return await go_next_as(sm, result, delay, sendid)
 
-async def wait_until(model, until_hour, minutes=0):
-    center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
-    now_center = datetime.now(center_tz)
-    next_event = now_center.replace(hour=until_hour, minute=minutes)
-    if now_center.hour > until_hour or \
-        (now_center.hour == until_hour and now_center.minute >= minutes):
-        # If it's already past the target time, schedule for tomorrow
-        next_event +=  timedelta(days=1)
-    if model.center_name == utils.Globals.TEST_CENTER or \
-            model.get_user() == utils.Globals.DEV_USER:
-        print(model.get_user(), model.center_name, " - using short delay for testing")
-        delay = utils.Globals.SHORT_DELAY
-    else:
-        delay = (next_event - now_center).total_seconds()
-    print(model.get_user(), model.center_name, " - waiting until ", next_event.isoformat())
-    await asyncio.sleep(delay)
-    return {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"} 
-
-async def transfer_new_db(model):
-    return await retry_on_error(transfer_new_db_once, model, retries=3, delay=30)
-async def transfer_new_db_once(model):
+async def transfer_new_db(sm):
     try:
-        center_tz = ZoneInfo(model.center_params[utils.Pkey.TIMEZON])
+        center_tz = ZoneInfo(sm.model.center_params[utils.Pkey.TIMEZON])
         center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
-        model.center_date = center_date
-        file_complete = utils.get_db_path() + model.save_db_filename
-        minio_object = f"{model.center_name.lower()}/sending{center_date}.db"
+        sm.model.center_date = center_date
+        file_complete = utils.get_db_path() + sm.model.save_db_filename
+        minio_object = f"{sm.model.center_name.lower()}/sending{center_date}.db"
         await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
     except (S3Error, MinioException, RuntimeError) as e:
-        return {"error": f"saving new db to minio failed: {e}"}
+        result = {"error": f"saving new db to minio failed: {e}"}
     else:
-        return {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
+        result = {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
+    finally:
+        return await go_next_as(sm, result)
 
-async def delete_new_db(model):
-    return await retry_on_error(delete_new_db_once, model, retries=3, delay=30)
-async def delete_new_db_once(model):
+async def delete_new_db(sm):
     try:
-        objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{model.center_name.lower()}")
-        if f"{model.center_name.lower()}/receiving{model.center_date}.db" in objects_in_minio:
+        objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{sm.model.center_name.lower()}")
+        if f"{sm.model.center_name.lower()}/received{sm.model.center_date}.db" in objects_in_minio:
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
-                                    f"{model.center_name.lower()}",f"receiving{model.center_date}.db")
-            ok_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name)
-            old_db_file = utils.get_db_path() + dbset.gong_db_name(model.center_name, "old")
+                                    f"{sm.model.center_name.lower()}",f"received{sm.model.center_date}.db")
+            ok_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name)
+            old_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name, "old")
             try:
                 os.remove(old_db_file)
             except FileNotFoundError:
                 pass
             os.rename(ok_db_file, old_db_file)            
-            os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
-            model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
-            return {"success": f"confirmation of production version {model.center_date} is OK"}
+            os.rename(utils.get_db_path() + sm.model.save_db_filename, ok_db_file)
+            sm.model.centers.update(center_name = sm.model.center_name, pi_db_date = sm.model.center_date)
+            result = {"success": f"confirmation of production version {sm.model.center_date} is OK"}
         else:
-           return {"error": f"production file 'receiving{model.center_date}.db' NOT PRESENT in minio"}
+            result = {"error": f"production file 'received{sm.model.center_date}.db' NOT PRESENT in minio"}
     except (S3Error, MinioException, RuntimeError) as e:
-        return {"error": f"production version {model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
+        result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
+    finally:
+        return await go_next_as(sm, result)
 
 # ~/~ end
 # ~/~ end

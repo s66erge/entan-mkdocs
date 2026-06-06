@@ -57,72 +57,41 @@ class CenterState(StateMachine):
     problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
-    #force_to_free = free.from_.any()
     force_to_free = free.from_(free, edit, save_db, wait_01, transfer, wait_02, getting_prod, w_reco_save, w_reco_prod)
 
     # ACTIONS ---------------------------------
 
-    def go_next(self, result, delai = 1, sendid = None):
-        self.model.last_result = result
-        if "success" in result:
-            print(f"success + {delai} + {sendid}")
-            self.send("progress", delay=delai, send_id=sendid)
-            return
-        else:
-            self.send("problem")
-            return
-
-    def on_enter_free(self):
+    async def on_enter_free(self):
         self.model.last_result = {"success": "center is free again"}
         self.model.clear_user()
 
-    def on_exit_edit(self):
+    async def on_exit_edit(self):
         self.model.last_result = None
 
     async def on_enter_save_db(self):
-        result = await transit.save_db_plan_times(self.model)
-        return self.go_next(result)
+        return await transit.save_db_plan_times(self)
 
-    def on_enter_wait_01(self):
-        delay, result = transit.get_delay(self.model, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
-        #result = await transit.wait_until(self.model,
-        #                                  utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
-        sendid = f"{self.model.center_name}_wait01"
-        self.model.send_id = sendid
-        return self.go_next(result, delay, sendid)
-    
-    def on_exit_wait_01(self):
+    async def on_enter_wait_01(self):
+        return await transit.get_delay(self, "wait01", utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+
+    async def on_exit_wait_01(self):
         if self.model.send_id:
             print("Canceling delayed event ", self.model.send_id)
             self.cancel_event(self.model.send_id)
 
     async def on_enter_transfer(self):
-        result = await transit.transfer_new_db(self.model)
-        return self.go_next(result)
+        return await transit.transfer_new_db(self)
 
-    def on_enter_wait_02(self):
-        delay, result = transit.get_delay(self.model, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
-        #result = await transit.wait_until(self.model,
-        #                                  utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
-        sendid = f"{self.model.center_name}_wait02"
-        self.model.send_id = sendid
-        return self.go_next(result, delay, sendid)
+    async def on_enter_wait_02(self):
+        return await transit.get_delay(self, "wait02", utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
 
-    def on_exit_wait_02(self):
+    async def on_exit_wait_02(self):
         if self.model.send_id:
             print("Canceling delayed event ", self.model.send_id)
             self.cancel_event(self.model.send_id)
-            
-    """
-    async def on_enter_wait_02(self):
-        result = await transit.wait_until(self.model,
-                                          utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
-        return await self.go_next(result)
-    """
 
     async def on_enter_getting_prod(self):
-        result = await transit.delete_new_db(self.model)
-        return self.go_next(result)
+        return await transit.delete_new_db(self)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
