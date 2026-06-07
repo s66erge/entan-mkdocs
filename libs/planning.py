@@ -113,7 +113,7 @@ def replace_table(conn, name, df):
 
 async def save_db_plan_timetable(center_name, centers):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
-    filename = dbset.gong_db_name(center_name, "sending")
+    filename = dbset.gong_db_name(center_name, utils.Globals.SENDING)
     dest_db_file = utils.get_db_path() + filename
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
