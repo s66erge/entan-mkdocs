@@ -115,10 +115,9 @@ async def transfer_new_db(sm):
         center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
         sm.model.center_date = center_date
         file_complete = utils.get_db_path() + sm.model.save_db_filename
-        minio_object = f"{sm.model.center_name.lower()}/sending{center_date}.db"
+        minio_object = f"{sm.model.center_name.lower()}/{utils.Globals.SENDING}{center_date}.db"
         await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
         print(file_complete, " uploaded to minio as ", minio_object, "in bucket ", utils.Globals.PI_BUCKET)
-        minio.file_upload(utils.Globals.PI_BUCKET, minio_object+"2", file_complete)
     except (S3Error, MinioException, RuntimeError) as e:
         result = {"error": f"saving new db to minio failed: {e}"}
     else:
@@ -129,9 +128,9 @@ async def transfer_new_db(sm):
 async def delete_new_db(sm):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{sm.model.center_name.lower()}")
-        if f"{sm.model.center_name.lower()}/received{sm.model.center_date}.db" in objects_in_minio:            
+        if f"{sm.model.center_name.lower()}/{utils.Globals.RECEIVED}{sm.model.center_date}.db" in objects_in_minio:            
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
-                                    f"{sm.model.center_name.lower()}",f"received{sm.model.center_date}.db")
+                                    f"{sm.model.center_name.lower()}",f"{utils.Globals.RECEIVED}{sm.model.center_date}.db")
             ok_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name)
             old_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name, "old")
             try:
@@ -143,7 +142,7 @@ async def delete_new_db(sm):
             sm.model.centers.update(center_name = sm.model.center_name, pi_db_date = sm.model.center_date)
             result = {"success": f"confirmation of production version {sm.model.center_date} is OK"}
         else:
-            result = {"error": f"production file 'received{sm.model.center_date}.db' NOT PRESENT in minio"}
+            result = {"error": f"production file '{utils.Globals.RECEIVED}{sm.model.center_date}.db' NOT PRESENT in minio"}
     except (S3Error, MinioException, RuntimeError) as e:
         result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
     finally:
