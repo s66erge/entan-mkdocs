@@ -4,7 +4,6 @@
 
 from fasthtml.common import *  # (1)
 from urllib.parse import quote
-import asyncio
 import libs.states as states
 import libs.auth as auth
 from libs.auth import admin_required
