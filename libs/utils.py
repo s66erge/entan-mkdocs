@@ -143,6 +143,11 @@ def add_months_days(date_str, num_months, num_days):
     result_date += timedelta(days=num_days)
     return result_date.isoformat()
 
+def days_between_iso_dates(date_str1, date_str2):
+    d1 = date.fromisoformat(date_str1)
+    d2 = date.fromisoformat(date_str2)
+    return (d2 - d1).days
+
 def short_iso(date_time: datetime, timezon="UTC"):
     return date_time.astimezone(ZoneInfo(timezon)).strftime('%Y-%m-%dT%H:%M:%S%z')
 

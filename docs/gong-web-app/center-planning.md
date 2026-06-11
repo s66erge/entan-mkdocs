@@ -136,7 +136,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         no_gong = plan_line.get("No_gong", "")
         # Conditional coloring
         ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
-        source_cell = Td(source, style="background: blue") if source == "new input" else Td(source)
+        source_cell = Td(source, style="background: blue") if source in "new input-fill gap" else Td(source)
         match check[0:2]:
             case "OK":
                 check_cell = Td(check)

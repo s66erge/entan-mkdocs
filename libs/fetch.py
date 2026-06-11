@@ -128,6 +128,7 @@ def clean_dhamma_courses(center, periods_dhamma_org, inside):
             cleaned.append(row)
             continue
         row_bef = periods_dhamma_org[i-1]
+
         row_delete_list = [d for d in delete_list if d["period_type"] == row["period_type"]]
         if row_delete_list:
             if row_delete_list[0]["container"] == "@ALL@":
@@ -168,10 +169,31 @@ def clean_dhamma_courses(center, periods_dhamma_org, inside):
             cleaned.append(second_row)
             continue
         else:
-            # FIXME: insert a period if there is a gap in the planand
-            # and create a 'fillin' type row in 'inside' sheet of center.xlsx
             cleaned.append(row)
     return cleaned
+
+def fillgaps_dhamma_courses(periods_dhamma_org, inside):
+    filled = []
+    fillin_list = [d for d in inside if d["action"] == "fillin"]
+    fillin_period = fillin_list[0]["period_type"] if fillin_list else None
+    for i, row in enumerate(periods_dhamma_org):
+        if i == 0:
+            filled.append(row)
+            continue
+        row_bef = periods_dhamma_org[i-1]
+        delta_days = utils.days_between_iso_dates(row_bef.get("end_date"), row.get("start_date"))
+        if fillin_period and delta_days > 1:
+            fillin_row = {
+                "start_date": utils.add_months_days(row_bef["end_date"], 0, 1),
+                "end_date": row["start_date"],
+                "period_type": fillin_period,
+                "source": "fill gap",
+                "course_type": "",
+                "no_gong": ""
+            }
+            filled.append(fillin_row)
+        filled.append(row)
+    return filled
 
 def sort_clean(center,aplan, inside):
     # Sort by end_date descending first then RE_SORT EVERYTHING by start_date ascending
@@ -180,7 +202,8 @@ def sort_clean(center,aplan, inside):
                       key=lambda x: x['start_date'])
     dedup = deduplicate(sorted_plan)
     dedup_cleaned = clean_dhamma_courses(center, dedup, inside)
-    return dedup_cleaned
+    cleaned_filled = fillgaps_dhamma_courses(dedup_cleaned, inside)
+    return cleaned_filled
 
 
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
