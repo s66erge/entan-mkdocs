@@ -65,6 +65,7 @@ def show_centers_form(centers):
         Div(
             Form(
                 Input(type="text", placeholder="Center Name", name="new_center_name", required=True),
+                utils.toggle_markdown("attention-to-center-config"),
                 Select(
                     Option("Center planning and config to copy", value="", selected=True, disabled=True),
                     *[Option(c, value=c) for c in center_names],

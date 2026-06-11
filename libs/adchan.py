@@ -141,7 +141,6 @@ def add_center(new_center_name, center_template, users, centers, db_path):
             message = {'error' : 'template_not_found'}
 
         else:  ## [2]
-            # FIXME: when making the copy, what about the gong ids and targets ?
             shutil.copy2(template_db, db_file_path)
             excel_template_path = minio.get_excel_minio(center_template)
             shutil.copy2(excel_template_path, f'{db_path}{new_center_name}.xlsx')

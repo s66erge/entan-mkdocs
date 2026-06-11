@@ -184,10 +184,12 @@ def toggle_markdown(md_id: str, insert=None, showhelp=False):
 
 ```
 
-### Add months and days to an ISO date
+### ISO dates helpers functions
 
 Return an ISO date string num_months and num_days after date_str (YYYY-MM-DD).
 Uses divmod to compute year/month rollover and preserves end-of-month.
+
+Reurn the number of days between 2 dates in ISO format
 
 ```python
 #| id: plus-months-days
@@ -204,6 +206,11 @@ def add_months_days(date_str, num_months, num_days):
     # Add num_days to the result
     result_date += timedelta(days=num_days)
     return result_date.isoformat()
+
+def days_between_iso_dates(date_str1, date_str2):
+    d1 = date.fromisoformat(date_str1)
+    d2 = date.fromisoformat(date_str2)
+    return (d2 - d1).days
 
 def short_iso(date_time: datetime, timezon="UTC"):
     return date_time.astimezone(ZoneInfo(timezon)).strftime('%Y-%m-%dT%H:%M:%S%z')
