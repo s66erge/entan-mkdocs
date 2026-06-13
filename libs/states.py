@@ -5,7 +5,7 @@ from abc import abstractmethod
 import asyncio
 # from fasthtml.common import *
 from datetime import datetime, timezone
-from statemachine import State, Event, StateMachine
+from statemachine import State, Event, StateChart
 import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
@@ -31,7 +31,11 @@ class HistoryListener:
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
-class CenterState(StateMachine):
+class CenterState(StateChart["CenterDataModel"]):
+
+    test_delay = 3 * 1000
+    allow_event_without_transition = False
+    atomic_configuration_update = True
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
@@ -40,7 +44,6 @@ class CenterState(StateMachine):
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
     getting_prod = State("Deleting production version after center restart")
-    w_reco_save = State("Saving new planning failed, waiting for recovery")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
@@ -50,29 +53,49 @@ class CenterState(StateMachine):
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    reco_save_done    = Event(w_reco_save.to(wait_01), name='recovery of saving new db done')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
-    force_to_free = free.from_(free, edit, save_db, wait_01, transfer, wait_02, getting_prod, w_reco_save, w_reco_prod)
+    force_to_free = free.from_.any()
 
     # ACTIONS ---------------------------------
 
+    async def go_next(self, result, delai=1, sendid = None):
+        self.model.last_result = result
+        if "success" in result:
+            await self.send("progress", delay=delai, send_id=sendid)
+            return
+        else:
+            await self.send("problem")
+            return
+
     async def on_enter_free(self):
         self.model.last_result = {"success": "center is free again"}
-        self.model.clear_user()
+        if not self.model.testing:
+            self.model.clear_user()
 
     async def on_exit_edit(self):
         self.model.last_result = None
 
     async def on_enter_save_db(self):
-        return await transit.save_db_plan_times(self)
+        if not self.model.testing:
+            result = await transit.save_db_plan_times(self)
+        else:
+            result = {"success": "testing: on_enter_save_db"}
+        return await self.go_next(result)
 
     async def on_enter_wait_01(self):
-        return await transit.get_delay(self, "wait01", utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+        if not self.model.testing:
+            result, delay = await transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+        else:
+            delay = self.test_delay
+            result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
+        self.model.send_id = f"{self.model.center_name}_wait01"
+        print(f"delay {delay}")
+        return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_01(self):
         if self.model.send_id:
@@ -80,10 +103,23 @@ class CenterState(StateMachine):
             self.cancel_event(self.model.send_id)
 
     async def on_enter_transfer(self):
-        return await transit.transfer_new_db(self)
+        if not self.model.testing:
+            result = await transit.transfer_new_db(self)
+        else:
+            result = {"success": "testing: on_enter_transfer"}
+            print("'Enter' for 'success', anything for 'error'")
+            if input("?"):
+                result = {"error": f"{result["success"]}"}
+        return await self.go_next(result)
 
     async def on_enter_wait_02(self):
-        return await transit.get_delay(self, "wait02", utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+        if not self.model.testing:
+            result, delay = await transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+        else:
+            delay = self.test_delay
+            result = {"success": f"testing: on_enter_wait_02 with delay: {self.test_delay}"}
+        self.model.send_id = f"{self.model.center_name}_wait02"        
+        return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_02(self):
         if self.model.send_id:
@@ -91,7 +127,14 @@ class CenterState(StateMachine):
             self.cancel_event(self.model.send_id)
 
     async def on_enter_getting_prod(self):
-        return await transit.delete_new_db(self)
+        if not self.model.testing:
+            result = await transit.delete_new_db(self)
+        else:
+            result = {"success": "testing: on_enter_getting_prod"}
+            print("'Enter' for 'success', anything for 'error'")
+            if input("?"):
+                result = {"error": f"{result["success"]}"}
+        return await self.go_next(result)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -116,10 +159,11 @@ class AbstractPersistentModel(ABC):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#db-persistent-model>>[init]
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, centers, user=None):
+    def __init__(self, center_name, centers, testing=False, user=None):
         super().__init__()
         self.center_name = center_name
         self.centers = centers
+        self.testing = testing
         self.user = user
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
@@ -185,14 +229,6 @@ def init_center_state_machines(centers):
     names = [c.get("center_name") for c in centers_list]
     for name in names:
         add_center_state_machine(name, centers)
-
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#print-graph>>[init]
-def states_print():
-    from statemachine import State, Event, StateMachine, StateChart 
-    from statemachine.contrib.diagram import quickchart_write_svg
-    sm = CenterState(StateChart)
-    quickchart_write_svg(sm, "images/center_machines.svg")
 
 # ~/~ end
 # ~/~ end
