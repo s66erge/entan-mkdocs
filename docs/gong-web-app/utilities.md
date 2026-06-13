@@ -53,7 +53,7 @@ class Globals:
     WAIT01_MINS = 40
     WAIT02_HOUR = 1
     WAIT02_MINS = 20
-    SHORT_DELAY = 8 # seconds: waiting time before uploading file to minio IN DEV MODE
+    SHORT_DELAY = 4 # seconds: waiting time before uploading file to minio IN DEV MODE
     SENDING = "sending"
     RECEIVED = "received"
     CENTER_BUCKET = "centers-data" # bucket name for local center data 

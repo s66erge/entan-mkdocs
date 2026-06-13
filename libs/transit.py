@@ -53,24 +53,14 @@ async def timer_done(session, csms):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
 
-async def go_next_as(state_mach, result, delai = 1, sendid = None):
-    state_mach.model.last_result = result
-    if "success" in result:
-        await state_mach.send("progress", delay=delai, send_id=sendid)
-        return
-    else:
-        await state_mach.send("problem")
-        return
-
 async def save_db_plan_times(sm):
     save_db_file = await planning.save_db_plan_timetable(sm.model.center_name, sm.model.centers)
     sm.model.save_db_filename = save_db_file
     sm.model.center_params = minio.params_from_excel_minio(sm.model.center_name)
     await asyncio.to_thread(minio.remove_center_temp_data, sm.model.center_name)
-    result = {"success": f"new db saved as {save_db_file}"}
-    return await go_next_as(sm, result)
+    return {"success": f"new db saved as {save_db_file}"}
 
-async def get_delay(sm, delay_id, until_hour, minutes=0):
+async def get_delay(sm, until_hour, minutes=0):
     center_tz = ZoneInfo(sm.model.center_params[utils.Pkey.TIMEZON])
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=until_hour, minute=minutes)
@@ -84,10 +74,8 @@ async def get_delay(sm, delay_id, until_hour, minutes=0):
         delay = utils.Globals.SHORT_DELAY * 1000
     else:
         delay =  (next_event - now_center).total_seconds() * 1000
-    sendid = f"{sm.model.center_name}_{delay_id}"
-    sm.model.send_id = sendid
     result = {"success": f"Date/time now at center: {datetime.now(center_tz).isoformat()}"}
-    return await go_next_as(sm, result, delay, sendid)
+    return result, delay
 
 async def transfer_new_db(sm):
     try:
@@ -103,7 +91,7 @@ async def transfer_new_db(sm):
     else:
         result = {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
     finally:
-        return await go_next_as(sm, result)
+        return result
 
 async def delete_new_db(sm):
     try:
@@ -126,7 +114,7 @@ async def delete_new_db(sm):
     except (S3Error, MinioException, RuntimeError) as e:
         result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
     finally:
-        return await go_next_as(sm, result)
+        return result
 
 # ~/~ end
 # ~/~ end

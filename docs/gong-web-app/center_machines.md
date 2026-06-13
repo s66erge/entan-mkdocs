@@ -53,12 +53,10 @@ clocks = {}
 <<abstract-with-persistency>>
 <<db-persistent-model>>
 <<create-centers-sms>>
-<<print-graph>>
 ```
 ### The state machine for each center
 
 see: https://python-statemachine.readthedocs.io/en/latest/index.html
-
 
 ```python
 #| id: state-machine
@@ -80,6 +78,10 @@ class HistoryListener:
             self.entries.pop(0)
 
 class CenterState(StateMachine):
+
+    test_delay = 3 * 1000
+    allow_event_without_transition = False
+    atomic_configuration_update = True
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
@@ -109,18 +111,39 @@ class CenterState(StateMachine):
 
     # ACTIONS ---------------------------------
 
+    async def go_next(self, result, delai=1, sendid = None):
+        self.model.last_result = result
+        if "success" in result:
+            await self.send("progress", delay=delai, send_id=sendid)
+            return
+        else:
+            await self.send("problem")
+            return
+
     async def on_enter_free(self):
         self.model.last_result = {"success": "center is free again"}
-        self.model.clear_user()
+        if not self.model.testing:
+            self.model.clear_user()
 
     async def on_exit_edit(self):
         self.model.last_result = None
 
     async def on_enter_save_db(self):
-        return await transit.save_db_plan_times(self)
+        if not self.model.testing:
+            result = await transit.save_db_plan_times(self)
+        else:
+            result = {"success": "testing: on_enter_save_db"}
+        return await self.go_next(result)
 
     async def on_enter_wait_01(self):
-        return await transit.get_delay(self, "wait01", utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+        if not self.model.testing:
+            result, delay = await transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+        else:
+            delay = self.test_delay
+            result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
+        self.model.send_id = f"{self.model.center_name}_wait01"
+        print(f"delay {delay}")
+        return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_01(self):
         if self.model.send_id:
@@ -128,10 +151,23 @@ class CenterState(StateMachine):
             self.cancel_event(self.model.send_id)
 
     async def on_enter_transfer(self):
-        return await transit.transfer_new_db(self)
+        if not self.model.testing:
+            result = await transit.transfer_new_db(self)
+        else:
+            result = {"success": "testing: on_enter_transfer"}
+            print("'Enter' for 'success', anything for 'error'")
+            if input("?"):
+                result = {"error": f"{result["success"]}"}
+        return await self.go_next(result)
 
     async def on_enter_wait_02(self):
-        return await transit.get_delay(self, "wait02", utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+        if not self.model.testing:
+            result, delay = await transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+        else:
+            delay = self.test_delay
+            result = {"success": f"testing: on_enter_wait_02 with delay: {self.test_delay}"}
+        self.model.send_id = f"{self.model.center_name}_wait02"        
+        return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_02(self):
         if self.model.send_id:
@@ -139,7 +175,15 @@ class CenterState(StateMachine):
             self.cancel_event(self.model.send_id)
 
     async def on_enter_getting_prod(self):
-        return await transit.delete_new_db(self)
+        if not self.model.testing:
+            result = await transit.delete_new_db(self)
+        else:
+            result = {"success": "testing: on_enter_getting_prod"}
+            print("'Enter' for 'success', anything for 'error'")
+            if input("?"):
+                result = {"error": f"{result["success"]}"}
+        return await self.go_next(result)
+
 
 ```
 
@@ -186,10 +230,11 @@ A concrete implementation of the generic storage protocol above, that reads and 
 ```python
 #| id: db-persistent-model
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, centers, user=None):
+    def __init__(self, center_name, centers, testing=False, user=None):
         super().__init__()
         self.center_name = center_name
         self.centers = centers
+        self.testing = testing
         self.user = user
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
@@ -264,16 +309,4 @@ class AbstractPersistentModel(ABC):
     def _read_state(self): ...
     @abstractmethod
     def _write_state(self, value): ...
-```
-
-### To print the state machine graph
-
-```python
-#| id: print-graph
-def states_print():
-    from statemachine import State, Event, StateMachine, StateChart 
-    from statemachine.contrib.diagram import quickchart_write_svg
-    sm = CenterState(StateChart)
-    quickchart_write_svg(sm, "images/center_machines.svg")
-
 ```
