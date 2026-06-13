@@ -5,7 +5,7 @@ from abc import abstractmethod
 import asyncio
 # from fasthtml.common import *
 from datetime import datetime, timezone
-from statemachine import State, Event, StateMachine
+from statemachine import State, Event, StateChart
 import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
@@ -31,7 +31,7 @@ class HistoryListener:
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
 
-class CenterState(StateMachine):
+class CenterState(StateChart["CenterDataModel"]):
 
     test_delay = 3 * 1000
     allow_event_without_transition = False
