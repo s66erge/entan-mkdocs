@@ -44,7 +44,6 @@ class CenterState(StateChart["CenterDataModel"]):
     transfer = State("Transferring planning to center") 
     wait_02 = State("Waiting for 2am at center timezone")
     getting_prod = State("Deleting production version after center restart")
-    w_reco_save = State("Saving new planning failed, waiting for recovery")
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
@@ -54,14 +53,13 @@ class CenterState(StateChart["CenterDataModel"]):
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    reco_save_done    = Event(w_reco_save.to(wait_01), name='recovery of saving new db done')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-    problem  = save_db.to(w_reco_save) | transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
-    force_to_free = free.from_(free, edit, save_db, wait_01, transfer, wait_02, getting_prod, w_reco_save, w_reco_prod)
+    force_to_free = free.from_.any()
 
     # ACTIONS ---------------------------------
 
@@ -137,7 +135,6 @@ class CenterState(StateChart["CenterDataModel"]):
             if input("?"):
                 result = {"error": f"{result["success"]}"}
         return await self.go_next(result)
-
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
