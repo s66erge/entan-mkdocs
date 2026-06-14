@@ -115,6 +115,6 @@ async def delete_new_db(sm):
         result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
     finally:
         return result
-
+        
 # ~/~ end
 # ~/~ end

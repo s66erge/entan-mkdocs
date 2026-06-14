@@ -160,6 +160,7 @@ async def get(session):
     if not session[utils.Skey.TIMESOK]:
         return messages.feedback_to_user({"error": "timings_not_ok"})
     state_mach = states.csms[session[utils.Skey.CENTER]]
+    await state_mach.activate_initial_state()
     await state_mach.send("progress")   # from 'edit' to 'save_db'
     print("after")
     return #Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")

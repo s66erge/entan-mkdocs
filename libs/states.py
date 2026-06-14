@@ -38,28 +38,59 @@ class CenterState(StateChart["CenterDataModel"]):
     atomic_configuration_update = True
 
     free = State("Planning free to be edited", initial=True)
-    edit = State("Planning is being edited")
-    save_db = State("Saving new planning in database")
-    wait_01 = State("Waiting for 1am at center timezone")
-    transfer = State("Transferring planning to center") 
-    wait_02 = State("Waiting for 2am at center timezone")
-    getting_prod = State("Deleting production version after center restart")
-    w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
-    w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
-    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
-            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
-            | getting_prod.to(free)
+    class oper(State.Compound):
 
-    abandon_changes   = Event(edit.to(free), name='user abandon changes')
-    edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
-    reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
+        edit = State("Planning is being edited", initial=True)
+        save_db = State("Saving new planning in database")
+        wait_01 = State("Waiting for 1am at center timezone")
+        transfer = State("Transferring planning to center") 
+        wait_02 = State("Waiting for 2am at center timezone")
+        getting_prod = State("Deleting production version after center restart", final=True)
+        w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+        w_reco_prod = State("Deleting prod version failed, waiting for production recovery", final=True)
 
-    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+        progress = edit.to(save_db) | save_db.to(wait_01) \
+            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod)
+
+        problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+        reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
+
+    enter_edit = free.to(oper.edit)
+    progress = oper.to(free)
+
+    abandon_changes   = Event(oper.edit.to(free), name='user abandon changes')
+    edit_timer_done   = Event(oper.edit.to(free), name='1 hour edit timer elapsed')
+    reco_prod_done    = Event(oper.to(free), name='recovery of db in production done')
+
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
+
+
+    # free = State("Planning free to be edited", initial=True)
+    # edit = State("Planning is being edited")
+    # save_db = State("Saving new planning in database")
+    # wait_01 = State("Waiting for 1am at center timezone")
+    # transfer = State("Transferring planning to center") 
+    # wait_02 = State("Waiting for 2am at center timezone")
+    # getting_prod = State("Deleting production version after center restart")
+    # w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+    # w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
+
+    # progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
+    #         | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
+    #         | getting_prod.to(free)
+
+    # abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    # edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
+    # reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
+    # reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
+
+    # problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+
+    # # used only in dev mode: force to free transitions
+    # force_to_free = free.from_.any()
 
     # ACTIONS ---------------------------------
 
