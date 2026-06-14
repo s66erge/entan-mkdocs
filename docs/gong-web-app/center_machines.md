@@ -39,6 +39,7 @@ The status of a center data is managed with a state machine. The state is persis
 from abc import ABC
 from abc import abstractmethod
 import asyncio
+import threading
 # from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateChart
@@ -84,134 +85,103 @@ class CenterState(StateChart["CenterDataModel"]):
     atomic_configuration_update = True
 
     free = State("Planning free to be edited", initial=True)
+    edit = State("Planning is being edited")
+    save_db = State("Saving new planning in database")
+    wait_01 = State("Waiting for 1am at center timezone")
+    transfer = State("Transferring planning to center") 
+    wait_02 = State("Waiting for 2am at center timezone")
+    getting_prod = State("Deleting production version after center restart")
+    w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+    w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
-    class oper(State.Compound):
+    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
+            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
+            | getting_prod.to(free)
 
-        edit = State("Planning is being edited", initial=True)
-        save_db = State("Saving new planning in database")
-        wait_01 = State("Waiting for 1am at center timezone")
-        transfer = State("Transferring planning to center") 
-        wait_02 = State("Waiting for 2am at center timezone")
-        getting_prod = State("Deleting production version after center restart", final=True)
-        w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
-        w_reco_prod = State("Deleting prod version failed, waiting for production recovery", final=True)
+    abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
+    reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
+    reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-        progress = edit.to(save_db) | save_db.to(wait_01) \
-            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod)
-
-        problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
-        reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
-
-    enter_edit = free.to(oper.edit)
-    progress = oper.to(free)
-
-    abandon_changes   = Event(oper.edit.to(free), name='user abandon changes')
-    edit_timer_done   = Event(oper.edit.to(free), name='1 hour edit timer elapsed')
-    reco_prod_done    = Event(oper.to(free), name='recovery of db in production done')
-
+    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
-
-    # free = State("Planning free to be edited", initial=True)
-    # edit = State("Planning is being edited")
-    # save_db = State("Saving new planning in database")
-    # wait_01 = State("Waiting for 1am at center timezone")
-    # transfer = State("Transferring planning to center") 
-    # wait_02 = State("Waiting for 2am at center timezone")
-    # getting_prod = State("Deleting production version after center restart")
-    # w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
-    # w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
-
-    # progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
-    #         | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
-    #         | getting_prod.to(free)
-
-    # abandon_changes   = Event(edit.to(free), name='user abandon changes')
-    # edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    # reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
-    # reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
-
-    # problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
-
-    # # used only in dev mode: force to free transitions
-    # force_to_free = free.from_.any()
-
     # ACTIONS ---------------------------------
 
-    async def go_next(self, result, delai=1, sendid = None):
+    def go_next(self, result, delai=1, sendid = None):
         self.model.last_result = result
         if "success" in result:
-            await self.send("progress", delay=delai, send_id=sendid)
+            self.send("progress", delay=delai, send_id=sendid)
             return
         else:
-            await self.send("problem")
+            self.send("problem")
             return
 
-    async def on_enter_free(self):
+    def on_enter_free(self):
         self.model.last_result = {"success": "center is free again"}
         if not self.model.testing:
             self.model.clear_user()
 
-    async def on_exit_edit(self):
+    def on_exit_edit(self):
         self.model.last_result = None
 
-    async def on_enter_save_db(self):
+    def on_enter_save_db(self):
         if not self.model.testing:
-            result = await transit.save_db_plan_times(self)
+            result = transit.save_db_plan_times(self)
         else:
             result = {"success": "testing: on_enter_save_db"}
-        return await self.go_next(result)
+        return self.go_next(result)
 
-    async def on_enter_wait_01(self):
+    def on_enter_wait_01(self):
         if not self.model.testing:
-            result, delay = await transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
+            result, delay = transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
         else:
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
         self.model.send_id = f"{self.model.center_name}_wait01"
         print(f"delay {delay}")
-        return await self.go_next(result, delay, self.model.send_id)
+        return self.go_next(result, delay, self.model.send_id)
 
-    async def on_exit_wait_01(self):
+    def on_exit_wait_01(self):
         if self.model.send_id:
             print("Canceling delayed event ", self.model.send_id)
             self.cancel_event(self.model.send_id)
 
-    async def on_enter_transfer(self):
+    def on_enter_transfer(self):
         if not self.model.testing:
-            result = await transit.transfer_new_db(self)
+            result = transit.transfer_new_db(self)
         else:
             result = {"success": "testing: on_enter_transfer"}
             print("'Enter' for 'success', anything for 'error'")
             if input("?"):
                 result = {"error": f"{result["success"]}"}
-        return await self.go_next(result)
+        return self.go_next(result)
 
-    async def on_enter_wait_02(self):
+    def on_enter_wait_02(self):
         if not self.model.testing:
-            result, delay = await transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
+            result, delay = transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
         else:
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_02 with delay: {self.test_delay}"}
         self.model.send_id = f"{self.model.center_name}_wait02"        
-        return await self.go_next(result, delay, self.model.send_id)
+        return self.go_next(result, delay, self.model.send_id)
 
-    async def on_exit_wait_02(self):
+    def on_exit_wait_02(self):
         if self.model.send_id:
             print("Canceling delayed event ", self.model.send_id)
             self.cancel_event(self.model.send_id)
 
-    async def on_enter_getting_prod(self):
+    def on_enter_getting_prod(self):
         if not self.model.testing:
-            result = await transit.delete_new_db(self)
+            result = transit.delete_new_db(self)
         else:
             result = {"success": "testing: on_enter_getting_prod"}
             print("'Enter' for 'success', anything for 'error'")
             if input("?"):
                 result = {"error": f"{result["success"]}"}
-        return await self.go_next(result)
+        return self.go_next(result)
 
 ```
 
@@ -236,7 +206,7 @@ def add_center_state_machine(name, centers):
     the_listener = HistoryListener(model=center_state)
     sm.add_listener(the_listener)
     csms[name] = sm
-    clocks[name] = asyncio.Lock()
+    clocks[name] = threading.Lock()
 
 def init_center_state_machines(centers):
     db2 = dbset.get_central_db()

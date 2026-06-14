@@ -25,9 +25,6 @@ import libs.minio as minio
 
 Get the courses from www.dhamma.org for a specific center from date_start until date_end, keep only the relevant fields for courses inside the center.
 
-Call to this async function from sync code with:
-courses = asyncio.run(fetch_courses_from_dhamma(location, date_start, date_end))
-
 ```python
 #| id: fetch-api
 
@@ -243,7 +240,7 @@ def sort_clean(center,aplan, inside):
     return cleaned_filled
 
 
-async def fetch_dhamma_courses(centers, center, num_months, num_days):
+def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
     dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
     #print(tabulate(dhamma_types, headers="keys"))
@@ -256,8 +253,8 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     periods_db_center, date_current_course = plancheck.coming_center_courses(center)  ## [1-3]
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
-    # extracted = await fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
-    extracted = await asyncio.to_thread(fetch_scrap, dhamma_location, date_current_course, end_date)
+    # extracted = fetch_courses_from_dhamma(dhamma_location, date_current_course, end_date)  ## [4]
+    extracted = fetch_scrap(dhamma_location, date_current_course, end_date)
     #print(tabulate(extracted, headers="keys"))
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)  ## [5]
     #print(tabulate(periods_dhamma_org, headers="keys"))

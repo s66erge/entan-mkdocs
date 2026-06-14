@@ -171,7 +171,7 @@ async def upload_config(file: UploadFile, center_name: str):
             filebuffer = await file.read()
             upload_dir = Path(utils.get_db_path())
             (upload_dir / file.filename).write_bytes(filebuffer)
-            await asyncio.to_thread(minio.save_excel_minio, center_name)
+            minio.save_excel_minio(center_name)
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')

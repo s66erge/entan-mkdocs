@@ -126,7 +126,7 @@ def get(session):
 
 @rt('/upload_config')
 async def post(file: UploadFile, center_name: str):
-    return await cdash.upload_config(file, center_name)
+    return cdash.upload_config(file, center_name)
 
 ```
 
@@ -159,15 +159,15 @@ def get(request):
 #| id: start-save-plan-times
 
 @rt('/planning_page')
-async def get(session, center: str):
+def get(session, center: str):
     session[utils.Skey.CENTER] = center
-    enter_edit_OK = await transit.check_center_free(states.csms[center], session['auth'])
+    enter_edit_OK = transit.check_center_free(states.csms[center], session['auth'])
     if enter_edit_OK:
         session[utils.Skey.PLANOK] = False
         session[utils.Skey.TIMESOK] = False
         session[utils.Skey.SAVED_PLAN] = False
         session[utils.Skey.SAVED_TIMES] = False
-        return await planning.planning_page(session, center, states.csms)
+        return planning.planning_page(session, center, states.csms)
     else:
         return Redirect(f"/status_page?center={center}")
 
@@ -177,24 +177,24 @@ def get(session, center: str):
     return cdash.status_page(session, center, centers, users, states.csms)
 
 @rt('/planning/abandon_edit')
-async def get(session):
+def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return await transit.abandon_edit(session, states.csms)
+    return transit.abandon_edit(session, states.csms)
 
 @rt('/planning/timer_done')
-async def get(session):
+def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return await transit.timer_done(session, states.csms)
+    return transit.timer_done(session, states.csms)
 
 @rt('/save-center-db')
-async def get(session):
+def get(session):
     if not session[utils.Skey.PLANOK]:
         return messages.feedback_to_user({"error": "plan_not_ok"})
     if not session[utils.Skey.TIMESOK]:
         return messages.feedback_to_user({"error": "timings_not_ok"})
     state_mach = states.csms[session[utils.Skey.CENTER]]
-    await state_mach.activate_initial_state()
-    await state_mach.send("progress")   # from 'edit' to 'save_db'
+    state_mach.activate_initial_state()
+    state_mach.send("progress")   # from 'edit' to 'save_db'
     print("after")
     return #Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
 
@@ -210,25 +210,25 @@ def get(session):
     return planning.load_dhamma_db(session)
 
 @rt('/planning/check_show_dhamma')
-async def get(session, request):
-    merged_plan = await fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
+def get(session, request):
+    merged_plan = fetch.fetch_dhamma_courses(centers, session[utils.Skey.CENTER],
                         utils.Globals.MONTHS_TO_FETCH, utils.Globals.DAYS_TO_FETCH)
-    return await planning.check_save_show_plan(session, merged_plan, {})
+    return planning.check_save_show_plan(session, merged_plan, {})
 
 @rt('/planning/saved_plan')
-async def get(session):
+def get(session):
     if not session[utils.Skey.SAVED_PLAN]:
         return messages.feedback_to_user({"error": "plan_not_saved"})
     plan = minio.get_center_temp_list_of_dicts(session[utils.Skey.CENTER], "planning")
-    return await planning.check_save_show_plan(session, plan, {"success": "show_plan"})
+    return planning.check_save_show_plan(session, plan, {"success": "show_plan"})
 
 @rt('/planning/delete_line/{idx}')
-async def post(session, idx: int):
-    return await planning.delete_line(session, idx)
+def post(session, idx: int):
+    return planning.delete_line(session, idx)
 
 @rt('/planning/add_line')
-async def post(session, ptype: str, start: str):
-    return await planning.add_line(session, ptype, start)
+def post(session, ptype: str, start: str):
+    return planning.add_line(session, ptype, start)
 
 ```
 
@@ -238,13 +238,13 @@ async def post(session, ptype: str, start: str):
 #| id: timetables-changes
 
 @rt('/timings/timingsubpage')
-async def get(session, center: str):
+def get(session, center: str):
     timings.load_timings(center)  # in pandas and minio from db
     session[utils.Skey.SAVED_TIMES] = True
     return timings.load_timingsubpage(session)
 
 @rt('/timings/saved_timings')
-async def get(session):
+def get(session):
     if not session[utils.Skey.SAVED_TIMES]:
         return messages.feedback_to_user({"error": "timings_not_saved"})
     return timings.load_timingsubpage(session)

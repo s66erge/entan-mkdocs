@@ -111,13 +111,13 @@ def load_dhamma_db(session):
 def replace_table(conn, name, df):
     df.to_sql(name, conn, if_exists="replace", index=False)
 
-async def save_db_plan_timetable(center_name, centers):
+def save_db_plan_timetable(center_name, centers):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
     filename = dbset.gong_db_name(center_name, utils.Globals.SENDING)
     dest_db_file = utils.get_db_path() + filename
     if os.path.exists(dest_db_file):
         os.remove(dest_db_file)
-    await asyncio.to_thread(shutil.copy2, Path(source_db_file), Path(dest_db_file))
+    shutil.copy2(Path(source_db_file), Path(dest_db_file))
 
     dest_db = database(dest_db_file)
     #for t in dest_db.t:
@@ -143,26 +143,26 @@ async def save_db_plan_timetable(center_name, centers):
 
     return filename
 
-async def check_save_show_plan(session, start_plan, mess):
+def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
     plan = fetch.sort_clean(selected_name,start_plan, inside)
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
-    await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
+    minio.save_center_temp_list_of_dicts (selected_name, "planning", new_draft_plan)
     session[utils.Skey.SAVED_PLAN] = True
     return show_draft_plan_table(new_draft_plan, selected_name, mess)
 
 # @rt('/planning/delete_line')
-async def delete_line(session, index):
+def delete_line(session, index):
     selected_name = session[utils.Skey.CENTER]
     plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     print(f"Deleting line {index} from draft plan with {len(plan)} entries")
     if 0 <= index < len(plan):
         plan.pop(index)
-    return await check_save_show_plan(session, plan, {"success": "line_deleted"})
+    return check_save_show_plan(session, plan, {"success": "line_deleted"})
 
 #@rt('/planning/add_line')
-async def add_line(session, ptype, start):
+def add_line(session, ptype, start):
     selected_name = session[utils.Skey.CENTER]
     plan = minio.get_center_temp_list_of_dicts(selected_name, "planning")
     # Create new plan line with user input
@@ -179,7 +179,7 @@ async def add_line(session, ptype, start):
     # Sort plan by start_date
     plansor = sorted(plan, key=lambda x: x['start_date'])
     plancomp = plancheck.add_end_dates(plansor, selected_name)
-    return await check_save_show_plan(session, plancomp, {"success" : "new_course"})
+    return check_save_show_plan(session, plancomp, {"success" : "new_course"})
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
 
@@ -194,7 +194,7 @@ def load_minio_timings_from_db(center):
     return
 
 # @rt('/planning_page')
-async def planning_page(session, selected_name, csms):
+def planning_page(session, selected_name, csms):
     load_minio_timings_from_db(selected_name)
     return Main(
         H1(f"Change {selected_name} planning and/or timetables"),
