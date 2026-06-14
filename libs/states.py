@@ -47,30 +47,39 @@ class CenterState(StateChart["CenterDataModel"]):
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
-    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
-            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
-            | getting_prod.to(free)
-
+    edit_now = free.to(edit)
+    save_now = edit.to(save_db)
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
+    
+    save_db.to(wait_01, cond="is_success")
+    wait_01.to(transfer, cond="is_success")
+    transfer.to(wait_02, cond="is_success")
+    wait_02.to(getting_prod, cond="is_success")
+    getting_prod.to(free, cond="is_success")
 
-    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
+    transfer.to(w_reco_trans, unless="is_success")
+    getting_prod.to(w_reco_prod, unless="is_success")
+
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
     # ACTIONS ---------------------------------
 
-    async def go_next(self, result, delai=1, sendid = None):
-        self.model.last_result = result
-        if "success" in result:
-            await self.send("progress", delay=delai, send_id=sendid)
-            return
-        else:
-            await self.send("problem")
-            return
+    # async def go_next(self, result, delai=1, sendid = None):
+    #     self.model.last_result = result
+    #     if "success" in result:
+    #         await self.send("progress", delay=delai, send_id=sendid)
+    #         return
+    #     else:
+    #         await self.send("problem")
+    #         return
+
+    def is_success(self):
+        return "success" in self.model.last_result
 
     async def on_enter_free(self):
         self.model.last_result = {"success": "center is free again"}
@@ -82,10 +91,10 @@ class CenterState(StateChart["CenterDataModel"]):
 
     async def on_enter_save_db(self):
         if not self.model.testing:
-            result = await transit.save_db_plan_times(self)
+            self.model.last_result = await transit.save_db_plan_times(self)
         else:
-            result = {"success": "testing: on_enter_save_db"}
-        return await self.go_next(result)
+            self.model.last_result = {"success": "testing: on_enter_save_db"}
+        return # await self.go_next(result)
 
     async def on_enter_wait_01(self):
         if not self.model.testing:
@@ -93,24 +102,26 @@ class CenterState(StateChart["CenterDataModel"]):
         else:
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
-        self.model.send_id = f"{self.model.center_name}_wait01"
-        print(f"delay {delay}")
-        return await self.go_next(result, delay, self.model.send_id)
+        #self.model.send_id = f"{self.model.center_name}_wait01"
+        self.model.last_result = result
+        print(f"wait_01 delay {delay/1000}")
+        await asyncio.sleep(delay/1000)
+        return # await self.go_next(result) #, delay, self.model.send_id)
 
-    async def on_exit_wait_01(self):
-        if self.model.send_id:
-            print("Canceling delayed event ", self.model.send_id)
-            self.cancel_event(self.model.send_id)
+    # async def on_exit_wait_01(self):
+    #     if self.model.send_id:
+    #         print("Canceling delayed event ", self.model.send_id)
+    #         self.cancel_event(self.model.send_id)
 
     async def on_enter_transfer(self):
         if not self.model.testing:
-            result = await transit.transfer_new_db(self)
+            self.model.last_result = await transit.transfer_new_db(self)
         else:
-            result = {"success": "testing: on_enter_transfer"}
+            self.model.last_result = {"success": "testing: on_enter_transfer"}
             print("'Enter' for 'success', anything for 'error'")
             if input("?"):
-                result = {"error": f"{result["success"]}"}
-        return await self.go_next(result)
+                self.model.last_result = {"error": f"{self.model.last_result["success"]}"}
+        return #await self.go_next(result)
 
     async def on_enter_wait_02(self):
         if not self.model.testing:
@@ -118,23 +129,26 @@ class CenterState(StateChart["CenterDataModel"]):
         else:
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_02 with delay: {self.test_delay}"}
-        self.model.send_id = f"{self.model.center_name}_wait02"        
-        return await self.go_next(result, delay, self.model.send_id)
+        self.model.last_result = result
+        #self.model.send_id = f"{self.model.center_name}_wait02"        
+        print(f"wait_02 delay {delay/1000}")
+        await asyncio.sleep(delay/1000)
+        return #await self.go_next(result) #, delay, self.model.send_id)
 
-    async def on_exit_wait_02(self):
-        if self.model.send_id:
-            print("Canceling delayed event ", self.model.send_id)
-            self.cancel_event(self.model.send_id)
+    # async def on_exit_wait_02(self):
+    #     if self.model.send_id:
+    #         print("Canceling delayed event ", self.model.send_id)
+    #         self.cancel_event(self.model.send_id)
 
     async def on_enter_getting_prod(self):
         if not self.model.testing:
-            result = await transit.delete_new_db(self)
+            self.model.last_result = await transit.delete_new_db(self)
         else:
-            result = {"success": "testing: on_enter_getting_prod"}
+            self.model.last_result = {"success": "testing: on_enter_getting_prod"}
             print("'Enter' for 'success', anything for 'error'")
             if input("?"):
-                result = {"error": f"{result["success"]}"}
-        return await self.go_next(result)
+                self.model.last_result = {"error": f"{self.model.last_result["success"]}"}
+        return #await self.go_next(result)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]

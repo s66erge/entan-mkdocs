@@ -28,7 +28,7 @@ async def check_center_free(state_mach, this_user):
             await state_mach.abandon_changes()
         if state_mach.configuration[0].id == "free":
             state_mach.model.user = this_user
-            await state_mach.progress()
+            await state_mach.edit_now()
             center_is_free = True
         return center_is_free
 
