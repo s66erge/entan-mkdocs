@@ -109,20 +109,41 @@ class CenterState(StateChart["CenterDataModel"]):
     transfer.to(w_reco_trans, unless="is_success")
     getting_prod.to(w_reco_prod, unless="is_success")
 
-
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
-    # ACTIONS ---------------------------------
+    # free = State("Planning free to be edited", initial=True)
+    # edit = State("Planning is being edited")
 
-    # async def go_next(self, result, delai=1, sendid = None):
-    #     self.model.last_result = result
-    #     if "success" in result:
-    #         await self.send("progress", delay=delai, send_id=sendid)
-    #         return
-    #     else:
-    #         await self.send("problem")
-    #         return
+    # class syncdb(State.Compound):
+
+    #     save_db = State("Saving new planning in database", initial=True)
+    #     wait_01 = State("Waiting for 1am at center timezone")
+    #     transfer = State("Transferring planning to center") 
+    #     wait_02 = State("Waiting for 2am at center timezone")
+    #     getting_prod = State("Deleting production version after center restart", final=True)
+    #     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
+    #     w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
+
+    #     save_db.to(wait_01, cond="is_success")
+    #     wait_01.to(transfer, cond="is_success")
+    #     transfer.to(wait_02, cond="is_success")
+    #     wait_02.to(getting_prod, cond="is_success")
+    #     # getting_prod.to(free, cond="is_success")
+
+    #     transfer.to(w_reco_trans, unless="is_success")
+    #     reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
+    #     getting_prod.to(w_reco_prod, unless="is_success")
+
+
+    # edit_now = free.to(edit)
+    # abandon_changes   = Event(edit.to(free), name='user abandon changes')
+    # edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
+    # save_now = edit.to(syncdb)
+    # done_state_syncdb = syncdb.to(free)
+    # reco_prod_done    = Event(syncdb.w_reco_prod.to(free), name='recovery of db in production done')
+
+    # ACTIONS ---------------------------------
 
     def is_success(self):
         return "success" in self.model.last_result
