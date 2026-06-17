@@ -6,6 +6,7 @@ import asyncio
 # from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateChart
+from statemachine.orderedset import OrderedSet
 import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
@@ -39,24 +40,30 @@ class CenterState(StateChart["CenterDataModel"]):
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
-    save_db = State("Saving new planning in database")
-    wait_01 = State("Waiting for 1am at center timezone")
-    transfer = State("Transferring planning to center") 
-    wait_02 = State("Waiting for 2am at center timezone")
-    getting_prod = State("Deleting production version after center restart")
+    
+    class syncdb(State.Compound):
+
+        save_db = State("Saving new planning in database", initial=True)
+        wait_01 = State("Waiting for 1am at center timezone")
+        transfer = State("Transferring planning to center") 
+        wait_02 = State("Waiting for 2am at center timezone")
+        getting_prod = State("Deleting production version after center restart")
+    
+        progress = save_db.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
+            | wait_02.to(getting_prod)
+
+
     w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
     w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
 
-    progress = free.to(edit) | edit.to(save_db) | save_db.to(wait_01) \
-            | wait_01.to(transfer) | transfer.to(wait_02) | wait_02.to(getting_prod) \
-            | getting_prod.to(free)
+    progress = free.to(edit) | edit.to(syncdb) | syncdb.getting_prod.to(free)
+    problem  = syncdb.transfer.to(w_reco_trans) | syncdb.getting_prod.to(w_reco_prod)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    reco_trans_done   = Event(w_reco_trans.to(wait_02), name='recovery of file transfer done')
+    reco_trans_done   = Event(w_reco_trans.to(syncdb.wait_01), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-    problem  = transfer.to(w_reco_trans) | getting_prod.to(w_reco_prod)
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
@@ -176,15 +183,24 @@ class CenterDataModel(AbstractPersistentModel):
         row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.created_by
-        return row.status if row.status else None
+        if row.status is None:
+            return None
+        parts = row.status.split(",")
+        return parts[0] if len(parts) == 1 else OrderedSet(parts)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
+        if value is None:
+            value_stri = None
+        elif isinstance(value, OrderedSet):
+            value_stri = ",".join(str(v) for v in value)
+        else:
+            value_stri = str(value)
         self.centers.update(
             center_name = self.center_name, 
-            status = value,
+            status = value_stri,
             status_start = now_utc,
             created_by = self.user
         )
