@@ -119,7 +119,7 @@ def status_page(session, center_name, centers, users, csms):
         P(f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
           f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),
-          f"Local database in center was installed on: {pi_database_date}",
+          f"Local database in center was installed on: {pi_database_date}",Br(),
           f"Last result: {state_mach.model.last_result}" if state_mach.model.last_result else None
         ),
         H3("Center gongs and targets"),
@@ -133,7 +133,7 @@ def status_page(session, center_name, centers, users, csms):
             utils.toggle_markdown("period-type-replacement"), Br(),
             Safe(html_replace)) if len(replace_df) > 0 else P("No data in the 'replacement' table"),
         Div(H4("gong planning instructions for dhamma.org periods overlaps/gaps"),
-            utils.toggle_markdown("period-type-replacement"), Br(),
+            utils.toggle_markdown("instructions-for-overlap-or-gaps"), Br(),
             Safe(html_inside)) if len(inside_df) > 0 else P("No data in the 'overlap/gaps' table"),
         P(f"Parameters: {params}"),
         H3("Center states history"),

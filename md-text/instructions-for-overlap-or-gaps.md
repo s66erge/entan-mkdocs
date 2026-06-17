@@ -1,0 +1,4 @@
+Overlaps or gaps between 2 consecutive periods happens in dhamma.org. But the gong planning cannot have overlaps or gaps. This table gives instructions for different ovelap/gaps situations. As this table is specific for each center, it can contain only a subset of the actions described here:
+- **delete**: if the `period_type` is indide the `container` period, then completely ignore this `period type` for the gong
+- **insert1**: replace the dhamma.org variable `container` period with the fixed `period_type` immediately followed by the variable `after` period
+- **fillin**: fill all gaps af at least one day between periods with the `period_type`
