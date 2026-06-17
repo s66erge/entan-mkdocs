@@ -113,11 +113,14 @@ def check_plan(session, plan, center):
     period_types_in_db =  get_period_types_list(center)
     session[utils.Skey.PLANOK] = True
     for idx, row in enumerate(plan):
+        pt = row.get("period_type")
         if idx == len(plan) - 1:
-            row["check"] = "OK"
+            if pt not in period_types_in_db:
+                row["check"] = "NoType"
+            else:                
+                row["check"] = "OK"
             continue
         next_start_date = plan[idx + 1].get("start_date")
-        pt = row.get("period_type")
         pt_is_variable = next((t for t in types_with_duration if t.get("period_type") == pt), {"tags":""}).get("tags") in "VX"
         delta_days = utils.days_between_iso_dates(row.get("end_date"), next_start_date)
         if pt not in period_types_in_db:
