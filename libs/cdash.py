@@ -74,7 +74,9 @@ def dashboard(session, users, planners):
 #@rt('/status_page')
 def status_page(session, center_name, centers, users, csms):
     state_mach = csms[center_name]
-    state = state_mach.configuration[0].id
+    #state = state_mach.configuration[0].id
+    state_list = states.status_to_stri(state_mach.configuration_values)
+    extended_states = states.status_to_stri(state_mach.configuration)
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
     center_obj = centers[center_name]
@@ -95,14 +97,15 @@ def status_page(session, center_name, centers, users, csms):
     html_inside = inside_df.fillna("").to_html(index=False)
     return Main(
         top_menu(session['role']),
-        Div(utils.display_markdown("planning-free-t" if state == "free" else "planning-busy-t")),
+        Div(utils.display_markdown("planning-free-t" if "free" in state_list else "planning-busy-t")),
         H1(f"{center_name}"),
-        P(f"Current center state: {state}", Br(),
-          f"Local database in center was installed on: {pi_database_date}"),
+        P(f"Current center state: {extended_states.replace(",", " , ")}"),
         P(f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
-          f"UTC time now: {utils.short_iso(datetime.now())}"),
-        P(f"Last result: {state_mach.model.last_result}") if state_mach.model.last_result else None,
+          f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),
+          f"Local database in center was installed on: {pi_database_date}",
+          f"Last result: {state_mach.model.last_result}" if state_mach.model.last_result else None
+        ),
         H3("Center gongs and targets"),
         utils.toggle_markdown("gongs-and-targets"), Br(),
         Safe(html_gongs),

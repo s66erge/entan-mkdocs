@@ -41,7 +41,7 @@ class CenterState(StateChart["CenterDataModel"]):
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
     
-    class syncdb(State.Compound):
+    class send_to_center(State.Compound):
 
         save_db = State("Saving new planning in database", initial=True)
         wait_01 = State("Waiting for 1am at center timezone")
@@ -53,15 +53,15 @@ class CenterState(StateChart["CenterDataModel"]):
             | wait_02.to(getting_prod)
 
 
-    w_reco_trans = State("Planning send failed, waiting for file transfer recovery")
-    w_reco_prod = State("Deleting prod version failed, waiting for production recovery")
+    w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
+    w_reco_prod = State("Deleting prod version failed: waiting for production recovery")
 
-    progress = free.to(edit) | edit.to(syncdb) | syncdb.getting_prod.to(free)
-    problem  = syncdb.transfer.to(w_reco_trans) | syncdb.getting_prod.to(w_reco_prod)
+    progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
+    problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)
 
     abandon_changes   = Event(edit.to(free), name='user abandon changes')
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
-    reco_trans_done   = Event(w_reco_trans.to(syncdb.wait_01), name='recovery of file transfer done')
+    reco_trans_done   = Event(w_reco_trans.to(send_to_center.wait_01), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
 
