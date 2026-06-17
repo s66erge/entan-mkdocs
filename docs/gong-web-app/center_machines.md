@@ -233,6 +233,20 @@ A concrete implementation of the generic storage protocol above, that reads and 
 
 ```python
 #| id: db-persistent-model
+def status_to_stri(status):
+    if status is None:
+        return None
+    elif isinstance(status, OrderedSet):
+        return ",".join(str(v) for v in status)
+    else:
+        return str(status)
+
+def stri_to_status(strin):
+    if strin is None:
+        return None
+    parts = strin.split(",")
+    return parts[0] if len(parts) == 1 else OrderedSet(parts)
+
 class CenterDataModel(AbstractPersistentModel):
     def __init__(self, center_name, centers, testing=False, user=None):
         super().__init__()
@@ -251,21 +265,23 @@ class CenterDataModel(AbstractPersistentModel):
         row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.created_by
-        if row.status is None:
-            return None
-        parts = row.status.split(",")
-        return parts[0] if len(parts) == 1 else OrderedSet(parts)
+        # if row.status is None:
+        #     return None
+        # parts = row.status.split(",")
+        # return parts[0] if len(parts) == 1 else OrderedSet(parts)
+        return stri_to_status(row.status)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.statustart = now_utc      
-        if value is None:
-            value_stri = None
-        elif isinstance(value, OrderedSet):
-            value_stri = ",".join(str(v) for v in value)
-        else:
-            value_stri = str(value)
+        # if value is None:
+        #     value_stri = None
+        # elif isinstance(value, OrderedSet):
+        #     value_stri = ",".join(str(v) for v in value)
+        # else:
+        #     value_stri = str(value)
+        value_stri = status_to_stri(value)
         self.centers.update(
             center_name = self.center_name, 
             status = value_stri,
