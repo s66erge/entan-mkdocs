@@ -48,7 +48,7 @@ def feed_text(params):
         'plan_not_ok': 'Correct the planning errors before saving this plan: click "Load saved plan" and suppress the red indicators.',
         'plan_not_saved': 'Create an initial plan with "(re)Start planning" before loading a saved plan',
         'planner_exists': 'This planner association already exists.',
-        'template_not_found': 'Template database (mahi.db) not found.',
+        'template_not_found': 'Template database (xxxx.db) not found.',
         'template_not_free': 'Cannot copy a template if it is not free: being modified',
         'time_already_exists': f'Time already exists in the planning: {params.get("time", "")}.',
         'timings_not_ok': 'Correct the timings errors before saving this plan: click "Load saved timetables" and suppress all lines in table "Timing errors".',
