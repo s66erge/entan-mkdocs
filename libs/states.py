@@ -40,7 +40,7 @@ class CenterState(StateChart["CenterDataModel"]):
 
     free = State("Planning free to be edited", initial=True)
     edit = State("Planning is being edited")
-    
+
     class send_to_center(State.Compound):
 
         save_db = State("Saving new planning in database", initial=True)
@@ -48,7 +48,7 @@ class CenterState(StateChart["CenterDataModel"]):
         transfer = State("Transferring planning to center") 
         wait_02 = State("Waiting for 2am at center timezone")
         getting_prod = State("Deleting production version after center restart")
-    
+
         progress = save_db.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
             | wait_02.to(getting_prod)
 
@@ -63,7 +63,6 @@ class CenterState(StateChart["CenterDataModel"]):
     edit_timer_done   = Event(edit.to(free), name='1 hour edit timer elapsed')
     reco_trans_done   = Event(w_reco_trans.to(send_to_center.wait_01), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
-
 
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
@@ -172,7 +171,7 @@ def status_to_stri(status):
         return ",".join(str(v) for v in status)
     else:
         return str(status)
-    
+
 def stri_to_status(strin):
     if strin is None:
         return None

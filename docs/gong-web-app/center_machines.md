@@ -110,7 +110,6 @@ class CenterState(StateChart["CenterDataModel"]):
     reco_trans_done   = Event(w_reco_trans.to(send_to_center.wait_01), name='recovery of file transfer done')
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
-
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
