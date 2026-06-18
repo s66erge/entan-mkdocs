@@ -80,21 +80,21 @@ async def planning_page(session, selected_name, csms):
             Span(style="display: inline-block; width: 20px;"),
             A("return NO CHANGES", id="abandon", href="/planning/abandon_edit", cls="allownavigation"),
             Span(style="display: inline-block; width: 20px;"),
-            Span("", id="offset", type="hidden"),
             Button("SAVE ALL CHANGES", id="save-btn",
                 hx_get="/save-center-db",
                 hx_target="#line-feedback",
                 hx_confirm=("Are you ABSOLUTELY sure you want to save your work now? "
-                        "It will then be sent to the center at 1 a.m. center local time"),
+                        "It will then be sent to the center by 2 a.m. center local time"),
                 hx_on_click="""
-                    document.getElementById('end-link').classList.toggle('hidden');
-                    document.getElementById('save-btn').classList.toggle('hidden');
-                    document.getElementById('abandon').classList.toggle('hidden');
+                    document.getElementById('end-link').classList.remove('hidden');
                 """,
+                #document.getElementById('abandon').classList.toggle('hidden');
+                #document.getElementById('save-btn').classList.toggle('hidden');
                 cls="allownavigation"
                 ),
-            A("  return to STATUS after SAVING ALL CHANGES", id="end-link",
-              href=f"/status_page?center={selected_name}", cls="allownavigation hidden"),            
+            Span(style="display: inline-block; width: 20px;"),
+            A("return to STATUS after SAVING ALL CHANGES", id="end-link",
+              href=f"/status_page?center={selected_name}", cls="allownavigation hidden")
         ),
         Br(), Br(),
         Span(
@@ -259,9 +259,13 @@ async def check_save_show_plan(session, start_plan, mess):
     inside = minio.dicts_from_excel_minio(selected_name,"inside")
     plan = fetch.sort_clean(selected_name,start_plan, inside)
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
+    if not session[utils.Skey.PLANOK]:
+        mess_after_check = {"error":"plan_not_ok"}
+    else:
+        mess_after_check = mess
     await asyncio.to_thread(minio.save_center_temp_list_of_dicts, selected_name, "planning", new_draft_plan)
     session[utils.Skey.SAVED_PLAN] = True
-    return show_draft_plan_table(new_draft_plan, selected_name, mess)
+    return show_draft_plan_table(new_draft_plan, selected_name, mess_after_check)
 
 # @rt('/planning/delete_line')
 async def delete_line(session, index):

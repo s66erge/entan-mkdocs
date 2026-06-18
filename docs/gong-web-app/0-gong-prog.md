@@ -195,7 +195,7 @@ async def get(session):
     state_mach = states.csms[session[utils.Skey.CENTER]]
     await state_mach.send("progress")   # from 'edit' to 'save_db'
     print("after")
-    return #Redirect(f"/status_page?center={session[utils.Skey.CENTER]}")
+    return Redirect("/dashboard")
 
 ```
 
