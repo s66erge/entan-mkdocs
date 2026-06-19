@@ -1,7 +1,11 @@
 # JS utilities
 
 ```python
-#| file: libs/utilsJS.py 
+#| file: libs/utilsJS.py
+
+from fasthtml.common import *
+
+<<UI-elements-visibility>>
 <<block-navigation>>
 <<client-timer>>
 ```
@@ -11,7 +15,23 @@
 Except for links/buttons with class='allownavigation'
 
 ```python
+#| id: UI-elements-visibility
+
+def show(UI_ref):
+    return Script(f"document.getElementById('{UI_ref}').classList.remove('hidden');")
+
+def hide(UI_ref):
+    return Script(f"document.getElementById('{UI_ref}').classList.add('hidden');")
+
+```
+
+### Block navigation
+
+Except for links/buttons with class='allownavigation'
+
+```python
 #| id: block-navigation
+### Block navigation
 JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation

@@ -47,14 +47,14 @@ class CenterState(StateChart["CenterDataModel"]):
         wait_01 = State("Waiting for 1am at center timezone")
         transfer = State("Transferring planning to center") 
         wait_02 = State("Waiting for 2am at center timezone")
-        getting_prod = State("Deleting production version after center restart")
+        getting_prod = State("Getting production confirmation after center restart")
 
         progress = save_db.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
             | wait_02.to(getting_prod)
 
 
     w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
-    w_reco_prod = State("Deleting prod version failed: waiting for production recovery")
+    w_reco_prod = State("Confirmation of version failed: waiting for production recovery")
 
     progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
     problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)
