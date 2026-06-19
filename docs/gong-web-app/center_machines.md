@@ -264,22 +264,12 @@ class CenterDataModel(AbstractPersistentModel):
         row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.created_by
-        # if row.status is None:
-        #     return None
-        # parts = row.status.split(",")
-        # return parts[0] if len(parts) == 1 else OrderedSet(parts)
         return stri_to_status(row.status)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
-        self.statustart = now_utc      
-        # if value is None:
-        #     value_stri = None
-        # elif isinstance(value, OrderedSet):
-        #     value_stri = ",".join(str(v) for v in value)
-        # else:
-        #     value_stri = str(value)
+        self.statustart = now_utc
         value_stri = status_to_stri(value)
         self.centers.update(
             center_name = self.center_name, 
