@@ -26,8 +26,8 @@ class HistoryListener:
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
-            f"from {source.id} to {model.get_status_stri()} on {event}" + result_mess
-        # to {target.id}
+            f"from {source.id} to {target.id} on {event}" + result_mess
+        # to {target.id} or {self.model.get_status_stri()}
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
@@ -67,7 +67,7 @@ class CenterState(StateChart["CenterDataModel"]):
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
     # used only in dev mode: force to free transitions
-    force_to_free = free.from_.any(on="printerror")
+    force_to_free = free.from_.any()
 
     error_execution = send_to_center.to(errorex, on="printerror")
 
@@ -76,7 +76,6 @@ class CenterState(StateChart["CenterDataModel"]):
     def printerror(self, error):
         #error = erro if erro else "NO ERROR TEXT AVAILABLE"
         self.model.last_result = {"error": f"execution error: {error}"}
-        print(f"error: {error}")
     
     async def go_next(self, result, delai=1, sendid = None):
         self.model.last_result = result
@@ -109,7 +108,6 @@ class CenterState(StateChart["CenterDataModel"]):
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
         self.model.send_id = f"{self.model.center_name}_wait01"
-        print(f"delay {delay}")
         return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_01(self):
