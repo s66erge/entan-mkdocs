@@ -69,6 +69,7 @@ async def get_delay(sm, until_hour, minutes=0):
         # If it's already past the target time, schedule for tomorrow
         next_event +=  timedelta(days=1)
     if sm.model.center_name in utils.Globals.TEST_CENTER or \
+        sm.model.center_name in utils.Globals.TEST_USER or \
         sm.model.get_user() == utils.Globals.DEV_USER:
         print(sm.model.get_user(), sm.model.center_name, " - using short delay for testing")
         delay = utils.Globals.SHORT_DELAY * 1000
@@ -109,7 +110,7 @@ async def delete_new_db(sm):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{sm.model.center_name.lower()}")
         confirmation = f"{sm.model.center_name.lower()}/{utils.Globals.RECEIVED}{sm.model.center_date}.db" in objects_in_minio
-        if confirmation or sm.model.center_name in utils.Globals.TEST_CENTER:       
+        if confirmation or (sm.model.center_name in utils.Globals.TEST_USER):       
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
                                     f"{sm.model.center_name.lower()}",f"{utils.Globals.RECEIVED}{sm.model.center_date}.db")
             replace_db_files(sm)
@@ -120,6 +121,5 @@ async def delete_new_db(sm):
         result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED: {e}"}
     finally:
         return result
-
 # ~/~ end
 # ~/~ end
