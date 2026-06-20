@@ -26,7 +26,8 @@ class HistoryListener:
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
-            f"from {source.id} to {target.id} on {event}" + result_mess
+            f"from {source.id} to {model.get_status_stri()} on {event}" + result_mess
+        # to {target.id}
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
@@ -55,6 +56,7 @@ class CenterState(StateChart["CenterDataModel"]):
 
     w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
     w_reco_prod = State("Confirmation of version failed: waiting for production recovery")
+    errorex = State("Error in callback execution")
 
     progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
     problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)
@@ -65,10 +67,17 @@ class CenterState(StateChart["CenterDataModel"]):
     reco_prod_done    = Event(w_reco_prod.to(free), name='recovery of db in production done')
 
     # used only in dev mode: force to free transitions
-    force_to_free = free.from_.any()
+    force_to_free = free.from_.any(on="printerror")
+
+    error_execution = send_to_center.to(errorex, on="printerror")
 
     # ACTIONS ---------------------------------
 
+    def printerror(self, error):
+        #error = erro if erro else "NO ERROR TEXT AVAILABLE"
+        self.model.last_result = {"error": f"execution error: {error}"}
+        print(f"error: {error}")
+    
     async def go_next(self, result, delai=1, sendid = None):
         self.model.last_result = result
         if "success" in result:
@@ -209,6 +218,9 @@ class CenterDataModel(AbstractPersistentModel):
             status_start = now_utc,
             created_by = self.user
         )
+
+    def get_status_stri(self):
+        return status_to_stri(self._read_state())
 
     def get_start_time(self):
         if self.statustart is None:
