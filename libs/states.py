@@ -76,7 +76,7 @@ class CenterState(StateChart["CenterDataModel"]):
     def printerror(self, error):
         #error = erro if erro else "NO ERROR TEXT AVAILABLE"
         self.model.last_result = {"error": f"execution error: {error}"}
-    
+
     async def go_next(self, result, delai=1, sendid = None):
         self.model.last_result = result
         if "success" in result:

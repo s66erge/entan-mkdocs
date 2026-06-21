@@ -146,6 +146,7 @@ def verify_code(session, code, timezon, users):
         magic_link_token=None,
         magic_link_expiry=None,
         is_active=True,
+        last_login = nowstr,
         timezone = timezon
     )
     print(f"{user.email} just got connected via code")
@@ -161,19 +162,6 @@ def admin_required(handler):
         if not role or not role == "admin":
             # Redirect to unauthorized page if not admin
             return Redirect('/no_access_right')
-        # Proceed if user is admin
-        return handler(session, *args, **kwargs)
-    return wrapper
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app/authentipass.md#admin_required>>[0]
-
-def admin_required(handler):
-    @wraps(handler)
-    def wrapper(session, *args, **kwargs):
-        role = session['role']
-        if not role or not role == "admin":
-            # Redirect to unauthorized page if not admin
-            return RedirectResponse('/no_access_right')
         # Proceed if user is admin
         return handler(session, *args, **kwargs)
     return wrapper

@@ -211,6 +211,7 @@ def verify_code(session, code, timezon, users):
         magic_link_token=None,
         magic_link_expiry=None,
         is_active=True,
+        last_login = nowstr,
         timezone = timezon
     )
     print(f"{user.email} just got connected via code")

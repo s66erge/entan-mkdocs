@@ -61,7 +61,7 @@ def show_users_table(users):
     return Main(
         Table(
             Thead(
-                Tr(Th("Email"), Th("Name"), Th("Role"), Th("Active"), Th("Action"))
+                Tr(Th("Email"), Th("Name"), Th("Role"), Th("Active"), Th("Last login"), Th("Action"))
             ),
             Tbody(
                 *[Tr(
@@ -69,6 +69,7 @@ def show_users_table(users):
                     Td(u.name or ""), 
                     Td(u.role_name), 
                     Td("Yes" if u.is_active else "No"),
+                    Td(u.last_login[1:17] if isinstance(u.last_login, str) and len(u.last_login) > 16  else ""),
                     Td(A("Delete", hx_post=f"/delete_user/{u.email}", hx_target="#users-feedback", hx_confirm="Are you sure you want to delete this user?"))
                 ) for u in sorted(users(), key=lambda x: x.name)]
             )
