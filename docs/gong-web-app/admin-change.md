@@ -19,8 +19,6 @@ import libs.admin as admin
 import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
-from libs.authpass import get_password_hash
-
 
 <<delete-user>>
 <<add-user>>
@@ -86,7 +84,7 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
             email=new_user_email,
             name=name,
             role_name=role_name,
-            password = get_password_hash("behappy"),
+            last_login = None,
             is_active=False,
             magic_link_token=None,
             magic_link_expiry=None

@@ -20,6 +20,7 @@ import libs.transit as transit
 import libs.timings as timings
 import libs.timechan as timechan
 import libs.minio as minio
+import libs.utilsJS as utilsJS
 
 #  from starlette.testclient import TestClient
 
@@ -155,14 +156,19 @@ async def get(session):
 
 @rt('/save-center-db')
 async def get(session):
-    if not session[utils.Skey.PLANOK]:
-        return messages.feedback_to_user({"error": "plan_not_ok"})
     if not session[utils.Skey.TIMESOK]:
-        return messages.feedback_to_user({"error": "timings_not_ok"})
+        error_mess = "timings_not_ok"
+    else:
+        error_mess = "plan_not_ok"
+    if not session[utils.Skey.PLANOK] or not session[utils.Skey.TIMESOK]:
+        return Div(
+            Div(messages.feedback_to_user({"error": error_mess})),
+            utilsJS.hide("end-link"), utilsJS.show("abandon"), utilsJS.show("save-btn"),
+        )
     state_mach = states.csms[session[utils.Skey.CENTER]]
     await state_mach.send("progress")   # from 'edit' to 'save_db'
     print("after")
-    return Redirect("/dashboard")
+    return #Redirect("/dashboard")
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]

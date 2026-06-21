@@ -1,5 +1,18 @@
 # ~/~ begin <<docs/gong-web-app/utils-javascript.md#libs/utilsJS.py>>[init]
+
+from fasthtml.common import *
+
+# ~/~ begin <<docs/gong-web-app/utils-javascript.md#UI-elements-visibility>>[init]
+
+def show(UI_ref):
+    return Script(f"document.getElementById('{UI_ref}').classList.remove('hidden');")
+
+def hide(UI_ref):
+    return Script(f"document.getElementById('{UI_ref}').classList.add('hidden');")
+
+# ~/~ end
 # ~/~ begin <<docs/gong-web-app/utils-javascript.md#block-navigation>>[init]
+### Block navigation
 JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
     // Click handler - only disable for same-tab navigation

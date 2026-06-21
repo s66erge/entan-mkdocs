@@ -87,9 +87,9 @@ async def planning_page(session, selected_name, csms):
                         "It will then be sent to the center by 2 a.m. center local time"),
                 hx_on_click="""
                     document.getElementById('end-link').classList.remove('hidden');
+                    document.getElementById('abandon').classList.add('hidden');
+                    document.getElementById('save-btn').classList.add('hidden');
                 """,
-                #document.getElementById('abandon').classList.toggle('hidden');
-                #document.getElementById('save-btn').classList.toggle('hidden');
                 cls="allownavigation"
                 ),
             Span(style="display: inline-block; width: 20px;"),

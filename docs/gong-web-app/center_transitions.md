@@ -88,7 +88,8 @@ async def get_delay(sm, until_hour, minutes=0):
         (now_center.hour == until_hour and now_center.minute >= minutes):
         # If it's already past the target time, schedule for tomorrow
         next_event +=  timedelta(days=1)
-    if sm.model.center_name == utils.Globals.TEST_CENTER or \
+    if sm.model.center_name in utils.Globals.TEST_CENTER or \
+        sm.model.center_name in utils.Globals.TEST_USER or \
         sm.model.get_user() == utils.Globals.DEV_USER:
         print(sm.model.get_user(), sm.model.center_name, " - using short delay for testing")
         delay = utils.Globals.SHORT_DELAY * 1000
@@ -113,28 +114,32 @@ async def transfer_new_db(sm):
     finally:
         return result
 
+def replace_db_files(sm):
+    ok_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name)
+    old_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name, "old")
+    try:
+        os.remove(old_db_file)
+    except FileNotFoundError:
+        pass
+    os.rename(ok_db_file, old_db_file)            
+    os.rename(utils.get_db_path() + sm.model.save_db_filename, ok_db_file)
+    sm.model.centers.update(center_name = sm.model.center_name, pi_db_date = sm.model.center_date)
+    return
+
 async def delete_new_db(sm):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{sm.model.center_name.lower()}")
-        if f"{sm.model.center_name.lower()}/{utils.Globals.RECEIVED}{sm.model.center_date}.db" in objects_in_minio:            
+        confirmation = f"{sm.model.center_name.lower()}/{utils.Globals.RECEIVED}{sm.model.center_date}.db" in objects_in_minio
+        if confirmation or (sm.model.center_name in utils.Globals.TEST_USER):       
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
                                     f"{sm.model.center_name.lower()}",f"{utils.Globals.RECEIVED}{sm.model.center_date}.db")
-            ok_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name)
-            old_db_file = utils.get_db_path() + dbset.gong_db_name(sm.model.center_name, "old")
-            try:
-                os.remove(old_db_file)
-            except FileNotFoundError:
-                pass
-            os.rename(ok_db_file, old_db_file)            
-            os.rename(utils.get_db_path() + sm.model.save_db_filename, ok_db_file)
-            sm.model.centers.update(center_name = sm.model.center_name, pi_db_date = sm.model.center_date)
+            replace_db_files(sm)
             result = {"success": f"confirmation of production version {sm.model.center_date} is OK"}
         else:
             result = {"error": f"production file '{utils.Globals.RECEIVED}{sm.model.center_date}.db' NOT PRESENT in minio"}
     except (S3Error, MinioException, RuntimeError) as e:
-        result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED as minio deletion failed: {e}"}
+        result = {"error": f"production version {sm.model.center_date} NOT CONFIRMED: {e}"}
     finally:
         return result
-
 ```
 

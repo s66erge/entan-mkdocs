@@ -13,6 +13,7 @@ import socket
 import calendar
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
+from dataclasses import dataclass
 import resend 
 import markdown2
 import os
@@ -40,29 +41,30 @@ class Pkey: # parameters keys
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-class Globals:
+@dataclass(frozen=True)
+class GlobalsDefinition:
     HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     MEDIA_TYPES = {".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                    ".db": "application/octet-stream"}
-    ORANGE = "darkorange"
-    INITIAL_COUNTDOWN = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
-    SUBDIR_TEMP = "temp" # subdir of get_db_path() for temp files
-    MONTHS_TO_FETCH = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
-    DAYS_TO_FETCH = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
-    WAIT01_HOUR = 0
-    WAIT01_MINS = 40
-    WAIT02_HOUR = 1
-    WAIT02_MINS = 20
-    SHORT_DELAY = 4 # seconds: waiting time before uploading file to minio IN DEV MODE
-    SENDING = "sending"
-    RECEIVED = "received"
-    CENTER_BUCKET = "centers-data" # bucket name for local center data 
-    PI_BUCKET = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
-    DEV_USER = "spegoff@authentica.eu" # always forces short delay for all centers
-    TEST_CENTER = "Testx" # always uses short delay
-    @classmethod
-    def get(cls, name, default=None):
-        return getattr(cls, name, default)
+    ORANGE:str = "darkorange"
+    INITIAL_COUNTDOWN:int = 4000 # seconds before auto-abandoning an edit session, set in planning_page and used in JS_CLIENT_TIMER
+    SUBDIR_TEMP:str = "temp" # subdir of get_db_path() for temp files
+    MONTHS_TO_FETCH:int = 12 # when fetching dhamma courses from dhamma.org, how many months to fetch starting from current month
+    DAYS_TO_FETCH:int = 0 # when fetching dharma courses from dhamma.org, how many extra days to fetch after the last day of the last month (to catch late announcements)
+    WAIT01_HOUR:int = 0
+    WAIT01_MINS:int = 40
+    WAIT02_HOUR:int = 1
+    WAIT02_MINS:int = 20
+    SHORT_DELAY:int = 4 # seconds: waiting time before uploading file to minio IN DEV MODE
+    SENDING:str = "sending"
+    RECEIVED:str = "received"
+    CENTER_BUCKET:str = "centers-data" # bucket name for local center data 
+    PI_BUCKET:str = "dhamma-gong-databases"  # bucket name for db exchange with Rasperry Pis
+    DEV_USER:str = "spegoff@authentica.eu" # always forces short delay for all centers
+    TEST_CENTER:str = "Testx" # always uses short delay, stops on confirmation error
+    TEST_USER:str = "Usertest" # always uses short delay, stops on confirmation OK
+
+Globals = GlobalsDefinition()
 
 <<isdev-computer>>
 <<istest-db>>

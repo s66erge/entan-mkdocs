@@ -27,6 +27,7 @@ class HistoryListener:
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
             f"from {source.id} to {target.id} on {event}" + result_mess
+        # to {target.id} or {self.model.get_status_stri()}
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
@@ -47,14 +48,15 @@ class CenterState(StateChart["CenterDataModel"]):
         wait_01 = State("Waiting for 1am at center timezone")
         transfer = State("Transferring planning to center") 
         wait_02 = State("Waiting for 2am at center timezone")
-        getting_prod = State("Deleting production version after center restart")
+        getting_prod = State("Getting production confirmation after center restart")
 
         progress = save_db.to(wait_01) | wait_01.to(transfer) | transfer.to(wait_02) \
             | wait_02.to(getting_prod)
 
 
     w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
-    w_reco_prod = State("Deleting prod version failed: waiting for production recovery")
+    w_reco_prod = State("Confirmation of version failed: waiting for production recovery")
+    errorex = State("Error in callback execution")
 
     progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
     problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)
@@ -67,7 +69,13 @@ class CenterState(StateChart["CenterDataModel"]):
     # used only in dev mode: force to free transitions
     force_to_free = free.from_.any()
 
+    error_execution = send_to_center.to(errorex, on="printerror")
+
     # ACTIONS ---------------------------------
+
+    def printerror(self, error):
+        #error = erro if erro else "NO ERROR TEXT AVAILABLE"
+        self.model.last_result = {"error": f"execution error: {error}"}
 
     async def go_next(self, result, delai=1, sendid = None):
         self.model.last_result = result
@@ -100,7 +108,6 @@ class CenterState(StateChart["CenterDataModel"]):
             delay = self.test_delay
             result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
         self.model.send_id = f"{self.model.center_name}_wait01"
-        print(f"delay {delay}")
         return await self.go_next(result, delay, self.model.send_id)
 
     async def on_exit_wait_01(self):
@@ -196,22 +203,12 @@ class CenterDataModel(AbstractPersistentModel):
         row = self.centers[self.center_name]
         self.statustart = row.status_start
         self.user = row.created_by
-        # if row.status is None:
-        #     return None
-        # parts = row.status.split(",")
-        # return parts[0] if len(parts) == 1 else OrderedSet(parts)
         return stri_to_status(row.status)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
-        self.statustart = now_utc      
-        # if value is None:
-        #     value_stri = None
-        # elif isinstance(value, OrderedSet):
-        #     value_stri = ",".join(str(v) for v in value)
-        # else:
-        #     value_stri = str(value)
+        self.statustart = now_utc
         value_stri = status_to_stri(value)
         self.centers.update(
             center_name = self.center_name, 
@@ -219,6 +216,9 @@ class CenterDataModel(AbstractPersistentModel):
             status_start = now_utc,
             created_by = self.user
         )
+
+    def get_status_stri(self):
+        return status_to_stri(self._read_state())
 
     def get_start_time(self):
         if self.statustart is None:

@@ -115,8 +115,8 @@ def load_timingsubpage(session):
         Div(hx_get= "/timings/center_periods",
             hx_target="#feedback-periods",
             hx_trigger="load"),
-        Div("", id= "center-periods"),
         Div("", id= "feedback-periods"),
+        Div("", id= "center-periods"),
         Div("", id= "periods-struct"),
         Div("", id= "feedback-times"),
         Div("", id= "show-times"),
@@ -147,7 +147,16 @@ def show_center_periods(session):
         axis=1
     )
     center_periods_df['tags'] = center_periods_df['tags'].map(utils.Globals.HTML_TAGS_CENTERS)
-    html_periods = center_periods_df.to_html(index=False, escape=False)
+    column_order = list(center_periods_df.columns)
+    if 'tags' in column_order:
+        column_order.remove('tags')  # Remove it from its current spot
+        column_order.insert(1, 'tags')  # Insert it at index 1 (second column)
+    center_periods_view_df = center_periods_df[column_order]
+    center_periods_view_df.loc[
+        center_periods_view_df['tags'].str.contains("Variable", na=False), 'duration'
+    ] = -99999
+    html_periods = center_periods_view_df.to_html(index=False, escape=False) \
+        .replace("<td>-99999</td>", "<td>at least 1</td>")
     db = dbset.get_central_db()
     centers = db.create(dbset.Center, pk='center_name')
     center_names = sorted([c.center_name for c in centers()])
