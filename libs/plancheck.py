@@ -117,6 +117,7 @@ def check_plan(session, plan, center):
         if idx == len(plan) - 1:
             if pt not in period_types_in_db:
                 row["check"] = "NoType"
+                session[utils.Skey.PLANOK] = False
             else:                
                 row["check"] = "OK"
             continue
