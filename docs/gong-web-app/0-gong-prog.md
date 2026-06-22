@@ -175,7 +175,7 @@ async def get(session, center: str):
 @rt('/status_page')
 def get(session, center: str):
     session[utils.Skey.CENTER] = center
-    return cdash.status_page(session, center, centers, users, states.csms)
+    return cdash.status_page(session, center, centers, users, planners, states.csms)
 
 @rt('/planning/abandon_edit')
 async def get(session):

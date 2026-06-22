@@ -72,13 +72,14 @@ def dashboard(session, users, planners):
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#status-page>>[init]
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, users, csms):
+def status_page(session, center_name, centers, users, planners, csms):
     state_mach = csms[center_name]
-    #state = state_mach.configuration[0].id
     state_list = states.status_to_stri(state_mach.configuration_values)
     extended_states = states.status_to_stri(state_mach.configuration)
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
+    center_planners = planners("center_name = ?", (center_name,))
+    admin_emails = [p.user_email for p in center_planners if users[p.user_email].role_name == "admin"]
     center_obj = centers[center_name]
     pi_database_date = center_obj.pi_db_date
     config_file = minio.get_excel_minio(center_name)
@@ -99,11 +100,15 @@ def status_page(session, center_name, centers, users, csms):
         top_menu(session['role']),
         Div(utils.display_markdown("planning-free-t" if "free" in state_list else "planning-busy-t")),
         H1(f"{center_name}"),
-        P(f"Current center state: {extended_states.replace(",", " , ")}"),
+        Div(
+            f"Current center state: {extended_states.replace(",", " , ")}  ",
+            A("goto dashboard", href="/dashboard") if "w_reco_prod" in state_list else None,
+        ), Br(),
         P(f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
           f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),
           f"Local database in center was installed on: {pi_database_date}",Br(),
+          f"Center admin(s): {", ".join(admin_emails)}",Br(),
           f"Last result: {state_mach.model.last_result}" if state_mach.model.last_result else None
         ),
         H3("Center gongs and targets"),

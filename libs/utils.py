@@ -34,6 +34,7 @@ class Pkey: # parameters keys
 
 @dataclass(frozen=True)
 class GlobalsDefinition:
+    EMAIL_SENDER:str = "spegoff@authentica.eu"
     HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     MEDIA_TYPES = {".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                    ".db": "application/octet-stream"}
@@ -83,8 +84,14 @@ def isa_db_test(db):
 # ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
+    sender = Globals.EMAIL_SENDER
+    if isa_dev_computer():
+        print(f'From: {sender}\nTo: {recipients}\nSubject: {subject}\n\n{body}')
+    else:
+        resend_email(sender, subject, body, recipients)
+
+def resend_email(sender, subject, body, recipients):
     # using resend
-    sender = "spegoff@authentica.eu" 
     resend.api_key = os.environ['RESEND_API_KEY']
     params: resend.Emails.SendParams = {
         "from": sender,
@@ -93,7 +100,7 @@ def send_email(subject, body, recipients):
         "text": body,
     }
     email = resend.Emails.send(params)
-    print(f'Message sent: {email} to {recipients}')
+    print(f'Message sent: {email} to {recipients} subject {subject}')
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
 

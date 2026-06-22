@@ -115,11 +115,7 @@ If you didn't request this, you can safely ignore this email.
 With Metta
 The Gong App Team
 """
-    # dev toggle if you like
-    if utils.isa_dev_computer():
-        print(f'To: {email_address}\nSubject: {email_subject}\n\n{email_text}')
-    else:
-        utils.send_email(email_subject, email_text, [email_address])
+    utils.send_email(email_subject, email_text, [email_address])
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
 

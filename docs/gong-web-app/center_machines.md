@@ -39,7 +39,7 @@ The status of a center data is managed with a state machine. The state is persis
 from abc import ABC
 from abc import abstractmethod
 import asyncio
-# from fasthtml.common import *
+from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateChart
 from statemachine.orderedset import OrderedSet
@@ -194,6 +194,11 @@ class CenterState(StateChart["CenterDataModel"]):
             if input("?"):
                 result = {"error": f"{result["success"]}"}
         return await self.go_next(result)
+
+    async def on_enter_w_reco_prod(self):
+        await asyncio.to_thread(utils.send_email, "w_reco_prod",
+                                "Houstone, we have a problem", ["spegoff@gmail.com"])
+        return
 
 ```
 
