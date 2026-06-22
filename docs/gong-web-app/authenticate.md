@@ -154,20 +154,7 @@ In dev mode, lets just mock sending the email by printing the email content to t
 
 def send_login_code_email(email_address: str, code: str):
     email_subject = "Your sign-in code for The App"
-    email_text = f"""
-Hey there,
-
-Use this code to sign in to The Gong App:
-
-    {code}
-
-This code is valid for 15 minutes and can be used only once.
-
-If you didn't request this, you can safely ignore this email.
-
-With Metta
-The Gong App Team
-"""
+    email_text = messages.email_text('login', {"code": code})
     utils.send_email(email_subject, email_text, [email_address])
 ```
 

@@ -118,7 +118,7 @@ def delete_center(center_name, users, centers, planners, db_path):
 # ~/~ begin <<docs/gong-web-app/admin-change.md#add-center>>[init]
 
 # @rt('/add_center')
-def add_center(new_center_name, center_template, users, centers, db_path):
+def add_center(new_center_name, center_template, users, centers, planners, db_path):
     ## [1]
     print(f"template: {center_template}")
     new_gong_db_name = dbset.gong_db_name(new_center_name)
@@ -149,7 +149,7 @@ def add_center(new_center_name, center_template, users, centers, db_path):
                 created_by="",
                 status_start=datetime.now(timezone.utc)
             )
-            states.add_center_state_machine(new_center_name, centers)
+            states.add_center_state_machine(new_center_name, centers, planners, users)
             message = {'success': 'center_added'}
 
         return Div(
