@@ -130,7 +130,7 @@ def email_text(type, params: None):
             1. log into the Gong user web app as an admin (if you have received this email, you are an admin planner for this center)
             2. go to the STATUS page for this center and refresh the page
             3. note the email of the last planner: 'Planner which initiated the current planning:'
-            4. click on the link "recover from NO PRODUCTION CONFIRMATION"
+            4. click on the link "recover from NO PRODUCTION CONFIRMATION AFTER CHECKING center gong computer and Internet"
             5. contact the last planner (if it is not you) who must resubmit now the planning changes he/she had just submitted.
 
             With Metta

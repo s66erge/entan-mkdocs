@@ -133,7 +133,8 @@ class CenterState(StateChart["CenterDataModel"]):
             await self.send("problem")
             return
 
-    async def on_enter_free(self):
+    async def on_enter_free(self, source):
+        print(source)
         self.model.last_result = {"success": "center is free again"}
         if not self.model.testing:
             self.model.clear_user()
@@ -141,12 +142,12 @@ class CenterState(StateChart["CenterDataModel"]):
     async def on_exit_edit(self):
         self.model.last_result = None
 
-    async def on_enter_save_db(self):
-        if not self.model.testing:
-            result = await transit.save_db_plan_times(self)
-        else:
-            result = {"success": "testing: on_enter_save_db"}
-        return await self.go_next(result)
+    # async def on_enter_save_db(self):
+    #     if not self.model.testing:
+    #         result = await transit.save_db_plan_times(self)
+    #     else:
+    #         result = {"success": "testing: on_enter_save_db"}
+    #     return await self.go_next(result)
 
     async def on_enter_wait_01(self):
         if not self.model.testing:
@@ -197,11 +198,14 @@ class CenterState(StateChart["CenterDataModel"]):
         return await self.go_next(result)
 
     async def on_enter_w_reco_prod(self):
-        admin_emails = self.model.get_admin_planners()
-        etext = messages.email_text("w_reco_prod", {"center": self.model.center_name,
-                                                    "date": self.model.center_date})
-        await asyncio.to_thread(utils.send_email, "Gong center planning NOT confirmed",
+        if not self.model.testing:
+            admin_emails = self.model.get_admin_planners()
+            etext = messages.email_text("w_reco_prod", {"center": self.model.center_name,
+                                                        "date": self.model.center_date})
+            await asyncio.to_thread(utils.send_email, "Gong center planning NOT confirmed",
                                 etext, admin_emails)
+        else:
+            print("testing: sent email for on_enter_w_reco_prod then return nothing")
         return
 
 ```
@@ -224,6 +228,7 @@ def delete_state_machine(center_name):
 def add_center_state_machine(name, centers, planners, users):
     center_state = CenterDataModel(center_name=name, centers=centers, planners=planners, users=users)
     sm = CenterState(model=center_state)
+    center_state.add_machine(sm)
     the_listener = HistoryListener(model=center_state)
     sm.add_listener(the_listener)
     csms[name] = sm
@@ -271,6 +276,7 @@ class CenterDataModel(AbstractPersistentModel):
         self.users = users
         self.testing = testing
         self.user = user
+        self.sm = None
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
         self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
@@ -322,6 +328,27 @@ class CenterDataModel(AbstractPersistentModel):
     def get_admin_planners(self):
         center_planners = self.planners("center_name = ?", (self.center_name,))
         return [p.user_email for p in center_planners if self.users[p.user_email].role_name == "admin"]
+
+    # ACTIONS --------------------------
+
+    def add_machine(self, machine):
+        self.sm = machine
+
+    async def go_next(self, result, delai=1, sendid = None):
+        self.last_result = result
+        if "success" in result:
+            await self.sm.send("progress", delay=delai, send_id=sendid)
+            return
+        else:
+            await self.sm.send("problem")
+            return
+
+    async def on_enter_save_db(self):
+        if not self.testing:
+            result = await transit.save_db_plan_times(self)
+        else:
+            result = {"success": "testing: on_enter_save_db"}
+        return await self.go_next(result)
 
 ```
 

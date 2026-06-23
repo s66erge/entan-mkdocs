@@ -41,11 +41,18 @@ async def goto_free(session, event, csms):
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_transitions.md#system-transitions>>[init]
 
-async def save_db_plan_times(sm):
-    save_db_file = await planning.save_db_plan_timetable(sm.model.center_name, sm.model.centers)
-    sm.model.save_db_filename = save_db_file
-    sm.model.center_params = minio.params_from_excel_minio(sm.model.center_name)
-    await asyncio.to_thread(minio.remove_center_temp_data, sm.model.center_name)
+# async def save_db_plan_times(sm):
+#     save_db_file = await planning.save_db_plan_timetable(sm.model.center_name, sm.model.centers)
+#     sm.model.save_db_filename = save_db_file
+#     sm.model.center_params = minio.params_from_excel_minio(sm.model.center_name)
+#     await asyncio.to_thread(minio.remove_center_temp_data, sm.model.center_name)
+#     return {"success": f"new db saved as {save_db_file}"}
+
+async def save_db_plan_times(model):
+    save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
+    model.save_db_filename = save_db_file
+    model.center_params = minio.params_from_excel_minio(model.center_name)
+    await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
     return {"success": f"new db saved as {save_db_file}"}
 
 async def get_delay(sm, until_hour, minutes=0):
