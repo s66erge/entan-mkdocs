@@ -82,4 +82,46 @@ def feedback_to_user(params):
         )
     return message_div
 # ~/~ end
+# ~/~ begin <<docs/gong-web-app/user-messages.md#email-texts>>[init]
+
+def email_text(type, params: None):
+    match type:
+        case 'login':
+            return f"""
+            Hey there,
+
+            Use this code to sign in to The Gong App:
+
+                {params.get("code", "")}
+
+            This code is valid for 15 minutes and can be used only once.
+
+            If you didn't request this, you can safely ignore this email.
+
+            With Metta
+            The Gong App Team
+            """
+        case 'w_reco_prod':
+            return f"""
+            This is an automated message from the Gong users web App.
+
+            The confirmation from the local gong computer at center {params.get("center", "")}
+            HAS NOT BEEN RECEIVED for the new planning version of {params.get("date", "")}
+
+            First:
+            1. check that the local gong computer is working correctly
+            2. check that it is correctly connected to the Internet
+
+            When this is OK:
+            1. log into the Gong user web app as an admin (if you have received this email, you are an admin planner for this center)
+            2. go to the STATUS page for this center and refresh the page
+            3. note the email of the last planner: 'Planner which initiated the current planning:'
+            4. click on the link "recover from NO PRODUCTION CONFIRMATION"
+            5. contact the last planner (if it is not you) who must resubmit now the planning changes he/she had just submitted.
+
+            With Metta
+            The Gong App Team
+            """
+
+# ~/~ end
 # ~/~ end

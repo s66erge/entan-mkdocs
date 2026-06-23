@@ -72,13 +72,14 @@ def dashboard(session, users, planners):
 # ~/~ begin <<docs/gong-web-app/center-dashboard.md#status-page>>[init]
 
 #@rt('/status_page')
-def status_page(session, center_name, centers, users, csms):
+def status_page(session, center_name, centers, users, planners, csms):
     state_mach = csms[center_name]
-    #state = state_mach.configuration[0].id
     state_list = states.status_to_stri(state_mach.configuration_values)
     extended_states = states.status_to_stri(state_mach.configuration)
     email = session[utils.Skey.AUTH]
     user_timezone = users[email].timezone
+    user_is_admin = session[utils.Skey.ROLE] == "admin"
+    admin_emails = state_mach.model.get_admin_planners()
     center_obj = centers[center_name]
     pi_database_date = center_obj.pi_db_date
     config_file = minio.get_excel_minio(center_name)
@@ -99,12 +100,20 @@ def status_page(session, center_name, centers, users, csms):
         top_menu(session['role']),
         Div(utils.display_markdown("planning-free-t" if "free" in state_list else "planning-busy-t")),
         H1(f"{center_name}"),
-        P(f"Current center state: {extended_states.replace(",", " , ")}"),
-        P(f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
+        Div(
+            f"Current center state: {extended_states.replace(",", " , ")}  ",Br(),
+            Div(
+                A("recover from NO PRODUCTION CONFIRMATION AFTER CHECKING center gong computer and Internet",
+                  href="/planning/reco_prod_done"),
+                Br()
+            ) if "w_reco_prod" in state_list and user_is_admin else None,
+        ), Br(),
+        P(f"Last planning was installed in center on: {pi_database_date}",Br(),
+          f"IN CASE OF PROBLEM, contact a center gong admin(s): {", ".join(admin_emails)}",Br(),
+          f"Planner which initiated the current planning: {state_mach.model.user}", Br(),Br(),
+          f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
           f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),
-          f"Local database in center was installed on: {pi_database_date}",Br(),
-          f"Last result: {state_mach.model.last_result}" if state_mach.model.last_result else None
         ),
         H3("Center gongs and targets"),
         utils.toggle_markdown("gongs-and-targets"), Br(),
@@ -143,8 +152,8 @@ def status_page(session, center_name, centers, users, csms):
                  Button("Upload", type="submit"),
             ),
             Br(),Br(),
-            A("set FREE",href="/planning/abandon_edit") 
-        ) if session[utils.Skey.ROLE] == "admin" else None,
+            A("set FREE",href="/planning/force_to_free") 
+        ) if user_is_admin else None,
         cls="container"
     )
 

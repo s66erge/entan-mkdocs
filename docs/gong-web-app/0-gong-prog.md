@@ -86,7 +86,7 @@ centers = db.create(dbset.Center, pk='center_name')
 planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 
 dbset.init_data(roles, users, centers, planners)
-states.init_center_state_machines(centers)
+states.init_center_state_machines(centers, planners, users)
 
 ```
 ### Routes for authentication
@@ -175,17 +175,25 @@ async def get(session, center: str):
 @rt('/status_page')
 def get(session, center: str):
     session[utils.Skey.CENTER] = center
-    return cdash.status_page(session, center, centers, users, states.csms)
+    return cdash.status_page(session, center, centers, users, planners, states.csms)
 
 @rt('/planning/abandon_edit')
 async def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return await transit.abandon_edit(session, states.csms)
+    return await transit.goto_free(session, "abandon_changes", states.csms)
 
 @rt('/planning/timer_done')
 async def get(session):
     minio.remove_center_temp_data(session[utils.Skey.CENTER])
-    return await transit.timer_done(session, states.csms)
+    return await transit.goto_free(session, "edit_timer_done", states.csms)
+
+@rt('/planning/force_to_free')
+async def get(session):
+    return await transit.goto_free(session, "force_to_free", states.csms)
+
+@rt('/planning/reco_prod_done')
+async def get(session):
+    return await transit.goto_free(session, "reco_prod_done", states.csms)
 
 @rt('/save-center-db')
 async def get(session):
@@ -198,9 +206,10 @@ async def get(session):
             Div(messages.feedback_to_user({"error": error_mess})),
             utilsJS.hide("end-link"), utilsJS.show("abandon"), utilsJS.show("save-btn"),
         )
-    state_mach = states.csms[session[utils.Skey.CENTER]]
+    center_name = session[utils.Skey.CENTER]
+    state_mach = states.csms[center_name]
     await state_mach.send("progress")   # from 'edit' to 'save_db'
-    print("after")
+    print(f"after state_mach finished for {center_name} on @rt('/save-center-db')")
     return #Redirect("/dashboard")
 
 ```
@@ -351,7 +360,7 @@ def post(session, center_name: str):
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", center_template: str = ""):
-    return adchan.add_center(new_center_name, center_template, users, centers, db_path)
+    return adchan.add_center(new_center_name, center_template, users, centers, planners, db_path)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required

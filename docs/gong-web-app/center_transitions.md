@@ -44,22 +44,10 @@ async def check_center_free(state_mach, this_user):
             center_is_free = True
         return center_is_free
 
-async def abandon_edit(session, csms):
+async def goto_free(session, event, csms):
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
-    if this_center in csms and csms[this_center].configuration[0].id == "edit":
-        await csms[this_center].abandon_changes()
-        csms[this_center].model.user = None
-    elif session[utils.Skey.ROLE] == "admin":
-        print("Admin is abandoning changes for center ",this_center)
-        await csms[this_center].send("force_to_free")
-    return  Redirect('/dashboard')
-
-async def timer_done(session, csms):
-    this_center = session[utils.Skey.CENTER]
-    session[utils.Skey.CENTER] = ""
-    await csms[this_center].edit_timer_done()
-    csms[this_center].model.user = None    
+    await csms[this_center].send(event)
     return  Redirect('/dashboard')
 
 ```
