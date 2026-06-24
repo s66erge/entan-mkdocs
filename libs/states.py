@@ -235,7 +235,7 @@ class CenterDataModel(AbstractPersistentModel):
         if target.id == "free":
             await transit.send_center_email(self,'send_to_center_OK', "New gong planning CONFIRMED")
         return
-        
+
     async def on_enter_w_reco_prod(self):
         await transit.send_center_email(self,'w_reco_prod', "Gong center planning NOT confirmed")
         return

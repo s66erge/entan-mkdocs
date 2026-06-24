@@ -28,15 +28,15 @@ def show_draft_plan_table(draft_plan, center, mess):
         course = plan_line.get("course_type")
         no_gong = plan_line.get("No_gong", "")
         # Conditional coloring
-        ptype_cell = Td(ptype, style="background: red") if ptype.startswith("UNKNOWN") else Td(ptype)
-        source_cell = Td(source, style="background: blue") if source in "new input-fill gap" else Td(source)
+        ptype_cell = Td(B(ptype), style="color: white; background: red") if ptype.startswith("UNKNOWN") else Td(B(ptype))
+        source_cell = Td(source, style="color: white; background: blue") if source in "new input-fill gap" else Td(source)
         match check[0:2]:
             case "OK":
                 check_cell = Td(check)
             case "CH":
-                check_cell = Td(check, style="background: darkorange")
+                check_cell = Td(check, style="color: black; background: darkorange")
             case _:
-                check_cell = Td(check, style="background: red")
+                check_cell = Td(check, style="color: white; background: red")
         # Add delete link for removing this row
         delete_link = A("Delete",
             hx_post=f"/planning/delete_line/{idx}",
@@ -45,7 +45,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         )
         rows.append(
             Tr(
-                Td(start), Td(end), ptype_cell, source_cell, check_cell, Td(course), Td(no_gong), Td(delete_link)
+                Td(B(start)), ptype_cell, Td(end), source_cell, check_cell, Td(course), Td(no_gong), Td(delete_link)
             )
         )
     today = datetime.now().date()
@@ -78,7 +78,7 @@ def show_draft_plan_table(draft_plan, center, mess):
         hx_target="#planning-periods",
         ),
     table = Table(
-        Thead( Tr( Th("Start date"), Th("End date"), Th("Period type"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("No_gong"), Th("Action"),)),
+        Thead( Tr( Th("Start date"), Th("Period type"), Th("End date"), Th("Source"), Th("Check"), Th("Info given by center in dhamma.org"), Th("No_gong"), Th("Action"),)),
         Tbody(*rows)
     )
     return Div(
