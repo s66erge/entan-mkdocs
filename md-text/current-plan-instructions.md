@@ -2,8 +2,8 @@ This plan can only be saved if there are no red cell in the 'Check' field column
 You can modify it by deleting a line (Delete link in Action field), adding a new line (input form at bottom of the table) or adding/changing period types in the center timetables where you can see complete periods information for this center (top 'timetables' buttons). The plan is completely recalculated after any modification and when you use the top button 'Load saved plan'.
 ##### Field information:
 - **Start date**: will be sent to the center gong when plans and timetables are saved.
-- **End date**: used to check the integrity of the plan. Will NOT be sent to the center gong.
 - **Period type**: period type names for the gong. See center configuration for the dhamma.org correspondence. 
+- **End date**: used to check the integrity of the plan. Will NOT be sent to the center gong.
 - **Source**: either 'dhamma.org' or the center gong plan (*center name*.ok.db) or BOTH when it is the same period type and starting date. In this last case, then the 'End date' is the one from dhamma.org.
 - **Check**: result of automatic plan check: see table below.
 - **Info given by center in dhamma.org**: used to disambiguate dhamm.org period types: see the center configuration.
