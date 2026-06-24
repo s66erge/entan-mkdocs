@@ -101,27 +101,35 @@ def email_text(type, params: None):
             With Metta
             The Gong App Team
             """
-        case 'w_reco_prod':
+        case 'send_to_center_OK':
             return f"""
-            This is an automated message from the Gong users web App.
+This is an automated message from the Gong users web App.
 
-            The confirmation from the local gong computer at center {params.get("center", "")}
-            HAS NOT BEEN RECEIVED for the new planning version of {params.get("date", "")}
+The confirmation from the local gong computer at center {params.get("center", "")}
+HAS BEEN WELL RECEIVED for the new planning version of {params.get("date", "")}
+submitted by {params.get("user", "")}.
 
-            First:
-            1. check that the local gong computer is working correctly
-            2. check that it is correctly connected to the Internet
+With Metta
+The Gong App Team
+"""
+        case 'w_reco_prod':
+            with open('md-text/todo-no-production-confirmation.md', 'r', encoding='utf-8') as file:
+                file_content = file.read()
+            return f"""
+This is an automated message from the Gong users web App.
 
-            When this is OK:
-            1. log into the Gong user web app as an admin (if you have received this email, you are an admin planner for this center)
-            2. go to the STATUS page for this center and refresh the page
-            3. note the email of the last planner: 'Planner which initiated the current planning:'
-            4. click on the link "recover from NO PRODUCTION CONFIRMATION AFTER CHECKING center gong computer and Internet"
-            5. contact the last planner (if it is not you) who must resubmit now the planning changes he/she had just submitted.
+The confirmation from the local gong computer at center {params.get("center", "")}
+HAS NOT BEEN RECEIVED for the new planning version of {params.get("date", "")}
+submitted by {params.get("user", "")}.
 
-            With Metta
-            The Gong App Team
-            """
+If you are not an admin planner for this center (see: IN CASE OF PROBLEM on the STATUS page), just check that one of these admin planners is taking care of this issue.
+
+If you are one of the admin planners:
+{file_content}
+
+With Metta
+The Gong App Team
+"""
 
 # ~/~ end
 # ~/~ end

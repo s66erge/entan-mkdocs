@@ -11,6 +11,7 @@ import libs.minio as minio
 import libs.states as states
 import libs.planning as planning
 import libs.dbset as dbset
+import libs.messages as messages
 
 pending_tasks = {}
 
@@ -109,6 +110,15 @@ async def delete_new_db(model):
         result = {"error": f"production version {model.center_date} NOT CONFIRMED: {e}"}
     finally:
         return result
+
+async def send_center_email(model, type, subject):
+    to_emails = model.get_admin_planners()
+    if model.get_user() not in to_emails:
+        to_emails.append(model.get_user())
+    etext = messages.email_text(type, {"center": model.center_name, "date": model.center_date, "user":model.get_user()})
+    print(etext)
+    await asyncio.to_thread(utils.send_email, subject, etext, to_emails)
+    return
 
 # ~/~ end
 # ~/~ end

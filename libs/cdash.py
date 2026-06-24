@@ -103,9 +103,10 @@ def status_page(session, center_name, centers, users, planners, csms):
         Div(
             f"Current center state: {extended_states.replace(",", " , ")}  ",Br(),
             Div(
+                utils.toggle_markdown("todo-no-production-confirmation"),
                 A("recover from NO PRODUCTION CONFIRMATION AFTER CHECKING center gong computer and Internet",
                   href="/planning/reco_prod_done"),
-                Br()
+                Br(),
             ) if "w_reco_prod" in state_list and user_is_admin else None,
         ), Br(),
         P(f"Last planning was installed in center on: {pi_database_date}",Br(),

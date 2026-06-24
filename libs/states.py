@@ -122,7 +122,7 @@ class CenterDataModel(AbstractPersistentModel):
         self.planners = planners
         self.users = users
         self.testing = testing    # testing flag if true: just get actions results 
-        self.test_delay = 3 * 1000  # delay for testing wait actions
+#        self.test_delay = utils.Globals.SHORT_DELAY * 1000  # delay for testing wait actions in miliiseconds
         self.user = user
         self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
         self.statustart = None    # Cache for the timestamp of the last state change
@@ -163,7 +163,7 @@ class CenterDataModel(AbstractPersistentModel):
     def get_user(self):
         if self.user is None:
             row = self.centers[self.center_name]
-            self.user = row.created_by
+            self.user: str = row.created_by
         return self.user
 
     def clear_user(self):
@@ -191,8 +191,7 @@ class CenterDataModel(AbstractPersistentModel):
             await self.state_mach.send("problem")
             return
 
-    async def on_enter_free(self, source):
-        print(f"XXXXXXXX the source from getting to 'free':{source.id}")
+    async def on_exit_free(self, source):
         self.last_result = {"success": "center is free again"}
         if not self.testing:
             self.clear_user()
@@ -201,18 +200,11 @@ class CenterDataModel(AbstractPersistentModel):
         self.last_result = None
 
     async def on_enter_save_db(self):
-        if not self.testing:
-            result = await transit.save_db_plan_times(self)
-        else:
-            result = {"success": "testing: on_enter_save_db"}
+        result = await transit.save_db_plan_times(self)
         return await self.go_next(result)
 
     async def on_enter_wait_01(self):
-        if not self.testing:
-            result, delay = await transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
-        else:
-            delay = self.test_delay
-            result = {"success": f"testing: on_enter_wait_01 with delay: {self.test_delay}"}
+        result, delay = await transit.get_delay(self, utils.Globals.WAIT01_HOUR , utils.Globals.WAIT01_MINS)
         self.send_id = f"{self.center_name}_wait01"
         return await self.go_next(result, delay, self.send_id)
 
@@ -222,21 +214,11 @@ class CenterDataModel(AbstractPersistentModel):
             self.state_mach.cancel_event(self.send_id)
 
     async def on_enter_transfer(self):
-        if not self.testing:
-            result = await transit.transfer_new_db(self)
-        else:
-            result = {"success": "testing: on_enter_transfer"}
-            print("'Enter' for 'success', anything for 'error'")
-            if input("?"):
-                result = {"error": f"{result["success"]}"}
+        result = await transit.transfer_new_db(self)
         return await self.go_next(result)
 
     async def on_enter_wait_02(self):
-        if not self.testing:
-            result, delay = await transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
-        else:
-            delay = self.test_delay
-            result = {"success": f"testing: on_enter_wait_02 with delay: {self.test_delay}"}
+        result, delay = await transit.get_delay(self, utils.Globals.WAIT02_HOUR , utils.Globals.WAIT02_MINS)
         self.send_id = f"{self.center_name}_wait02"        
         return await self.go_next(result, delay, self.send_id)
 
@@ -246,24 +228,16 @@ class CenterDataModel(AbstractPersistentModel):
             self.state_mach.cancel_event(self.send_id)
 
     async def on_enter_getting_prod(self):
-        if not self.testing:
-            result = await transit.delete_new_db(self)
-        else:
-            result = {"success": "testing: on_enter_getting_prod"}
-            print("'Enter' for 'success', anything for 'error'")
-            if input("?"):
-                result = {"error": f"{result["success"]}"}
+        result = await transit.delete_new_db(self)
         return await self.go_next(result)
 
+    async def on_exit_getting_prod(self, target):
+        if target.id == "free":
+            await transit.send_center_email(self,'send_to_center_OK', "New gong planning CONFIRMED")
+        return
+        
     async def on_enter_w_reco_prod(self):
-        if not self.testing:
-            admin_emails = self.get_admin_planners()
-            etext = messages.email_text("w_reco_prod", {"center": self.center_name,
-                                                        "date": self.center_date})
-            await asyncio.to_thread(utils.send_email, "Gong center planning NOT confirmed",
-                                etext, admin_emails)
-        else:
-            print("testing: sent email for on_enter_w_reco_prod then return nothing")
+        await transit.send_center_email(self,'w_reco_prod', "Gong center planning NOT confirmed")
         return
 
 # ~/~ end
