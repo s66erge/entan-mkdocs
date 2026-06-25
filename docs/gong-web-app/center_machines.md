@@ -195,7 +195,6 @@ class CenterDataModel(AbstractPersistentModel):
         self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
         self.statustart = None    # Cache for the timestamp of the last state change
         self.last_result = None   # result of the last operation on this machine
-        self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
         self.save_db_filename = None  # new production db filenameto to be sent : 'sending...'
         self.center_date = None  # production version date
         self.send_id = None # id of the delayed send for waiting states, to be able to cancel it if needed
