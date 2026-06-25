@@ -184,7 +184,7 @@ def stri_to_status(strin):
     return parts[0] if len(parts) == 1 else OrderedSet(parts)
 
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, centers, planners, users, testing=False, user=None):
+    def __init__(self, center_name, centers, planners, users, user=None):
         super().__init__()
         self.center_name = center_name
         self.centers = centers
