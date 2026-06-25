@@ -121,7 +121,6 @@ class CenterDataModel(AbstractPersistentModel):
         self.centers = centers
         self.planners = planners
         self.users = users
-        self.testing = testing    # testing flag if true: just get actions results 
 #        self.test_delay = utils.Globals.SHORT_DELAY * 1000  # delay for testing wait actions in miliiseconds
         self.user = user
         self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
@@ -193,8 +192,7 @@ class CenterDataModel(AbstractPersistentModel):
 
     async def on_exit_free(self, source):
         self.last_result = {"success": "center is free again"}
-        if not self.testing:
-            self.clear_user()
+        self.clear_user()
 
     async def on_exit_edit(self):
         self.last_result = None
