@@ -25,7 +25,7 @@ class HistoryListener:
     def after_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
-        log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
+        log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \
             f"from {source.id} to {target.id} on {event}" + result_mess
         # to {target.id} or {self.model.get_status_stri()}
         self.entries.append(log)
@@ -73,8 +73,9 @@ class CenterState(StateChart["CenterDataModel"]):
     # ACTIONS ---------------------------------
 
     async def printerror(self, error):
-        #error = erro if erro else "NO ERROR TEXT AVAILABLE"
+        # error = erro if erro else "NO ERROR TEXT AVAILABLE"
         self.model.last_result = {"error": f"execution error: {error}"}
+        await transit.send_center_email(self.model,'errorex', "ATTENTION: Gong app execution error")
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -119,14 +120,14 @@ class CenterDataModel(AbstractPersistentModel):
         self.centers = centers
         self.planners = planners
         self.users = users
-        self.created_by = created_by
         self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
+        self.created_by = created_by
         self.status_start = None    # Cache for the timestamp of the last state change
-        self.last_result = None   # result of the last operation on this machine
         self.save_db_filename = None  # new production db filenameto to be sent : 'sending...'
         self.center_save_date = None # date of sending new production version
         self.pi_db_date = None  # confirmed production version date
         self.send_id = None # id of the delayed send for waiting states, to be able to cancel it if needed
+        self.last_result = None   # result of the last operation on this machine
 
     def _read_state(self):
         row = self.centers[self.center_name]
@@ -134,11 +135,11 @@ class CenterDataModel(AbstractPersistentModel):
         self.created_by = row.created_by
         self.pi_db_date = row.pi_db_date
         self.center_save_date = row.center_save_date
+        self.save_db_filename = row.save_db_filename
         return stri_to_status(row.status)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
-        print(type(self.centers))
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.status_start = now_utc
         value_stri = status_to_stri(value)
@@ -161,30 +162,11 @@ class CenterDataModel(AbstractPersistentModel):
     def get_status_stri(self):
         return status_to_stri(self._read_state())
 
-    def get_start_time(self):
-        if self.status_start is None:
-            row = self.centers[self.center_name]
-            self.status_start: str = row.status_start
-        return self.status_start
-
-    def get_user(self):
-        if self.created_by is None:
-            row = self.centers[self.center_name]
-            self.created_by: str = row.created_by
-        return self.created_by
-
-    def get_center_save_date(self):
-        if self.center_save_date is None:
-            row = self.centers[self.center_name]
-            self.center_save_date: str = row.center_save_date
-        return self.center_save_date
-
-    def get_pi_db_date(self):
-        if self.get_pi_db_date is None:
-            row = self.centers[self.center_name]
-            self.get_pi_db_date: str = row.get_pi_db_date
-        return self.get_pi_db_date
-
+    def get_center_attr(self, attr_name):
+        if getattr(self, attr_name) is None:
+            center_obj = self.centers[self.center_name]
+            setattr(self, attr_name, getattr(center_obj, attr_name))
+        return getattr(self, attr_name)
 
     def get_admin_planners(self):
         center_planners = self.planners("center_name = ?", (self.center_name,))

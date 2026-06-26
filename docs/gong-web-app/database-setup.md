@@ -36,6 +36,7 @@ class Center:
     created_by: str
     status_start: str
     center_save_date: str
+    save_db_filename: str
 class Planner:
     user_email: str
     center_name: str

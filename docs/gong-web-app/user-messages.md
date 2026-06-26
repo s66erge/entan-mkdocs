@@ -134,12 +134,26 @@ This is an automated message from the Gong users web App.
 
 The confirmation from the local gong computer at center {params.get("center", "")}
 HAS NOT BEEN RECEIVED for the new planning version of {params.get("date", "")}
-submitted by {params.get("user", "")}.
+submitted by {params.get("user", "")}
 
 If you are not an admin planner for this center (see: IN CASE OF PROBLEM on the STATUS page), just check that one of these admin planners is taking care of this issue.
 
 If you are one of the admin planners:
 {file_content}
+
+With Metta
+The Gong App Team
+"""
+        case 'errorex':
+            return f"""
+This is an automated message from the Gong users web App.
+
+HELP, an action execution ERROR happened for center {params.get("center", "")}
+while working on a new planning version of {params.get("date", "")}
+with error {params.get("last_result", "")}
+submitted by {params.get("user", "")}.
+
+If you are not an admin planner for this center (see: IN CASE OF PROBLEM on the STATUS page), please check that one of these admin planners is taking care of this issue.
 
 With Metta
 The Gong App Team

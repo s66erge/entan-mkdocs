@@ -16,12 +16,12 @@ def states_test(centers):
         quickchart_write_svg(sm, "images/center_machines.svg") 
 
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
-    print(f"Initial state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
+    print(f"Initial state: {sm.configuration[0].id}, started at: {sm.model.get_center_attr("status_start")}, user: {sm.model.get_user()}")
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm.model.user = "abc@mail.com"
     sm.send("start_editing")
-    print(f"new state: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
+    print(f"new state: {sm.configuration[0].id}, started at: {sm.model.get_center_attr("status_start")}, user: {sm.model.get_user()}")
     # Remove the instances from memory.
     del sm
     time.sleep(3)
@@ -34,9 +34,9 @@ def states_test(centers):
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm = csm["Mahi"]
-    print(f"State restored from database: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
+    print(f"State restored from database: {sm.configuration[0].id}, started at: {sm.model.get_center_attr("status_start")}, user: {sm.model.get_user()}")
     time.sleep(3)
     print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00'))
     sm.model.user = None
     sm.send("abandon_changes")
-    print(f"State after last transition: {sm.configuration[0].id}, started at: {sm.model.get_start_time()}, user: {sm.model.get_user()}")
+    print(f"State after last transition: {sm.configuration[0].id}, started at: {sm.model.get_center_attr("status_start")}, user: {sm.model.get_user()}")
