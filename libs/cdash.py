@@ -111,7 +111,7 @@ def status_page(session, center_name, centers, users, planners, csms):
         ), Br(),
         P(f"Last planning was installed in center on: {pi_database_date}",Br(),
           f"IN CASE OF PROBLEM, contact a center gong admin(s): {", ".join(admin_emails)}",Br(),
-          f"Planner which initiated the current planning: {state_mach.model.user}", Br(),Br(),
+          f"Planner which initiated the current planning: {state_mach.model.created_by}", Br(),Br(),
           f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
           f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),

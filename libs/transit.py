@@ -28,7 +28,7 @@ async def check_center_free(state_mach, this_user):
         if state_mach.configuration[0].id == "edit" and delta > utils.Globals.INITIAL_COUNTDOWN:
             await state_mach.abandon_changes()
         if state_mach.configuration[0].id == "free":
-            state_mach.model.user = this_user
+            state_mach.model.update_attr("created_by", this_user)
             await state_mach.progress()
             center_is_free = True
         return center_is_free
@@ -71,15 +71,15 @@ async def transfer_new_db(model):
     try:
         center_params = minio.params_from_excel_minio(model.center_name)
         center_tz = ZoneInfo(center_params[utils.Pkey.TIMEZON])
-        center_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
-        model.center_date = center_date
+        center_save_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
         file_complete = utils.get_db_path() + model.save_db_filename
-        minio_object = f"{model.center_name.lower()}/{utils.Globals.SENDING}{center_date}.db"
+        minio_object = f"{model.center_name.lower()}/{utils.Globals.SENDING}{center_save_date}.db"
         await asyncio.to_thread(minio.file_upload, utils.Globals.PI_BUCKET, minio_object, file_complete)
         print(file_complete, " uploaded to minio as ", minio_object, "in bucket ", utils.Globals.PI_BUCKET)
     except (S3Error, MinioException, RuntimeError) as e:
         result = {"error": f"saving new db to minio failed: {e}"}
     else:
+        model.update_attr("center_save_date", center_save_date)
         result = {"success": f"production db -{minio_object}- sent at {datetime.now(center_tz).isoformat()} center time"}
     finally:
         return result
@@ -93,22 +93,22 @@ def replace_db_files(model):
         pass
     os.rename(ok_db_file, old_db_file)            
     os.rename(utils.get_db_path() + model.save_db_filename, ok_db_file)
-    model.centers.update(center_name = model.center_name, pi_db_date = model.center_date)
     return
 
 async def delete_new_db(model):
     try:
         objects_in_minio = minio.get_objects_list(utils.Globals.PI_BUCKET, f"{model.center_name.lower()}")
-        confirmation = f"{model.center_name.lower()}/{utils.Globals.RECEIVED}{model.center_date}.db" in objects_in_minio
+        confirmation = f"{model.center_name.lower()}/{utils.Globals.RECEIVED}{model.get_center_save_date()}.db" in objects_in_minio
         if confirmation or (model.center_name in utils.Globals.TEST_USER):       
             await asyncio.to_thread(minio.delete_object, utils.Globals.PI_BUCKET,
-                                    f"{model.center_name.lower()}",f"{utils.Globals.RECEIVED}{model.center_date}.db")
+                                    f"{model.center_name.lower()}",f"{utils.Globals.RECEIVED}{model.get_center_save_date()}.db")
             replace_db_files(model)
-            result = {"success": f"confirmation of production version {model.center_date} is OK"}
+            model.update_attr("pi_db_date", model.get_center_save_date())
+            result = {"success": f"confirmation of production version {model.get_center_save_date()} is OK"}
         else:
-            result = {"error": f"production file '{utils.Globals.RECEIVED}{model.center_date}.db' NOT PRESENT in minio"}
+            result = {"error": f"production file '{utils.Globals.RECEIVED}{model.get_center_save_date()}.db' NOT PRESENT in minio"}
     except (S3Error, MinioException, RuntimeError) as e:
-        result = {"error": f"production version {model.center_date} NOT CONFIRMED: {e}"}
+        result = {"error": f"production version {model.get_center_save_date()} NOT CONFIRMED: {e}"}
     finally:
         return result
 
@@ -116,7 +116,7 @@ async def send_center_email(model, type, subject):
     to_emails = model.get_admin_planners()
     if model.get_user() not in to_emails:
         to_emails.append(model.get_user())
-    etext = messages.email_text(type, {"center": model.center_name, "date": model.center_date, "user":model.get_user()})
+    etext = messages.email_text(type, {"center": model.center_name, "date": model.get_center_save_date(), "user":model.get_user()})
     print(etext)
     await asyncio.to_thread(utils.send_email, subject, etext, to_emails)
     return

@@ -1,4 +1,4 @@
-The program in the center minicomputer recognizes 3 type of periods:
+The program in the center minicomputer recognizes 3 types of periods:
 
 - **fixed length** with each day having a specific gong timetable, as examples:
     + 10 day course with:
@@ -12,10 +12,10 @@ The program in the center minicomputer recognizes 3 type of periods:
       - 'trust meeting' for the second and last day  
 - **variable length** periods have only one type of day 'repeating day' and its timetable is repeated until the start of the next period. As examples: 'service', 'course preparation', 'maintenance' ...
   + the **default period** is one of the variable periods is (often called 'IN BETWEEN'). Ita timetable is used:
-    -  whenever there is a full-day gap in the gong planning
+    -  whenever there is at least a full-day gap in the gong planning
     -  between the last gong of the last day of a period and 1 a.m. on the next day (if there is any gong in the default period for this interval)
 
-The gong program sent from this app to the center minicomputer is just the list of days with their starting period. The scheduling is:
+The gong planning sent from this app to the center minicomputer is just the list of days with their starting period. The scheduling constraints are:
 
 - there can be only one period starting on any day
 - a fixed period runs uninterrupted until the last gong of the last day
