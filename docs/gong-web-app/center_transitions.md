@@ -137,7 +137,6 @@ async def send_center_email(model, type, subject):
     if model.get_user() not in to_emails:
         to_emails.append(model.get_user())
     etext = messages.email_text(type, {"center": model.center_name, "date": model.get_center_save_date(), "user":model.get_user()})
-    print(etext)
     await asyncio.to_thread(utils.send_email, subject, etext, to_emails)
     return
 

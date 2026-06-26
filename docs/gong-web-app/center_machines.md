@@ -46,7 +46,6 @@ from statemachine.orderedset import OrderedSet
 import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
-import libs.messages as messages
 
 csms = {}
 clocks = {}
@@ -203,24 +202,23 @@ class CenterDataModel(AbstractPersistentModel):
         self.status_start = row.status_start
         self.created_by = row.created_by
         self.pi_db_date = row.pi_db_date
+        self.center_save_date = row.center_save_date
         return stri_to_status(row.status)
 
     def _write_state(self, value):
         # Write BOTH state AND current timestamp
+        print(type(self.centers))
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.status_start = now_utc
         value_stri = status_to_stri(value)
         self.centers.update(
             center_name = self.center_name, 
             status = value_stri,
-            status_start = self.status_start,
-            created_by = self.created_by,
-            # pi_db_date = self.center_date
+            status_start = self.status_start
         )
 
     def update_attr(self, attr_name, value):
         setattr(self, attr_name, value)
-        # row_dict = dict(self.centers[self.center_name])
         center_obj = self.centers[self.center_name]
         row_dict = center_obj.__dict__
         row_dict[attr_name] = value
@@ -235,7 +233,7 @@ class CenterDataModel(AbstractPersistentModel):
     def get_start_time(self):
         if self.status_start is None:
             row = self.centers[self.center_name]
-            self.status_start = row.status_start
+            self.status_start: str = row.status_start
         return self.status_start
 
     def get_user(self):
@@ -249,6 +247,13 @@ class CenterDataModel(AbstractPersistentModel):
             row = self.centers[self.center_name]
             self.center_save_date: str = row.center_save_date
         return self.center_save_date
+
+    def get_pi_db_date(self):
+        if self.get_pi_db_date is None:
+            row = self.centers[self.center_name]
+            self.get_pi_db_date: str = row.get_pi_db_date
+        return self.get_pi_db_date
+
 
     def get_admin_planners(self):
         center_planners = self.planners("center_name = ?", (self.center_name,))

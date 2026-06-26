@@ -80,8 +80,8 @@ def status_page(session, center_name, centers, users, planners, csms):
     user_timezone = users[email].timezone
     user_is_admin = session[utils.Skey.ROLE] == "admin"
     admin_emails = state_mach.model.get_admin_planners()
-    center_obj = centers[center_name]
-    pi_database_date = center_obj.pi_db_date
+    # center_obj = centers[center_name]
+    pi_database_date = state_mach.model.get_pi_db_date()
     config_file = minio.get_excel_minio(center_name)
     params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]

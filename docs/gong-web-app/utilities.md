@@ -31,7 +31,7 @@ class Skey: # session keys
     def get(cls, name, default=None):
         return getattr(cls, name, default)
 
-class Pkey: # parameters keys
+class Pkey: # parameters keys in excel sheet
     TIMEZON = "timezon"
     LOCATION = "location"
     GONG_ID = "gong_id"
