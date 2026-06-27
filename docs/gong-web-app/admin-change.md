@@ -159,7 +159,7 @@ def delete_center(center_name, users, centers, planners, db_path):
 #| id: add-center
 
 # @rt('/add_center')
-def add_center(new_center_name, center_template, users, centers, planners, db_path):
+def add_center(new_center_name, center_template, users, centers, db_path, db):
     ## [1]
     print(f"template: {center_template}")
     new_gong_db_name = dbset.gong_db_name(new_center_name)
@@ -190,7 +190,7 @@ def add_center(new_center_name, center_template, users, centers, planners, db_pa
                 created_by="",
                 status_start=datetime.now(timezone.utc)
             )
-            states.add_center_state_machine(new_center_name, centers, planners, users)
+            states.add_center_state_machine(new_center_name, db)
             message = {'success': 'center_added'}
 
         return Div(

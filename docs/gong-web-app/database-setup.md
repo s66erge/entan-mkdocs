@@ -17,16 +17,55 @@ import libs.utils as utils
 ```python
 #| id: dataclasses
 
-class Role: role_name: str; description: str
-class User: email: str; name: str; role_name: str; last_login: str; magic_link_token: str; magic_link_expiry: str; is_active: bool; timezone: str
-class Center: center_name: str; pi_db_date: str; status: str; created_by: str; status_start: str
-class Planner: user_email: str; center_name: str
+class Role:
+    role_name: str
+    description: str
+class User:
+    email: str
+    name: str
+    role_name: str
+    last_login: str
+    magic_link_token: str
+    magic_link_expiry: str
+    is_active: bool
+    timezone: str
+class Center:
+    center_name: str
+    pi_db_date: str
+    status: str
+    created_by: str
+    status_start: str
+    center_save_date: str
+    save_db_filename: str
+class Planner:
+    user_email: str
+    center_name: str
 
-class Coming_periods: start_date: str; period_type: str
-class Periods_struct: period_type: str; day: int; day_type: str
-class Timetables: period_type: str; day_type: str; time: str; gong_id: int; auto: int; targets: str; comment: str
-class Gongs: sound_id: int; repeat: int; interval: float; length: float; comment: str  
-class Targets: id: int; shortname: str; longname: str
+class Coming_periods:
+    start_date: str
+    period_type: str
+class Periods_struct:
+    period_type: str
+    day: int
+    day_type: str
+class Timetables:
+    period_type: str
+    day_type: str
+    time: str
+    gong_id: int
+    auto: int
+    targets: str
+    comment: str
+class Gongs:
+    sound_id: int
+    repeat: int
+    interval: float
+    length: float
+    comment: str  
+class Targets:
+    id: int
+    shortname: str
+    longname: str
 
 def get_central_db():
     if utils.isa_dev_computer():

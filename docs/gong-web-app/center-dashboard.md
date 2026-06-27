@@ -96,8 +96,8 @@ def status_page(session, center_name, centers, users, planners, csms):
     user_timezone = users[email].timezone
     user_is_admin = session[utils.Skey.ROLE] == "admin"
     admin_emails = state_mach.model.get_admin_planners()
-    center_obj = centers[center_name]
-    pi_database_date = center_obj.pi_db_date
+    # center_obj = centers[center_name]
+    pi_database_date = state_mach.model.get_center_attr("pi_db_date")
     config_file = minio.get_excel_minio(center_name)
     params = minio.params_from_excel_minio(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
@@ -127,7 +127,7 @@ def status_page(session, center_name, centers, users, planners, csms):
         ), Br(),
         P(f"Last planning was installed in center on: {pi_database_date}",Br(),
           f"IN CASE OF PROBLEM, contact a center gong admin(s): {", ".join(admin_emails)}",Br(),
-          f"Planner which initiated the current planning: {state_mach.model.user}", Br(),Br(),
+          f"Planner which initiated the current planning: {state_mach.model.created_by}", Br(),Br(),
           f"Center timezone: {ct_timezone}, local center time now: {utils.short_iso(datetime.now() , ct_timezone)}", Br(),
           f"Your browser timezone: {user_timezone}, your time now: {utils.short_iso(datetime.now(), user_timezone)}", Br(),
           f"UTC time now: {utils.short_iso(datetime.now())}",Br(),Br(),

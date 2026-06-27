@@ -222,7 +222,7 @@ def load_dhamma_db(session):
 def replace_table(conn, name, df):
     df.to_sql(name, conn, if_exists="replace", index=False)
 
-async def save_db_plan_timetable(center_name, centers):
+async def save_db_plan_timetable(center_name):
     source_db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
     filename = dbset.gong_db_name(center_name, utils.Globals.SENDING)
     dest_db_file = utils.get_db_path() + filename

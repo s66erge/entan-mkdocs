@@ -64,7 +64,7 @@ centers = db.create(dbset.Center, pk='center_name')
 planners = db.create(dbset.Planner, pk=('user_email', 'center_name'))
 
 dbset.init_data(roles, users, centers, planners)
-states.init_center_state_machines(centers, planners, users)
+states.init_center_state_machines(db)
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#login-authenticate>>[init]
@@ -315,7 +315,7 @@ def post(session, center_name: str):
 @rt('/add_center')
 @admin_required
 def post(session, new_center_name: str = "", center_template: str = ""):
-    return adchan.add_center(new_center_name, center_template, users, centers, planners, db_path)
+    return adchan.add_center(new_center_name, center_template, users, centers, db_path, db)
 
 @rt('/delete_planner/{user_email}/{center_name}')
 @admin_required

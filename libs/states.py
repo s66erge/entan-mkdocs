@@ -7,10 +7,8 @@ from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateChart
 from statemachine.orderedset import OrderedSet
-import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
-import libs.messages as messages
 
 csms = {}
 clocks = {}
@@ -26,7 +24,7 @@ class HistoryListener:
     def after_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
-        log = f"At {model.get_start_time()}, {model.get_user()} moved {model.center_name} " + \
+        log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \
             f"from {source.id} to {target.id} on {event}" + result_mess
         # to {target.id} or {self.model.get_status_stri()}
         self.entries.append(log)
@@ -36,7 +34,6 @@ class HistoryListener:
 
 class CenterState(StateChart["CenterDataModel"]):
 
-    test_delay = 3 * 1000
     allow_event_without_transition = False
     atomic_configuration_update = True
 
@@ -75,8 +72,9 @@ class CenterState(StateChart["CenterDataModel"]):
     # ACTIONS ---------------------------------
 
     async def printerror(self, error):
-        #error = erro if erro else "NO ERROR TEXT AVAILABLE"
+        # error = erro if erro else "NO ERROR TEXT AVAILABLE"
         self.model.last_result = {"error": f"execution error: {error}"}
+        await transit.send_center_email(self.model,'errorex', "ATTENTION: Gong app execution error")
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
@@ -115,67 +113,62 @@ def stri_to_status(strin):
     return parts[0] if len(parts) == 1 else OrderedSet(parts)
 
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, centers, planners, users, testing=False, user=None):
+    def __init__(self, center_name, db,created_by=None):
         super().__init__()
         self.center_name = center_name
-        self.centers = centers
-        self.planners = planners
-        self.users = users
-        self.testing = testing    # testing flag if true: just get actions results 
-#        self.test_delay = utils.Globals.SHORT_DELAY * 1000  # delay for testing wait actions in miliiseconds
-        self.user = user
+        self.db = db
+        self.created_by = created_by
         self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
-        self.statustart = None    # Cache for the timestamp of the last state change
-        self.last_result = None   # result of the last operation on this machine
-        self.center_params = None # cache for center parameters from db/excel, to avoid multiple calls
+        self.status_start = None    # Cache for the timestamp of the last state change
         self.save_db_filename = None  # new production db filenameto to be sent : 'sending...'
-        self.center_date = None  # production version date
+        self.center_save_date = None # date of sending new production version
+        self.pi_db_date = None  # confirmed production version date
         self.send_id = None # id of the delayed send for waiting states, to be able to cancel it if needed
+        self.last_result = None   # result of the last operation on this machine
 
     def _read_state(self):
-        row = self.centers[self.center_name]
-        self.statustart = row.status_start
-        self.user = row.created_by
+        centers = self.db.t.center
+        row = centers[self.center_name]
+        self.status_start = row.status_start
+        self.created_by = row.created_by
+        self.pi_db_date = row.pi_db_date
+        self.center_save_date = row.center_save_date
+        self.save_db_filename = row.save_db_filename
         return stri_to_status(row.status)
 
     def _write_state(self, value):
-        # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
-        self.statustart = now_utc
+        self.status_start = now_utc
         value_stri = status_to_stri(value)
-        self.centers.update(
+        centers = self.db.t.center
+        centers.update(
             center_name = self.center_name, 
             status = value_stri,
-            status_start = now_utc,
-            created_by = self.user
+            status_start = self.status_start
         )
+
+    def update_attr(self, attr_name, value):
+        setattr(self, attr_name, value)
+        centers = self.db.t.center
+        center_obj = centers[self.center_name]
+        row_dict = center_obj.__dict__
+        centers.update(row_dict)
 
     def get_status_stri(self):
         return status_to_stri(self._read_state())
 
-    def get_start_time(self):
-        if self.statustart is None:
-            # If statustart is not cached, read it from the database
-            row = self.centers[self.center_name]
-            self.statustart = row.status_start if row.status_start else None
-        return self.statustart
-
-    def get_user(self):
-        if self.user is None:
-            row = self.centers[self.center_name]
-            self.user: str = row.created_by
-        return self.user
-
-    def clear_user(self):
-        #self.user = None
-        self.centers.update(
-            center_name = self.center_name, 
-            created_by = None
-        )
+    def get_center_attr(self, attr_name):
+        if getattr(self, attr_name) is None:
+            centers = self.db.t.center
+            center_obj = centers[self.center_name]
+            setattr(self, attr_name, getattr(center_obj, attr_name))
+        return getattr(self, attr_name)
 
     def get_admin_planners(self):
-        center_planners = self.planners("center_name = ?", (self.center_name,))
-        return [p.user_email for p in center_planners if self.users[p.user_email].role_name == "admin"]
+        planners = self.db.t.planner
+        users = self.db.t.user
+        center_planners = planners("center_name = ?", (self.center_name,))
+        return [p.user_email for p in center_planners if users[p.user_email].role_name == "admin"]
 
     # ACTIONS --------------------------
 
@@ -191,13 +184,12 @@ class CenterDataModel(AbstractPersistentModel):
             await self.state_mach.send("problem")
             return
 
-    async def on_exit_free(self, source):
+    async def on_enter_free(self):
         self.last_result = {"success": "center is free again"}
-        if not self.testing:
-            self.clear_user()
+        self.update_attr(self, "created_by", None)
 
-    async def on_exit_edit(self):
-        self.last_result = None
+    async def on_enter_edit(self):
+        self.last_result = {"success": "entered edit mode"}
 
     async def on_enter_save_db(self):
         result = await transit.save_db_plan_times(self)
@@ -247,8 +239,8 @@ def delete_state_machine(center_name):
     del csms[center_name]
     del clocks[center_name]
 
-def add_center_state_machine(name, centers, planners, users):
-    center_state = CenterDataModel(center_name=name, centers=centers, planners=planners, users=users)
+def add_center_state_machine(name, db):
+    center_state = CenterDataModel(center_name=name, db=db)
     sm = CenterState(model=center_state)
     center_state.add_machine(sm)
     the_listener = HistoryListener(model=center_state)
@@ -256,12 +248,11 @@ def add_center_state_machine(name, centers, planners, users):
     csms[name] = sm
     clocks[name] = asyncio.Lock()
 
-def init_center_state_machines(centers, planners, users):
-    db2 = dbset.get_central_db()
-    centers_list = db2.t.center()
-    names = [c.get("center_name") for c in centers_list]
+def init_center_state_machines(db):
+    centers_list = db.t.center()
+    names = [c.center_name for c in centers_list]
     for name in names:
-        add_center_state_machine(name, centers, planners, users)
+        add_center_state_machine(name, db)
 
 # ~/~ end
 # ~/~ end
