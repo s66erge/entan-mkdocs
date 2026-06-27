@@ -49,7 +49,7 @@ async def goto_free(session, event, csms):
     this_center = session[utils.Skey.CENTER]
     session[utils.Skey.CENTER] = ""
     await csms[this_center].send(event)
-    return  Redirect('/dashboard')
+    return  Redirect(f"/status_page?center={this_center}")
 
 ```
 
@@ -63,7 +63,7 @@ To access the sm for one center: sm = csms["Mahi"]
 #| id: system-transitions
 
 async def save_db_plan_times(model):
-    save_db_file = await planning.save_db_plan_timetable(model.center_name, model.centers)
+    save_db_file = await planning.save_db_plan_timetable(model.center_name)
     model.update_attr("save_db_filename", save_db_file)
     await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
     return {"success": f"new db saved as {save_db_file}"}

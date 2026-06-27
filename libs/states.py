@@ -7,7 +7,6 @@ from fasthtml.common import *
 from datetime import datetime, timezone
 from statemachine import State, Event, StateChart
 from statemachine.orderedset import OrderedSet
-import libs.dbset as dbset
 import libs.transit as transit
 import libs.utils as utils
 
@@ -114,14 +113,12 @@ def stri_to_status(strin):
     return parts[0] if len(parts) == 1 else OrderedSet(parts)
 
 class CenterDataModel(AbstractPersistentModel):
-    def __init__(self, center_name, centers, planners, users, created_by=None):
+    def __init__(self, center_name, db,created_by=None):
         super().__init__()
         self.center_name = center_name
-        self.centers = centers
-        self.planners = planners
-        self.users = users
-        self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
+        self.db = db
         self.created_by = created_by
+        self.state_mach: StateChart = None    # reference to the state machine for initiating transitions
         self.status_start = None    # Cache for the timestamp of the last state change
         self.save_db_filename = None  # new production db filenameto to be sent : 'sending...'
         self.center_save_date = None # date of sending new production version
@@ -130,7 +127,8 @@ class CenterDataModel(AbstractPersistentModel):
         self.last_result = None   # result of the last operation on this machine
 
     def _read_state(self):
-        row = self.centers[self.center_name]
+        centers = self.db.t.center
+        row = centers[self.center_name]
         self.status_start = row.status_start
         self.created_by = row.created_by
         self.pi_db_date = row.pi_db_date
@@ -139,11 +137,11 @@ class CenterDataModel(AbstractPersistentModel):
         return stri_to_status(row.status)
 
     def _write_state(self, value):
-        # Write BOTH state AND current timestamp
         now_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S+00:00')
         self.status_start = now_utc
         value_stri = status_to_stri(value)
-        self.centers.update(
+        centers = self.db.t.center
+        centers.update(
             center_name = self.center_name, 
             status = value_stri,
             status_start = self.status_start
@@ -151,23 +149,26 @@ class CenterDataModel(AbstractPersistentModel):
 
     def update_attr(self, attr_name, value):
         setattr(self, attr_name, value)
-        center_obj = self.centers[self.center_name]
+        centers = self.db.t.center
+        center_obj = centers[self.center_name]
         row_dict = center_obj.__dict__
-        row_dict[attr_name] = value
-        self.centers.update(row_dict)
+        centers.update(row_dict)
 
     def get_status_stri(self):
         return status_to_stri(self._read_state())
 
     def get_center_attr(self, attr_name):
         if getattr(self, attr_name) is None:
-            center_obj = self.centers[self.center_name]
+            centers = self.db.t.center
+            center_obj = centers[self.center_name]
             setattr(self, attr_name, getattr(center_obj, attr_name))
         return getattr(self, attr_name)
 
     def get_admin_planners(self):
-        center_planners = self.planners("center_name = ?", (self.center_name,))
-        return [p.user_email for p in center_planners if self.users[p.user_email].role_name == "admin"]
+        planners = self.db.t.planner
+        users = self.db.t.user
+        center_planners = planners("center_name = ?", (self.center_name,))
+        return [p.user_email for p in center_planners if users[p.user_email].role_name == "admin"]
 
     # ACTIONS --------------------------
 
@@ -238,8 +239,8 @@ def delete_state_machine(center_name):
     del csms[center_name]
     del clocks[center_name]
 
-def add_center_state_machine(name, centers, planners, users):
-    center_state = CenterDataModel(center_name=name, centers=centers, planners=planners, users=users)
+def add_center_state_machine(name, db):
+    center_state = CenterDataModel(center_name=name, db=db)
     sm = CenterState(model=center_state)
     center_state.add_machine(sm)
     the_listener = HistoryListener(model=center_state)
@@ -247,12 +248,11 @@ def add_center_state_machine(name, centers, planners, users):
     csms[name] = sm
     clocks[name] = asyncio.Lock()
 
-def init_center_state_machines(centers, planners, users):
-    db2 = dbset.get_central_db()
-    centers_list = db2.t.center()
-    names = [c.get("center_name") for c in centers_list]
+def init_center_state_machines(db):
+    centers_list = db.t.center()
+    names = [c.center_name for c in centers_list]
     for name in names:
-        add_center_state_machine(name, centers, planners, users)
+        add_center_state_machine(name, db)
 
 # ~/~ end
 # ~/~ end
