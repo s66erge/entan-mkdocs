@@ -225,9 +225,6 @@ class CenterDataModel(AbstractPersistentModel):
         row_dict[attr_name] = value
         self.centers.update(row_dict)
 
-    def clear_user(self):
-        self.update_attr(self, "created_by", None)
-
     def get_status_stri(self):
         return status_to_stri(self._read_state())
 
@@ -257,7 +254,7 @@ class CenterDataModel(AbstractPersistentModel):
 
     async def on_enter_free(self):
         self.last_result = {"success": "center is free again"}
-        # self.clear_user()
+        self.update_attr(self, "created_by", None)
 
     async def on_enter_edit(self):
         self.last_result = {"success": "entered edit mode"}
