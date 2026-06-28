@@ -69,6 +69,25 @@ states.init_center_state_machines(db)
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app/0-gong-prog.md#login-authenticate>>[init]
 
+@rt('/')
+def home():
+    return Main(
+        H1("Welcome to the Gong user web app"),
+        Div(utils.toggle_markdown("about-the-digital-gong-app", None, True)),Br(),
+        P("If you are a registered user of this app, please log in here below to access the gong planning features."),
+        A("Login",href="/login"),
+        cls="container"
+    )
+
+@rt('/about-contact')
+def get():
+    return Main(
+        H1("About-Contact"),
+        Div(utils.display_markdown("about-the-digital-gong-app")),
+        A("Return to the Dashboard",href="/dashboard", style="font-size: 24px;"),
+        cls="container"
+    )
+
 @rt('/login')
 def get():
     return auth.login()
@@ -82,19 +101,11 @@ def post(session, request, code: str):
     timezon = dict(request.query_params).get('timezone', 'UTC')
     return auth.verify_code(session, code, timezon, users) 
 
-@rt('/')
-def home():
-    return Main(
-        Div(utils.display_markdown("home-t")),
-        A("Login",href="/login", class_="button"),
-        cls="container"
-    )
-
 @rt('/logout')
 def post(session):
     del session[utils.Skey.AUTH]
     del session[utils.Skey.ROLE]
-    return Redirect('/login')
+    return Redirect('/')
 
 @rt('/dashboard')
 def get(session):
