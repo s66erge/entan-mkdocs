@@ -3,10 +3,12 @@
 ## Synchronisation between Rasperry Pi and web program
 
 Synchro by reading and writing files on a shared s3 server: 
+
 - Server public endpoint : bucket-production-6009.up.railway.app:443
 - Bucket : dhamma-gong-database
 
 00h45 : Web program writes the new center gong db file in the bucket
+
 - f"{center_name}/sending{file-ISO_date}.db"
 - example: mahi/sending2024-04-09.db
 

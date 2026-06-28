@@ -26,8 +26,7 @@ def show_page(request, users, roles, centers, planners):
         Nav(
             Ul(
                 Li(A("Dashboard", href="/dashboard")),
-                Li(A("Contact", href="/unfinished")),
-                Li(A("About", href="/unfinished")),
+                Li(A("About-Contact", href="/about-contact")),
             ), 
             Button("Logout", hx_post="/logout"),
         ),

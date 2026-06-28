@@ -29,8 +29,7 @@ def top_menu(role):
             Ul(
                 Li(A("Admin", href="/admin_page")) if role == "admin" else None,
                 Li(A("Dashboard", href="/dashboard")),
-                Li(A("Contact", href="/unfinished")),
-                Li(A("About", href="/unfinished")),
+                Li(A("About-Contact", href="/about-contact")),
                 Span(style="display: inline-block; width: 100px;"),
                 Button("Download PDF", onclick="window.print()"),
 
