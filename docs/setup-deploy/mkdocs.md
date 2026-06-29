@@ -39,6 +39,8 @@ plugins:
          securityLevel: 'loose' 
 
 markdown_extensions:
+  - attr_list
+  - md_in_html
   - toc:
       permalink: "#"
   - pymdownx.highlight:
@@ -47,7 +49,7 @@ markdown_extensions:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
-  - pymdownx.inlinehilite
+  #- pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
       custom_fences:
@@ -60,17 +62,17 @@ theme:
   #name: readthedocs
   name: material
   features:
-    - navigation.instant
-    #- navigation.top
-    - navigation.tab
+    - content.code.annotate # (1)
+    #- navigation.instant
+    - navigation.top
+    #- navigation.tab
     - navigation.path
     - content.code.copy
-    - content.code.annotate # [1]
-  palette: 
+  # icon:
+    # annotation: material/plus-circle-outline
+  palette:
     #Palette toggle for light mode
     - scheme: default
-      primary: indigo
-      accent: indigo 
       toggle:
         icon: material/brightness-7 
         name: Switch to dark mode
@@ -78,21 +80,20 @@ theme:
 
     # Palette toggle for dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo 
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
       code_theme: material-dark
 
 extra_css:
-#  - stylesheets/solarized-dark.css
-  - stylesheets/native.css
+  - stylesheets/extra.css
+#  - stylesheets/native.css
 #  - stylesheets/one-dark.css
 
 #extra_javascript:
 #    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
+docs_dir: docs
 watch:
   - docs
 
