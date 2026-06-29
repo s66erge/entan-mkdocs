@@ -10,20 +10,15 @@ plugins:
       arguments:
          securityLevel: 'loose' 
 
-#extra_javascript:
-#    - https://unpkg.com/mermaid/dist/mermaid.min.js
-
 markdown_extensions:
   - toc:
       permalink: "#"
   - pymdownx.highlight:
-      linenums: true
+      linenums: true 
+      use_pygments: true
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
-      use_pygments: true
-      pygments_style: rrt
-      # solarized-dark monokai default github-dark rrt 
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
@@ -37,27 +32,47 @@ theme:
   #name: readthedocs
   name: material
   features:
-    - content.code.copy
     - navigation.instant
-    - navigation.sections
-    - content.code.annotate
-    - navigation.top
+    #- navigation.top
+    - navigation.tab
+    - navigation.path
+    - content.code.copy
+    - content.code.annotate # [1]
   palette: 
     #Palette toggle for light mode
     - scheme: default
+      primary: indigo
+      accent: indigo 
       toggle:
         icon: material/brightness-7 
         name: Switch to dark mode
+      code_theme: github
 
     # Palette toggle for dark mode
     - scheme: slate
+      primary: indigo
+      accent: indigo 
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+      code_theme: material-dark
 
-#extra_css:
-#  - styles/vscode.css
+extra_css:
+#  - stylesheets/solarized-dark.css
+  - stylesheets/native.css
+#  - stylesheets/one-dark.css
+
+#extra_javascript:
+#    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
 watch:
   - docs
+
+#Bash
+#pygmentize -L styles
+#To generate a CSS file for your Markdown project (for example, using monokai), use:
+
+#Bash example
+#pygmentize -S monokai -f html -a .highlight > monokai.css
+
 # ~/~ end

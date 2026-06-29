@@ -127,7 +127,7 @@ Using: *send_email(subject, body, recipients)*
 
 - subject = "Hello from Python"
 - body = "This is a test email sent from Python."
-- recipients = ["recipient1@gmail.com"]  : list of recipients 
+- recipients = \["recipient1@gmail.com"\]  : list of recipients 
 
 ```python
 #| id: send-email
