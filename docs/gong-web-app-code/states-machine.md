@@ -2,34 +2,41 @@
 
 ## Synchronisation between Rasperry Pi and web program
 
-Synchro by reading and writing files on a shared s3 server: 
+Synchro by reading and writing files on a shared S3 server [Minio](storage-minio.md): 
 
 - Server public endpoint : bucket-production-6009.up.railway.app:443
 - Bucket : dhamma-gong-database
 
-00h45 : Web program writes the new center gong db file in the bucket
+#### 00h40 : Web program
+
+Writes the new center gong db file in the bucket
 
 - f"{center_name}/sending{file-ISO_date}.db"
 - example: mahi/sending2024-04-09.db
 
-01h00 : Rasperry Pi 
+#### 01h00 : Rasperry Pi 
+
 - reads the file if it is there
 - IF the file is there
-  - IF the date in the file name is today's date
-    - message = f"OK: {today_ISO_date}"
-    - restarts with the new db file
-  - ELSE # dates do not match
-    - message = f"wrong_date: {file_ISO_date}"
-    - restarts on the same db as before
-  - writes the message in the bucket:
-    - in the file: "f"{center_name}/settings.json"
-    - in a dict of dict with access key: 'general' then 'db_version'
+    - IF the date in the file name is today's date
+        - restarts with the new db file
+        - writes this file in the bucket:  
+          f"{center_name}/received{file-ISO_date}.db"
+    - ELSE # dates do not match
+        - restarts on the same db as before
 - ELSE # no file there
-  - restarts on the same db as before
+    - restarts on the same db as before
 
-01h20 : Web program
-- reads the settings.json file, if there
-- delete the files : .db and/or settings.json 
+#### 01h20 : Web program
+
+- checks if the file f"{center_name}/received{file-ISO_date}.db" exists
+- IF the file is there
+    - delete the file
+    - updates the master db file for the center with the new db file
+    - updates the date for the version in the center computer
+    - sends an 'OK' email to the center admin(s)
+- ELSE # no file there
+    - sends a 'NOT OK' email to the center admin(s)
 
 ## State machine for center state (and data) management 
 
@@ -125,13 +132,15 @@ class CenterState(StateChart["CenterDataModel"]):
 
 ```
 
-1. an annotation
+The state diagram for the center state machine:
+
+![State machine diagram](../images/vertical.png)
 
 ### State machines creation and access
 
-1 state machine per center.
-To create them: csms = init_center_state_machines()
-To access the sm for one center: sm = csms["Mahi"]
+1 state machine per center.  
+To create them: csms = init_center_state_machines()  
+To access the sm for one center: sm = csms\["Mahi"\]
 
 ```python
 #| id: create-centers-sms

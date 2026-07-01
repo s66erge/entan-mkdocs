@@ -1,6 +1,6 @@
 # Code sections
 
-Each link below points to a documented code file in the 'Gong web app code' section. Each file contains the exact same code as the current version of the app.
+Each link below points to a documented code file in the 'Gong web app code' section.
 
 ### Main program: initialization and html routes
 [Gong main program](../gong-web-app-code/0-gong-prog.md)

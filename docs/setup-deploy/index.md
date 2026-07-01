@@ -1,6 +1,6 @@
-# Dev and prod tools
+# List of tools: dev and prod
 
 - Python
 - Entangled for sync of code and docs
-- Zensical for generating docs static site
+- MkDocs + Material for generating docs static site
 - Railway is the production service

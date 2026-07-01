@@ -50,9 +50,9 @@ erDiagram
     }
 ```
 
-### Admin database
+### Web app database
 
-The admin database is used to manage users, centers, and planners in the gong web app. It has the following entities:
+The database is used to manage users, centers, and planners in the gong web app. It has the following entities:
 
 ROLES:
 - admin for modifying USERS / CENTERS / PLANNERS, and also gong planning 

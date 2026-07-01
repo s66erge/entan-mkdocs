@@ -3,7 +3,7 @@
 Used by the admin page in admin-show.md:  
 functions to add or delete a user / center / planner.
 
-All these functions are called with these htmx ([intro](../architecture/ui-archi.md)) tags:  
+All these functions are called with these htmx ([intro](../gong-web-app/ui-archi.md)) tags:  
 - `hx_post=` route to the function  
 - `hx_target=` id of DOM element where the resulting html will be placed  
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
