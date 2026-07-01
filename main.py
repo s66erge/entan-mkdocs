@@ -2,7 +2,7 @@
 
 # ruff: noqa: F811
 
-from fasthtml.common import *  # (1)
+from fasthtml.common import *
 from urllib.parse import quote
 import libs.states as states
 import libs.auth as auth

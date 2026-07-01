@@ -1,6 +1,5 @@
 import pytest
 import os
-from pathlib import Path
 from libs.dbset import create_tables, init_data
 from libs.utils import feed_text
 from fasthtml.common import database, to_xml
