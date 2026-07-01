@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/admin-change.md#libs/adchan.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#libs/adchan.py>>[init]
 
 import shutil
 from fasthtml.common import *
@@ -9,7 +9,7 @@ import libs.messages as messages
 import libs.states as states
 import libs.minio as minio
 
-# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-user>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#delete-user>>[init]
 
 # @rt('/delete_user/{email}')
 def delete_user(email, users, planners, centers):
@@ -38,7 +38,7 @@ def delete_user(email, users, planners, centers):
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#add-user>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#add-user>>[init]
 
 # @rt('/add_user')
 def add_user(new_user_email, name ,role_name, users, roles, centers):
@@ -74,7 +74,7 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-center>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#delete-center>>[init]
 
 # @rt('/delete_center/{center_name}')
 
@@ -115,7 +115,7 @@ def delete_center(center_name, users, centers, planners, db_path):
         print(e)
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#add-center>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#add-center>>[init]
 
 # @rt('/add_center')
 def add_center(new_center_name, center_template, users, centers, db_path, db):
@@ -162,7 +162,7 @@ def add_center(new_center_name, center_template, users, centers, db_path, db):
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#delete-planner>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#delete-planner>>[init]
 
 # @rt('/delete_planner/{user_email}/{center_name}')
 def delete_planner(user_email, center_name, planners):
@@ -183,7 +183,7 @@ def delete_planner(user_email, center_name, planners):
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-change.md#add-planner>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-change.md#add-planner>>[init]
 
 # @rt('/add_planner')
 

@@ -41,7 +41,7 @@ The Railway CLI is used to:
 
 ## Resend api key
 
-On the entan-mkdocs service in Railway, [define the variable 'RESEND_API_KEY'](../gong-web-app/utilities.md#via-resendcom)
+On the entan-mkdocs service in Railway, [define the variable 'RESEND_API_KEY'](../gong-web-app-code/utilities.md#via-resendcom)
 
 ## How to access a railway volume by installing a file browser ?
 

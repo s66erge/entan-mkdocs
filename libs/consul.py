@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center-consult.md#libs/consul.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-consult.md#libs/consul.py>>[init]
 
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -8,7 +8,7 @@ import libs.utils as utils
 import libs.dbset as dbset
 
 
-# ~/~ begin <<docs/gong-web-app/center-consult.md#consult-page>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-consult.md#consult-page>>[init]
 
 # @rt('/consult_page')
 def consult_page(session, centers):
@@ -37,7 +37,7 @@ def consult_page(session, centers):
         cls="container"
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-consult.md#consult-periods>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-consult.md#consult-periods>>[init]
 
 # @rt('/consult/select_db')
 def consult_select_db(request, centers, db_path):
@@ -98,7 +98,7 @@ def consult_select_db(request, centers, db_path):
         Div("", hx_swap_oob="true", id="periods-struct")
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-consult.md#consult-structure>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-consult.md#consult-structure>>[init]
 
 # @rt('/consult/select_period')
 def consult_select_period(request, db_path):
@@ -160,7 +160,7 @@ def consult_select_period(request, db_path):
         table, id="periods-struct-table"
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-consult.md#consult-timetable>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-consult.md#consult-timetable>>[init]
 
 # @rt('/consult/select_timetables')
 def consult_select_timetable(request, db_path):

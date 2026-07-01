@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#libs/fetch.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/fetch-courses.md#libs/fetch.py>>[init]
 
 import cloudscraper
 import re
@@ -10,7 +10,7 @@ import libs.plancheck as plancheck
 import libs.utils as utils
 import libs.minio as minio
 
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-api>>[init]
+# ~/~ begin <<docs/gong-web-app-code/fetch-courses.md#fetch-api>>[init]
 
 def fetch_scrap(location, date_start, date_end):
     scraper = cloudscraper.create_scraper()
@@ -48,7 +48,7 @@ def fetch_scrap(location, date_start, date_end):
     ]   
     return extracted
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#period-type>>[init]
+# ~/~ begin <<docs/gong-web-app-code/fetch-courses.md#period-type>>[init]
 
 def get_period_type(dhamma_type, course_type: str, dhamma_types, replacement):
     replace_dhamma = [r for r in replacement if r["raw_course_type"] == dhamma_type]
@@ -65,7 +65,7 @@ def get_period_type(dhamma_type, course_type: str, dhamma_types, replacement):
         return match_dhamma[0]['period_type']
     return dhamma_type
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#deduplicate>>[init]
+# ~/~ begin <<docs/gong-web-app-code/fetch-courses.md#deduplicate>>[init]
 
 def deduplicate(merged):
     deduplicated = []
@@ -92,7 +92,7 @@ def deduplicate(merged):
     return deduplicated
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/fetch-courses.md#fetch-courses>>[init]
+# ~/~ begin <<docs/gong-web-app-code/fetch-courses.md#fetch-courses>>[init]
 
 def get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement):
     for course in extracted:   ## [5]

@@ -1,8 +1,8 @@
-# ~/~ begin <<docs/gong-web-app/utils-javascript.md#libs/utilsJS.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utils-javascript.md#libs/utilsJS.py>>[init]
 
 from fasthtml.common import *
 
-# ~/~ begin <<docs/gong-web-app/utils-javascript.md#UI-elements-visibility>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utils-javascript.md#UI-elements-visibility>>[init]
 
 def show(UI_ref):
     return Script(f"document.getElementById('{UI_ref}').classList.remove('hidden');")
@@ -11,7 +11,7 @@ def hide(UI_ref):
     return Script(f"document.getElementById('{UI_ref}').classList.add('hidden');")
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utils-javascript.md#block-navigation>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utils-javascript.md#block-navigation>>[init]
 ### Block navigation
 JS_BLOCK_NAV = """
 document.querySelectorAll('a').forEach(link => {
@@ -54,7 +54,7 @@ console.log("Planning page timer script loaded, onbeforeunload set to warn about
 window.onbeforeunload = function() { return "Unsaved changes!";};
 """
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utils-javascript.md#client-timer>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utils-javascript.md#client-timer>>[init]
 JS_CLIENT_TIMER = """
 function startCountdown(seconds, elementId) {
     const element = document.getElementById(elementId);

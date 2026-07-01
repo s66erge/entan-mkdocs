@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/states-transitions.md#libs/transit.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-transitions.md#libs/transit.py>>[init]
 
 import os
 import asyncio
@@ -15,7 +15,7 @@ import libs.messages as messages
 
 pending_tasks = {}
 
-# ~/~ begin <<docs/gong-web-app/states-transitions.md#user-transitions>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-transitions.md#user-transitions>>[init]
 
 async def check_center_free(state_mach, this_user):
     center_lock = states.clocks[state_mach.model.center_name]
@@ -40,7 +40,7 @@ async def goto_free(session, event, csms):
     return  Redirect(f"/status_page?center={this_center}")
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/states-transitions.md#system-transitions>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-transitions.md#system-transitions>>[init]
 
 async def save_db_plan_times(model):
     save_db_file = await planning.save_db_plan_timetable(model.center_name)

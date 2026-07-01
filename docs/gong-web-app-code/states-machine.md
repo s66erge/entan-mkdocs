@@ -85,9 +85,6 @@ class CenterState(StateChart["CenterDataModel"]):
     allow_event_without_transition = False
     atomic_configuration_update = True
 
-    free = State("Planning free to be edited", initial=True)
-    edit = State("Planning is being edited")
-
     class send_to_center(State.Compound):
 
         save_db = State("Saving new planning in database", initial=True)
@@ -100,9 +97,11 @@ class CenterState(StateChart["CenterDataModel"]):
             | wait_02.to(getting_prod)
 
 
+    edit = State("Planning is being edited")
     w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
     w_reco_prod = State("Confirmation of version failed: waiting for production recovery")
     errorex = State("Error in callback execution")
+    free = State("Planning free to be edited", initial=True)
 
     progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
     problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)

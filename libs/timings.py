@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/gong-timings.md#libs/timings.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings.md#libs/timings.py>>[init]
 
 import pandas as pd
 from urllib.parse import quote_plus
@@ -9,7 +9,7 @@ import libs.plancheck as plancheck
 import libs.dbset as dbset
 import libs.minio as minio
 
-# ~/~ begin <<docs/gong-web-app/gong-timings.md#check-show-period-types>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings.md#check-show-period-types>>[init]
 
 # @rt('/timings/load_center_periods')
 
@@ -134,7 +134,7 @@ def get_other_center_periods(session, center):
 
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/gong-timings.md#show-struct-timetable>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings.md#show-struct-timetable>>[init]
 
 # @rt('/timings/select_period')
 def select_period(session, period_type, clear_show_times=True):
@@ -247,7 +247,7 @@ def select_timings(session, period_type, day_type):
     )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/gong-timings.md#load-save-timings>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings.md#load-save-timings>>[init]
 
 def load_timings(center):
     selected_db = dbset.gong_db_name(center)

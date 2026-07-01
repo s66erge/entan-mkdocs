@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/utilities.md#libs/utils.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#libs/utils.py>>[init]
 
 import socket
 import calendar
@@ -58,7 +58,7 @@ class GlobalsDefinition:
 
 Globals = GlobalsDefinition()
 
-# ~/~ begin <<docs/gong-web-app/utilities.md#isdev-computer>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#isdev-computer>>[init]
 def isa_dev_computer():
     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
     hostname = socket.gethostname()
@@ -77,11 +77,11 @@ def get_db_path():
     return root + "data/"
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#istest-db>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#istest-db>>[init]
 def isa_db_test(db):
     return 'Database <apsw.Connection object ""' in str(db)
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#send-email>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#send-email>>[init]
 
 def send_email(subject, body, recipients):
     sender = Globals.EMAIL_SENDER
@@ -102,7 +102,7 @@ def resend_email(sender, subject, body, recipients):
     email = resend.Emails.send(params)
     print(f'Message sent: {email} to {recipients} subject {subject}')
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#display-markdown>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#display-markdown>>[init]
 
 def display_markdown(file_name:str, insert=None):
     file_path = os.path.join('md-text', f"{file_name}.md")
@@ -137,7 +137,7 @@ def toggle_markdown(md_id: str, insert=None, showhelp=False):
     )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#plus-months-days>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#plus-months-days>>[init]
 
 def add_months_days(date_str, num_months, num_days):
     dt = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -166,7 +166,7 @@ def seconds_to_hours_minutes(total_seconds):
     return hours, remaining_minutes
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#pre-select-fasthtml>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#pre-select-fasthtml>>[init]
 
 def option_selected_one(value, current):
     return Option(
@@ -185,7 +185,7 @@ def option_selected_multi(value, selected_values):
     )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/utilities.md#date-time-picker>>[init]
+# ~/~ begin <<docs/gong-web-app-code/utilities.md#date-time-picker>>[init]
 
 def TimePicker(name, value=None, id=None, label=None):
     id = id or f"{name}_picker"
