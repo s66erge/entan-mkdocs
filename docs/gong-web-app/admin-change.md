@@ -1,4 +1,4 @@
-# Admin change functions
+# Admin - CRuD
 
 Used by the admin page in admin-show.md:  
 functions to add or delete a user / center / planner.

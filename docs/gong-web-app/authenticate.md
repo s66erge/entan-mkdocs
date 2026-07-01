@@ -1,4 +1,4 @@
-# Authentication with a code by email
+# Authenticate by email
 
 This is a passwordless authentication:
 
