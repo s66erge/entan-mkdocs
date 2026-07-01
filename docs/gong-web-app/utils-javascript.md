@@ -1,4 +1,4 @@
-# JS utilities
+# JavaScript utilities
 
 ```python
 #| file: libs/utilsJS.py

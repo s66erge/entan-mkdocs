@@ -1,4 +1,4 @@
-# Admin - all UI
+# Admin - UI
 
 Will only be reachable for signed in admin users.
 

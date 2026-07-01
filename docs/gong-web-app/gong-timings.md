@@ -1,4 +1,4 @@
-# Timetables page
+# Gong timetables - UI
 
 Will only be reachable for authenticated users and planner for the selected center.
 

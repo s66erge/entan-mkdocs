@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center_machines.md#libs/states.py>>[init]
+# ~/~ begin <<docs/gong-web-app/states-machine.md#libs/states.py>>[init]
 
 from abc import ABC
 from abc import abstractmethod
@@ -13,7 +13,7 @@ import libs.utils as utils
 csms = {}
 clocks = {}
 
-# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+# ~/~ begin <<docs/gong-web-app/states-machine.md#state-machine>>[init]
 
 class HistoryListener:
     def __init__(self, model):
@@ -77,7 +77,7 @@ class CenterState(StateChart["CenterDataModel"]):
         await transit.send_center_email(self.model,'errorex', "ATTENTION: Gong app execution error")
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
+# ~/~ begin <<docs/gong-web-app/states-machine.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
     def __init__(self):
         self._state = None
@@ -97,7 +97,7 @@ class AbstractPersistentModel(ABC):
     @abstractmethod
     def _write_state(self, value): ...
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#db-persistent-model>>[init]
+# ~/~ begin <<docs/gong-web-app/states-machine.md#db-persistent-model>>[init]
 def status_to_stri(status):
     if status is None:
         return None
@@ -233,7 +233,7 @@ class CenterDataModel(AbstractPersistentModel):
         return
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
+# ~/~ begin <<docs/gong-web-app/states-machine.md#create-centers-sms>>[init]
 
 def delete_state_machine(center_name):
     del csms[center_name]

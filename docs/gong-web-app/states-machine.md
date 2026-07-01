@@ -1,4 +1,4 @@
-# Center state machines
+# State machine - for centers
 
 ## Synchronisation between Rasperry Pi and web program
 

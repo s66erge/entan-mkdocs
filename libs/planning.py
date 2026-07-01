@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center-planning.md#libs/planning.py>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-planning.md#libs/planning.py>>[init]
 
 import asyncio
 import os
@@ -14,7 +14,7 @@ import libs.dbset as dbset
 import libs.minio as minio
 import libs.utilsJS as utilsJS
 
-# ~/~ begin <<docs/gong-web-app/center-planning.md#create-html-table>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-planning.md#create-html-table>>[init]
 
 def show_draft_plan_table(draft_plan, center, mess):
     # Create an HTML table from a draft plan list of dictionaries
@@ -92,7 +92,7 @@ def show_draft_plan_table(draft_plan, center, mess):
     )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-planning.md#load-show-center-plan>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-planning.md#load-show-center-plan>>[init]
 
 # @rt('/planning/load_dhamma_db')
 def load_dhamma_db(session):
@@ -185,7 +185,7 @@ async def add_line(session, ptype, start):
     plancomp = plancheck.add_end_dates(plansor, selected_name)
     return await check_save_show_plan(session, plancomp, {"success" : "new_course"})
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-planning.md#planning-page>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-planning.md#planning-page>>[init]
 
 def load_minio_timings_from_db(center):
     selected_db = dbset.gong_db_name(center)

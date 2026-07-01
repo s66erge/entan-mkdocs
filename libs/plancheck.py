@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center-plan-check.md#libs/plancheck.py>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-plan-check.md#libs/plancheck.py>>[init]
 
 from fasthtml.common import *
 from datetime import date
@@ -8,7 +8,7 @@ import libs.utils as utils
 import libs.dbset as dbset
 import libs.minio as minio
 
-# ~/~ begin <<docs/gong-web-app/center-plan-check.md#this-center-courses>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-plan-check.md#this-center-courses>>[init]
 
 def add_end_dates(plan, center):
     types_with_duration = get_types_with_duration(center)
@@ -50,7 +50,7 @@ def coming_center_courses(center):
     return sorted_periods_ends, date_current_course
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-plan-check.md#obtain-durations>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-plan-check.md#obtain-durations>>[init]
 
 def get_period_types_list(center, source="df"):
     if source == "df":
@@ -106,7 +106,7 @@ def get_types_with_duration(center, source="df"):
     return types_sorted
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-plan-check.md#check-complete-plan>>[init]
+# ~/~ begin <<docs/gong-web-app/gong-plan-check.md#check-complete-plan>>[init]
 def check_plan(session, plan, center):
     types_with_duration = get_types_with_duration(center)
     default_period = next((t for t in types_with_duration if t.get("tags") == "X"), {}).get("period_type", "")

@@ -1,6 +1,9 @@
-# Get schedule from dhamma.org and merge into center schedule
+# Fetch Courses - dhamma.org
 
-### Example usage:
+## Fetching courses from dhamma.org
+
+Example usage:
+
 fetch_dhamma_courses("Mahi", 6, 0)
 fetch_dhamma_courses("Pajjota", 6, 0)
 

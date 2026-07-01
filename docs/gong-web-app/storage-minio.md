@@ -1,5 +1,4 @@
-# Get/send file/data to minio for center rasperry Pi and local files
-
+# Storage 'S3' : Minio
 
 
 ```python

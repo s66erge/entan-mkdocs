@@ -1,4 +1,4 @@
-# Center consult page
+# Center consult
 
 Will only be reachable for authenticated users.
 

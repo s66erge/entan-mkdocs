@@ -1,4 +1,4 @@
-# Utilities
+# Utilities + parameters
 
 - checking if the program runs on a development machine
 - sending an email

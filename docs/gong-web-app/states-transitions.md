@@ -1,4 +1,4 @@
-# Center machines transitions
+# State machines - actions
 
 The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
 Here are the transitions processes used by the state machines
