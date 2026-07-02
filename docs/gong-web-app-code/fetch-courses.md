@@ -260,11 +260,11 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     periods_db_center, date_current_course = plancheck.coming_center_courses(center)
 
     end_date = utils.add_months_days(date_current_course, num_months, num_days)
-    
+
     # fetch extracted courses from dhamma.org
     extracted = await asyncio.to_thread(fetch_scrap, dhamma_location, date_current_course, end_date)
     #print(tabulate(extracted, headers="keys"))
-    
+
     # get the course_type for each extracted course from the mapping and replacements tables
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)
     #print(tabulate(periods_dhamma_org, headers="keys"))

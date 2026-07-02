@@ -76,7 +76,7 @@ class HistoryListener:
         self.model = model
         self.entries = []
 
-    def after_transition(self, event, source, target):
+    def on_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \
@@ -224,13 +224,17 @@ class CenterDataModel(AbstractPersistentModel):
             status = value_stri,
             status_start = self.status_start
         )
+        return
 
     def update_attr(self, attr_name, value):
+        print(f"Updating attribute {attr_name} to {value} for center {self.center_name}")
         setattr(self, attr_name, value)
         centers = self.db.t.center
         center_obj = centers[self.center_name]
         row_dict = center_obj.__dict__
+        row_dict[attr_name] = value
         centers.update(row_dict)
+        return
 
     def get_status_stri(self):
         return status_to_stri(self._read_state())
@@ -252,22 +256,24 @@ class CenterDataModel(AbstractPersistentModel):
 
     def add_machine(self, machine):
         self.state_mach = machine
+        return
 
     async def go_next(self, result, delai=1, sendid = None):
         self.last_result = result
         if "success" in result:
             await self.state_mach.send("progress", delay=delai, send_id=sendid)
-            return
         else:
             await self.state_mach.send("problem")
-            return
+        return
 
     async def on_enter_free(self):
         self.last_result = {"success": "center is free again"}
-        self.update_attr(self, "created_by", None)
+        self.update_attr("created_by", None)
+        return
 
     async def on_enter_edit(self):
         self.last_result = {"success": "entered edit mode"}
+        return
 
     async def on_enter_save_db(self):
         result = await transit.save_db_plan_times(self)
@@ -282,6 +288,7 @@ class CenterDataModel(AbstractPersistentModel):
         if self.send_id:
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
+        return
 
     async def on_enter_transfer(self):
         result = await transit.transfer_new_db(self)
@@ -296,6 +303,7 @@ class CenterDataModel(AbstractPersistentModel):
         if self.send_id:
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
+        return
 
     async def on_enter_getting_prod(self):
         result = await transit.delete_new_db(self)
