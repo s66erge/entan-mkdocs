@@ -5,12 +5,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link href="https://s66erge.github.io/entan-mkdocs/setup-deploy/entangled/" rel="canonical"/>
-<link href="../a-python-environ/" rel="prev"/>
-<link href="../mkdocs/" rel="next"/>
+<link href="https://s66erge.github.io/entan-mkdocs/gong-web-app/data-design/" rel="canonical"/>
+<link href="../../gong-players/intro/" rel="prev"/>
+<link href="../folders-files/" rel="next"/>
 <link href="../../assets/images/favicon.png" rel="icon"/>
 <meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
-<title>Entangled - Gong system and apps for Vipassane centers</title>
+<title>Database design - Gong system and apps for Vipassane centers</title>
 <link href="../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
 <link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -24,7 +24,7 @@
 <input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
 <label class="md-overlay" for="__drawer"></label>
 <div data-md-component="skip">
-<a class="md-skip" href="#entangled">
+<a class="md-skip" href="#database-design">
           Skip to content
         </a>
 </div>
@@ -48,7 +48,7 @@
 <div class="md-header__topic" data-md-component="header-topic">
 <span class="md-ellipsis">
             
-              Entangled
+              Database design
             
           </span>
 </div>
@@ -219,8 +219,8 @@
 </ul>
 </nav>
 </li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
 <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
 <span class="md-ellipsis">
     
@@ -232,7 +232,7 @@
   </span>
 <span class="md-nav__icon md-icon"></span>
 </label>
-<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<nav aria-expanded="true" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="__nav_4">
 <span class="md-nav__icon md-icon"></span>
             
@@ -242,8 +242,20 @@
 
           </label>
 <ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/data-design/">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Database design
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
 <span class="md-ellipsis">
     
   
@@ -253,9 +265,53 @@
     
   </span>
 </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gong-databases">
+<span class="md-ellipsis">
+      
+        Gong databases
+      
+    </span>
+</a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/folders-files/">
+<a class="md-nav__link" href="#er-diagrams">
+<span class="md-ellipsis">
+      
+        ER diagrams
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#web-app-database">
+<span class="md-ellipsis">
+      
+        Web app database
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#er-diagrams_1">
+<span class="md-ellipsis">
+      
+        ER diagrams
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../folders-files/">
 <span class="md-ellipsis">
     
   
@@ -267,7 +323,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/sections-code/">
+<a class="md-nav__link" href="../sections-code/">
 <span class="md-ellipsis">
     
   
@@ -279,7 +335,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/sourcing-dhamma-org/">
+<a class="md-nav__link" href="../sourcing-dhamma-org/">
 <span class="md-ellipsis">
     
   
@@ -291,7 +347,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/tools-dev-prod/">
+<a class="md-nav__link" href="../tools-dev-prod/">
 <span class="md-ellipsis">
     
   
@@ -303,7 +359,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../gong-web-app/ui-archi/">
+<a class="md-nav__link" href="../ui-archi/">
 <span class="md-ellipsis">
     
   
@@ -559,8 +615,8 @@
 </ul>
 </nav>
 </li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
 <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
 <span class="md-ellipsis">
     
@@ -572,7 +628,7 @@
   </span>
 <span class="md-nav__icon md-icon"></span>
 </label>
-<nav aria-expanded="true" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="__nav_6">
 <span class="md-nav__icon md-icon"></span>
             
@@ -583,7 +639,7 @@
           </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="../a-python-environ/">
+<a class="md-nav__link" href="../../setup-deploy/a-python-environ/">
 <span class="md-ellipsis">
     
   
@@ -594,20 +650,8 @@
   </span>
 </a>
 </li>
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
-<span class="md-ellipsis">
-    
-  
-    Entangled
-  
-
-    
-  </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../setup-deploy/entangled/">
 <span class="md-ellipsis">
     
   
@@ -617,66 +661,9 @@
     
   </span>
 </a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#initial-installation">
-<span class="md-ellipsis">
-      
-        Initial Installation
-      
-    </span>
-</a>
-<nav aria-label="Initial Installation" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#windows">
-<span class="md-ellipsis">
-      
-        Windows
-      
-    </span>
-</a>
-</li>
-</ul>
-</nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#commands">
-<span class="md-ellipsis">
-      
-        Commands
-      
-    </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#restoring-files-when-both-markdown-and-code-have-changed">
-<span class="md-ellipsis">
-      
-        Restoring files when both Markdown and code have changed
-      
-    </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#configuration">
-<span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../mkdocs/">
+<a class="md-nav__link" href="../../setup-deploy/mkdocs/">
 <span class="md-ellipsis">
     
   
@@ -688,7 +675,7 @@
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../railway/">
+<a class="md-nav__link" href="../../setup-deploy/railway/">
 <span class="md-ellipsis">
     
   
@@ -717,50 +704,37 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#initial-installation">
+<a class="md-nav__link" href="#gong-databases">
 <span class="md-ellipsis">
       
-        Initial Installation
-      
-    </span>
-</a>
-<nav aria-label="Initial Installation" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#windows">
-<span class="md-ellipsis">
-      
-        Windows
-      
-    </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#commands">
-<span class="md-ellipsis">
-      
-        Commands
+        Gong databases
       
     </span>
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#restoring-files-when-both-markdown-and-code-have-changed">
+<a class="md-nav__link" href="#er-diagrams">
 <span class="md-ellipsis">
       
-        Restoring files when both Markdown and code have changed
+        ER diagrams
       
     </span>
 </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#configuration">
+<a class="md-nav__link" href="#web-app-database">
 <span class="md-ellipsis">
       
-        Configuration
+        Web app database
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#er-diagrams_1">
+<span class="md-ellipsis">
+      
+        ER diagrams
       
     </span>
 </a>
@@ -781,124 +755,107 @@
 </a>
 </li>
 <li class="md-path__item">
-<a class="md-path__link" href="../a-python-environ/">
+<a class="md-path__link" href="./">
 <span class="md-ellipsis">
-    Setup deploy
+    Gong web app
   </span>
 </a>
 </li>
 </ol>
 </nav>
 <article class="md-content__inner md-typeset">
-<h1 id="entangled">Entangled<a class="headerlink" href="#entangled" title="Permanent link">#</a></h1>
-<p>Entangled is a tool to manage code snippets in Markdown files. It allows you to tangle code from Markdown files into separate source files and stitch changes back into the Markdown files.
-For full documentation visit:</p>
-<ul>
-<li><a href="https://entangled.github.io/#about">user documentation</a></li>
-<li><a href="https://github.com/entangled/entangled.py">installation / configuration</a>.</li>
-</ul>
-<p>Pandoc needs to be installed for Entangled.</p>
-<p>VSCode extensions:</p>
-<ul>
-<li>Markdown All in One</li>
-<li>Markdown Preview Enhanced</li>
-<li>Entangled VSCode : helps for editing the entangled files.</li>
-</ul>
-<h2 id="initial-installation">Initial Installation<a class="headerlink" href="#initial-installation" title="Permanent link">#</a></h2>
-<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">#</a></h3>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
-<span class="normal"><a href="#__codelineno-0-2">2</a></span>
-<span class="normal"><a href="#__codelineno-0-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c">#| file: setup/entangled.ps1 </span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="n">scoop</span> <span class="n">install</span> <span class="n">pandoc</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">entangled-cli</span>
-</span></code></pre></div></td></tr></table></div>
-<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">#</a></h2>
-<p>see: entangled --help</p>
-<h2 id="restoring-files-when-both-markdown-and-code-have-changed">Restoring files when both Markdown and code have changed<a class="headerlink" href="#restoring-files-when-both-markdown-and-code-have-changed" title="Permanent link">#</a></h2>
-<p>When you edited both Markdown and code without the daemon running, you may need to do some tricks to get back into a consistent state.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
-<span class="normal"><a href="#__codelineno-1-2">2</a></span>
-<span class="normal"><a href="#__codelineno-1-3">3</a></span>
-<span class="normal"><a href="#__codelineno-1-4">4</a></span>
-<span class="normal"><a href="#__codelineno-1-5">5</a></span>
-<span class="normal"><a href="#__codelineno-1-6">6</a></span>
-<span class="normal"><a href="#__codelineno-1-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a>git add . 
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a>git commit -m 'fixed everything'  # save everything you did
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a>entangled tangle --force          # overwrites some changes you made
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a>git restore main.py               # retrieve from latest commit
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a>entangled stitch                  # apply changes back to markdown
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a>git add .
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a>git commit --amend                # amend your commit to perfection
-</span></code></pre></div></td></tr></table></div>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-2-10">10</a></span>
-<span class="normal"><a href="#__codelineno-2-11">11</a></span>
-<span class="normal"><a href="#__codelineno-2-12">12</a></span>
-<span class="normal"><a href="#__codelineno-2-13">13</a></span>
-<span class="normal"><a href="#__codelineno-2-14">14</a></span>
-<span class="normal"><a href="#__codelineno-2-15">15</a></span>
-<span class="normal"><a href="#__codelineno-2-16">16</a></span>
-<span class="normal"><a href="#__codelineno-2-17">17</a></span>
-<span class="normal"><a href="#__codelineno-2-18">18</a></span>
-<span class="normal"><a href="#__codelineno-2-19">19</a></span>
-<span class="normal"><a href="#__codelineno-2-20">20</a></span>
-<span class="normal"><a href="#__codelineno-2-21">21</a></span>
-<span class="normal"><a href="#__codelineno-2-22">22</a></span>
-<span class="normal"><a href="#__codelineno-2-23">23</a></span>
-<span class="normal"><a href="#__codelineno-2-24">24</a></span>
-<span class="normal"><a href="#__codelineno-2-25">25</a></span>
-<span class="normal"><a href="#__codelineno-2-26">26</a></span>
-<span class="normal"><a href="#__codelineno-2-27">27</a></span>
-<span class="normal"><a href="#__codelineno-2-28">28</a></span>
-<span class="normal"><a href="#__codelineno-2-29">29</a></span>
-<span class="normal"><a href="#__codelineno-2-30">30</a></span>
-<span class="normal"><a href="#__codelineno-2-31">31</a></span>
-<span class="normal"><a href="#__codelineno-2-32">32</a></span>
-<span class="normal"><a href="#__codelineno-2-33">33</a></span>
-<span class="normal"><a href="#__codelineno-2-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1">#| file: entangled.toml</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"2.0"</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="n">watch_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"docs/**/*.md"</span><span class="p">]</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="n">hooks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"quarto_attributes"</span><span class="p">]</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="k">[markers]</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="n">open</span><span class="o">=</span><span class="s2">"^(?P&lt;indent&gt;</span><span class="se">\\</span><span class="s2">s*)```(?P&lt;properties&gt;.*)$"</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="n">close</span><span class="o">=</span><span class="s2">"^(?P&lt;indent&gt;</span><span class="se">\\</span><span class="s2">s*)```</span><span class="se">\\</span><span class="s2">s*$"</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10"></a>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11"></a><span class="k">[[languages]]</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Powershell"</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13"></a><span class="n">identifiers</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">[</span><span class="s2">"powershell"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pwsh"</span><span class="p">]</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"#"</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15"></a>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="k">[[languages]]</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"XML"</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18"></a><span class="n">identifiers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"xml"</span><span class="p">,</span><span class="w"> </span><span class="s2">"html"</span><span class="p">,</span><span class="w"> </span><span class="s2">"svg"</span><span class="p">]</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19"></a><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"&lt;!--"</span><span class="p">,</span><span class="w"> </span><span class="n">close</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"--&gt;"</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20"></a>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="k">[[languages]]</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"mermaid"</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23"></a><span class="n">identifiers</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">[</span><span class="s2">"mermaid"</span><span class="p">]</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"%%"</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25"></a>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26"></a><span class="k">[[languages]]</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"yaml"</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28"></a><span class="n">identifiers</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">[</span><span class="s2">"yaml"</span><span class="p">]</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29"></a><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"#"</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30"></a>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31"></a><span class="k">[[languages]]</span>
-</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32"></a><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"toml"</span>
-</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33"></a><span class="n">identifiers</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">[</span><span class="s2">"toml"</span><span class="p">]</span>
-</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34"></a><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"#"</span><span class="w"> </span><span class="p">}</span>
-</span></code></pre></div></td></tr></table></div>
+<h1 id="database-design">Database design<a class="headerlink" href="#database-design" title="Permanent link">#</a></h1>
+<h3 id="gong-databases">Gong databases<a class="headerlink" href="#gong-databases" title="Permanent link">#</a></h3>
+<p>One gong database is used to store the gong planning data for each center. Each gong database name is referenced in the CENTERS table in the Admin database below.
+All gong databases have the same structure detailed here below, but their content will vary from center to center.</p>
+<h3 id="er-diagrams">ER diagrams<a class="headerlink" href="#er-diagrams" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>erDiagram
+
+    COMING_PERIODS { 
+        string start_date PK "ISO date string"
+        string period_type FK 
+   }
+
+    COMING_PERIODS ||--|| PERIODS_STRUCT : "has this structure table"
+    PERIODS_STRUCT {
+        string period_type PK, FK
+        int day_sequence PK "sequence of day: 0, 1, 2, ..."
+        string day_type FK "'day 0', 'course day', 'last day'"
+        }
+
+    PERIODS_STRUCT  }o--o{ TIMETABLES : "day type has these timings"
+    TIMETABLES {
+        string period_type PK, FK
+        string day_type PK,FK
+        string gong_time PK "ISO time string"
+        int gong_sound FK "gong sound to play"
+        int automatic_gong "gong is automatic or manual (e.g.: depends on the kitchen)"
+        string targets "list of Rasperry Pi(s) on this center that will ring this gong"
+        string comment
+    }
+
+    TIMETABLES ||--|| GONGS : "gong sound is defined in this table"
+    GONGS {
+        int gong_sound PK
+        int repeat
+        float interval "in seconds"
+        float length "in seconds"
+        string comment
+    }
+
+    TIMETABLES ||--|| TARGETS : "gong targets are defined in this table"
+    TARGETS {
+        int id PK
+        string shortname "short name of the target"
+        string longname "long name of the target"
+    }</code></pre>
+<h3 id="web-app-database">Web app database<a class="headerlink" href="#web-app-database" title="Permanent link">#</a></h3>
+<p>The database is used to manage users, centers, and planners in the gong web app. It has the following entities:</p>
+<p>ROLES:
+- admin for modifying USERS / CENTERS / PLANNERS, and also gong planning 
+- user for gong planning only</p>
+<p>USERS:
+- authenticated by sending a "magic link" to their email address : see "authenticate.md"</p>
+<p>CENTERS:
+- with the gong database name for this center</p>
+<p>PLANNERS:
+- indicates which user(s) can modify the gong planning of which center </p>
+<h3 id="er-diagrams_1">ER diagrams<a class="headerlink" href="#er-diagrams_1" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>erDiagram
+
+    ROLES { 
+        string role_name PK
+        text description
+    }
+
+    USERS  }o--|| ROLES : "has role"
+    USERS {
+        string email PK
+        string name
+        string role_name FK
+        string last_login "ISO date-time string"
+        string magic_link_token
+        timestamp magic_link_expiry
+        boolean is_active
+        string timezone "from browser, e.g. 'Europe/Paris'"
+    }
+
+    CENTERS {
+        string center_name PK
+        string pi_db_date "ISO date string of last planning saved to the center"
+        string status "current state machine status"
+        string created_by "user who created the current planning"
+        string status_start "ISO datetime for state machine current status"
+        string center_save_date "ISO date for saving the current planning"
+        string save_db_filename "name of file with planning to send to the center"
+    }
+
+    USERS ||--o{ PLANNERS : "is a"
+    PLANNERS }o--|| CENTERS : for
+    PLANNERS {
+        string user_email PK, FK
+        string center_name PK, FK
+    }</code></pre>
 </article>
 </div>
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>

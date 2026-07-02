@@ -1,0 +1,19 @@
+body {
+  outline: 5px solid red !important;
+}
+/* Global: make the annotation marker visible */
+.md-annotation__index::after {
+  background-color: #ffffff;   /* dot background */
+  border-color: #ffffff;       /* dot border */
+}
+
+/* Dark mode only: stronger contrast on slate */
+[data-md-color-scheme="slate"] .md-annotation__index::after {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Optional: color of the number inside the tooltip */
+[data-md-color-scheme="slate"] .md-annotation__index {
+  color: #ffffff;
+}
