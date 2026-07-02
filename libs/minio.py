@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/minio_access.md#libs/minio.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#libs/minio.py>>[init]
 
 import os
 import libs.utils as utils
@@ -14,7 +14,7 @@ minio_client = None # global S3 client, initialized from main.py and used in tra
 # https://docs.min.io/enterprise/aistor-object-store/developers/sdk/python/
 
 
-# ~/~ begin <<docs/gong-web-app/minio_access.md#define-client>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#define-client>>[init]
 
 def create_minio_client():
     if utils.isa_dev_computer():
@@ -34,7 +34,7 @@ def create_minio_client():
     return client
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/minio_access.md#get-objects-alist>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-objects-alist>>[init]
 
 def get_objects_list(bucket, prefix, recursive=True):
     listob = []
@@ -50,7 +50,7 @@ def delete_object(bucket, prefix, object_name):
     return result
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/minio_access.md#file-upload>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#file-upload>>[init]
 
 def file_upload(bucket, the_object, file_to_upload):
     result = minio_client.fput_object(
@@ -60,7 +60,7 @@ def file_upload(bucket, the_object, file_to_upload):
     )
     return result
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/minio_access.md#file-download>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#file-download>>[init]
 def file_download(bucket, the_object, file_to_write):
     result = minio_client.fget_object(
         bucket_name=bucket,
@@ -70,7 +70,7 @@ def file_download(bucket, the_object, file_to_write):
     return result
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/minio_access.md#get-save-temp-files>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-save-temp-files>>[init]
 
 def get_center_temp_df(center, df_name):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
@@ -105,7 +105,7 @@ def remove_center_temp_data(center):
     return
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/minio_access.md#get-save-excel-files>>[init]
+# ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-save-excel-files>>[init]
 
 def save_excel_minio(center):
     if center == "all_centers":

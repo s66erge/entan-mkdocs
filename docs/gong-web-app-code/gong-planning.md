@@ -1,4 +1,4 @@
-# Center planning page
+# Gong planning - UI
 
 Will only be reachable for authenticated users and planner for the selected center.
 

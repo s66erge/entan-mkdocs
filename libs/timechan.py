@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/timings-change.md#libs/timechan.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings-chan.md#libs/timechan.py>>[init]
 
 import pandas as pd
 from fasthtml.common import *
@@ -9,7 +9,7 @@ import libs.minio as minio
 import libs.timings as timings
 import libs.messages as messages
 
-# ~/~ begin <<docs/gong-web-app/timings-change.md#repaint-timings>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings-chan.md#repaint-timings>>[init]
 
 def repaint(session, period_type, day_type, message, clear_show_times):
     mess_periods = None
@@ -31,7 +31,7 @@ def repaint(session, period_type, day_type, message, clear_show_times):
     )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/timings-change.md#change-timetables>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings-chan.md#change-timetables>>[init]
 
 # @rt('/timings/delete_timetable_row')
 def delete_timetable_row(session, idx):
@@ -145,7 +145,7 @@ def add_mod_timetable_row(session, period_type, day_type, idx, time, gong_id, au
     return repaint(session, period_type, day_type, message, False)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/timings-change.md#change-struct>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings-chan.md#change-struct>>[init]
 
 # @rt('/timings/modify_day_type')
 def modify_day_type(session, index, day_type):
@@ -227,7 +227,7 @@ def create_day_type(session, period_type, new_day_type, day_type):
     return repaint(session, period_type, new_day_type, message, False)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/timings-change.md#change-period>>[init]
+# ~/~ begin <<docs/gong-web-app-code/gong-timings-chan.md#change-period>>[init]
 
 # @rt('/timings/delete_period')
 def delete_period(session, period_type):

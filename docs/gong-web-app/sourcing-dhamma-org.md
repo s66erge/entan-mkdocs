@@ -1,13 +1,13 @@
-# dhamma.org courses API 
+# Sourcing dhamma.org courses
 
-## Request
+### Request
 
 - POST request
 **Request URL:** https://www.dhamma.org/en-US/courses/do_search
 - current_state=OldStudents&regions[]=location_1370&daterange=2025-11-02 - 2026-11-02&page=1
 - iterate over pages until reaching the ‘pages’ at the end of the Response
 
-## Response
+### Response
 
 Summary with relevant fields
     

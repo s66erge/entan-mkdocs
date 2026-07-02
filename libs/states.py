@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center_machines.md#libs/states.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-machine.md#libs/states.py>>[init]
 
 from abc import ABC
 from abc import abstractmethod
@@ -13,7 +13,7 @@ import libs.utils as utils
 csms = {}
 clocks = {}
 
-# ~/~ begin <<docs/gong-web-app/center_machines.md#state-machine>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-machine.md#state-machine>>[init]
 
 class HistoryListener:
     def __init__(self, model):
@@ -21,7 +21,7 @@ class HistoryListener:
         self.model = model
         self.entries = []
 
-    def after_transition(self, event, source, target):
+    def on_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \
@@ -37,9 +37,6 @@ class CenterState(StateChart["CenterDataModel"]):
     allow_event_without_transition = False
     atomic_configuration_update = True
 
-    free = State("Planning free to be edited", initial=True)
-    edit = State("Planning is being edited")
-
     class send_to_center(State.Compound):
 
         save_db = State("Saving new planning in database", initial=True)
@@ -52,9 +49,11 @@ class CenterState(StateChart["CenterDataModel"]):
             | wait_02.to(getting_prod)
 
 
+    edit = State("Planning is being edited")
     w_reco_trans = State("Planning send failed: waiting for file transfer recovery")
     w_reco_prod = State("Confirmation of version failed: waiting for production recovery")
     errorex = State("Error in callback execution")
+    free = State("Planning free to be edited", initial=True)
 
     progress = free.to(edit) | edit.to(send_to_center) | send_to_center.getting_prod.to(free)
     problem  = send_to_center.transfer.to(w_reco_trans) | send_to_center.getting_prod.to(w_reco_prod)
@@ -77,7 +76,7 @@ class CenterState(StateChart["CenterDataModel"]):
         await transit.send_center_email(self.model,'errorex', "ATTENTION: Gong app execution error")
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#abstract-with-persistency>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-machine.md#abstract-with-persistency>>[init]
 class AbstractPersistentModel(ABC):
     def __init__(self):
         self._state = None
@@ -97,7 +96,7 @@ class AbstractPersistentModel(ABC):
     @abstractmethod
     def _write_state(self, value): ...
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#db-persistent-model>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-machine.md#db-persistent-model>>[init]
 def status_to_stri(status):
     if status is None:
         return None
@@ -146,13 +145,17 @@ class CenterDataModel(AbstractPersistentModel):
             status = value_stri,
             status_start = self.status_start
         )
+        return
 
     def update_attr(self, attr_name, value):
+        print(f"Updating attribute {attr_name} to {value} for center {self.center_name}")
         setattr(self, attr_name, value)
         centers = self.db.t.center
         center_obj = centers[self.center_name]
         row_dict = center_obj.__dict__
+        row_dict[attr_name] = value
         centers.update(row_dict)
+        return
 
     def get_status_stri(self):
         return status_to_stri(self._read_state())
@@ -174,23 +177,25 @@ class CenterDataModel(AbstractPersistentModel):
 
     def add_machine(self, machine):
         self.state_mach = machine
+        return
 
     async def go_next(self, result, delai=1, sendid = None):
         self.last_result = result
         if "success" in result:
             await self.state_mach.send("progress", delay=delai, send_id=sendid)
-            return
         else:
             await self.state_mach.send("problem")
-            return
+        return
 
     async def on_enter_free(self):
         self.last_result = {"success": "center is free again"}
-        self.update_attr(self, "created_by", None)
-
+        self.update_attr("created_by", None)
+        return
+    
     async def on_enter_edit(self):
         self.last_result = {"success": "entered edit mode"}
-
+        return
+    
     async def on_enter_save_db(self):
         result = await transit.save_db_plan_times(self)
         return await self.go_next(result)
@@ -204,7 +209,8 @@ class CenterDataModel(AbstractPersistentModel):
         if self.send_id:
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
-
+        return
+        
     async def on_enter_transfer(self):
         result = await transit.transfer_new_db(self)
         return await self.go_next(result)
@@ -218,7 +224,8 @@ class CenterDataModel(AbstractPersistentModel):
         if self.send_id:
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
-
+        return
+    
     async def on_enter_getting_prod(self):
         result = await transit.delete_new_db(self)
         return await self.go_next(result)
@@ -233,7 +240,7 @@ class CenterDataModel(AbstractPersistentModel):
         return
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center_machines.md#create-centers-sms>>[init]
+# ~/~ begin <<docs/gong-web-app-code/states-machine.md#create-centers-sms>>[init]
 
 def delete_state_machine(center_name):
     del csms[center_name]

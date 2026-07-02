@@ -8,7 +8,7 @@
 
 # ruff: noqa: F811
 
-from fasthtml.common import *  # (1)
+from fasthtml.common import *
 from urllib.parse import quote
 import libs.states as states
 import libs.auth as auth
@@ -40,8 +40,6 @@ import libs.utilsJS as utilsJS
 <<other-routes>>
 
 ```
-
-1. Another annotation MERMAID2  - Found superfences config: 'custom_fences': 'name': 'mermaid', 'class': 'mermaid', 'format': function fence_mermaid at 0x000002B15DA79D00
 
 ### Initializations
 
@@ -343,7 +341,7 @@ def get(session, period_type: str):
 
 ```
 
-### Routes for adminP
+### Routes for admin
 
 ```python
 #| id: users-admin

@@ -1,4 +1,4 @@
-# Center planning page
+# Gong planning - CRUD
 
 Will only be reachable for authenticated users and planner for the selected center.
 

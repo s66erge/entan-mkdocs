@@ -1,4 +1,4 @@
-# Change timetables page
+# Gong timetables - CRUD
 
 Will only be reachable for authenticated users and planner for the selected center.
 

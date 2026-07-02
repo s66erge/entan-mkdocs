@@ -1,4 +1,4 @@
-# Center dashboard page
+# Center dashboard
 
 Will only be reachable for authenticated users.
 

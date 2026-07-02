@@ -1,8 +1,8 @@
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#main.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#main.py>>[init]
 
 # ruff: noqa: F811
 
-from fasthtml.common import *  # (1)
+from fasthtml.common import *
 from urllib.parse import quote
 import libs.states as states
 import libs.auth as auth
@@ -24,7 +24,7 @@ import libs.utilsJS as utilsJS
 
 #  from starlette.testclient import TestClient
 
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#initialize-program>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#initialize-program>>[init]
 
 custom_styles = Style("""
 blockquote {
@@ -67,7 +67,7 @@ dbset.init_data(roles, users, centers, planners)
 states.init_center_state_machines(db)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#login-authenticate>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#login-authenticate>>[init]
 
 @rt('/')
 def home():
@@ -116,7 +116,7 @@ async def post(file: UploadFile, center_name: str):
     return await cdash.upload_config(file, center_name)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#consult-centers-plans>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#consult-centers-plans>>[init]
 
 @rt('/consult_page')
 def get(session, request):
@@ -135,7 +135,7 @@ def get(request):
     return consul.consult_select_timetable(request, db_path)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#start-save-plan-times>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#start-save-plan-times>>[init]
 
 @rt('/planning_page')
 async def get(session, center: str):
@@ -191,7 +191,7 @@ async def get(session):
     return #Redirect("/dashboard")
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#courses-planning>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#courses-planning>>[init]
 
 @rt('/planning/load_dhamma_db')
 def get(session):
@@ -219,7 +219,7 @@ async def post(session, ptype: str, start: str):
     return await planning.add_line(session, ptype, start)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#timetables-changes>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#timetables-changes>>[init]
 
 @rt('/timings/timingsubpage')
 async def get(session, center: str):
@@ -301,7 +301,7 @@ def get(session, period_type: str):
     return timechan.delete_period(session, period_type)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#users-admin>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#users-admin>>[init]
 
 @rt('/admin_page')
 @admin_required
@@ -339,7 +339,7 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
     return adchan.add_planner(new_planner_user_email, new_planner_center_name, users, centers, planners)
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/0-gong-prog.md#other-routes>>[init]
+# ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#other-routes>>[init]
 @rt("/download_file/{filepath}")
 def get(session, request):
     params = dict(request.query_params)

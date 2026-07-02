@@ -1,15 +1,15 @@
-# Admin change functions
+# Admin - CRuD
 
 Used by the admin page in admin-show.md:  
 functions to add or delete a user / center / planner.
 
-All these functions are called with these htmx ([intro](../architecture/ui-archi.md)) tags:  
+All these functions are called with these htmx [intro](../gong-web-app/ui-archi.md) tags:  
 - `hx_post=` route to the function  
 - `hx_target=` id of DOM element where the resulting html will be placed  
 and these functions can update multiple other DOM elements with `hx_swap_oob="true"`
 
 ```python
-#| file: libs/adchan.py 
+#| file: libs/adchan.py
 
 import shutil
 from fasthtml.common import *
@@ -28,6 +28,7 @@ import libs.minio as minio
 <<add-planner>>
 ```
 
+
 ```python
 #| id: delete-user
 
@@ -35,39 +36,39 @@ import libs.minio as minio
 def delete_user(email, users, planners, centers):
     try:
         user_info = users("email = ?",(email,))
-        user_planners = planners("user_email = ?", (email,))  ## [1]
+        user_planners = planners("user_email = ?", (email,))  # (1)
 
         if not user_info:
             message = {'error' : 'user_not_found'}
 
-        elif user_planners:  ## [1] 
-            center_names = [p.center_name for p in user_planners]  ## [2]
+        elif user_planners:
+            center_names = [p.center_name for p in user_planners]  # (2)
             centers_list = ", ".join(center_names)
             message = {"error": "user_has_planners", "centers": f"{centers_list}"}
 
-        else:  ## [3]
+        else:  # (3)
             users.delete(email)
             message = {"success": "user_deleted"}
 
         return Div(
             Div(messages.feedback_to_user(message)),
             Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
-            ## [4]
+            # (4)
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] Check if user has any planner associations  
-[2] Get the center names for the error message  
-[3] Proceed with deletion  
-[4] rebuild the dropdown of the planners form to show changed users/centers
-<br><br>
+
+1.   Check if user has any planner associations  
+2.   Get the center names for the error message  
+3.   Proceed with deletion  
+4.   rebuild the dropdown of the planners form to show changed users/centers  
 
 ```python
 #| id: add-user
-# @rt('/add_user')
 
+# @rt('/add_user')
 def add_user(new_user_email, name ,role_name, users, roles, centers):
     try:
         if new_user_email == "" or name == "" or role_name == "":
@@ -79,7 +80,7 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
         elif users("email = ?", (new_user_email,)):
             message = {"error": "user_exists"}
 
-        else:  ## [1]
+        else:  ## (1)
             users.insert(
             email=new_user_email,
             name=name,
@@ -95,15 +96,15 @@ def add_user(new_user_email, name ,role_name, users, roles, centers):
             Div(messages.feedback_to_user(message)),
             Div(admin.show_users_table(users), hx_swap_oob="true", id="users-table") if "success" in message else None,
             Div(admin.show_users_form(roles), hx_swap_oob="true", id="users-form"),
-            ## [2]
+            ## (2)
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] creates the new user  
-[2] rebuild the dropdown of the planners form to show changed users/centers
-<br><br> 
+
+1.   creates the new user  
+2.   rebuild the dropdown of the planners form to show changed users/centers  
 
 ```python
 #| id: delete-center
@@ -116,20 +117,20 @@ def delete_center(center_name, users, centers, planners, db_path):
         if not center_info:
             message = {'error' : 'center_not_found'}
         else:
-            gong_db_name = dbset.gong_db_name(center_name)  ## [1]
+            gong_db_name = dbset.gong_db_name(center_name)  ## (1)
             db_file_path = f'{db_path}{gong_db_name}'
-            center_planners = planners("center_name = ?", (center_name,))  ## [2]
+            center_planners = planners("center_name = ?", (center_name,))  ## (2)
             state = states.csms[center_name].configuration[0].id
 
             if state != "free":
                 message = {'error' : "center_not_free"}
 
-            elif center_planners:  ## [2]
-                user_emails = [p.user_email for p in center_planners]  ## [3]
+            elif center_planners:  ## (2)
+                user_emails = [p.user_email for p in center_planners]  ## (3)
                 users_list = ", ".join(user_emails)
                 message = {'error' : 'center_has_planners','users' : f'{users_list}'}
 
-            else:  ## [4]
+            else:  ## (4)
                 states.delete_state_machine(center_name)
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
@@ -140,19 +141,20 @@ def delete_center(center_name, users, centers, planners, db_path):
         return Div(
             Div(messages.feedback_to_user(message)),
             Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
-            ## [6]
+            ## (6)
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         print(e)
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] get gong database path  
-[2] check if center has planners  
-[3] get planners emails for error message  
-[4] delete the center and the associated database file if it exists  
-[5] also remove any SQLite journal files  
-[6] rebuild the dropdown of the planners form to show changed users/centers
+
+(1) get gong database path  
+(2) check if center has planners  
+(3) get planners emails for error message  
+(4) delete the center and the associated database file if it exists  
+(5) also remove any SQLite journal files  
+(6) rebuild the dropdown of the planners form to show changed users/centers
 <br><br>
 
 ```python
@@ -160,7 +162,7 @@ def delete_center(center_name, users, centers, planners, db_path):
 
 # @rt('/add_center')
 def add_center(new_center_name, center_template, users, centers, db_path, db):
-    ## [1]
+    ## (1)
     print(f"template: {center_template}")
     new_gong_db_name = dbset.gong_db_name(new_center_name)
     db_file_path = f'{db_path}{new_gong_db_name}'
@@ -179,7 +181,7 @@ def add_center(new_center_name, center_template, users, centers, db_path, db):
         elif not os.path.exists(template_db):
             message = {'error' : 'template_not_found'}
 
-        else:  ## [2]
+        else:  ## (2)
             shutil.copy2(template_db, db_file_path)
             excel_template_path = minio.get_excel_minio(center_template)
             shutil.copy2(excel_template_path, f'{db_path}{new_center_name}.xlsx')
@@ -197,16 +199,15 @@ def add_center(new_center_name, center_template, users, centers, db_path, db):
             Div(messages.feedback_to_user(message)),
             Div(admin.show_centers_table(centers), hx_swap_oob="true", id="centers-table") if "success" in message else None,
             Div(admin.show_centers_form(centers), hx_swap_oob="true", id="centers-form"),
-            ## [3]
+            ## (3)
             Div(admin.show_planners_form(users, centers), hx_swap_oob="true", id="planners-form") if "success" in message else None
         )
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] Ensure gong_db_name ends with .db  
-[2] Create the new database by copying mahi.db and update center table  
-[3] rebuild the dropdown of the planners form to show changed users/center
-<br><br>
+(1) Ensure gong_db_name ends with .db  
+(2) Create the new database by copying mahi.db and update center table  
+(3) rebuild the dropdown of the planners form to show changed users/center  
 
 ```python
 #| id: delete-planner
@@ -215,10 +216,10 @@ def add_center(new_center_name, center_template, users, centers, db_path, db):
 def delete_planner(user_email, center_name, planners):
     try:
         center_planners = planners("center_name = ?", (center_name,))
-        if len(center_planners) == 1:  ## [1]
+        if len(center_planners) == 1:  ## (1)
             message ={"error" : "last_planner_for_center", "center" : f"{center_name}"}
 
-        else:  ## [2]
+        else:  ## (2)
             planners.delete([user_email, center_name,])
             message = {"success" : "planner_deleted"}
 
@@ -230,9 +231,8 @@ def delete_planner(user_email, center_name, planners):
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] if this is the only planner for this center, prevent deletion
-[2] proceed with deletion
-<br><br>
+(1) if this is the only planner for this center, prevent deletion  
+(2) proceed with deletion  
 
 ```python
 #| id: add-planner
@@ -253,7 +253,7 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
         elif planners("user_email = ? AND center_name = ?", (new_planner_user_email, new_planner_center_name)):
             message = {'error' : 'planner_exists'}
 
-        else:  ## [1]
+        else:  ## (1)
             planners.insert(
             user_email=new_planner_user_email,
             center_name=new_planner_center_name
@@ -268,5 +268,4 @@ def add_planner(new_planner_user_email, new_planner_center_name, users, centers,
     except Exception as e:
         return Redirect(f'/db_error?etext={e}')
 ```
-[1] add planner association
-<br><br>
+(1) add planner association  

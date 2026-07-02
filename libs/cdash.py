@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/center-dashboard.md#libs/cdash.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-dashboard.md#libs/cdash.py>>[init]
 
 import asyncio
 from fasthtml.common import *
@@ -10,7 +10,7 @@ import libs.dbset as dbset
 import libs.messages as messages
 import libs.states as states
 
-# ~/~ begin <<docs/gong-web-app/center-dashboard.md#dashboard>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-dashboard.md#dashboard>>[init]
 
 def top_menu(role):
     return Nav(
@@ -68,7 +68,7 @@ def dashboard(session, users, planners):
         cls="container",
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/center-dashboard.md#status-page>>[init]
+# ~/~ begin <<docs/gong-web-app-code/center-dashboard.md#status-page>>[init]
 
 #@rt('/status_page')
 def status_page(session, center_name, centers, users, planners, csms):

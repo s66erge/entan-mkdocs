@@ -23,10 +23,18 @@ uv pip install mkdocs-entangled-plugin
 * `mkdocs gh-deploy` - Deploy site on the gh-pages branch: see site_url in config. 
 * `mkdocs -h` - Print help message and exit.
 
+## Project layout
+
+    mkdocs.yml    # The configuration file synced with the configuration code below.
+    docs/
+        index.md  # The documentation homepage.
+        ...       # Other markdown pages, images and other files.
+
 ## Configuration
 
 ```yaml
-#| file:  mkdocs.yml 
+#| file:  mkdocs.yml
+
 site_name: Gong system and apps for Vipassane centers
 site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
@@ -38,39 +46,32 @@ plugins:
       arguments:
          securityLevel: 'loose' 
 
-#extra_javascript:
-#    - https://unpkg.com/mermaid/dist/mermaid.min.js
-
 markdown_extensions:
   - toc:
       permalink: "#"
   - pymdownx.highlight:
-      linenums: true
+      linenums: true 
+      # use_pygments: true
       anchor_linenums: true
       line_spans: __span
-      pygments_lang_class: true
-      use_pygments: true
-      pygments_style: rrt
-      # solarized-dark monokai default github-dark rrt 
-  - pymdownx.inlinehilite
+      # pygments_lang_class: true
+  #- pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-          #format: !!python/name:mermaid2.fence_mermaid
 
 theme:
-  #name: readthedocs
   name: material
   features:
-    - content.code.copy
-    - navigation.instant
-    - navigation.sections
-    - content.code.annotate
+    #- navigation.instant
     - navigation.top
-  palette: 
+    #- navigation.tab
+    - navigation.path
+    - content.code.copy
+  palette:
     #Palette toggle for light mode
     - scheme: default
       toggle:
@@ -83,18 +84,25 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-#extra_css:
-#  - styles/vscode.css
+extra_css:
+#  - stylesheets/extra.css
+  - stylesheets/rrt.css
+#  - stylesheets/fruity.css
+
+#extra_javascript:
+#    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
 watch:
   - docs
+
 ```
 
-Note: to use the 'material' theme, add '' under 'readthedocs'
+## Creating pygments files to change colors inside code blocke
 
-## Project layout
+List loaded styles:  
+`pygmentize -L styles`
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+Generate a CSS file for your Markdown project (for example, using rrt), use:  
+`pygmentize -S rrt -f html -a .highlight > rrt.css`
+
+Move the generated file to the `docs/stylesheets` folder and add it to the `extra_css` section of the configuration above.

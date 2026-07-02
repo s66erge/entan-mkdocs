@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/database-setup.md#libs/dbset.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/database-setup.md#libs/dbset.py>>[init]
 
 from fasthtml.common import database
 from fasthtml.common import *
@@ -6,7 +6,7 @@ from fastsql import Database # MUST COME AFTER PRECEDING LINE !!!
 import os
 import libs.utils as utils
 
-# ~/~ begin <<docs/gong-web-app/database-setup.md#dataclasses>>[init]
+# ~/~ begin <<docs/gong-web-app-code/database-setup.md#dataclasses>>[init]
 
 class Role:
     role_name: str
@@ -72,7 +72,7 @@ def gong_db_name(center_name, middle="ok"):
     return center_name.lower() + "." + middle + ".db"
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/database-setup.md#setup-database>>[init]
+# ~/~ begin <<docs/gong-web-app-code/database-setup.md#setup-database>>[init]
 
 def init_data(roles, users, centers, planners):
 

@@ -1,4 +1,4 @@
-# The python environment
+# Python dev
 
 Make sure this computer will be recognized by name as a dev machine : see isa_dev_computer() in utilities.md !!!
 

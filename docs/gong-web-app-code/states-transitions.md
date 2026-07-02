@@ -1,4 +1,4 @@
-# Center machines transitions
+# State machines - actions
 
 The status of a center data is managed with a state machine. The state is persisted into the center table of the central gongUsers database, using an abstract model and a database persistent model.
 Here are the transitions processes used by the state machines
@@ -32,7 +32,7 @@ pending_tasks = {}
 async def check_center_free(state_mach, this_user):
     center_lock = states.clocks[state_mach.model.center_name]
     async with center_lock:
-        center_is_free = False
+        enter_edit_OK = False
         tnow = datetime.now(timezone.utc)
         start_state_time = state_mach.model.get_center_attr("status_start")
         past = datetime.fromisoformat(start_state_time.replace("Z", "+00:00"))
@@ -42,8 +42,8 @@ async def check_center_free(state_mach, this_user):
         if state_mach.configuration[0].id == "free":
             state_mach.model.update_attr("created_by", this_user)
             await state_mach.progress()
-            center_is_free = True
-        return center_is_free
+            enter_edit_OK = True
+        return enter_edit_OK
 
 async def goto_free(session, event, csms):
     this_center = session[utils.Skey.CENTER]

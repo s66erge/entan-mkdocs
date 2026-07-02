@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/gong-web-app/authenticate.md#libs/auth.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#libs/auth.py>>[init]
 
 import secrets
 import string
@@ -9,7 +9,7 @@ import libs.utils as utils
 import libs.messages as messages
 
 
-# ~/~ begin <<docs/gong-web-app/authenticate.md#build-serve-login-form>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#build-serve-login-form>>[init]
 def signin_form():
     return Form(
         Input(id='email', type='email', placeholder='foo@bar.com'),
@@ -57,7 +57,7 @@ def login():
         ), cls="container"
    )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#handling-form>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#handling-form>>[init]
 def _generate_login_code(length: int = 6) -> str:
     # e.g. 6-digit numeric code
     digits = string.digits
@@ -97,14 +97,14 @@ def create_code(email, users):
         )
 
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#send-link>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#send-link>>[init]
 
 def send_login_code_email(email_address: str, code: str):
     email_subject = "Your sign-in code for The App"
     email_text = messages.email_text('login', {"code": code})
     utils.send_email(email_subject, email_text, [email_address])
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#verify-link>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#verify-link>>[init]
 
 """
 @rt('/verify_code')
@@ -136,7 +136,7 @@ def verify_code(session, code, timezon, users):
     return Redirect('/dashboard')
     # return Script("window.location.href = '/dashboard';")
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/authenticate.md#admin_required>>[init]
+# ~/~ begin <<docs/gong-web-app-code/authenticate.md#admin_required>>[init]
 
 def admin_required(handler):
     @wraps(handler)

@@ -1,8 +1,8 @@
-# ~/~ begin <<docs/gong-web-app/user-messages.md#libs/messages.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/user-messages.md#libs/messages.py>>[init]
 
 from fasthtml.common import *
 
-# ~/~ begin <<docs/gong-web-app/user-messages.md#feedback-to-user>>[init]
+# ~/~ begin <<docs/gong-web-app-code/user-messages.md#feedback-to-user>>[init]
 
 def feed_text(params):
     # query_params = dict(request.query_params)
@@ -82,7 +82,7 @@ def feedback_to_user(params):
         )
     return message_div
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/user-messages.md#email-texts>>[init]
+# ~/~ begin <<docs/gong-web-app-code/user-messages.md#email-texts>>[init]
 
 def email_text(type, params: None):
     match type:

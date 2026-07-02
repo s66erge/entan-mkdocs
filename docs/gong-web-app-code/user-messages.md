@@ -1,4 +1,4 @@
-# Messages to the user
+# User messages + emails
 
 ```python
 #| file: libs/messages.py 

@@ -1,10 +1,10 @@
-# ~/~ begin <<docs/gong-web-app/admin-show.md#libs/admin.py>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-show.md#libs/admin.py>>[init]
 
 from fasthtml.common import *
 import libs.utils as utils
 import libs.messages as messages
 
-# ~/~ begin <<docs/gong-web-app/admin-show.md#show-users>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-show.md#show-users>>[init]
 def show_users_table(users):
     return Main(
         Table(
@@ -40,7 +40,7 @@ def show_users_form(roles):
         )    
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-show.md#show-centers>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-show.md#show-centers>>[init]
 
 def show_centers_table(centers):
     return Main(
@@ -77,7 +77,7 @@ def show_centers_form(centers):
         )
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-show.md#show-planners>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-show.md#show-planners>>[init]
 
 def show_planners_table(planners):
     return Main(
@@ -117,7 +117,7 @@ def show_planners_form(users, centers):
         )
     )
 # ~/~ end
-# ~/~ begin <<docs/gong-web-app/admin-show.md#admin-page>>[init]
+# ~/~ begin <<docs/gong-web-app-code/admin-show.md#admin-page>>[init]
 
 # @rt('/admin_page')
 def show_page(request, users, roles, centers, planners):
