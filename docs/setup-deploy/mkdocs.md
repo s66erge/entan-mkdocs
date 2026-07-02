@@ -23,10 +23,18 @@ uv pip install mkdocs-entangled-plugin
 * `mkdocs gh-deploy` - Deploy site on the gh-pages branch: see site_url in config. 
 * `mkdocs -h` - Print help message and exit.
 
+## Project layout
+
+    mkdocs.yml    # The configuration file synced with the configuration code below.
+    docs/
+        index.md  # The documentation homepage.
+        ...       # Other markdown pages, images and other files.
+
 ## Configuration
 
 ```yaml
-#| file:  mkdocs.yml 
+#| file:  mkdocs.yml
+
 site_name: Gong system and apps for Vipassane centers
 site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
@@ -78,8 +86,8 @@ theme:
 
 extra_css:
 #  - stylesheets/extra.css
-  - stylesheets/native.css
-#  - stylesheets/one-dark.css
+  - stylesheets/rrt.css
+#  - stylesheets/fruity.css
 
 #extra_javascript:
 #    - https://unpkg.com/mermaid/dist/mermaid.min.js
@@ -87,20 +95,14 @@ extra_css:
 watch:
   - docs
 
-#Bash
-#pygmentize -L styles
-#To generate a CSS file for your Markdown project (for example, using monokai), use:
-
-#Bash example
-#pygmentize -S monokai -f html -a .highlight > monokai.css
-
 ```
 
-Note: to use the 'material' theme, add '' under 'readthedocs'
+## Creating pygments files to change colors inside code blocke
 
-## Project layout
+List loaded styles:  
+`pygmentize -L styles`
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+Generate a CSS file for your Markdown project (for example, using rrt), use:  
+`pygmentize -S rrt -f html -a .highlight > rrt.css`
+
+Move the generated file to the `docs/stylesheets` folder and add it to the `extra_css` section of the configuration above.

@@ -1,4 +1,5 @@
 # ~/~ begin <<docs/setup-deploy/mkdocs.md#mkdocs.yml>>[init]
+
 site_name: Gong system and apps for Vipassane centers
 site_url: https://s66erge.github.io/entan-mkdocs
 repo_url: https://github.com/s66erge/entan-mkdocs
@@ -50,20 +51,13 @@ theme:
 
 extra_css:
 #  - stylesheets/extra.css
-  - stylesheets/native.css
-#  - stylesheets/one-dark.css
+  - stylesheets/rrt.css
+#  - stylesheets/fruity.css
 
 #extra_javascript:
 #    - https://unpkg.com/mermaid/dist/mermaid.min.js
 
 watch:
   - docs
-
-#Bash
-#pygmentize -L styles
-#To generate a CSS file for your Markdown project (for example, using monokai), use:
-
-#Bash example
-#pygmentize -S monokai -f html -a .highlight > monokai.css
 
 # ~/~ end
