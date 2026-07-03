@@ -58,15 +58,20 @@ class Targets:
     shortname: str
     longname: str
 
+
 def get_central_db():
-    if utils.isa_dev_computer():
+    match utils.host_type():
         # local sqlite3
         # return database(utils.get_db_path() + "gongUsers.db")
-        # local postgreSQL
-        return Database("postgresql://postgres:Route666@localhost:5432/postgres")
-    else:
-        # on railway.com
-        return Database(os.environ.get('DATABASE_URL'))
+        case "dev-host":
+            # local postgreSQL
+            return Database("postgresql://postgres:Route666@localhost:5432/postgres")
+        case "dev-container":
+            # dev container postgreSQL
+            return Database(os.environ.get('DATABASE_URL'))
+        case "prod-railway":
+            # on railway.com
+            return Database(os.environ.get('DATABASE_URL'))
 
 def gong_db_name(center_name, middle="ok"):
     return center_name.lower() + "." + middle + ".db"

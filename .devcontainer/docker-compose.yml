@@ -1,0 +1,46 @@
+services:
+  # 1. Your Application Dev Container
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
+    hostname: solaris  
+    volumes:
+      - ..:/workspace:cached # Mounts your local project folder into the container
+    ports:
+      - "8000:8000" # Exposes your app's port to the host machine
+    environment:
+      DATABASE_URL: "postgresql://postgres:ELXBqXgN63ekVvNQSamEaV5F@db:5432/dev_db"
+      MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
+      MINIO_ROOT_PASSWORD: "aNmFXY5RftuhtfctBxNC3YUS"      
+    command: sleep infinity # Keeps the container running so VS Code can attach to it
+  # 2. PostgreSQL 18 Container
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "ELXBqXgN63ekVvNQSamEaV5F"
+      POSTGRES_DB: "dev_db"
+    ports:
+      - "5432:5432" # Exposes to your host machine so you can use external GUI tools like DBeaver
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  # 3. MinIO (S3-compatible object storage) Container
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # API port for your app to connect to
+      - "9001:9001" # Web Console UI port
+    environment:
+      MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
+      MINIO_ROOT_PASSWORD: "aNmFXY5RftuhtfctBxNC3YUS"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data: # Persists your database tables even if the container restarts
+  minio_data:    # Persists your uploaded files/buckets

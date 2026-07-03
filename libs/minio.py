@@ -17,20 +17,28 @@ minio_client = None # global S3 client, initialized from main.py and used in tra
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#define-client>>[init]
 
 def create_minio_client():
-    if utils.isa_dev_computer():
-        client = Minio(
-            endpoint ="localhost:9005",
-            access_key = "dhamma-gong-on-local",
-            secret_key = os.environ["MINIO_USER1_SECRET"],
-            secure = False,
-        )
-    else: # production
-        client = Minio(
-            endpoint ="bucket.railway.internal:9000",
-            access_key = "dhamma-gong-on-local-serge",
-            secret_key = os.environ["MINIO_USER1_SECRET"],
-            secure = False,
-        )
+    match utils.host_type():
+        case "dev-host":
+            client = Minio(
+                endpoint ="localhost:9005",
+                access_key = "dhamma-gong-on-local",
+                secret_key = os.environ["MINIO_USER1_SECRET"],
+                secure = False,
+            )
+        case "dev-container":
+            client = Minio(
+                endpoint ="minio:9000",
+                access_key = os.environ["MINIO_ROOT_USER"],
+                secret_key = os.environ["MINIO_ROOT_PASSWORD"],
+                secure = False,
+            )
+        case "prod-railway":
+            client = Minio(
+                endpoint ="bucket.railway.internal:9000",
+                access_key = "dhamma-gong-on-local-serge",
+                secret_key = os.environ["MINIO_USER1_SECRET"],
+                secure = False,
+            )
     return client
 
 # ~/~ end

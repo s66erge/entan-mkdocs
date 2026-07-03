@@ -191,11 +191,11 @@ class CenterDataModel(AbstractPersistentModel):
         self.last_result = {"success": "center is free again"}
         self.update_attr("created_by", None)
         return
-    
+
     async def on_enter_edit(self):
         self.last_result = {"success": "entered edit mode"}
         return
-    
+
     async def on_enter_save_db(self):
         result = await transit.save_db_plan_times(self)
         return await self.go_next(result)
@@ -210,7 +210,7 @@ class CenterDataModel(AbstractPersistentModel):
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
         return
-        
+
     async def on_enter_transfer(self):
         result = await transit.transfer_new_db(self)
         return await self.go_next(result)
@@ -225,7 +225,7 @@ class CenterDataModel(AbstractPersistentModel):
             print("Canceling delayed event ", self.send_id)
             self.state_mach.cancel_event(self.send_id)
         return
-    
+
     async def on_enter_getting_prod(self):
         result = await transit.delete_new_db(self)
         return await self.go_next(result)

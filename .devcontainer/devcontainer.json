@@ -1,0 +1,19 @@
+{
+  "name": "My App Dev Environment",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app", // Tells VS Code to open your terminal inside the 'app' container
+  "workspaceFolder": "/workspace",
+  
+  // Customizes VS Code inside the container
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ckolkman.vscode-postgres" // Useful extension to query postgres directly from VS Code
+      ]
+    }
+  },
+  
+  // Ensures dependent containers are fully up before VS Code connects
+  "forwardPorts": [8000, 5432, 9000, 9001]
+}

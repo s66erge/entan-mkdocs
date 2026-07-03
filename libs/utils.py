@@ -59,18 +59,27 @@ class GlobalsDefinition:
 Globals = GlobalsDefinition()
 
 # ~/~ begin <<docs/gong-web-app-code/utilities.md#isdev-computer>>[init]
-def isa_dev_computer():
-    DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
-    hostname = socket.gethostname()
-    return hostname in DEV_COMPUTERS
+# def isa_dev_computer():
+#     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
+#     hostname = socket.gethostname()
+#     return hostname in DEV_COMPUTERS
 
-def dev_comp_or_user(session):
-    return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
+# def dev_comp_or_user(session):
+#     return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
+
+def host_type():
+    hostname = socket.gethostname()
+    match hostname:
+        case "serge-asrock" | "serge-framework" | "serge-bosgame":
+            return "dev-host"
+        case "solaris":
+            return "dev-container"
+        case _:
+            # on railway.com
+            return "prod-railway"
 
 def get_db_path():
-    if isa_dev_computer():
-        root = ""
-    elif os.environ.get('Github_CI') == 'true': # Github CI actions
+    if "dev" in host_type():
         root = ""
     else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
@@ -85,7 +94,7 @@ def isa_db_test(db):
 
 def send_email(subject, body, recipients):
     sender = Globals.EMAIL_SENDER
-    if isa_dev_computer():
+    if  "dev" in host_type():
         print(f'From: {sender}\nTo: {recipients}\nSubject: {subject}\n\n{body}')
     else:
         resend_email(sender, subject, body, recipients)
