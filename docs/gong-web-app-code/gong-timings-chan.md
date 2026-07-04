@@ -7,6 +7,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 
 import pandas as pd
 from fasthtml.common import *
+from fastlite import database
 import libs.utils as utils
 import libs.dbset as dbset
 import libs.plancheck as plancheck

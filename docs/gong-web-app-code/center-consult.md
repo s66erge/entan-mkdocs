@@ -8,6 +8,7 @@ Will only be reachable for authenticated users.
 from pathlib import Path
 from urllib.parse import quote_plus
 from fasthtml.common import *
+from fastlite import database
 import libs.cdash as cdash
 import libs.utils as utils
 import libs.dbset as dbset

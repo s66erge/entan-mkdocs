@@ -1,6 +1,5 @@
 # ~/~ begin <<docs/gong-web-app-code/database-setup.md#libs/dbset.py>>[init]
 
-from fasthtml.common import database
 from fasthtml.common import *
 from fastsql import Database # MUST COME AFTER PRECEDING LINE !!!
 import os

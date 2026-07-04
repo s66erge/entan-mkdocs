@@ -56,7 +56,7 @@ blockquote {
 .mw-480 { max-width: 480px; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 """)
-css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
+# css = Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}')
 
 
 def before(req, session):
@@ -67,9 +67,11 @@ def before(req, session):
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware,
-    hdrs=(picolink, css, custom_styles,
+    hdrs=(custom_styles,
+        Link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css", type='text/css'),
         Link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css', type='text/css'),
         Script(src="https://cdn.jsdelivr.net/npm/flatpickr"),
+        Style(':root {--pico-font-size: 95% ; --pico-font-family: Roboto;}'),
         ),
     )
 # client = TestClient(app)

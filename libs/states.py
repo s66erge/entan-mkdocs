@@ -21,7 +21,7 @@ class HistoryListener:
         self.model = model
         self.entries = []
 
-    def on_transition(self, event, source, target):
+    def after_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
         log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \

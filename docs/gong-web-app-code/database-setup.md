@@ -3,7 +3,6 @@
 ```python
 #| file: libs/dbset.py 
 
-from fasthtml.common import database
 from fasthtml.common import *
 from fastsql import Database # MUST COME AFTER PRECEDING LINE !!!
 import os
