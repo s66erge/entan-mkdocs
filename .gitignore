@@ -3,6 +3,8 @@
 # Ignore hidden/work directories
 .*/
 .*
+.venv/
+.venv/Scripts/python.exe
 site/*
 *.pyc
 *.db-shm
