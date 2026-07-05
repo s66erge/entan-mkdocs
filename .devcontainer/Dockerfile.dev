@@ -2,8 +2,12 @@ FROM python:3.13-slim
 
 # Install system dependencies from log
 RUN apt-get update && apt-get install -y \
-    curl ed sqlite3 \
+    curl ed sqlite3 sudo \
     && rm -rf /var/lib/apt/lists/*
+
+# 🔽 CREATE VSCODE USER AND GIVE SUDO ACCESS 🔽
+RUN useradd -m -s /bin/bash vscode \
+    && echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
@@ -11,20 +15,22 @@ ENV PYTHONUNBUFFERED=1
 # Install uv directly (matches Railpack's uv 0.10.4)
 RUN pip install uv==0.10.4
 
+# Fix permissions on /app so the vscode user can write to it
+RUN chown -R vscode:vscode /app
+
+# Switch to the vscode user
+USER vscode
+
 # Copy lockfiles first for caching
-COPY pyproject.toml uv.lock* ./
+COPY --chown=vscode:vscode pyproject.toml uv.lock* ./
 
 # Exact uv sync steps from your log (no mise needed)
 RUN uv sync --locked --no-dev --no-editable
 # CRITICAL: Activate venv for entire container
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Copy app
-COPY . .
-# COPY data data
-
-# Bytecode compile (from log)
-# RUN python -m compileall .
+# Copy app with proper ownership
+COPY --chown=vscode:vscode . .
 
 EXPOSE 8000
 CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

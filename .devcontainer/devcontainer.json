@@ -4,6 +4,9 @@
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
   
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+
   // Customizes VS Code inside the container
   "customizations": {
     "vscode": {

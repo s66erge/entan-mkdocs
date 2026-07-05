@@ -74,41 +74,6 @@ def fetch_scrap(location, date_start, date_end):
     ]   
     return extracted
 
-def fetch_scrap2(location, date_start, date_end):
-    scraper = cloudscraper.create_scraper()
-    all_courses = []
-    page = 1
-    while True:
-        print(f"Scraping courses Dhamma {location} - Page {page}...")
-        payload = scraper.post(
-            "https://www.dhamma.org/en-US/courses/do_search",
-            data={
-                "current_state": "OldStudents",
-                "regions[]": location,
-                "daterange": f"{date_start} - {date_end}",
-                "page": page,
-            }
-        ).json()
-        courses = payload.get("courses", [])
-        all_courses.extend(courses)
-        total_pages = payload.get("pages", 0)
-        if page >= total_pages:
-            break
-        page += 1
-
-    extracted = [
-        {
-            "course_start_date": c.get("course_start_date"),
-            "course_end_date": c.get("course_end_date"),
-            "raw_course_type": c.get("raw_course_type"),
-            "course_type_anchor": c.get("course_type_anchor"),
-            "course_type": c.get("course_type")
-        }
-        for c in all_courses
-        if c.get("location", {}).get("center_noncenter") != "noncenter" and \
-            c.get("status",{})[0].get("status").upper() != "CANCELLED"
-    ]   
-    return extracted
 
 ```
 
