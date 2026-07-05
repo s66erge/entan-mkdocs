@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
+      dockerfile: .devcontainer/Dockerfile.dev # Or point to your standard dev Dockerfile
     hostname: solaris  
     volumes:
       - ..:/workspace:cached # Mounts your local project folder into the container

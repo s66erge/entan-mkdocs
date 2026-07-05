@@ -2,6 +2,7 @@
 
 import asyncio
 from fasthtml.common import *
+from fastlite import database
 from datetime import datetime
 import pandas as pd
 import libs.utils as utils

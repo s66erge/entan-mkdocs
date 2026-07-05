@@ -6,6 +6,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 #| file: libs/plancheck.py
 
 from fasthtml.common import *
+from fastlite import database
 from datetime import date
 from tabulate import tabulate
 import pandas as pd

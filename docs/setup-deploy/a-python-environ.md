@@ -10,14 +10,56 @@ VSCode extensions:
 
 ## Windows
 
+### Dependencies
+
+
+
+```toml
+#| file: pyproject.toml
+[project]
+name = "entan-mkdocs"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = "~=3.13.0"
+dependencies = [
+    "python-fasthtml==0.14.04",
+    "uvicorn==0.40.0",
+    "fastsql==2.1.2",
+    "psycopg2-binary==2.9.12",
+    "curl-cffi==0.15.0",
+    "fastparquet==2026.3.0",
+    "markdown2==2.5.4",
+    "minio==7.2.20",
+    "openpyxl==3.1.5",
+    "pandas==3.0.0",
+    "python-statemachine>=3.2.0",
+    "resend==2.21.0",
+    "tabulate==0.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.2",
+    "pytest-asyncio==1.3.0",
+    "pytest-cov==7.0.0",
+    "pytest-mock==3.15.1",
+    "ruff>=0.3.0",
+    "ipykernel==7.3.0",
+    "pydot==4.0.1",
+    "entangled-cli>=2.4.0",
+]
+
+[tool.ruff]
+ignore = ["F403", "F405"]
+
+```
+
 ### Initial installation
 
 ```pwsh
 #| file: setup/environ.ps1
 scoop install main/uv
-uv python install
-uv venv
-uv pip install -r pyproject.toml
+uv sync
 ```
 ### VSCode startup
 
