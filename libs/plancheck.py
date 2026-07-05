@@ -1,6 +1,7 @@
 # ~/~ begin <<docs/gong-web-app-code/gong-plan-check.md#libs/plancheck.py>>[init]
 
 from fasthtml.common import *
+from fastlite import database
 from datetime import date
 from tabulate import tabulate
 import pandas as pd

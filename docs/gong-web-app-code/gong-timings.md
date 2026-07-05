@@ -8,6 +8,7 @@ Will only be reachable for authenticated users and planner for the selected cent
 import pandas as pd
 from urllib.parse import quote_plus
 from fasthtml.common import *
+from fastlite import database
 import libs.utils as utils
 import libs.messages as messages
 import libs.plancheck as plancheck
