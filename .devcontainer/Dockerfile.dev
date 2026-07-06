@@ -11,6 +11,8 @@ RUN useradd -m -s /bin/bash vscode \
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 # Install uv directly (matches Railpack's uv 0.10.4)
 RUN pip install uv==0.10.4
