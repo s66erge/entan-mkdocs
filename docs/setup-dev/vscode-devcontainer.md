@@ -1,4 +1,4 @@
-# Local docker containers
+# Local docker container for development
 
 2 sets of local docker containers are used to:  
 1. develop over the exact same OS
@@ -8,7 +8,7 @@ Both sets include also containers for:
 - postgres server - postgres-18
 - minio server - last dev. version
 
-The production staging files are in `another folder`
+The production staging files are in `another folder/file`
 
 ## Container for developmemt
 
@@ -171,10 +171,3 @@ CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ```
 
-## Container for production staging
-
-Execute in a bash session on: ~/develop/entan-mkdocs
-```bash
-docker compose -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.staging.yml up --build
-
-```
