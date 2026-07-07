@@ -46,7 +46,7 @@ dev = [
     "ruff>=0.3.0",
     "ipykernel==7.3.0",
     "pydot==4.0.1",
-    "entangled-cli>=2.4.0",
+    "entangled-cli==2.4.0",
     "mkdocs>=1.6.1",
     "pymdown-extensions>=11.0.1",
     "mkdocs-material>=9.7.6",

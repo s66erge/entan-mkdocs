@@ -62,6 +62,11 @@ identifiers =  ["powershell", "pwsh"]
 comment = { open = "#" }
 
 [[languages]]
+name = "Docker"
+identifiers =  ["docker"]
+comment = { open = "#" }
+
+[[languages]]
 name = "XML"
 identifiers = ["xml", "html", "svg"]
 comment = { open = "<!--", close = "-->" }
@@ -73,12 +78,17 @@ comment = { open = "%%" }
 
 [[languages]]
 name = "yaml"
-identifiers =  ["yaml"]
+identifiers =  ["yaml", "yml"]
 comment = { open = "#" }
 
 [[languages]]
 name = "toml"
 identifiers =  ["toml"]
 comment = { open = "#" }
+
+[[languages]]
+name = "json"
+identifiers =  ["json"]
+comment = { open = "//" }
 
 ```

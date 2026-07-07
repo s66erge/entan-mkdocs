@@ -3,9 +3,14 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
-  
+
   "remoteUser": "vscode",
   "containerUser": "vscode",
+
+// 🔽 FORCE THE PATH INTO VS CODE TERMINALS 🔽
+  "remoteEnv": {
+    "PATH": "/app/.venv/bin:${containerEnv:PATH}"
+  },
 
   // Customizes VS Code inside the container
   "customizations": {
@@ -16,7 +21,7 @@
       ]
     }
   },
-  
+
   // Ensures dependent containers are fully up before VS Code connects
   "forwardPorts": [8000, 5432, 9000, 9001]
 }

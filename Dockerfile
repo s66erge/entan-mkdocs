@@ -1,8 +1,10 @@
+# ~/~ begin <<docs/setup-prod/railway.md#Dockerfile>>[init]
+
 FROM python:3.12.8-slim
 
 # Install system dependencies from log
 RUN apt-get update && apt-get install -y \
-    curl ed sqlite3 \
+    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -28,3 +30,5 @@ RUN python -m compileall .
 
 EXPOSE 8000
 CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# ~/~ end

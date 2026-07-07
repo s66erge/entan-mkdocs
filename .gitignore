@@ -26,3 +26,4 @@ __pycache__/*
 # and ignore this
 */temp
 */tmp
+.devcontainer/.env

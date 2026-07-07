@@ -452,7 +452,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "entangled-cli", specifier = ">=2.4.0" },
+    { name = "entangled-cli", specifier = "==2.4.0" },
     { name = "ipykernel", specifier = "==7.3.0" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", specifier = ">=9.7.6" },
@@ -468,14 +468,17 @@ dev = [
 
 [[package]]
 name = "entangled-cli"
-version = "2.4.3"
+version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "argh" },
     { name = "brei" },
     { name = "click" },
     { name = "copier" },
     { name = "filelock" },
+    { name = "mawk" },
     { name = "msgspec" },
+    { name = "pexpect" },
     { name = "pyyaml" },
     { name = "repl-session" },
     { name = "rich" },
@@ -483,11 +486,11 @@ dependencies = [
     { name = "rich-click" },
     { name = "tomlkit" },
     { name = "typeguard" },
-    { name = "watchfiles" },
+    { name = "watchdog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/63/8b/4858f6b4edaab4ec9128349a8aec1abf40716fbe1967244a8f6d61872ddc/entangled_cli-2.4.3.tar.gz", hash = "sha256:1d3b713b7d53833ff24958bed1b2878c00ed02c4428aa512f8b2ada9bbbf7106", size = 46355, upload-time = "2026-06-09T09:03:40.399Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/00/4f0325f849869ab5490cc62d63186dde8d52fb40f9f0103fb39c53dee218/entangled_cli-2.4.0.tar.gz", hash = "sha256:62518756ddb08b2e3242c873310961f534b377bcc04df72910c2b7e3865540d0", size = 45026, upload-time = "2025-11-25T11:33:13.447Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3c/8c/e54b68c8a06f25ee67b5a66eb92f10180fa0d633d090b117d1720d07d76d/entangled_cli-2.4.3-py3-none-any.whl", hash = "sha256:c9510923bf165bf37c5ab1c9e56d1b66689288cbe97e1bd30a890cc32324d95d", size = 68893, upload-time = "2026-06-09T09:03:39.29Z" },
+    { url = "https://files.pythonhosted.org/packages/de/3e/c73e72157fb7a705c1e710266d487a4dac9615a89767d1bd1f598b7734e4/entangled_cli-2.4.0-py3-none-any.whl", hash = "sha256:e9cd8c22d32a9a219c4f51337e157c5acff05fd59ebe77239588c813b115901c", size = 67223, upload-time = "2025-11-25T11:33:12.258Z" },
 ]
 
 [[package]]
@@ -908,6 +911,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/bd/c0/9f7c9a46090390368a4d7bcb76bb87a4a36c421e4c0792cdb53486ffac7a/matplotlib_inline-0.2.2.tar.gz", hash = "sha256:72f3fe8fce36b70d4a5b612f899090cd0401deddc4ea90e1572b9f4bfb058c79", size = 8150, upload-time = "2026-05-08T17:33:33.49Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/09/5b161152e2d90f7b87f781c2e1267494aef9c32498df793f73ad0a0a494a/matplotlib_inline-0.2.2-py3-none-any.whl", hash = "sha256:3c821cf1c209f59fb2d2d64abbf5b23b67bcb2210d663f9918dd851c6da1fcf6", size = 9534, upload-time = "2026-05-08T17:33:32.055Z" },
+]
+
+[[package]]
+name = "mawk"
+version = "0.1.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/50/b47b5b2697c4a11fcf4e9308bf635c35e033961efa8a8712536997258ce5/mawk-0.1.7.tar.gz", hash = "sha256:41b2a5185e6c5aa3d4cbd860a1a9196ad01763ded84a54234e3b92037f40136f", size = 7490, upload-time = "2025-10-01T15:20:20.104Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/30/4d/1cf26c06f9d11008bad7ccc88728deccf27d58dac4576c4d09d7d96d2831/mawk-0.1.7-py3-none-any.whl", hash = "sha256:ca03b3409b48a23192a669af14385409a52400b6eaf1e599332ca4e3243604be", size = 8374, upload-time = "2025-10-01T15:20:19.076Z" },
 ]
 
 [[package]]

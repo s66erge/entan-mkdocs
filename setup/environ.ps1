@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/setup-deploy/a-python-environ.md#setup/environ.ps1>>[init]
+# ~/~ begin <<docs/setup-dev/a-python-environ.md#setup/environ.ps1>>[init]
 scoop install main/uv
 uv sync
 # ~/~ end

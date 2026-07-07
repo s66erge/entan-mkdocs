@@ -1,18 +1,21 @@
+# ~/~ begin <<docs/setup-dev/vscode-devcontainer.md#.devcontainer/docker-compose.yml>>[init]
+
 services:
   # 1. Your Application Dev Container
   app:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile.dev # Or point to your standard dev Dockerfile
+      dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
+      target: builder
     hostname: solaris  
     volumes:
       - ..:/workspace:cached # Mounts your local project folder into the container
     ports:
       - "8000:8000" # Exposes your app's port to the host machine
     environment:
-      DATABASE_URL: "postgresql://postgres:ELXBqXgN63ekVvNQSamEaV5F@db:5432/dev_db"
+      DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@db:5432/dev_db"
       MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
-      MINIO_ROOT_PASSWORD: "aNmFXY5RftuhtfctBxNC3YUS"      
+      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
     command: sleep infinity # Keeps the container running so VS Code can attach to it
   # 2. PostgreSQL 18 Container
   db:
@@ -20,7 +23,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "ELXBqXgN63ekVvNQSamEaV5F"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
       POSTGRES_DB: "dev_db"
     ports:
       - "5432:5432" # Exposes to your host machine so you can use external GUI tools like DBeaver
@@ -29,14 +32,14 @@ services:
 
   # 3. MinIO (S3-compatible object storage) Container
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio
     restart: unless-stopped
     ports:
       - "9000:9000" # API port for your app to connect to
       - "9001:9001" # Web Console UI port
     environment:
       MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
-      MINIO_ROOT_PASSWORD: "aNmFXY5RftuhtfctBxNC3YUS"
+      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
@@ -44,3 +47,5 @@ services:
 volumes:
   postgres_data: # Persists your database tables even if the container restarts
   minio_data:    # Persists your uploaded files/buckets
+
+# ~/~ end
