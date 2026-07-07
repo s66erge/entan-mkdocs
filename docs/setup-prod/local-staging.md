@@ -1,4 +1,4 @@
-# Local docker container for production staging
+# Local prod. staging
 
 2 sets of local docker containers are used to:  
 1. develop over the exact same OS

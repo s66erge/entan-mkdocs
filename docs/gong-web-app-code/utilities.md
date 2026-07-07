@@ -128,7 +128,7 @@ We will need to create an App Password in your Google Account settings as we hav
 
 #### via resend.com
 
-As railway does not give smtp access to Hobby plan, we are using instead the resend API: https://resend.com/docs/send-with-python . And we set up [the environmemt variable 'RESEND_API_KEY'](../setup-deploy/railway.md#resend-api-key) .
+As railway does not give smtp access to Hobby plan, we are using instead the resend API: https://resend.com/docs/send-with-python . And we set up [the environmemt variable 'RESEND_API_KEY'](../setup-prod/railway.md) .
 
 ### Example
 

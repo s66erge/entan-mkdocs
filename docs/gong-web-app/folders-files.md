@@ -3,7 +3,7 @@
     -   gong center databases (.db): planning and timetables
     -   gong centers configurations (.xlsx): see the app `STATUS AND CONFIGURATION` page 
 - `\docs\`:
-    -   THIS documentation of architecture, system and dev/prod environments for the gong center app and web app. It contains and is automatically synchronized with the web app source code: see [Entangled](../setup-deploy/entangled.md)
+    -   THIS documentation of architecture, system and dev/prod environments for the gong center app and web app. It contains and is automatically synchronized with the web app source code: see [Entangled](../setup-dev/entangled.md)
 - `\libs\*.py` + `\main.py`: source code for the gong web app
 - `\md-text\`: user documentation integrated in the web app
 - `\setup\`: scripts to setup the gong web app and its dev tools: see [Setup deploy](tools-dev-prod.md)

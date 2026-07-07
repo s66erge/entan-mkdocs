@@ -1,4 +1,4 @@
-# MkDocs
+# MkDocs-Zensical
 
 MkDocs is a static site generator that's geared towards project documentation. It takes Markdown files and builds them into a static website.
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
@@ -106,3 +106,9 @@ Generate a CSS file for your Markdown project (for example, using rrt), use:
 `pygmentize -S rrt -f html -a .highlight > rrt.css`
 
 Move the generated file to the `docs/stylesheets` folder and add it to the `extra_css` section of the configuration above.
+
+## Using Zensical
+
+Install vscode zensical extension PLUS
+
+uv add --dev zensical
