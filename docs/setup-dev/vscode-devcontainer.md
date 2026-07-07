@@ -8,6 +8,7 @@ Both sets include also containers for:
 - postgres server - postgres-18
 - minio server - last dev. version
 
+The production staging files are in `another folder`
 
 ## Container for developmemt
 
@@ -170,12 +171,7 @@ CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ```
 
-
-
-
 ## Container for production staging
-
-
 
 Execute in a bash session on: ~/develop/entan-mkdocs
 ```bash
