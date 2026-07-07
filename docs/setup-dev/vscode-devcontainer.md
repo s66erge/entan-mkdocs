@@ -52,7 +52,9 @@ Note - entangled does not work with json files, need to copy/paste:
 
 ```
 
-### Which triggers the `docker-compose.yml` in the same `.devcontainer` folder
+### Which triggers the `docker-compose.yml` file in the same `.devcontainer` folder
+
+The passwords are in the .env file (not in Git) in the same folder `.devcontainer`
 
 ```yml
 #| file: .devcontainer/docker-compose.yml
@@ -107,10 +109,67 @@ volumes:
 
 ```
 
+### Which triggers the `Dockerfile.dev` in the app root folder with target `builder`
 
-The `builder` container gives the same OS as in production with access to bash and the same vscode tools as in Ubuntu
+```dockerfile
+#| file: Dockerfile.dev
 
-The `production` container 
+# ==========================================
+# STAGE 1: The Build & Development Stage
+# ==========================================
+FROM python:3.13-slim AS builder
+
+# Install system dependencies needed for building/testing
+RUN apt-get update && apt-get install -y \
+    sqlite3 sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create the vscode user only for development/testing context if needed
+RUN useradd -m -s /bin/bash vscode \
+    && echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+
+RUN pip install uv==0.10.4
+RUN chown -R vscode:vscode /app
+
+USER vscode
+
+COPY --chown=vscode:vscode pyproject.toml uv.lock* ./
+RUN uv sync --locked --no-dev --no-editable
+
+# ==========================================
+# STAGE 2: The Hardened Production Stage
+# ==========================================
+FROM python:3.13-slim AS production
+
+# Only install necessary runtime OS dependencies (No 'sudo', no build tools)
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a locked-down system user with NO sudo rights
+RUN useradd -u 10001 -m -s /bin/false appuser
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+
+# Copy the pre-built virtual environment from the builder stage
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Copy application source code and set ownership to the production user
+COPY --chown=appuser:appuser . .
+
+# Switch to the non-root, non-sudo user
+USER appuser
+
+EXPOSE 8000
+CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+```
+
 
 
 

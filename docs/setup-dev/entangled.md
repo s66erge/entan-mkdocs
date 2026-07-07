@@ -63,7 +63,7 @@ comment = { open = "#" }
 
 [[languages]]
 name = "Docker"
-identifiers =  ["docker"]
+identifiers =  ["dockerfile"]
 comment = { open = "#" }
 
 [[languages]]

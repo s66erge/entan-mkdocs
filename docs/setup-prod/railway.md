@@ -43,7 +43,7 @@ The Railway CLI is used to:
 
 The `Dockerfile` instructs how to build the railway app:
 
-```docker
+```dockerfile
 #| file: Dockerfile
 
 FROM python:3.12.8-slim

@@ -1,3 +1,5 @@
+# ~/~ begin <<docs/setup-dev/vscode-devcontainer.md#Dockerfile.dev>>[init]
+
 # ==========================================
 # STAGE 1: The Build & Development Stage
 # ==========================================
@@ -51,3 +53,5 @@ USER appuser
 
 EXPOSE 8000
 CMD ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# ~/~ end
