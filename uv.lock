@@ -431,6 +431,7 @@ dev = [
     { name = "entangled-cli" },
     { name = "ipykernel" },
     { name = "mkdocs" },
+    { name = "mkdocs-encryptcontent-plugin" },
     { name = "mkdocs-material" },
     { name = "mkdocs-mermaid2-plugin" },
     { name = "pydot" },
@@ -465,6 +466,7 @@ dev = [
     { name = "entangled-cli", specifier = "==2.4.0" },
     { name = "ipykernel", specifier = "==7.3.0" },
     { name = "mkdocs", specifier = ">=1.6.1" },
+    { name = "mkdocs-encryptcontent-plugin", specifier = ">=3.1.0" },
     { name = "mkdocs-material", specifier = ">=9.7.6" },
     { name = "mkdocs-mermaid2-plugin", specifier = ">=1.2.3" },
     { name = "pydot", specifier = "==4.0.1" },
@@ -989,6 +991,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/bc/c6/bbd4f061bd16b378247f12953ffcb04786a618ce5e904b8c5a01a0309061/mkdocs-1.6.1.tar.gz", hash = "sha256:7b432f01d928c084353ab39c57282f29f92136665bdd6abf7c1ec8d822ef86f2", size = 3889159, upload-time = "2024-08-30T12:24:06.899Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/22/5b/dbc6a8cddc9cfa9c4971d59fb12bb8d42e161b7e7f8cc89e49137c5b279c/mkdocs-1.6.1-py3-none-any.whl", hash = "sha256:db91759624d1647f3f34aa0c3f327dd2601beae39a366d6e064c03468d35c20e", size = 3864451, upload-time = "2024-08-30T12:24:05.054Z" },
+]
+
+[[package]]
+name = "mkdocs-encryptcontent-plugin"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "mkdocs" },
+    { name = "pycryptodome" },
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/80/5b7ef20793f365ffbacb08476572a7a7bc624c06db9f86135f0a3208b629/mkdocs_encryptcontent_plugin-3.1.0.tar.gz", hash = "sha256:49e4bf1d2e971de13167f19e17ba273674363d2e0a095b2a11a9ee80ce81fc74", size = 89480, upload-time = "2025-12-31T09:19:59.849Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4f/f5/7ee504c93b5fdb2448c1da3208f7091cab602b8c6f2291c1e330b450e1c5/mkdocs_encryptcontent_plugin-3.1.0-py3-none-any.whl", hash = "sha256:fc8d9bdc6b69cb28f4d843ba8e0aeda72f38860cc4576b38e8915d061430fffa", size = 77976, upload-time = "2025-12-31T09:19:58.611Z" },
 ]
 
 [[package]]
