@@ -74,7 +74,7 @@ def host_type():
             return "prod-railway"
 
 def get_db_path():
-    if "dev" in host_type():
+    if host_type() != "prod-railway":
         root = ""
     else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"

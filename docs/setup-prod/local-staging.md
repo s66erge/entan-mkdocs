@@ -9,30 +9,76 @@ Both sets use the same `Dockerfile.dev` file and use docker-compose for containe
 - postgres server: postgres-18  
 - minio server: last dev. version
 
-The production staging configuration file is an override of the [local dev containers](../setup-dev/vscode-devcontainer.md)
+## Another file for staging containers
 
-## Override of local dev containers
-
-This file `.devcontainer/docker-compose.staging.yml`  
-overrides the file: `.devcontainer/docker-compose.yml`  
-and keeps all the other options untouched, including postgres and minio.
+This file `.devcontainer/docker-compose.staging.yml` replaces `.devcontainer/docker-compose.yml`   
 
 ```yaml
 #| file: .devcontainer/docker-compose.staging.yml
 
 services:
+  # 1. Your Application Staging Container
   app:
     build:
       context: ..
-      dockerfile: Dockerfile.dev  # 👈 Points to your single, main Dockerfile
-      target: production     # 👈 THIS is how you use the target feature in Compose!
-      hostname: staging
-    volumes: !override []
+      dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
+      target: production
+    hostname: staging
+    env_file:
+      - .env.staging
+    ports:
+      - "8000:8000" # Exposes your app's port to the host machine
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
     command: ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+  # 2. PostgreSQL 18 Container
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    ports:
+      - "5432:5432" # Exposes to your host machine so you can use external GUI tools like DBeaver
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # 3. MinIO (S3-compatible object storage) Container
+  minio:
+    image: quay.io/minio/minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # API port for your app to connect to
+      - "9001:9001" # Web Console UI port
+    env_file:
+      - .env.staging
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data: # Persists your database tables even if the container restarts
+  minio_data:    # Persists your uploaded files/buckets
+
 ```
 
-Build in a bash session on project root: ~/develop/entan-mkdocs
+Build and started in a bash session on project root: ~/develop/entan-mkdocs
 ```bash
-docker compose --env-file .devcontainer/.env.staging -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.staging.yml up --build
+docker compose -f .devcontainer/docker-compose.staging.yml up --build
+```
 
+Stopped from the same bash session
+```bash
+docker compose -f .devcontainer/docker-compose.staging.yml down
 ```
