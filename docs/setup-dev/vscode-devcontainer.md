@@ -35,7 +35,7 @@ Note - entangled does not work with json files, need to copy/paste:
 // 🔽 FORCE THE PATH INTO VS CODE TERMINALS 🔽
   "remoteEnv": {
     "PATH": "/app/.venv/bin:${containerEnv:PATH}",
-    "COMPOSE_ENV_FILES": ".devcontainer/.env.solaris"
+    "COMPOSE_ENV_FILES": "/app/.devcontainer/.env.solaris"
   },
 
   // Customizes VS Code inside the container

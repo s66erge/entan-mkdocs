@@ -1,6 +1,6 @@
 {
   "name": "My App Dev Environment",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "docker-compose.yml", // WITH .env.solaris : see below
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
 
@@ -9,7 +9,8 @@
 
 // 🔽 FORCE THE PATH INTO VS CODE TERMINALS 🔽
   "remoteEnv": {
-    "PATH": "/app/.venv/bin:${containerEnv:PATH}"
+    "PATH": "/app/.venv/bin:${containerEnv:PATH}",
+    "COMPOSE_ENV_FILES": "/app/.devcontainer/.env.solaris"
   },
 
   // Customizes VS Code inside the container
