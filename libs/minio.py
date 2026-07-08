@@ -25,7 +25,7 @@ def create_minio_client():
                 secret_key = os.environ["MINIO_USER1_SECRET"],
                 secure = False,
             )
-        case "dev-container":
+        case "dev-container" | "staging-container":
             client = Minio(
                 endpoint ="minio:9000",
                 access_key = os.environ["MINIO_ROOT_USER"],

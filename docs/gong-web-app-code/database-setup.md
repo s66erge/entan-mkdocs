@@ -72,11 +72,8 @@ def get_central_db():
         case "dev-host":
             # local postgreSQL
             return Database("postgresql://postgres:Route666@localhost:5432/postgres")
-        case "dev-container":
+        case "dev-container" | "staging-container" | "prod-railway":
             # dev container postgreSQL
-            return Database(os.environ.get('DATABASE_URL'))
-        case "prod-railway":
-            # railway.com postgreSQL
             return Database(os.environ.get('DATABASE_URL'))
 
 def gong_db_name(center_name, middle="ok"):

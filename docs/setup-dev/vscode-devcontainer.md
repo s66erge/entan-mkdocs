@@ -1,11 +1,11 @@
 # Local container
 
 2 sets of local docker containers are used to:  
-1. develop over the exact same OS
+1. develop over the exact same OS  
 2. stage a secure system very close to final production   
 
-Both sets include also containers for:  
-- postgres server - postgres-18
+Both sets use the same `Dockerfile.dev` file and use docker-compose for containers for:   
+- postgres server - postgres-18  
 - minio server - last dev. version
 
 The production staging files are in `another folder/file`
@@ -13,8 +13,8 @@ The production staging files are in `another folder/file`
 ## Container for developmemt
 
 Built by vscode with:  
-- vscode extensions
-- bash
+- vscode extensions  
+- bash  
 - direct acces to files in Ubuntu
 
 ### It is initiated with the file: `.devcontainer/devcontainer.json`
@@ -25,7 +25,7 @@ Note - entangled does not work with json files, need to copy/paste:
 ```json
 {
   "name": "My App Dev Environment",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "docker-compose.yml", // WITH .env.solaris : see below
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
 
@@ -34,7 +34,8 @@ Note - entangled does not work with json files, need to copy/paste:
 
 // 🔽 FORCE THE PATH INTO VS CODE TERMINALS 🔽
   "remoteEnv": {
-    "PATH": "/app/.venv/bin:${containerEnv:PATH}"
+    "PATH": "/app/.venv/bin:${containerEnv:PATH}",
+    "COMPOSE_ENV_FILES": ".devcontainer/.env.solaris"
   },
 
   // Customizes VS Code inside the container
@@ -55,11 +56,10 @@ Note - entangled does not work with json files, need to copy/paste:
 
 ### Which triggers the `docker-compose.yml` file in the same `.devcontainer` folder
 
-The passwords are in the .env file (not in Git) in the same folder `.devcontainer`
+The passwords are in the .env.* files (not in Git) in the same folder `.devcontainer`
 
-```yml
+```yaml
 #| file: .devcontainer/docker-compose.yml
-
 services:
   # 1. Your Application Dev Container
   app:
@@ -74,7 +74,7 @@ services:
       - "8000:8000" # Exposes your app's port to the host machine
     environment:
       DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@db:5432/dev_db"
-      MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
+      MINIO_ROOT_USER: "${MINIO_USER}"
       MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
     command: sleep infinity # Keeps the container running so VS Code can attach to it
   # 2. PostgreSQL 18 Container
@@ -98,7 +98,7 @@ services:
       - "9000:9000" # API port for your app to connect to
       - "9001:9001" # Web Console UI port
     environment:
-      MINIO_ROOT_USER: "msDpY3CtaVdHzX2Df8XYdmzt"
+      MINIO_ROOT_USER:  "${MINIO_USER}"
       MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD}"
     volumes:
       - minio_data:/data

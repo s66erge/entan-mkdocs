@@ -109,6 +109,9 @@ Move the generated file to the `docs/stylesheets` folder and add it to the `extr
 
 ## Using Zensical
 
-Install vscode zensical extension PLUS
+Install vscode zensical extension PLUS: uv add --dev zensical
 
-uv add --dev zensical
+Uses the mkdocs configuration file.
+Command: `zensical serve`
+
+[Documentation](https://zensical.org/studio/)

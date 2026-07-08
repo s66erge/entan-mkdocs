@@ -51,6 +51,7 @@ dev = [
     "pymdown-extensions>=11.0.1",
     "mkdocs-material>=9.7.6",
     "mkdocs-mermaid2-plugin>=1.2.3",
+    "zensical>=0.0.47",
 ]
 
 [tool.ruff]

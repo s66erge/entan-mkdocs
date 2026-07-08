@@ -83,13 +83,6 @@ This function checks if the program runs on one of a predefined list of developm
 
 ```python
 #| id: isdev-computer
-# def isa_dev_computer():
-#     DEV_COMPUTERS = ["serge-asrock","DESKTOP-UIPS8J2","serge-framework", "serge-bosgame", "Solaris" ]
-#     hostname = socket.gethostname()
-#     return hostname in DEV_COMPUTERS
-
-# def dev_comp_or_user(session):
-#     return isa_dev_computer() or session[Skey.AUTH] == Globals.DEV_USER
 
 def host_type():
     hostname = socket.gethostname()
@@ -98,6 +91,8 @@ def host_type():
             return "dev-host"
         case "solaris":
             return "dev-container"
+        case "production":
+            return "prod-container"
         case _:
             # on railway.com
             return "prod-railway"
