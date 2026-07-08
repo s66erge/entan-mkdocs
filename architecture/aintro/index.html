@@ -25,7 +25,7 @@
     
     
       
-        <title>Overall architecture - Gong system and apps for Vipassane centers</title>
+        <title>[Protected] Overall architecture - Gong system and apps for Vipassane centers</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overall architecture
+              [Protected] Overall architecture
             
           </span>
         </div>
@@ -267,7 +267,7 @@
   <span class="md-ellipsis">
     
   
-    Home
+    [Protected] Home
   
 
     
@@ -352,7 +352,7 @@
   <span class="md-ellipsis">
     
   
-    Overall architecture
+    [Protected] Overall architecture
   
 
     
@@ -370,7 +370,7 @@
   <span class="md-ellipsis">
     
   
-    Overall architecture
+    [Protected] Overall architecture
   
 
     
@@ -1370,7 +1370,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Setup dev
   
 
     
@@ -1386,7 +1386,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Setup deploy
+    Setup dev
   
 
           </label>
@@ -1399,7 +1399,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/a-python-environ/" class="md-nav__link">
+      <a href="../../setup-dev/a-python-environ/" class="md-nav__link">
         
   
   
@@ -1427,7 +1427,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/entangled/" class="md-nav__link">
+      <a href="../../setup-dev/entangled/" class="md-nav__link">
         
   
   
@@ -1455,14 +1455,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/mkdocs/" class="md-nav__link">
+      <a href="../../setup-dev/mkdocs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    MkDocs
+    MkDocs-Zensical
   
 
     
@@ -1483,7 +1483,117 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/railway/" class="md-nav__link">
+      <a href="../../setup-dev/vscode-devcontainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup prod
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Setup prod
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/local-staging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local prod. staging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/railway/" class="md-nav__link">
         
   
   
@@ -1637,7 +1747,7 @@
       <a href="../.." class="md-path__link">
         
   <span class="md-ellipsis">
-    Home
+    [Protected] Home
   </span>
 
       </a>
@@ -1677,40 +1787,34 @@
   
 
 
-<h1 id="overall-architecture">Overall architecture<a class="headerlink" href="#overall-architecture" title="Permanent link">#</a></h1>
-<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h3>
-<p>The digital gong system was originally designed for Dhamma Pajjota. As there was no pre-existing audio system for an electronic gong, the choice was made to use network cables and small computers (Raspberry Pi) to create a distributed system.
-This was followed by an implementation at Dhamma Mahi, which already had an audio system for an electronic gong. What was missing was the automation of the gongs played.</p>
-<h3 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">#</a></h3>
-<p>Each installation uses Raspberry Pi devices as the core computing units. The Raspberry Pis communicate with each other via standard network cables (Ethernet).
-The master Rasperry Pi has a touchscreen interface allowing servants to:<br />
-- see the coming gong schedules<br />
-- go into manual mode to ring gongs with a screen button (or a real physical button connected to the Raspberry Pi)<br />
-- check that the Internet connection is working<br />
-- see the date of the last schedules received from the web application  </p>
-<h3 id="software">Software<a class="headerlink" href="#software" title="Permanent link">#</a></h3>
-<p>Version 2.0 of the software, is currently in development and will be available in Q3 2026.
-It consists of two components:</p>
-<ul>
-<li>
-<p>Software running on the Raspberry Pi(s) — written in Python and Python/Qt (graphical interface for the control centre touchscreen).</p>
-</li>
-<li>
-<p>Web application for remote database management — written in Python and HTMX, allowing schedules and configurations to be updated from any browser.</p>
-</li>
-</ul>
-<h3 id="4-system-architectures">4. System Architectures<a class="headerlink" href="#4-system-architectures" title="Permanent link">#</a></h3>
-<p>As of version 2.2, all changes are made in the web application and, once checked as valid gong schedules, are sent at 1am (center time) to the center Rasperry Pi(s) for the next day. The web application is hosted on a cloud server, which can be accessed from any browser. </p>
-<p>The system offers two approaches for the architecture on the center. They can be combined depending on the centre's existing infrastructure.</p>
-<h4 id="41-centralised-approach-dhamma-mahi">4.1 Centralised approach (Dhamma Mahi)<a class="headerlink" href="#41-centralised-approach-dhamma-mahi" title="Permanent link">#</a></h4>
-<p>One central Raspberry Pi connected to a single powerful amplifier. Long audio cables run from the amplifier to speakers installed in the relevant buildings.</p>
-<p>Note from experience at Dhamma Mahi: the centralised system is slightly more complex to set up from an audio perspective, as it requires an intermediate sound card between the Raspberry Pi and the amplifier. As the audio signal will get degradation in long audio cables, the audio sent to the amplifier must be of the highest possible quality.</p>
-<h4 id="42-distributed-approach-dhamma-pajjota">4.2 Distributed approach (Dhamma Pajjota)<a class="headerlink" href="#42-distributed-approach-dhamma-pajjota" title="Permanent link">#</a></h4>
-<p>One central Raspberry Pi and a series of satellite Raspberry Pis installed in each building. Each satellite Raspberry Pi is connected to a smaller, less powerful local amplifier.</p>
-<p>Advantages of the distributed approach:
-Easier to expand — no need to reassess amplifier power when adding new buildings or speakers.
-Ability to ring specific gongs individually in specific locations, enabling differentiated schedules per building.</p>
-<p>Note on hardware constraint: a standard network cable can span a maximum distance of 100 metres (328 feet).</p>
+<div id="mkdocs-encrypted-content" style="display:none">McSy5cQQ2pay1F1ICKZNCQ==;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</div>
+<div id="mkdocs-decrypted-content" style="display:none">
+    <form id="mkdocs-decrypt-form" class="md-content__inner md-typeset">
+        <h1>This content is protected with AES encryption. </h1>
+        <p>Contact your administrator for access to this page.</p>
+        <input class="md-input" type="password" id="mkdocs-content-password" placeholder="Password">
+        
+        <p id="mkdocs-decrypt-msg"></p>
+    </form>
+</div>
+
+<script type="text/javascript">
+var encryptcontent_id = "encryptcontent_1";
+var encryptcontent_path = "entan-mkdocs/architecture/aintro/";
+var decryption_failure_message = "Invalid password.";
+var encryptcontent_keystore = ["5boCr4fPvVvG2wvVPKcjOQ==;G9FFKAOK91yHHkCwvqvIU+ZXN4cBhtrOb6sGG5SA42zewc1SqbAVrth50DC2dxL+XoUFuk5cK4e44OEnaTn4/iwO+F7AmAk4+340DpfeXbBWCa8ych611b5LnrU37NNE;k+yTNBwoHkuo6isgCpjrGQ=="];
+var encryptcontent_obfuscate = 0;
+
+const encryptcontent_event = new Event("encryptcontent_event");
+var encryptcontent_done = false;
+</script>
+<script type="module">
+if (!window.hasOwnProperty("init_decryptor")) {
+    import("../../assets/javascripts/decrypt-contents.js");
+} else {
+    init_decryptor();
+}
+</script>
 
 
 

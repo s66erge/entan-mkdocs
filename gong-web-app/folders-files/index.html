@@ -25,7 +25,7 @@
     
     
       
-        <title>Main folders / files - Gong system and apps for Vipassane centers</title>
+        <title>[Protected] Main folders / files - Gong system and apps for Vipassane centers</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Main folders / files
+              [Protected] Main folders / files
             
           </span>
         </div>
@@ -267,7 +267,7 @@
   <span class="md-ellipsis">
     
   
-    Home
+    [Protected] Home
   
 
     
@@ -341,7 +341,7 @@
   <span class="md-ellipsis">
     
   
-    Overall architecture
+    [Protected] Overall architecture
   
 
     
@@ -423,7 +423,7 @@
   <span class="md-ellipsis">
     
   
-    Intro
+    [Protected] Intro
   
 
     
@@ -507,7 +507,7 @@
   <span class="md-ellipsis">
     
   
-    Database design
+    [Protected] Database design
   
 
     
@@ -544,7 +544,7 @@
   <span class="md-ellipsis">
     
   
-    Main folders / files
+    [Protected] Main folders / files
   
 
     
@@ -562,7 +562,7 @@
   <span class="md-ellipsis">
     
   
-    Main folders / files
+    [Protected] Main folders / files
   
 
     
@@ -1309,7 +1309,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Setup dev
   
 
     
@@ -1325,7 +1325,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Setup deploy
+    Setup dev
   
 
           </label>
@@ -1338,7 +1338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/a-python-environ/" class="md-nav__link">
+      <a href="../../setup-dev/a-python-environ/" class="md-nav__link">
         
   
   
@@ -1366,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/entangled/" class="md-nav__link">
+      <a href="../../setup-dev/entangled/" class="md-nav__link">
         
   
   
@@ -1394,14 +1394,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/mkdocs/" class="md-nav__link">
+      <a href="../../setup-dev/mkdocs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    MkDocs
+    MkDocs-Zensical
   
 
     
@@ -1422,7 +1422,117 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/railway/" class="md-nav__link">
+      <a href="../../setup-dev/vscode-devcontainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup prod
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Setup prod
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/local-staging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local prod. staging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/railway/" class="md-nav__link">
         
   
   
@@ -1515,7 +1625,7 @@
       <a href="../.." class="md-path__link">
         
   <span class="md-ellipsis">
-    Home
+    [Protected] Home
   </span>
 
       </a>
@@ -1555,29 +1665,34 @@
   
 
 
-<h1 id="main-folders-files">Main folders / files<a class="headerlink" href="#main-folders-files" title="Permanent link">#</a></h1>
-<ul>
-<li><code>\data\</code>:<ul>
-<li>gong center databases (.db): planning and timetables</li>
-<li>gong centers configurations (.xlsx): see the app <code>STATUS AND CONFIGURATION</code> page </li>
-</ul>
-</li>
-<li><code>\docs\</code>:<ul>
-<li>THIS documentation of architecture, system and dev/prod environments for the gong center app and web app. It contains and is automatically synchronized with the web app source code: see <a href="../../setup-deploy/entangled/">Entangled</a></li>
-</ul>
-</li>
-<li><code>\libs\*.py</code> + <code>\main.py</code>: source code for the gong web app</li>
-<li><code>\md-text\</code>: user documentation integrated in the web app</li>
-<li><code>\setup\</code>: scripts to setup the gong web app and its dev tools: see <a href="../tools-dev-prod/">Setup deploy</a></li>
-<li><code>\site\</code>: static website files generated by mkdocs from the <code>\docs</code> (sub)folder(s)</li>
-<li><code>\tests\</code>: unit tests for the gong web app  </li>
-</ul>
-<h2 id="main-configuration-files">Main configuration files<a class="headerlink" href="#main-configuration-files" title="Permanent link">#</a></h2>
-<ul>
-<li><code>\pyproject.toml</code> and <code>\uv.lock</code>: configuration used by <code>uv</code> for the gong web app dependencies</li>
-<li><code>\*.yaml</code> and <code>\*.toml</code>: configuration files for the gong web dev tools: see <a href="../tools-dev-prod/">Setup deploy</a></li>
-<li><code>\Dockerfile</code>: Dockerfile to build the gong web app production container</li>
-</ul>
+<div id="mkdocs-encrypted-content" style="display:none">aKfs+JVvpcwLGhUCcvCTpQ==;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</div>
+<div id="mkdocs-decrypted-content" style="display:none">
+    <form id="mkdocs-decrypt-form" class="md-content__inner md-typeset">
+        <h1>This content is protected with AES encryption. </h1>
+        <p>Contact your administrator for access to this page.</p>
+        <input class="md-input" type="password" id="mkdocs-content-password" placeholder="Password">
+        
+        <p id="mkdocs-decrypt-msg"></p>
+    </form>
+</div>
+
+<script type="text/javascript">
+var encryptcontent_id = "encryptcontent_1";
+var encryptcontent_path = "entan-mkdocs/gong-web-app/folders-files/";
+var decryption_failure_message = "Invalid password.";
+var encryptcontent_keystore = ["5boCr4fPvVvG2wvVPKcjOQ==;G9FFKAOK91yHHkCwvqvIU+ZXN4cBhtrOb6sGG5SA42zewc1SqbAVrth50DC2dxL+XoUFuk5cK4e44OEnaTn4/iwO+F7AmAk4+340DpfeXbBWCa8ych611b5LnrU37NNE;k+yTNBwoHkuo6isgCpjrGQ=="];
+var encryptcontent_obfuscate = 0;
+
+const encryptcontent_event = new Event("encryptcontent_event");
+var encryptcontent_done = false;
+</script>
+<script type="module">
+if (!window.hasOwnProperty("init_decryptor")) {
+    import("../../assets/javascripts/decrypt-contents.js");
+} else {
+    init_decryptor();
+}
+</script>
 
 
 

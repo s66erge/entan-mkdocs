@@ -2,126 +2,134 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/architecture/aintro/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-players/intro/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/data-design/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/folders-files/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/sections-code/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/sourcing-dhamma-org/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/tools-dev-prod/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app/ui-archi/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/0-gong-prog/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/admin-change/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/admin-show/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/authenticate/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/center-consult/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/center-dashboard/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/database-setup/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/fetch-courses/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/gong-plan-check/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/gong-planning/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/gong-timings-chan/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/gong-timings/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/states-machine/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/states-transitions/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/storage-minio/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/user-messages/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/utilities/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
          <loc>https://s66erge.github.io/entan-mkdocs/gong-web-app-code/utils-javascript/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
-         <loc>https://s66erge.github.io/entan-mkdocs/setup-deploy/a-python-environ/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-dev/a-python-environ/</loc>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
-         <loc>https://s66erge.github.io/entan-mkdocs/setup-deploy/entangled/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-dev/entangled/</loc>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
-         <loc>https://s66erge.github.io/entan-mkdocs/setup-deploy/mkdocs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-dev/mkdocs/</loc>
+         <lastmod>2026-07-08</lastmod>
     </url>
     <url>
-         <loc>https://s66erge.github.io/entan-mkdocs/setup-deploy/railway/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-dev/vscode-devcontainer/</loc>
+         <lastmod>2026-07-08</lastmod>
+    </url>
+    <url>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-prod/local-staging/</loc>
+         <lastmod>2026-07-08</lastmod>
+    </url>
+    <url>
+         <loc>https://s66erge.github.io/entan-mkdocs/setup-prod/railway/</loc>
+         <lastmod>2026-07-08</lastmod>
     </url>
 </urlset>

@@ -25,7 +25,7 @@
     
     
       
-        <title>UI architecture - Gong system and apps for Vipassane centers</title>
+        <title>[Protected] UI architecture - Gong system and apps for Vipassane centers</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              UI architecture
+              [Protected] UI architecture
             
           </span>
         </div>
@@ -267,7 +267,7 @@
   <span class="md-ellipsis">
     
   
-    Home
+    [Protected] Home
   
 
     
@@ -341,7 +341,7 @@
   <span class="md-ellipsis">
     
   
-    Overall architecture
+    [Protected] Overall architecture
   
 
     
@@ -423,7 +423,7 @@
   <span class="md-ellipsis">
     
   
-    Intro
+    [Protected] Intro
   
 
     
@@ -507,7 +507,7 @@
   <span class="md-ellipsis">
     
   
-    Database design
+    [Protected] Database design
   
 
     
@@ -535,7 +535,7 @@
   <span class="md-ellipsis">
     
   
-    Main folders / files
+    [Protected] Main folders / files
   
 
     
@@ -563,7 +563,7 @@
   <span class="md-ellipsis">
     
   
-    Code sections
+    [Protected] Code sections
   
 
     
@@ -591,7 +591,7 @@
   <span class="md-ellipsis">
     
   
-    Sourcing dhamma.org courses
+    [Protected] Sourcing dhamma.org courses
   
 
     
@@ -619,7 +619,7 @@
   <span class="md-ellipsis">
     
   
-    Tools + sync code&lt;-&gt;doc
+    [Protected] Tools + sync code&lt;-&gt;doc
   
 
     
@@ -656,7 +656,7 @@
   <span class="md-ellipsis">
     
   
-    UI architecture
+    [Protected] UI architecture
   
 
     
@@ -674,7 +674,7 @@
   <span class="md-ellipsis">
     
   
-    UI architecture
+    [Protected] UI architecture
   
 
     
@@ -1309,7 +1309,7 @@
   <span class="md-ellipsis">
     
   
-    Setup deploy
+    Setup dev
   
 
     
@@ -1325,7 +1325,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Setup deploy
+    Setup dev
   
 
           </label>
@@ -1338,7 +1338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/a-python-environ/" class="md-nav__link">
+      <a href="../../setup-dev/a-python-environ/" class="md-nav__link">
         
   
   
@@ -1366,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/entangled/" class="md-nav__link">
+      <a href="../../setup-dev/entangled/" class="md-nav__link">
         
   
   
@@ -1394,14 +1394,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/mkdocs/" class="md-nav__link">
+      <a href="../../setup-dev/mkdocs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    MkDocs
+    MkDocs-Zensical
   
 
     
@@ -1422,7 +1422,117 @@
   
   
     <li class="md-nav__item">
-      <a href="../../setup-deploy/railway/" class="md-nav__link">
+      <a href="../../setup-dev/vscode-devcontainer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup prod
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Setup prod
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/local-staging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local prod. staging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup-prod/railway/" class="md-nav__link">
         
   
   
@@ -1515,7 +1625,7 @@
       <a href="../.." class="md-path__link">
         
   <span class="md-ellipsis">
-    Home
+    [Protected] Home
   </span>
 
       </a>
@@ -1555,15 +1665,34 @@
   
 
 
-<h1 id="ui-architecture">UI architecture<a class="headerlink" href="#ui-architecture" title="Permanent link">#</a></h1>
-<p>The UI architecture is based on <strong>htmx</strong> (https://htmx.org/), a JavaScript library that extends HTML with custom attributes to add dynamic web features directly in HTML without needing large JavaScript frameworks.</p>
-<h3 id="key-features-of-htmx">Key Features of htmx:<a class="headerlink" href="#key-features-of-htmx" title="Permanent link">#</a></h3>
-<ul>
-<li>Adds attributes like hx-get, hx-post, hx-put, hx-delete, and hx-patch to HTML elements that trigger AJAX requests on certain user actions (click, submit, change).</li>
-<li>Enables partial HTML updates by swapping server responses into parts of the current page DOM, avoiding full page reloads.</li>
-<li>Supports event modifiers, CSS transitions, WebSockets, and Server-Sent Events through HTML attributes.</li>
-<li>Promotes a server-driven application model: the server returns HTML fragments rather than JSON, making UI updates simpler with less client-side JavaScript.</li>
-</ul>
+<div id="mkdocs-encrypted-content" style="display:none">SpN7zN8fmD9RkjlGNRSoEg==;p4sPcdATc9n7in6ClqzWr81FcaNUlCNgDk8XqgyVvm3D3K5deKr2/n5X6wfVRNvyKBq7oX9qKucJUVSu6qazNPfuTcv+kU8kxfbqpwWDvaTANgXPAKrmi/VlB3cJIacBT4FWSRuqBCxCizbUYnTRCFzHzQThCSMXorlL0OSH3GMwUWHcVyp83O7XbtJjA0bEP0nv8744ZwkNUaGddKoO+/9++x72wCZYM9pqK51CzPhwiLVPuDJpmUIHAnb1YSaJrt8gQRZjy1erB2E7PZgtCHbxJ3LjafTRw0fKVYVg6oYWNtEMN45JCyjPj5zrddtvpzf7V8TSQQlPs+4HMYri3zuo5+GbhbQvmWeox7dqOzFi5qXVm9ljkazOi32LjOQS05RnW4QWBOboFWx9vK6P6VNGR4KZwcq9aXjXWbMSlLxKRKcHMv6SP1O7m36xaDk1i8iTHOzal/DZpQgu9Lo+7R/Tdmo9ZAGFtrvpoHq9y8WzMciTdgXUtqIGXKIa6I1QZxmhX7zTMZFk3qGty5KVe8HER/dw9DH5/XmCMS+OqS5vK5ANQJSj2Ec1XnTxjqOvwg+Ubjkdk96lAlFe8A1sKyc5nbtoo1WUSStnGHAWRXgx7CcoYjuq7gma4L2h5KQSltZt9UIzYuTbBb1I5RVtfTZpQd0f/+K1H57bszm0FyuNpOOOTn49+73UMFgf+yavgI5EuK5e2SYwljzFTkF2dHdQGnbphQ/+JBvk89wgBhQG7pptUDYBDMfcS2CvSsEmN4SzS+PwcBocH85wCtNvgSVWVU4GFayXLII38DFNvGn8YQMMUAsY+I1BJNU9rW3uoH5stdmip1VCl+wTXMulkm8sk3mvVXlxHwHGJH/Unb8EWnp8mM3f6pCrwofUP3/llfSdSqx8cTmjxOZuG2IOVK5z7PzDC4v2wc0qKGTm3pR2B85UZeY9JMs2+9isvAq+MiABZqkBSGjmHH4ZqjhMgX6BMrvF/PURlDiSYZOYwYNbwIVqRYD02DbL1sbCdOFhzRHPXuJu1osEV3JMZ9U9znV6mXLB508qV5sgGMUvIqqlYy243sJcpQvTBOUYHxOYPcPaG7eI6HLS/76sPY02XG1uhP69XPUDUCtmy8+zOp5mnKaZhERwYvYsa7bZWqnpzHQgj2e5e4UOHIH5V6YaFVo34DW2QFSwT43byOkNw3NnHFUlMmvlV1gP0++ZH48WB6rZmmI7r9t9mpF3UlCDeL75rDzw2oUjPrLJNBP/CsY9KjigpWYAbd83V6R4KHhd9h7J9Z7k7HbsQdwSuiUTD610GVORe37v8AE++/urYepNLgFCZvE/RPmQnnL0C2m1f1LHMLD44NPoYo1EnfxqIoLHrxHtPw6zo+LecQ55aGmGOEXed8DMRvEmy5+NqOQamIgP0A1AhEExi3HTGEtUDMKj7b4V/GcC/2kxGtDjO/Y=</div>
+<div id="mkdocs-decrypted-content" style="display:none">
+    <form id="mkdocs-decrypt-form" class="md-content__inner md-typeset">
+        <h1>This content is protected with AES encryption. </h1>
+        <p>Contact your administrator for access to this page.</p>
+        <input class="md-input" type="password" id="mkdocs-content-password" placeholder="Password">
+        
+        <p id="mkdocs-decrypt-msg"></p>
+    </form>
+</div>
+
+<script type="text/javascript">
+var encryptcontent_id = "encryptcontent_1";
+var encryptcontent_path = "entan-mkdocs/gong-web-app/ui-archi/";
+var decryption_failure_message = "Invalid password.";
+var encryptcontent_keystore = ["5boCr4fPvVvG2wvVPKcjOQ==;G9FFKAOK91yHHkCwvqvIU+ZXN4cBhtrOb6sGG5SA42zewc1SqbAVrth50DC2dxL+XoUFuk5cK4e44OEnaTn4/iwO+F7AmAk4+340DpfeXbBWCa8ych611b5LnrU37NNE;k+yTNBwoHkuo6isgCpjrGQ=="];
+var encryptcontent_obfuscate = 0;
+
+const encryptcontent_event = new Event("encryptcontent_event");
+var encryptcontent_done = false;
+</script>
+<script type="module">
+if (!window.hasOwnProperty("init_decryptor")) {
+    import("../../assets/javascripts/decrypt-contents.js");
+} else {
+    init_decryptor();
+}
+</script>
 
 
 
