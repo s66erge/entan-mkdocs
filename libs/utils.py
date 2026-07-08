@@ -67,8 +67,8 @@ def host_type():
             return "dev-host"
         case "solaris":
             return "dev-container"
-        case "production":
-            return "prod-container"
+        case "staging":
+            return "staging-container"
         case _:
             # on railway.com
             return "prod-railway"

@@ -91,8 +91,8 @@ def host_type():
             return "dev-host"
         case "solaris":
             return "dev-container"
-        case "production":
-            return "prod-container"
+        case "staging":
+            return "staging-container"
         case _:
             # on railway.com
             return "prod-railway"
@@ -256,7 +256,6 @@ Select(
     *[option_selected_multi(id, selected_targets) for id in gong_ids],
     name="xxx", multiple=True, required=True
 )
-
 
 ```python
 #| id: pre-select-fasthtml
