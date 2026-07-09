@@ -22,9 +22,10 @@ __pycache__/*
 !md-text/
 !setup/
 !tests/
+!.devcontainer
 
 # and ignore this
 */temp
 */tmp
-.devcontainer/.env.*
 encryptcontent.cache
+.devcontainer/.env.*
