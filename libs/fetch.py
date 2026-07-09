@@ -214,12 +214,12 @@ def sort_clean(center,aplan, inside):
 async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
     # get the course_type mapping table from the spreadsheet
-    dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
+    dhamma_types = minio.dicts_from_excel("all_centers", "dhamma_course")
     #print(tabulate(dhamma_types, headers="keys"))
-    replacement = minio.dicts_from_excel_minio(center,"replacement")
-    inside = minio.dicts_from_excel_minio(center,"inside")
+    replacement = minio.dicts_from_excel(center,"replacement")
+    inside = minio.dicts_from_excel(center,"inside")
     #print(tabulate(replacement, headers="keys"))
-    params = minio.params_from_excel_minio(center)
+    params = minio.params_from_excel(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
     # get the start date for the last course just before today = current course - or service

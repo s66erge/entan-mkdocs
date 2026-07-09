@@ -274,7 +274,7 @@ def create_new_period(session, from_center, new_period, from_period):
         this_center_timetables_df = minio.get_center_temp_df(this_center, "timetables")
         new_rows = from_center_timetables_df[from_center_timetables_df["period_type"] == from_period].copy()
         new_rows["period_type"] = new_period
-        params = minio.params_from_excel_minio(this_center)
+        params = minio.params_from_excel(this_center)
         new_rows["gong_id"] = params[utils.Pkey.GONG_ID]
         new_rows["targets"] = params[utils.Pkey.TARGETS]
         this_center_timetables_df = pd.concat([this_center_timetables_df, new_rows], ignore_index=True)

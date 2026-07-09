@@ -45,11 +45,11 @@ async def goto_free(session, event, csms):
 async def save_db_plan_times(model):
     save_db_file = await planning.save_db_plan_timetable(model.center_name)
     model.update_attr("save_db_filename", save_db_file)
-    await asyncio.to_thread(minio.remove_center_temp_data, model.center_name)
+    await asyncio.to_thread(minio.remove_temp_center_data, model.center_name)
     return {"success": f"new db saved as {save_db_file}"}
 
 async def get_delay(model, until_hour, minutes=0):
-    center_params = minio.params_from_excel_minio(model.center_name)
+    center_params = minio.params_from_excel(model.center_name)
     center_tz = ZoneInfo(center_params[utils.Pkey.TIMEZON])
     now_center = datetime.now(center_tz)
     next_event = now_center.replace(hour=until_hour, minute=minutes)
@@ -68,7 +68,7 @@ async def get_delay(model, until_hour, minutes=0):
     return result, delay
 
 async def transfer_new_db(model):
-    center_params = minio.params_from_excel_minio(model.center_name)
+    center_params = minio.params_from_excel(model.center_name)
     center_tz = ZoneInfo(center_params[utils.Pkey.TIMEZON])
     center_save_date = datetime.now(center_tz).date().strftime("%Y-%m-%d")
     file_complete = utils.get_db_path() + model.get_center_attr("save_db_filename")

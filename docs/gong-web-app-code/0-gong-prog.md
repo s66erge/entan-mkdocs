@@ -191,12 +191,12 @@ def get(session, center: str):
 
 @rt('/planning/abandon_edit')
 async def get(session):
-    minio.remove_center_temp_data(session[utils.Skey.CENTER])
+    minio.remove_temp_center_data(session[utils.Skey.CENTER])
     return await transit.goto_free(session, "abandon_changes", states.csms)
 
 @rt('/planning/timer_done')
 async def get(session):
-    minio.remove_center_temp_data(session[utils.Skey.CENTER])
+    minio.remove_temp_center_data(session[utils.Skey.CENTER])
     return await transit.goto_free(session, "edit_timer_done", states.csms)
 
 @rt('/planning/force_to_free')

@@ -75,7 +75,7 @@ def get_types_with_duration(center, source="df"):
         periods_structs = list(db_center.t.periods_struct())
         timetables = list(db_center.t.timetables())
         db_center.close() 
-    params_from_excel = minio.params_from_excel_minio(center)
+    params_from_excel = minio.params_from_excel(center)
     types_duration = []
     for vt in period_types_list:
         item = {}

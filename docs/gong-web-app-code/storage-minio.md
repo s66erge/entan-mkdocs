@@ -5,6 +5,7 @@
 #| file: libs/minio.py 
 
 import os
+from pathlib import Path
 import libs.utils as utils
 import pandas as pd 
 from minio import Minio
@@ -115,18 +116,20 @@ def file_download(bucket, the_object, file_to_write):
 
 def get_center_temp_df(center, df_name):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
-    the_object = f"{center.lower()}/temp/{df_name}.parquet"
-    file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    # print(file_path)
+    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    # file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     df = pd.read_parquet(file_path)
-    os.remove(file_path)
+    # os.remove(file_path)
     return df
 
 def save_df_center_temp(center, df_name, df):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
     df.to_parquet(file_path)
-    the_object = f"{center.lower()}/temp/{df_name}.parquet"
-    file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
-    os.remove(file_path)
+    # print(file_path)
+    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    # file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    # os.remove(file_path)
     return
 
 def get_center_temp_list_of_dicts(center, key):
@@ -138,12 +141,22 @@ def save_center_temp_list_of_dicts(center, key, data):
     save_df_center_temp(center, key, df)
     return
 
-def remove_center_temp_data(center):
-    location = f"{center.lower()}/temp/"
-    list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)
-    for the_object in list_obj:
-        minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+def remove_temp_center_data(center):
+    folder = Path(utils.get_db_path())
+    target_files = [
+        file_path for file_path in folder.iterdir()
+        if file_path.is_file() and file_path.name.startswith(center) and file_path.suffix == '.parquet'
+    ]
+    for file_path in target_files:
+        file_path.unlink()
     return
+
+# def remove_temp_center_dat2(center):
+#     location = f"{center.lower()}/temp/"
+#     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)
+#     for the_object in list_obj:
+#         minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+#     return
 
 ```
 
@@ -152,41 +165,36 @@ def remove_center_temp_data(center):
 ```python
 #| id: get-save-excel-files
 
-def save_excel_minio(center):
-    if center == "all_centers":
-        file_path = f"{utils.get_db_path()}all_centers.xlsx"
-        the_object = "all_centers.xlsx"
-    else:
-        file_path = f"{utils.get_db_path()}{center}.xlsx"
-        the_object = f"{center.lower()}/{center}.xlsx"
-    file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+# def save_excel_minio(center):
+#     if center == "all_centers":
+#         file_path = f"{utils.get_db_path()}all_centers.xlsx"
+#         the_object = "all_centers.xlsx"
+#     else:
+#         file_path = f"{utils.get_db_path()}{center}.xlsx"
+#         the_object = f"{center.lower()}/{center}.xlsx"
+#     file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
 
-def get_excel_minio(center):
+def get_excel(center):
     if center == "all_centers":
         file_path = f"{utils.get_db_path()}all_centers.xlsx"
-        the_object = "all_centers.xlsx"
     else:
         file_path = f"{utils.get_db_path()}{center}.xlsx"
-        the_object = f"{center.lower()}/{center}.xlsx"
-    file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     return file_path
 
-def remove_excel_minio(center):
+def remove_excel(center):
     config_path = f'{utils.get_db_path()}{center}.xlsx'
     if os.path.exists(config_path):
         os.remove(config_path)
-    the_object = f"{center.lower()}/{center}.xlsx"
-    minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
     return
 
-def dicts_from_excel_minio(center, sheet):
-    file_path = get_excel_minio(center)
+def dicts_from_excel(center, sheet):
+    file_path = get_excel(center)
     df = pd.read_excel(file_path, sheet_name=sheet)
     result = df.to_dict('records')
     return result
 
-def params_from_excel_minio(center):
-    list_of_dicts = dicts_from_excel_minio(center, "params")
+def params_from_excel(center):
+    list_of_dicts = dicts_from_excel(center, "params")
     one_dict = {item["name"]: item["value"] for item in list_of_dicts}
     return one_dict
 
