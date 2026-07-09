@@ -35,6 +35,7 @@ dependencies = [
     "python-statemachine>=3.2.0",
     "resend==2.21.0",
     "tabulate==0.9.0",
+    "python-dotenv>=1.2.2",
 ]
 
 [dependency-groups]
@@ -46,11 +47,13 @@ dev = [
     "ruff>=0.3.0",
     "ipykernel==7.3.0",
     "pydot==4.0.1",
-    "entangled-cli>=2.4.0",
+    "entangled-cli==2.4.0",
     "mkdocs>=1.6.1",
     "pymdown-extensions>=11.0.1",
     "mkdocs-material>=9.7.6",
     "mkdocs-mermaid2-plugin>=1.2.3",
+    "zensical>=0.0.47",
+    "mkdocs-encryptcontent-plugin>=3.1.0",
 ]
 
 [tool.ruff]

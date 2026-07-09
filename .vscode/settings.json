@@ -2,9 +2,13 @@
      "workbench.editorAssociations": {
         "*.url": "default"
      },
-    "workbench.activityBar.location": "default",
+       "files.associations": {
+    "*.md": "python-markdown"
+     },
+   "workbench.activityBar.location": "default",
    "workbench.activityBar.orientation": "vertical",
    "python.analysis.diagnosticSeverityOverrides": {},
    "python.analysis.diagnosticMode": "workspace",
-   "python.analysis.autoImportCompletions": true
+   "python.analysis.autoImportCompletions": true,
+
 }

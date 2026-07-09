@@ -4,15 +4,15 @@
 
 These tools are described in the section `Setup deploy`.
 
-- [Python](../setup-deploy/a-python-environ.md): main programming language, with some JavaScript
-- [Entangled](../setup-deploy/entangled.md): for permanent sync of code and documentation
-- [MkDocs/Material](../setup-deploy/mkdocs.md): for generating the documentation static site
-- [Railway](../setup-deploy/railway.md): the production service
+- [Python](../setup-dev/a-python-environ.md): main programming language, with some JavaScript
+- [Entangled](../setup-dev/entangled.md): for permanent sync of code and documentation
+- [MkDocs/Material](../setup-dev/mkdocs.md): for generating the documentation static site
+- [Railway](../setup-prod/railway.md): the production service
 
 
 ## Automatic sync code <-> documentation
 
-[Entangled](../setup-deploy/entangled.md) synchronizes automatically the code in each of the markdown files here below with one of the app python files: `\libs\*.py`, plus `\main.py`.
+[Entangled](../setup-dev/entangled.md) synchronizes automatically the code in each of the markdown files here below with one of the app python files: `\libs\*.py`, plus `\main.py`.
 
 Read carefully the doc and ensure smooth usage with git !
 

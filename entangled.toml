@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/setup-deploy/entangled.md#entangled.toml>>[init]
+# ~/~ begin <<docs/setup-dev/entangled.md#entangled.toml>>[init]
 
 version = "2.0"
 watch_list = ["docs/**/*.md"]
@@ -14,6 +14,11 @@ identifiers =  ["powershell", "pwsh"]
 comment = { open = "#" }
 
 [[languages]]
+name = "Docker"
+identifiers =  ["dockerfile"]
+comment = { open = "#" }
+
+[[languages]]
 name = "XML"
 identifiers = ["xml", "html", "svg"]
 comment = { open = "<!--", close = "-->" }
@@ -25,12 +30,17 @@ comment = { open = "%%" }
 
 [[languages]]
 name = "yaml"
-identifiers =  ["yaml"]
+identifiers =  ["yaml", "yml"]
 comment = { open = "#" }
 
 [[languages]]
 name = "toml"
 identifiers =  ["toml"]
 comment = { open = "#" }
+
+[[languages]]
+name = "json"
+identifiers =  ["json"]
+comment = { open = "//" }
 
 # ~/~ end
