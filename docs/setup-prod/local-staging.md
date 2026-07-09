@@ -11,7 +11,7 @@ Both sets use the same `Dockerfile.dev` file and use docker-compose for containe
 
 ## Another file for staging containers
 
-This file `.devcontainer/docker-compose.staging.yml` replaces `.devcontainer/docker-compose.yml`   
+This file `.devcontainer/docker-compose.staging.yml` replaces `.devcontainer/docker-compose.vscodedev.yml`   
 
 ```yaml
 #| file: .devcontainer/docker-compose.staging.yml
@@ -23,9 +23,11 @@ services:
       context: ..
       dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
       target: production
-    hostname: staging
+    hostname: ubuntu-bosgame
     env_file:
-      - .env.staging
+      - .env.staging  # including same CONTAINER_NAME
+    volumes:
+      - appli_data:/app/data
     ports:
       - "8000:8000" # Exposes your app's port to the host machine
     depends_on:
@@ -68,8 +70,10 @@ services:
       retries: 5
 
 volumes:
+  appli_data:    # Persists application data
   postgres_data: # Persists your database tables even if the container restarts
   minio_data:    # Persists your uploaded files/buckets
+
 
 ```
 

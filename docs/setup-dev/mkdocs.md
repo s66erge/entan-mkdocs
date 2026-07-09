@@ -44,7 +44,9 @@ plugins:
 #  - entangled
   - mermaid2:
       arguments:
-         securityLevel: 'loose' 
+         securityLevel: 'loose'
+  - encryptcontent:
+      global_password: "the-digital-gongs"
 
 markdown_extensions:
   - toc:

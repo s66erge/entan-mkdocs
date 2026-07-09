@@ -68,10 +68,12 @@ class Targets:
 
 
 def get_central_db():
-    match utils.host_type():
+    match utils.environ():
         case "dev-host":
             # local postgreSQL
-            return Database("postgresql://postgres:Route666@localhost:5432/postgres")
+            # return Database("postgresql://postgres:Route666@localhost:5432/postgres")
+            # postgreSQL in the vscodedev container
+            return Database(os.environ.get('DATABASE_URL'))
         case "dev-container" | "staging-container" | "prod-railway":
             # dev container postgreSQL
             return Database(os.environ.get('DATABASE_URL'))

@@ -76,6 +76,7 @@ app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before
     )
 # client = TestClient(app)
 
+utils.show_load_context()
 db_path = utils.get_db_path()
 db = dbset.get_central_db()
 minio.minio_client = minio.create_minio_client()

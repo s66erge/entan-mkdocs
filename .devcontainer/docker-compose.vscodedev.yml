@@ -1,4 +1,4 @@
-# ~/~ begin <<docs/setup-dev/vscode-devcontainer.md#.devcontainer/docker-compose.yml>>[init]
+# ~/~ begin <<docs/setup-dev/vscode-devcontainer.md#.devcontainer/docker-compose.vscodedev.yml>>[init]
 services:
   # 1. Your Application Dev Container
   app:
@@ -6,9 +6,9 @@ services:
       context: ..
       dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
       target: builder
-    hostname: solaris
+    hostname: ubuntu-bosgame
     env_file:
-      - .env.solaris
+      - .env.vscodedev  # including same CONTAINER_NAME 
     volumes:
       - ..:/workspace:cached # Mounts your local project folder into the container
     ports:
@@ -19,7 +19,7 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     env_file:
-      - .env.solaris
+      - .env.vscodedev
     ports:
       - "5432:5432" # Exposes to your host machine so you can use external GUI tools like DBeaver
     volumes:
@@ -33,7 +33,7 @@ services:
       - "9000:9000" # API port for your app to connect to
       - "9001:9001" # Web Console UI port
     env_file:
-      - .env.solaris
+      - .env.vscodedev
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

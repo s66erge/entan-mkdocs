@@ -25,7 +25,7 @@ Note - entangled does not work with json files, need to copy/paste:
 ```json
 {
   "name": "My App Dev Environment",
-  "dockerComposeFile": "docker-compose.yml", // WITH .env.solaris : see below
+  "dockerComposeFile": "docker-compose.vscodedev.yml", // WITH .env.solaris : see below
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
 
@@ -53,12 +53,12 @@ Note - entangled does not work with json files, need to copy/paste:
 
 ```
 
-### Which triggers the `docker-compose.yml` file in the same `.devcontainer` folder
+### Which triggers the `docker-compose-vscodedev.yml` file in the same `.devcontainer` folder
 
 The passwords are in the .env.* files (not in Git) in the same folder `.devcontainer`
 
 ```yaml
-#| file: .devcontainer/docker-compose.yml
+#| file: .devcontainer/docker-compose.vscodedev.yml
 services:
   # 1. Your Application Dev Container
   app:
@@ -66,9 +66,9 @@ services:
       context: ..
       dockerfile: Dockerfile.dev # Or point to your standard dev Dockerfile
       target: builder
-    hostname: solaris
+    hostname: ubuntu-bosgame
     env_file:
-      - .env.solaris
+      - .env.vscodedev  # including same CONTAINER_NAME 
     volumes:
       - ..:/workspace:cached # Mounts your local project folder into the container
     ports:
@@ -79,7 +79,7 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     env_file:
-      - .env.solaris
+      - .env.vscodedev
     ports:
       - "5432:5432" # Exposes to your host machine so you can use external GUI tools like DBeaver
     volumes:
@@ -93,7 +93,7 @@ services:
       - "9000:9000" # API port for your app to connect to
       - "9001:9001" # Web Console UI port
     env_file:
-      - .env.solaris
+      - .env.vscodedev
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

@@ -1,6 +1,8 @@
 # ~/~ begin <<docs/gong-web-app-code/utilities.md#libs/utils.py>>[init]
 
 import socket
+from dotenv import load_dotenv
+from pathlib import Path
 import calendar
 from zoneinfo import ZoneInfo
 from fasthtml.common import *
@@ -60,21 +62,39 @@ Globals = GlobalsDefinition()
 
 # ~/~ begin <<docs/gong-web-app-code/utilities.md#isdev-computer>>[init]
 
-def host_type():
+def show_load_context():
     hostname = socket.gethostname()
-    match hostname:
-        case "serge-asrock" | "serge-framework" | "serge-bosgame":
-            return "dev-host"
-        case "solaris":
-            return "dev-container"
+    container_name = os.getenv("CONTAINER_NAME", "local-host")
+    if container_name == "local-host":
+        # 1. Get the absolute path to your project's root directory
+        # (Assuming this script is running from your project root)
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        SUB_DIR = BASE_DIR / ".devcontainer"
+        # 2. Point directly to your custom file
+        ENV_FILE_PATH = SUB_DIR / ".env.localhost"
+        print(ENV_FILE_PATH)
+        # 3. Load it explicitly
+        load_dotenv(dotenv_path=ENV_FILE_PATH)
+        print(os.getenv("DATABASE_URL"))
+    print(f"hostname: {hostname}, container name: {container_name}, environ: {environ()}")
+
+def environ():
+    # hostname = socket.gethostname()
+    container_name = os.getenv("CONTAINER_NAME", "local-host")
+    match container_name:
+        case "local-host":
+            enviro = "dev-host"
+        case "vscodedev":
+            enviro = "dev-container"
         case "staging":
-            return "staging-container"
+            enviro = "staging-container"        
         case _:
             # on railway.com
-            return "prod-railway"
+            enviro = "prod-railway"
+    return enviro
 
 def get_db_path():
-    if host_type() != "prod-railway":
+    if environ() != "prod-railway":
         root = ""
     else:   # Railway production permanent storage
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
@@ -89,7 +109,7 @@ def isa_db_test(db):
 
 def send_email(subject, body, recipients):
     sender = Globals.EMAIL_SENDER
-    if  "dev" in host_type():
+    if  "dev" in environ():
         print(f'From: {sender}\nTo: {recipients}\nSubject: {subject}\n\n{body}')
     else:
         resend_email(sender, subject, body, recipients)

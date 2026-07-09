@@ -1,6 +1,6 @@
 {
   "name": "My App Dev Environment",
-  "dockerComposeFile": "docker-compose.yml", // WITH .env.solaris : see below
+  "dockerComposeFile": "docker-compose.vscodedev.yml", // WITH .env.vscodedev
   "service": "app", // Tells VS Code to open your terminal inside the 'app' container
   "workspaceFolder": "/workspace",
   
