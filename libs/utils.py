@@ -20,9 +20,6 @@ class Skey: # session keys
     TIMESOK = "timesOK"
     SAVED_PLAN = "saved_plan"
     SAVED_TIMES = "saved_times"
-    @classmethod
-    def get(cls, name, default=None):
-        return getattr(cls, name, default)
 
 class Pkey: # parameters keys in excel sheet
     TIMEZON = "timezon"
@@ -30,9 +27,6 @@ class Pkey: # parameters keys in excel sheet
     GONG_ID = "gong_id"
     TARGETS = "targets"
     DEFAULT_PERIOD = "default_period"
-    @classmethod
-    def get(cls, name, default=None):
-        return getattr(cls, name, default)
 
 @dataclass(frozen=True)
 class GlobalsDefinition:
@@ -102,10 +96,6 @@ def get_db_path():
         root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
     return root + "data/"
 
-# ~/~ end
-# ~/~ begin <<docs/gong-web-app-code/utilities.md#istest-db>>[init]
-def isa_db_test(db):
-    return 'Database <apsw.Connection object ""' in str(db)
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/utilities.md#send-email>>[init]
 
@@ -185,11 +175,6 @@ def days_between_iso_dates(date_str1, date_str2):
 
 def short_iso(date_time: datetime, timezon="UTC"):
     return date_time.astimezone(ZoneInfo(timezon)).strftime('%Y-%m-%dT%H:%M:%S%z')
-
-def seconds_to_hours_minutes(total_seconds):
-    hours = total_seconds // 3600
-    remaining_minutes = (total_seconds % 3600) // 60
-    return hours, remaining_minutes
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/utilities.md#pre-select-fasthtml>>[init]

@@ -13,7 +13,6 @@ fetch_dhamma_courses("Pajjota", 6, 0)
 from curl_cffi import requests
 import re
 import asyncio
-from tabulate import tabulate
 from datetime import date
 from fasthtml.common import *
 import libs.plancheck as plancheck
@@ -255,10 +254,8 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
     # get the course_type mapping table from the spreadsheet
     dhamma_types = minio.dicts_from_excel_minio("all_centers", "dhamma_course")
-    #print(tabulate(dhamma_types, headers="keys"))
     replacement = minio.dicts_from_excel_minio(center,"replacement")
     inside = minio.dicts_from_excel_minio(center,"inside")
-    #print(tabulate(replacement, headers="keys"))
     params = minio.params_from_excel_minio(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
@@ -269,11 +266,9 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
 
     # fetch extracted courses from dhamma.org
     extracted = await asyncio.to_thread(fetch_scrap, dhamma_location, date_current_course, end_date)
-    #print(tabulate(extracted, headers="keys"))
 
     # get the course_type for each extracted course from the mapping and replacements tables
     periods_dhamma = get_dhamma_courses_types(extracted, center_obj, dhamma_types, replacement)
-    #print(tabulate(periods_dhamma_org, headers="keys"))
 
     # merge the 2 course lists, sort the merge and deduplicate identical courses
     merged = periods_db_center + periods_dhamma

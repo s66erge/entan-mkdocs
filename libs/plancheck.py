@@ -3,7 +3,6 @@
 from fasthtml.common import *
 from fastlite import database
 from datetime import date
-from tabulate import tabulate
 import pandas as pd
 import libs.utils as utils
 import libs.dbset as dbset
