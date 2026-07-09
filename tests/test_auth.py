@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 from fasthtml.common import to_xml
+from libs.messages import feed_text
 from libs.auth import (
     signin_form, login, create_code, send_login_code_email,
     verify_code, admin_required
@@ -145,8 +146,11 @@ class TestVerifyCode:
 
         result = verify_code({}, "invalid_code", "UTC", mock_users)
 
-        # Should return error feedback
-        assert 'The code is invalid ot expired' in str(to_xml(result))
+        # Should return the "invalid or expired code" error feedback. Derive the
+        # expected copy from feed_text so the assertion tracks the source of truth
+        # rather than hard-coding the (currently typoed) sentence.
+        expected = feed_text({"error": "invalid_or_expired_code"})["mess"]
+        assert expected in to_xml(result)
 
     @patch('libs.auth.datetime')
     def test_verify_code_valid_code(self, mock_datetime, mock_users):
