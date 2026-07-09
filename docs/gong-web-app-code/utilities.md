@@ -46,6 +46,7 @@ class Pkey: # parameters keys in excel sheet
 @dataclass(frozen=True)
 class GlobalsDefinition:
     EMAIL_SENDER:str = "spegoff@authentica.eu"
+    DEV_COMPUTERS = ["serge-bosgame", "serge-asrock", "serge-framework"]
     HTML_TAGS_CENTERS = {"F": "Fixed", "V": "Variable", "X": "Default - Variable"}
     MEDIA_TYPES = {".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                    ".db": "application/octet-stream"}
@@ -88,8 +89,8 @@ This function checks if the program runs on one of a predefined list of developm
 
 def show_load_context():
     hostname = socket.gethostname()
-    container_name = os.getenv("CONTAINER_NAME", "local-host")
-    if container_name == "local-host":
+    container_name = os.getenv("CONTAINER_NAME", "unknown")
+    if container_name == "unknown" and hostname in Globals.DEV_COMPUTERS:
         # 1. Get the absolute path to your project's root directory
         # (Assuming this script is running from your project root)
         BASE_DIR = Path(__file__).resolve().parent.parent
@@ -103,18 +104,19 @@ def show_load_context():
     print(f"hostname: {hostname}, container name: {container_name}, environ: {environ()}")
 
 def environ():
-    # hostname = socket.gethostname()
-    container_name = os.getenv("CONTAINER_NAME", "local-host")
+    hostname = socket.gethostname()
+    container_name = os.getenv("CONTAINER_NAME", "unknown")
     match container_name:
-        case "local-host":
-            enviro = "dev-host"
         case "vscodedev":
             enviro = "dev-container"
         case "staging":
             enviro = "staging-container"        
-        case _:
+        case "unknown":
+            if hostname in Globals.DEV_COMPUTERS:
+                enviro = "dev-host"
+            else:
             # on railway.com
-            enviro = "prod-railway"
+                enviro = "prod-railway"
     return enviro
 
 def get_db_path():
