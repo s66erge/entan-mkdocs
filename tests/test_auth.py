@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
-from fasthtml.common import NotFoundError, RedirectResponse
+from fasthtml.common import to_xml
 from libs.auth import (
     signin_form, login, create_code, send_login_code_email,
     verify_code, admin_required
@@ -99,57 +99,30 @@ class TestCreateCode:
     @patch('libs.auth.send_login_code_email')
     @patch('libs.auth.datetime')
     @patch('libs.auth.secrets')
-    @patch('libs.auth.isa_dev_computer')
-    def test_create_code_success_dev(self, mock_is_dev, mock_secrets, mock_datetime, mock_send_email, mock_users):
-        """Test create_code success on dev machine."""
-        mock_is_dev.return_value = True
+    def test_create_code_success(self, mock_secrets, mock_datetime, mock_send_email, mock_users):
+        """Test create_code success: generates a code and emails it to the user."""
         mock_secrets.choice.return_value = '4'
         mock_datetime.now.return_value = datetime(2023, 1, 1, 12, 0, 0)
         mock_users.return_value = [Mock(email="test@example.com", role_name="user")]
 
         result = create_code("test@example.com", mock_users)
 
-        # Check that send_login_code_email was called
+        # Check that send_login_code_email was called with the generated code
         mock_send_email.assert_called_once()
         call_args = mock_send_email.call_args[0]
         assert call_args[0] == "test@example.com"
         assert call_args[1] == "444444"  # 6-digit code from mock
 
-        # Check result structure
-        assert hasattr(result, 'tag') or isinstance(result, tuple)
-
-    @patch('libs.auth.send_login_code_email')
-    @patch('libs.auth.datetime')
-    @patch('libs.auth.secrets')
-    @patch('libs.auth.isa_dev_computer')
-    def test_create_code_success_production(self, mock_is_dev, mock_secrets, mock_datetime, mock_send_email, mock_users):
-        """Test create_code success in production."""
-        mock_is_dev.return_value = False
-        mock_secrets.choice.return_value = '4'
-        mock_datetime.now.return_value = datetime(2023, 1, 1, 12, 0, 0)
-        mock_users.return_value = [Mock(email="test@example.com", role_name="user")]
-
-        result = create_code("test@example.com", mock_users)
-
-        # Check that send_login_code_email was called
-        mock_send_email.assert_called_once()
-        call_args = mock_send_email.call_args[0]
-        assert call_args[0] == "test@example.com"
-        assert call_args[1] == "444444"  # 6-digit code from mock
-
-        # Check result structure
+        # Check result structure (create_code returns a tuple of FT partials on success)
         assert hasattr(result, 'tag') or isinstance(result, tuple)
 
 
 class TestSendLoginCodeEmail:
     """Test magic link email sending."""
 
-    @patch('libs.auth.send_email')
-    @patch('libs.auth.isa_dev_computer')
-    def test_send_email_production(self, mock_is_dev, mock_send_email):
-        """Test email sending in production."""
-        mock_is_dev.return_value = False
-
+    @patch('libs.utils.send_email')
+    def test_send_login_code_email(self, mock_send_email):
+        """send_login_code_email delegates to utils.send_email with subject, text and recipient."""
         send_login_code_email("test@example.com", "123456")
 
         # Check that send_email was called with correct args
@@ -158,20 +131,6 @@ class TestSendLoginCodeEmail:
         assert "Your sign-in code for The App" in args[0]
         assert "123456" in args[1]
         assert args[2] == ["test@example.com"]
-
-    @patch('builtins.print')
-    @patch('libs.auth.isa_dev_computer')
-    def test_send_email_dev(self, mock_is_dev, mock_print):
-        """Test email printing in development."""
-        mock_is_dev.return_value = True
-
-        send_login_code_email("test@example.com", "123456")
-
-        # Check that print was called (not send_email)
-        mock_print.assert_called_once()
-        print_args = mock_print.call_args[0][0]
-        assert "test@example.com" in print_args
-        assert "Your sign-in code for The App" in print_args
 
 
 class TestVerifyCode:
@@ -184,10 +143,10 @@ class TestVerifyCode:
         # Configure the mock to raise IndexError when accessed
         mock_users.side_effect = IndexError()
 
-        result = verify_code({}, "invalid_code", mock_users)
+        result = verify_code({}, "invalid_code", "UTC", mock_users)
 
         # Should return error feedback
-        assert 'The code is invalid ot expired' in str(result)
+        assert 'The code is invalid ot expired' in str(to_xml(result))
 
     @patch('libs.auth.datetime')
     def test_verify_code_valid_code(self, mock_datetime, mock_users):
@@ -197,14 +156,15 @@ class TestVerifyCode:
         mock_users.return_value = [mock_user]
         
         session = {}
-        result = verify_code(session, "valid_code", mock_users)
+        result = verify_code(session, "valid_code", "UTC", mock_users)
 
         # Check session was updated
         assert session['auth'] == "test@example.com"
         assert session['role'] == "user"
 
-        # Check result is a redirect script
-        assert 'window.location.href = \'/dashboard\'' in str(result)
+        # Check result is a redirect to the dashboard
+        assert type(result).__name__ == "Redirect"
+        assert result.loc == "/dashboard"
 
 
 class TestAdminRequired:
@@ -233,10 +193,8 @@ class TestAdminRequired:
         result = test_handler(mock_session)
 
         # Should redirect to no_access_right
-        assert isinstance(result, RedirectResponse)
-        assert hasattr(result, 'status_code')
-        assert result.status_code == 307
-        assert '/no_access_right' in str(result.headers)
+        assert type(result).__name__ == "Redirect"
+        assert result.loc == "/no_access_right"
 
     def test_admin_required_wrong_role(self, mock_session):
         """Test admin_required with non-admin role."""
@@ -249,7 +207,5 @@ class TestAdminRequired:
         result = test_handler(mock_session)
 
         # Should redirect to no_access_right
-        assert isinstance(result, RedirectResponse)
-        assert hasattr(result, 'status_code')
-        assert result.status_code == 307
-        assert '/no_access_right' in str(result.headers)
+        assert type(result).__name__ == "Redirect"
+        assert result.loc == "/no_access_right"
