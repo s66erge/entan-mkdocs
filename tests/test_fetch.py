@@ -1,165 +1,139 @@
-import json
-import types
-from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch
 
-import pytest
-
 from libs.fetch import (
-    get_field_from_db,
-    fetch_courses_from_dhamma,
+    fetch_scrap,
     get_period_type,
     deduplicate,
-    check_row,
-    check_plan,
+    check_within,
+    get_dhamma_courses_types,
 )
 
 
 # ----------------------------------------------------------------------
-# Helpers / Fixtures
+# get_period_type: maps a dhamma.org raw course type to a center period type
 # ----------------------------------------------------------------------
-class DummyCenter:
-    """Simple object with attribute access."""
-    def __init__(self, location=None, **extra):
-        self.location = location
-        for k, v in extra.items():
-            setattr(self, k, v)
+def test_get_period_type_replace_all():
+    replacement = [{"raw_course_type": "ABC", "course_description": "@ALL@", "period_type": "ALLTYPE"}]
+    assert get_period_type("ABC", "anything", [], replacement) == "ALLTYPE"
 
 
-class DummyCenters:
-    """Mimic the .t.centers mapping used in get_field_from_db."""
-    def __init__(self, mapping):
-        self._mapping = mapping
-
-    def __getitem__(self, key):
-        return self._mapping[key]
+def test_get_period_type_replace_by_cleaned_description():
+    replacement = [{"raw_course_type": "DEF", "course_description": "Z", "period_type": "W"}]
+    # course_type "Z-course" -> cleaned "ZCOURSE", which contains "Z"
+    assert get_period_type("DEF", "Z-course", [], replacement) == "W"
 
 
-class DummyDBCentral:
-    """Mimic the db_central with .t.centers."""
-    def __init__(self, centers):
-        self.t = types.SimpleNamespace(centers=DummyCenters(centers))
+def test_get_period_type_fallback_to_mapping():
+    dhamma_types = [{"raw_course_type": "R1", "period_type": "PT1"}]
+    assert get_period_type("R1", "anything", dhamma_types, []) == "PT1"
+
+
+def test_get_period_type_unknown_returns_input():
+    assert get_period_type("UNKNOWN", "anything", [], []) == "UNKNOWN"
 
 
 # ----------------------------------------------------------------------
-# Tests for get_field_from_db
+# deduplicate: adjacent rows with same date+type but different source -> "BOTH"
 # ----------------------------------------------------------------------
-def test_get_field_from_db_location():
-    db = DummyDBCentral({"C1": DummyCenter(location="NY")})
-    assert get_field_from_db(db, "C1", "location") == "location_NY"
-
-
-def test_get_field_from_db_other_json():
-    db = DummyDBCentral({"C1": DummyCenter(other='{"a": 1, "b": 2}')})
-    # The function uses json.loads on the attribute value
-    result = get_field_from_db(db, "C1", "other")
-    assert result == {"a": 1, "b": 2}
-
-
-# ----------------------------------------------------------------------
-# Tests for fetch_courses_from_dhamma (pagination handling)
-# ----------------------------------------------------------------------
-def test_fetch_courses_from_dhamma_pagination():
-    # Mock the requests.post to simulate two pages
-    page1 = {
-        "courses": [{"course_type": "CT1"}],
-        "pages": 2
-    }
-    page2 = {
-        "courses": [{"course_type": "CT2"}],
-        "pages": 2
-    }
-
-    def fake_post(url, data=None, headers=None, timeout=None):
-        page = int(data["page"])
-        resp = Mock()
-        resp.json.return_value = page1 if page == 1 else page2
-        resp.raise_for_status = Mock()
-        return resp
-
-    with patch("libs.fetch.requests.post", side_effect=fake_post):
-        result = fetch_courses_from_dhamma("loc", "2023-01-01", "2023-02-01")
-        # Two courses from both pages
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert result[0]["course_type"] == "CT1"
-        assert result[1]["course_type"] == "CT2"
-
-
-# ----------------------------------------------------------------------
-# Tests for get_period_type
-# ----------------------------------------------------------------------
-def test_get_period_type_replacements():
-    other = {"replacements": {"ABC": {"@ALL@": "ALLTYPE"},
-                                "DEF": {"Z": "W"}}}
-    list_of = [{"raw_course_type": "R1", "period_type": "PT1"}]
-
-    # Exact replacement via @ALL@
-    assert get_period_type("ABC", "any", list_of, other) == "ALLTYPE"
-    # Replacement via key X -> Y
-    assert get_period_type("DEF", "Z", list_of, other) == "W"
-    # Fallback to list_of
-    assert get_period_type("R1", "any", list_of, other) == "PT1"
-    # Unknown
-    assert get_period_type("UNKNOWN", "any", list_of, other) == "UNKNOWN UNKNOWN"
-
-
-# ----------------------------------------------------------------------
-# Tests for deduplicate
-# ----------------------------------------------------------------------
-def test_deduplicate_basic():
+def test_deduplicate_marks_both():
     merged = [
-        {"start_date": "2023-01-01", "period_type": "A", "source": "s1"},
-        {"start_date": "2023-01-01", "period_type": "A", "source": "s2"},
-        {"start_date": "2023-01-02", "period_type": "B", "source": "s3"},
+        {"start_date": "2023-01-01", "period_type": "A", "source": "center.ok.db"},
+        {"start_date": "2023-01-01", "period_type": "A", "source": "dhamma.org"},
+        {"start_date": "2023-01-02", "period_type": "B", "source": "dhamma.org"},
     ]
-    result = deduplicate(merged, del_as_BETWEEN=[])
-    # First two should merge into one with source "BOTH"
+    result = deduplicate(merged)
+    assert len(result) == 2
     assert result[0]["source"] == "BOTH"
-    assert result[0]["start_date"] == "2023-01-01"
     assert result[0]["period_type"] == "A"
-    # Second entry unchanged
     assert result[1]["period_type"] == "B"
 
 
-# ----------------------------------------------------------------------
-# Tests for check_row and check_plan
-# ----------------------------------------------------------------------
-def test_check_row_gap():
-    row = {"period_type": "type1", "start_date": "2023-01-01"}
-    # next start is 2023-01-04, duration=2 => gap of 2 days expected
-    checked = check_row(row, next_type="type2", next_start_date="2023-01-05",
-                        previous_type=None, previous_end_date=None,
-                        types_with_duration=[{
-                            "valid_types": "type1",
-                            "duration": 2,
-                            "var_period": False,
-                            "over_oth": []
-                        }])
-    assert checked["check"] == "GAP of 2"
-
-
-def test_check_plan_no_valid_types():
-    # Minimal dummy db_center with periods_struct returning empty list
-    class DummyPeriodsStruct:
-        def __call__(self):
-            return []  # no period definitions
-
-    class DummyT:
-        def __init__(self):
-            self.periods_struct = DummyPeriodsStruct()
-
-    class DummyDB:
-        def __init__(self):
-            self.t = DummyT()
-
-    db_center = DummyDB()
-    other_course = {"variable-len": [], "override": {}}
-    plan = [
-        {"period_type": "X", "start_date": "2023-01-01"},
-        {"period_type": "Y", "start_date": "2023-01-05"},
+def test_deduplicate_keeps_distinct_rows():
+    merged = [
+        {"start_date": "2023-01-01", "period_type": "A", "source": "dhamma.org"},
+        {"start_date": "2023-01-05", "period_type": "B", "source": "dhamma.org"},
     ]
-    # Should not raise; each entry gets a 'check' of "NoType"
-    result = check_plan(plan, db_center, other_course)
-    for item in result:
-        assert item["check"] == "NoType"
+    result = deduplicate(merged)
+    assert len(result) == 2
+    assert [r["source"] for r in result] == ["dhamma.org", "dhamma.org"]
+
+
+# ----------------------------------------------------------------------
+# check_within: is this_row's start inside [row_aft.start, row_aft.end) ?
+# ----------------------------------------------------------------------
+def test_check_within_inside():
+    this_row = {"start_date": "2023-01-03"}
+    row_aft = {"start_date": "2023-01-01", "end_date": "2023-01-05"}
+    assert check_within(this_row, row_aft) is True
+
+
+def test_check_within_outside():
+    this_row = {"start_date": "2023-01-06"}
+    row_aft = {"start_date": "2023-01-01", "end_date": "2023-01-05"}
+    assert check_within(this_row, row_aft) is False
+
+
+# ----------------------------------------------------------------------
+# get_dhamma_courses_types: strips trailing OSC and resolves period types
+# ----------------------------------------------------------------------
+def test_get_dhamma_courses_types_strips_osc_and_maps():
+    extracted = [{
+        "course_start_date": "2023-01-01",
+        "course_end_date": "2023-01-11",
+        "course_type_anchor": "TenDayOSC",
+        "course_type": "CT",
+    }]
+    dhamma_types = [{"raw_course_type": "TenDay", "period_type": "PT10"}]
+    result = get_dhamma_courses_types(extracted, center_obj=None,
+                                      dhamma_types=dhamma_types, replacement=[])
+    assert len(result) == 1
+    assert result[0]["period_type"] == "PT10"
+    assert result[0]["source"] == "dhamma.org"
+    assert result[0]["start_date"] == "2023-01-01"
+
+
+# ----------------------------------------------------------------------
+# fetch_scrap: paginates dhamma.org and filters cancelled / non-center courses
+# ----------------------------------------------------------------------
+def _course(course_type):
+    return {
+        "course_start_date": "2023-01-01",
+        "course_end_date": "2023-01-11",
+        "raw_course_type": "10d",
+        "course_type_anchor": "TenDay",
+        "course_type": course_type,
+        "location": {"center_noncenter": "center"},
+        "status": [{"status": "OPEN"}],
+    }
+
+
+def test_fetch_scrap_paginates_and_maps():
+    page1 = {"courses": [_course("CT1")], "pages": 2}
+    page2 = {"courses": [_course("CT2")], "pages": 2}
+
+    def fake_post(url, data=None, **kwargs):
+        resp = Mock()
+        resp.json.return_value = page1 if int(data["page"]) == 1 else page2
+        return resp
+
+    mock_session = Mock()
+    mock_session.post.side_effect = fake_post
+    with patch("libs.fetch.requests.Session", return_value=mock_session):
+        result = fetch_scrap("location_1", "2023-01-01", "2023-02-01")
+
+    assert [c["course_type"] for c in result] == ["CT1", "CT2"]
+
+
+def test_fetch_scrap_filters_cancelled_and_noncenter():
+    cancelled = _course("CANCELLED_ONE")
+    cancelled["status"] = [{"status": "cancelled"}]
+    noncenter = _course("NONCENTER_ONE")
+    noncenter["location"] = {"center_noncenter": "noncenter"}
+    payload = {"courses": [_course("KEPT"), cancelled, noncenter], "pages": 1}
+
+    mock_session = Mock()
+    mock_session.post.return_value = Mock(json=Mock(return_value=payload))
+    with patch("libs.fetch.requests.Session", return_value=mock_session):
+        result = fetch_scrap("location_1", "2023-01-01", "2023-02-01")
+
+    assert [c["course_type"] for c in result] == ["KEPT"]
