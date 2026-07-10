@@ -214,10 +214,8 @@ async def fetch_dhamma_courses(centers, center, num_months, num_days):
     center_obj = centers[center]
     # get the course_type mapping table from the spreadsheet
     dhamma_types = minio.dicts_from_excel("all_centers", "dhamma_course")
-    #print(tabulate(dhamma_types, headers="keys"))
     replacement = minio.dicts_from_excel(center,"replacement")
     inside = minio.dicts_from_excel(center,"inside")
-    #print(tabulate(replacement, headers="keys"))
     params = minio.params_from_excel(center)
     dhamma_location = f"location_{params[utils.Pkey.LOCATION]}"
 
