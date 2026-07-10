@@ -1,0 +1,35 @@
+name: Deploy production
+
+# Version tag (vX.Y.Z) → production. The `production` GitHub Environment carries
+# required reviewers, so the deploy job pauses for approval before it runs.
+on:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+
+  deploy:
+    needs: checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+      image_ref: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+      image_tags: |
+        ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        ghcr.io/${{ github.repository }}:latest
+      compose_project: gong-production
+      host_dir: /opt/gong/production
+      smoke_url: ${{ vars.PRODUCTION_URL }}/healthz
+    secrets: inherit

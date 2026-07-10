@@ -17,3 +17,7 @@ zref/
 Dockerfile*
 .dockerignore
 README.md
+deploy/
+.github/
+**/.env
+**/.env.*

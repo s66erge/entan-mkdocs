@@ -1,0 +1,138 @@
+name: Reusable deploy
+
+# Reusable build + SSH deploy. Called by deploy-staging.yml and
+# deploy-production.yml so staging and prod share one implementation.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub Environment to deploy to (staging | production)
+        required: true
+        type: string
+      image_ref:
+        description: Immutable image the server pulls (e.g. ghcr.io/...:sha-abc123)
+        required: true
+        type: string
+      image_tags:
+        description: Newline-separated full image refs to build and push
+        required: true
+        type: string
+      compose_project:
+        description: docker compose project name on the host (isolates stacks)
+        required: true
+        type: string
+      host_dir:
+        description: Directory on the host holding compose.yaml + .env
+        required: true
+        type: string
+      smoke_url:
+        description: URL whose /healthz must return 200 after deploy
+        required: true
+        type: string
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_USER:
+        required: true
+      SSH_PRIVATE_KEY:
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build-and-deploy:
+    name: build + deploy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: production
+          push: true
+          tags: ${{ inputs.image_tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      - name: Copy compose assets to host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy/compose.yaml,deploy/Caddyfile"
+          target: ${{ inputs.host_dir }}
+          strip_components: 1
+
+      - name: Deploy over SSH (health-gated, auto-rollback)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 10m
+          envs: IMAGE,PROJECT,HOST_DIR,GHCR_USER,GHCR_TOKEN
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd "$HOST_DIR"
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            # Record the current image as the rollback target before changing it.
+            if [ -f .image_current ]; then cp .image_current .image_previous; fi
+            echo "$IMAGE" > .image_current
+            export IMAGE
+
+            docker compose -p "$PROJECT" pull
+            if docker compose -p "$PROJECT" up -d --wait --wait-timeout 120; then
+              echo "Deploy healthy: $IMAGE"
+            else
+              echo "::error::Deploy unhealthy, rolling back"
+              if [ -f .image_previous ]; then
+                IMAGE="$(cat .image_previous)"; export IMAGE
+                cp .image_previous .image_current
+                docker compose -p "$PROJECT" up -d --wait --wait-timeout 120 || true
+              fi
+              exit 1
+            fi
+            docker image prune -f || true
+        env:
+          IMAGE: ${{ inputs.image_ref }}
+          PROJECT: ${{ inputs.compose_project }}
+          HOST_DIR: ${{ inputs.host_dir }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke test /healthz
+        run: |
+          for i in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "${SMOKE_URL}" || true)
+            if [ "$code" = "200" ]; then echo "healthz OK"; exit 0; fi
+            echo "attempt $i: got $code, retrying..."; sleep 6
+          done
+          echo "::error::Smoke test failed for ${SMOKE_URL}"; exit 1
+        env:
+          SMOKE_URL: ${{ inputs.smoke_url }}
