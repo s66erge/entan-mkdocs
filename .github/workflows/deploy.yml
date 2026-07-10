@@ -1,7 +1,7 @@
 name: Reusable deploy
 
-# Reusable build + SSH deploy. Called by deploy-staging.yml and
-# deploy-production.yml so staging and prod share one implementation.
+# Reusable build + SSH deploy. Called by deploy-staging.yml (auto) and
+# deploy-manual.yml (dropdown) so every path shares one implementation.
 on:
   workflow_call:
     inputs:

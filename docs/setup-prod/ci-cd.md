@@ -1,9 +1,9 @@
 # CI/CD — no-touch deploy to a self-managed server
 
 GitHub Actions builds and ships the app to a Linux host over SSH. `master`
-auto-deploys **staging**; a version tag deploys **production** behind an
-approval gate. Images live in **GHCR**. App secrets stay on the host; GitHub
-only holds SSH + deploy credentials.
+auto-deploys **staging**; deploying to **staging or production on demand** is a
+one-click dropdown (production behind an approval gate). Images live in **GHCR**.
+App secrets stay on the host; GitHub only holds SSH + deploy credentials.
 
 ## Pipeline
 
@@ -11,24 +11,31 @@ only holds SSH + deploy credentials.
 | --- | --- | --- |
 | every PR + push `master` | `ci.yml` → `checks.yml` | lint (ruff), tests (pytest), tangle-clean, docker build + Trivy scan |
 | push `master` | `deploy-staging.yml` | checks → build/push `:staging`,`:sha-*` → deploy `gong-staging` |
-| push tag `v*` | `deploy-production.yml` | checks → **approval** → build/push `:vX.Y.Z`,`:latest` → deploy `gong-production` |
+| **Actions → Deploy** (manual) | `deploy-manual.yml` | pick env → checks → (**approval** if production) → build/push `:sha-*`,`:<env>` → deploy `gong-<env>` |
 
-`deploy.yml` is the reusable build+SSH-deploy job both environments call. Deploys
-are health-gated (`docker compose up -d --wait` on the image's `/healthz`
+`deploy.yml` is the reusable build+SSH-deploy job every path calls. Deploys are
+health-gated (`docker compose up -d --wait` on the image's `/healthz`
 HEALTHCHECK) and **auto-roll back** to the previous image on failure.
 
-## Cutting a release
+## Deploying (staging or production)
 
-```bash
-git tag v1.2.3 && git push origin v1.2.3
-```
+No tag to remember. In the GitHub UI:
 
-Then approve the `production` environment in the GitHub UI. Rollback = re-tag/redeploy a prior version, or on the host `IMAGE=$(cat .image_previous) docker compose -p gong-production up -d --wait`.
+1. **Actions → Deploy → Run workflow**.
+2. Pick the **branch/tag** to deploy in the ref selector.
+3. Pick **environment**: `staging` or `production`.
+4. **Run**. Production pauses for approval in the `production` environment before it deploys.
+
+`master` also auto-deploys to staging on every merge, so most staging updates
+need no clicks. Rollback = run **Deploy** again against a prior ref/tag, or on the
+host `IMAGE=$(cat .image_previous) docker compose -p gong-production up -d --wait`.
 
 ## GitHub configuration (one-time)
 
 - **Environments** → create `staging` and `production`. On `production`, add
-  **required reviewers** and restrict deployment branches/tags to `v*`.
+  **required reviewers** so a manual deploy to prod pauses for approval.
+- The **Deploy** button (`workflow_dispatch`) only appears once `deploy-manual.yml`
+  is on the default branch (`master`).
 - **Environment secrets** (both envs): `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`
   (a deploy key with access only to the deploy user).
 - **Repository variables**: `STAGING_URL`, `PRODUCTION_URL` (e.g.
