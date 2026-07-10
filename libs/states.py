@@ -24,9 +24,8 @@ class HistoryListener:
     def after_transition(self, event, source, target):
         model = self.model
         result_mess = f" with: {model.last_result}" if model.last_result else ""
-        log = f"At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} " + \
+        log = f'At {model.get_center_attr("status_start")}, {model.get_center_attr("created_by")} moved {model.center_name} ' + \
             f"from {source.id} to {target.id} on {event}" + result_mess
-        # to {target.id} or {self.model.get_status_stri()}
         self.entries.append(log)
         print(log)
         if len(self.entries) > self.max_size:
@@ -156,9 +155,6 @@ class CenterDataModel(AbstractPersistentModel):
         row_dict[attr_name] = value
         centers.update(row_dict)
         return
-
-    def get_status_stri(self):
-        return status_to_stri(self._read_state())
 
     def get_center_attr(self, attr_name):
         if getattr(self, attr_name) is None:
