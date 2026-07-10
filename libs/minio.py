@@ -73,20 +73,12 @@ def file_download(bucket, the_object, file_to_write):
 
 def get_center_temp_df(center, df_name):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
-    # print(file_path)
-    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
-    # file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     df = pd.read_parquet(file_path)
-    # os.remove(file_path)
     return df
 
 def save_df_center_temp(center, df_name, df):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
     df.to_parquet(file_path)
-    # print(file_path)
-    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
-    # file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
-    # os.remove(file_path)
     return
 
 def get_center_temp_list_of_dicts(center, key):
@@ -108,24 +100,8 @@ def remove_temp_center_data(center):
         file_path.unlink()
     return
 
-# def remove_temp_center_dat2(center):
-#     location = f"{center.lower()}/temp/"
-#     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)
-#     for the_object in list_obj:
-#         minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
-#     return
-
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-save-excel-files>>[init]
-
-# def save_excel_minio(center):
-#     if center == "all_centers":
-#         file_path = f"{utils.get_db_path()}all_centers.xlsx"
-#         the_object = "all_centers.xlsx"
-#     else:
-#         file_path = f"{utils.get_db_path()}{center}.xlsx"
-#         the_object = f"{center.lower()}/{center}.xlsx"
-#     file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
 
 def get_excel(center):
     if center == "all_centers":
