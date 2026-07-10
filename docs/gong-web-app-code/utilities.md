@@ -108,14 +108,17 @@ def environ():
             else:
             # on railway.com
                 enviro = "prod-railway"
+        case _:
+            # any explicitly-named deploy environment (e.g. CONTAINER_NAME=production)
+            enviro = "server"
     return enviro
 
 def get_db_path():
-    if environ() != "prod-railway":
-        root = ""
-    else:   # Railway production permanent storage
-        root = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH',"None") + "/"
-    return root + "data/"
+    # 12-factor: DATA_DIR points at the persistent data volume. Defaults to the
+    # in-repo "data" dir for local dev; staging/production set it to the mounted
+    # volume path (e.g. "/app/data").
+    root = os.environ.get("DATA_DIR", "data")
+    return root.rstrip("/") + "/"
 
 ```
 

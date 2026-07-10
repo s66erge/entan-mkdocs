@@ -18,31 +18,20 @@ minio_client = None # global S3 client, initialized from main.py and used in tra
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#define-client>>[init]
 
 def create_minio_client():
-    match utils.environ():
-        case "dev-host":
-            client = Minio(
-                endpoint ="localhost:9000",
-                # access_key = "dhamma-gong-on-local",
-                # secret_key = os.environ["MINIO_USER1_SECRET"],
-                access_key = os.environ["MINIO_ROOT_USER"],
-                secret_key = os.environ["MINIO_ROOT_PASSWORD"],
-                secure = False,
-            )
-        case "dev-container" | "staging-container":
-            client = Minio(
-                endpoint ="minio:9000",
-                access_key = os.environ["MINIO_ROOT_USER"],
-                secret_key = os.environ["MINIO_ROOT_PASSWORD"],
-                secure = False,
-            )
-        case "prod-railway":
-            client = Minio(
-                endpoint ="bucket.railway.internal:9000",
-                access_key = "dhamma-gong-on-local-serge",
-                secret_key = os.environ["MINIO_USER1_SECRET"],
-                secure = False,
-            )
-    return client
+    # 12-factor: all connection config comes from the environment, with
+    # dev-friendly defaults so a bare `localhost` MinIO works out of the box.
+    # Staging/production set MINIO_ENDPOINT (e.g. "minio:9000") and, on a
+    # TLS-terminated setup, MINIO_SECURE=true.
+    endpoint = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
+    access_key = os.environ.get("MINIO_ACCESS_KEY") or os.environ["MINIO_ROOT_USER"]
+    secret_key = os.environ.get("MINIO_SECRET_KEY") or os.environ["MINIO_ROOT_PASSWORD"]
+    secure = os.environ.get("MINIO_SECURE", "false").lower() == "true"
+    return Minio(
+        endpoint=endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
+    )
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-objects-alist>>[init]
@@ -85,12 +74,20 @@ def file_download(bucket, the_object, file_to_write):
 
 def get_center_temp_df(center, df_name):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
+    # print(file_path)
+    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    # file_download(utils.Globals.CENTER_BUCKET, the_object, file_path)
     df = pd.read_parquet(file_path)
+    # os.remove(file_path)
     return df
 
 def save_df_center_temp(center, df_name, df):
     file_path = f"{utils.get_db_path()}{center}{df_name}.parquet"
     df.to_parquet(file_path)
+    # print(file_path)
+    # the_object = f"{center.lower()}/temp/{df_name}.parquet"
+    # file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
+    # os.remove(file_path)
     return
 
 def get_center_temp_list_of_dicts(center, key):
@@ -112,8 +109,24 @@ def remove_temp_center_data(center):
         file_path.unlink()
     return
 
+# def remove_temp_center_dat2(center):
+#     location = f"{center.lower()}/temp/"
+#     list_obj = get_objects_list(utils.Globals.CENTER_BUCKET, location)
+#     for the_object in list_obj:
+#         minio_client.remove_object(utils.Globals.CENTER_BUCKET, the_object)
+#     return
+
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-save-excel-files>>[init]
+
+# def save_excel_minio(center):
+#     if center == "all_centers":
+#         file_path = f"{utils.get_db_path()}all_centers.xlsx"
+#         the_object = "all_centers.xlsx"
+#     else:
+#         file_path = f"{utils.get_db_path()}{center}.xlsx"
+#         the_object = f"{center.lower()}/{center}.xlsx"
+#     file_upload(utils.Globals.CENTER_BUCKET, the_object, file_path)
 
 def get_excel(center):
     if center == "all_centers":

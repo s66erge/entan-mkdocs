@@ -64,7 +64,7 @@ def before(req, session):
    if not auth:
        return Redirect('/login')
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code', '/healthz', '/readyz' ])
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware,
     hdrs=(custom_styles,
@@ -390,6 +390,33 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 ```python
 #| id: other-routes
+@rt('/healthz')
+def get():
+    # Liveness: the process is up. Deliberately performs no DB/MinIO calls so it
+    # stays green during backing-service blips; used by the container HEALTHCHECK
+    # and the deploy smoke test.
+    return JSONResponse({"status": "ok"})
+
+@rt('/readyz')
+def get():
+    # Readiness: verify backing services are reachable. Returns 503 if any check
+    # fails. Error details are reduced to the exception type to avoid leaking
+    # connection strings/secrets into the response.
+    from sqlalchemy import text
+    checks = {}
+    try:
+        db.execute(text("SELECT 1"))  # central DB is fastsql/SQLAlchemy
+        checks["db"] = "ok"
+    except Exception as e:
+        checks["db"] = f"error: {type(e).__name__}"
+    try:
+        minio.minio_client.list_buckets()
+        checks["minio"] = "ok"
+    except Exception as e:
+        checks["minio"] = f"error: {type(e).__name__}"
+    healthy = all(v == "ok" for v in checks.values())
+    return JSONResponse(checks, status_code=200 if healthy else 503)
+
 @rt("/download_file/{filepath}")
 def get(session, request):
     params = dict(request.query_params)
