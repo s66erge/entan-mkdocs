@@ -34,7 +34,6 @@ dependencies = [
     "pandas==3.0.0",
     "python-statemachine>=3.2.0",
     "resend==2.21.0",
-    "tabulate==0.9.0",
     "python-dotenv>=1.2.2",
 ]
 
