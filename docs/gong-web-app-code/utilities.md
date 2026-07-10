@@ -90,10 +90,8 @@ def show_load_context():
         SUB_DIR = BASE_DIR / ".devcontainer"
         # 2. Point directly to your custom file
         ENV_FILE_PATH = SUB_DIR / ".env.localhost"
-        print(ENV_FILE_PATH)
         # 3. Load it explicitly
         load_dotenv(dotenv_path=ENV_FILE_PATH)
-        print(os.getenv("DATABASE_URL"))
     print(f"hostname: {hostname}, container name: {container_name}, environ: {environ()}")
 
 def environ():

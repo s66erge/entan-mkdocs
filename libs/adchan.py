@@ -102,7 +102,7 @@ def delete_center(center_name, users, centers, planners, db_path):
                 centers.delete(center_name)
                 if os.path.exists(db_file_path):
                     os.remove(db_file_path)
-                minio.remove_excel_minio(center_name)
+                minio.remove_excel(center_name)
                 message = {'success' : 'center_deleted'}
 
         return Div(
@@ -140,9 +140,8 @@ def add_center(new_center_name, center_template, users, centers, db_path, db):
 
         else:  ## (2)
             shutil.copy2(template_db, db_file_path)
-            excel_template_path = minio.get_excel_minio(center_template)
+            excel_template_path = minio.get_excel(center_template)
             shutil.copy2(excel_template_path, f'{db_path}{new_center_name}.xlsx')
-            minio.save_excel_minio(new_center_name)
             centers.insert(
                 center_name=new_center_name,
                 status="free",

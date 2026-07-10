@@ -82,16 +82,16 @@ def status_page(session, center_name, centers, users, planners, csms):
     admin_emails = state_mach.model.get_admin_planners()
     # center_obj = centers[center_name]
     pi_database_date = state_mach.model.get_center_attr("pi_db_date")
-    config_file = minio.get_excel_minio(center_name)
-    params = minio.params_from_excel_minio(center_name)
+    config_file = minio.get_excel(center_name)
+    params = minio.params_from_excel(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
     db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
     db_center = database(db_file)
     gongs_df = pd.DataFrame(db_center.t.gongs())
     targets_df = pd.DataFrame(db_center.t.targets())
     db_center.close()
-    replace_df = pd.DataFrame(minio.dicts_from_excel_minio(center_name,"replacement"))
-    inside_df = pd.DataFrame(minio.dicts_from_excel_minio(center_name,"inside"))
+    replace_df = pd.DataFrame(minio.dicts_from_excel(center_name,"replacement"))
+    inside_df = pd.DataFrame(minio.dicts_from_excel(center_name,"inside"))
     html_gongs = gongs_df.fillna("").to_html(index=False)
     html_targets = targets_df.fillna("").to_html(index=False)
     html_replace = replace_df.fillna("").to_html(index=False)
@@ -168,7 +168,6 @@ async def upload_config(file: UploadFile, center_name: str):
             filebuffer = await file.read()
             upload_dir = Path(utils.get_db_path())
             (upload_dir / file.filename).write_bytes(filebuffer)
-            await asyncio.to_thread(minio.save_excel_minio, center_name)
             mess = {"success": "config_uploaded"}
         except Exception as e:
             return Redirect(f'/db_error?etext={e}')

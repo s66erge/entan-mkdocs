@@ -254,7 +254,7 @@ async def save_db_plan_timetable(center_name):
 
 async def check_save_show_plan(session, start_plan, mess):
     selected_name = session[utils.Skey.CENTER]
-    inside = minio.dicts_from_excel_minio(selected_name,"inside")
+    inside = minio.dicts_from_excel(selected_name,"inside")
     plan = fetch.sort_clean(selected_name,start_plan, inside)
     new_draft_plan = plancheck.check_plan(session, plan, selected_name)
     if not session[utils.Skey.PLANOK]:
