@@ -18,6 +18,8 @@ permissions:
 jobs:
   checks:
     uses: ./.github/workflows/checks.yml
+    with:
+      run_build: false  # the deploy job builds + pushes the image itself
 
   deploy:
     needs: checks

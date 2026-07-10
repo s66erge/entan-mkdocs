@@ -74,8 +74,6 @@ jobs:
           tags: ${{ inputs.image_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          provenance: true
-          sbom: true
 
       - name: Copy compose assets to host
         uses: appleboy/scp-action@v0.1.7

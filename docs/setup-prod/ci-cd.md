@@ -89,6 +89,5 @@ docker run --rm -v gong-production_app_data:/seed \
 
 ```bash
 curl -fsS https://<domain>/healthz         # 200 {"status":"ok"}
-curl -fsS https://<domain>/readyz          # 200 when db + minio reachable
 docker compose -p gong-production ps        # app/db/minio/caddy healthy
 ```

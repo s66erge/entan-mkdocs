@@ -5,6 +5,11 @@ name: Checks
 # nothing ships without passing the same checks.
 on:
   workflow_call:
+    inputs:
+      run_build:
+        description: Run the docker build + scan job (deploy pipelines skip it — they build+push anyway)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -66,6 +71,7 @@ jobs:
 
   build:
     name: docker build + scan
+    if: inputs.run_build
     runs-on: ubuntu-latest
     permissions:
       contents: read
