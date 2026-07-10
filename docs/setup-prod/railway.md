@@ -88,7 +88,7 @@ COPY --from=builder /app/.venv /app/.venv
 
 # Application source (owned by the runtime user)
 COPY --chown=appuser:appuser . .
-RUN python -m compileall -q . || true
+RUN python -m compileall -q .
 
 USER appuser
 EXPOSE 8000

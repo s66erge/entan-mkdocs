@@ -44,8 +44,8 @@ host `IMAGE=$(cat .image_previous) docker compose -p gong-production up -d --wai
   + PR review before merge.
 - **Actions → General**: workflow permissions default read; GHCR publishing is
   granted per-workflow (`packages: write`).
-- Hardening: pin third-party actions to commit SHAs (Dependabot `github-actions`
-  keeps them current).
+- Hardening (recommended, not yet applied): pin third-party actions to commit
+  SHAs. Dependabot (`github-actions`) currently keeps the version tags current.
 
 ## Server bootstrap (one-time, per host)
 
@@ -81,7 +81,7 @@ will find no template:
 
 ```bash
 docker run --rm -v gong-production_app_data:/seed \
-  ghcr.io/dhammaorg/eu-digital-gong-web:latest \
+  ghcr.io/dhammaorg/eu-digital-gong-web:production \
   sh -c 'cp -rn /app/data/. /seed/'
 ```
 

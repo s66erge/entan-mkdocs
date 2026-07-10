@@ -14,9 +14,9 @@ services:
       minio:
         condition: service_healthy
     volumes:
-      # Persistent center databases live under DATA_DIR (default /app/data).
-      # Seed template DBs into this volume once — see docs/setup-prod/ci-cd.md.
-      - app_data:/app/data
+      # Persistent center databases live under DATA_DIR; mount there so config
+      # and storage stay aligned. Seed template DBs once — see ci-cd.md.
+      - app_data:${DATA_DIR:-/app/data}
     expose:
       - "8000"
     # The image ships its own HEALTHCHECK (/healthz); `up --wait` waits on it.

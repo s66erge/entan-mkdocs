@@ -1,6 +1,7 @@
 name: Deploy staging
 
-# master → staging, no-touch. Runs the full checks gate first, then deploys.
+# master → staging, no-touch. Runs lint/test/tangle checks (the image is
+# built+scanned in the deploy job, so the redundant checks build is skipped).
 on:
   push:
     branches: [master]
@@ -12,8 +13,6 @@ concurrency:
 permissions:
   contents: read
   packages: write
-  id-token: write
-  attestations: write
 
 jobs:
   checks:

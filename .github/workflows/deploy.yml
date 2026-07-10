@@ -40,8 +40,6 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write
-  attestations: write
 
 jobs:
   build-and-deploy:
@@ -71,9 +69,20 @@ jobs:
           context: .
           target: production
           push: true
+          load: true
           tags: ${{ inputs.image_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Scan the exact image being deployed (deploys skip the checks build job).
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: ${{ inputs.image_ref }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
 
       - name: Copy compose assets to host
         uses: appleboy/scp-action@v0.1.7
@@ -112,6 +121,7 @@ jobs:
               if [ -f .image_previous ]; then
                 IMAGE="$(cat .image_previous)"; export IMAGE
                 cp .image_previous .image_current
+                docker compose -p "$PROJECT" pull || true
                 docker compose -p "$PROJECT" up -d --wait --wait-timeout 120 || true
               fi
               exit 1
