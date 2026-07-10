@@ -79,7 +79,6 @@ def file_download(bucket, the_object, file_to_write):
         file_path=file_to_write,
     )
     return result
-
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/storage-minio.md#get-save-temp-files>>[init]
 

@@ -5,7 +5,6 @@ Will only be reachable for authenticated users.
 ```python
 #| file: libs/cdash.py 
 
-import asyncio
 from fasthtml.common import *
 from fastlite import database
 from datetime import datetime
