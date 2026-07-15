@@ -119,7 +119,7 @@ def create_code(email, users):
     login_code = _generate_login_code()  # e.g. "483921"
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
     try:
-        user_results = users("email = ?", (email,))[0]
+        users("email = ?", (email,))[0]  # raises IndexError if the user does not exist
         # If we get here, user exists
         users.update(
             email=email,
@@ -183,7 +183,6 @@ def verify_code(session, code, timezon, users):
     except IndexError:
         return messages.feedback_to_user({'error': 'invalid_or_expired_code'})
 
-    User = users.dataclass()
     session.clear()
     session[utils.Skey.AUTH] = user.email
     session[utils.Skey.ROLE] = user.role_name

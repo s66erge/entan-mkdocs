@@ -44,7 +44,7 @@ def before(req, session):
    if not auth:
        return Redirect('/login')
 
-bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code' ])
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css','/login','/', '/create_magic_link', '/verify_code', '/create_code', '/healthz' ])
 
 app, rt = fast_app(live=False, title="Gong Users", favicon="favicon.ico", before=bware,
     hdrs=(custom_styles,
@@ -343,6 +343,13 @@ def post(session, new_planner_user_email: str = "", new_planner_center_name: str
 
 # ~/~ end
 # ~/~ begin <<docs/gong-web-app-code/0-gong-prog.md#other-routes>>[init]
+@rt('/healthz')
+def get():
+    # Liveness: the process is up. Deliberately performs no DB/MinIO calls so it
+    # stays green during backing-service blips; used by the container HEALTHCHECK
+    # and the deploy smoke test.
+    return JSONResponse({"status": "ok"})
+
 @rt("/download_file/{filepath}")
 def get(session, request):
     params = dict(request.query_params)

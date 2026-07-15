@@ -1,0 +1,70 @@
+# Server-side stack for one environment (staging or production).
+# Deployed by CI: `docker compose -p <project> up -d --wait`.
+# Interpolated vars come from the shell (IMAGE) and the sibling .env file
+# (DATABASE_URL, MINIO_*, DOMAIN, POSTGRES_*, RESEND_API_KEY, DATA_DIR, ...).
+
+services:
+  app:
+    image: ${IMAGE}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      # Persistent center databases live under DATA_DIR; mount there so config
+      # and storage stay aligned. Seed template DBs once — see ci-cd.md.
+      - app_data:${DATA_DIR:-/app/data}
+    expose:
+      - "8000"
+    # The image ships its own HEALTHCHECK (/healthz); `up --wait` waits on it.
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # PG18 stores data in a version subdir; mount the parent (see postgres:18 docs).
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: quay.io/minio/minio
+    restart: unless-stopped
+    env_file: .env
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  app_data:
+  postgres_data:
+  minio_data:
+  caddy_data:
+  caddy_config:

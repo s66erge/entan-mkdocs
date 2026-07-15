@@ -34,31 +34,20 @@ minio_client = None # global S3 client, initialized from main.py and used in tra
 #| id: define-client
 
 def create_minio_client():
-    match utils.environ():
-        case "dev-host":
-            client = Minio(
-                endpoint ="localhost:9000",
-                # access_key = "dhamma-gong-on-local",
-                # secret_key = os.environ["MINIO_USER1_SECRET"],
-                access_key = os.environ["MINIO_ROOT_USER"],
-                secret_key = os.environ["MINIO_ROOT_PASSWORD"],
-                secure = False,
-            )
-        case "dev-container" | "staging-container":
-            client = Minio(
-                endpoint ="minio:9000",
-                access_key = os.environ["MINIO_ROOT_USER"],
-                secret_key = os.environ["MINIO_ROOT_PASSWORD"],
-                secure = False,
-            )
-        case "prod-railway":
-            client = Minio(
-                endpoint ="bucket.railway.internal:9000",
-                access_key = "dhamma-gong-on-local-serge",
-                secret_key = os.environ["MINIO_USER1_SECRET"],
-                secure = False,
-            )
-    return client
+    # 12-factor: all connection config comes from the environment, with
+    # dev-friendly defaults so a bare `localhost` MinIO works out of the box.
+    # Staging/production set MINIO_ENDPOINT (e.g. "minio:9000") and, on a
+    # TLS-terminated setup, MINIO_SECURE=true.
+    endpoint = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
+    access_key = os.environ.get("MINIO_ACCESS_KEY") or os.environ["MINIO_ROOT_USER"]
+    secret_key = os.environ.get("MINIO_SECRET_KEY") or os.environ["MINIO_ROOT_PASSWORD"]
+    secure = os.environ.get("MINIO_SECURE", "false").lower() == "true"
+    return Minio(
+        endpoint=endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
+    )
 
 ```
 

@@ -1,0 +1,35 @@
+name: Deploy staging
+
+# master → staging, no-touch. Runs lint/test/tangle checks (the image is
+# built+scanned in the deploy job, so the redundant checks build is skipped).
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+    with:
+      run_build: false  # the deploy job builds + pushes the image itself
+
+  deploy:
+    needs: checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+      image_ref: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+      image_tags: |
+        ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+        ghcr.io/${{ github.repository }}:staging
+      compose_project: gong-staging
+      host_dir: /opt/gong/staging
+      smoke_url: ${{ vars.STAGING_URL }}/healthz
+    secrets: inherit

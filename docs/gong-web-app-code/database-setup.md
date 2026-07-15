@@ -6,7 +6,6 @@
 from fasthtml.common import *
 from fastsql import Database # MUST COME AFTER PRECEDING LINE !!!
 import os
-import libs.utils as utils
 
 <<dataclasses>>
 <<setup-database>>
@@ -68,15 +67,9 @@ class Targets:
 
 
 def get_central_db():
-    match utils.environ():
-        case "dev-host":
-            # local postgreSQL
-            # return Database("postgresql://postgres:Route666@localhost:5432/postgres")
-            # postgreSQL in the vscodedev container
-            return Database(os.environ.get('DATABASE_URL'))
-        case "dev-container" | "staging-container" | "prod-railway":
-            # dev container postgreSQL
-            return Database(os.environ.get('DATABASE_URL'))
+    # 12-factor: the central Postgres is addressed entirely by DATABASE_URL,
+    # the same in every environment (dev, staging, production).
+    return Database(os.environ.get('DATABASE_URL'))
 
 def gong_db_name(center_name, middle="ok"):
     return center_name.lower() + "." + middle + ".db"

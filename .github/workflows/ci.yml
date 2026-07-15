@@ -1,0 +1,19 @@
+name: CI
+
+# Every pull request (any base branch) and every push to master.
+# Delegates to the reusable checks workflow so PR gates == deploy gates.
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml

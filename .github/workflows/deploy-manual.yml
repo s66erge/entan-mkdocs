@@ -1,0 +1,45 @@
+name: Deploy
+
+# One-click deploy: Actions → Deploy → Run workflow → pick the environment from
+# the dropdown and the branch/tag from GitHub's ref selector. No tag to remember.
+# Production pauses for approval via the `production` Environment (set on the
+# deploy job inside the reusable deploy.yml).
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+        required: true
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+    with:
+      run_build: false  # the deploy job builds + pushes the image itself
+
+  deploy:
+    needs: checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      image_ref: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+      image_tags: |
+        ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+        ghcr.io/${{ github.repository }}:${{ inputs.environment }}
+      compose_project: gong-${{ inputs.environment }}
+      host_dir: /opt/gong/${{ inputs.environment }}
+      smoke_url: ${{ inputs.environment == 'production' && vars.PRODUCTION_URL || vars.STAGING_URL }}/healthz
+    secrets: inherit
