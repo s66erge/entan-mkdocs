@@ -226,7 +226,6 @@ class CenterDataModel(AbstractPersistentModel):
         return
 
     def update_attr(self, attr_name, value):
-        print(f"Updating attribute {attr_name} to {value} for center {self.center_name}")
         setattr(self, attr_name, value)
         centers = self.db.t.center
         center_obj = centers[self.center_name]
