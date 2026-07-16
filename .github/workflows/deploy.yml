@@ -63,6 +63,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile-nonRailway   # multi-stage self-host image (Dockerfile is Railway's)
           target: production
           push: true
           load: true
