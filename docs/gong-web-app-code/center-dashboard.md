@@ -101,6 +101,7 @@ def status_page(session, center_name, centers, users, planners, csms):
     params = minio.params_from_excel(center_name)
     ct_timezone = params[utils.Pkey.TIMEZON]
     db_file = utils.get_db_path() + dbset.gong_db_name(center_name)
+    print(db_file)
     db_center = database(db_file)
     gongs_df = pd.DataFrame(db_center.t.gongs())
     targets_df = pd.DataFrame(db_center.t.targets())
