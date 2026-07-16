@@ -1,5 +1,0 @@
-# Automatic HTTPS via Let's Encrypt. DOMAIN is injected from the environment.
-{$DOMAIN} {
-	encode zstd gzip
-	reverse_proxy app:8000
-}

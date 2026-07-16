@@ -30,11 +30,7 @@ on:
         required: true
         type: string
     secrets:
-      SSH_HOST:
-        required: true
-      SSH_USER:
-        required: true
-      SSH_PRIVATE_KEY:
+      SSH_KEY:
         required: true
 
 permissions:
@@ -87,25 +83,28 @@ jobs:
       - name: Copy compose assets to host
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy/compose.yaml,deploy/Caddyfile"
+          host: ${{ vars.SSH_ADDRESS }}
+          username: ${{ vars.SSH_USER }}
+          port: ${{ vars.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "deploy/compose.yaml"
           target: ${{ inputs.host_dir }}
           strip_components: 1
 
       - name: Deploy over SSH (health-gated, auto-rollback)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ vars.SSH_ADDRESS }}
+          username: ${{ vars.SSH_USER }}
+          port: ${{ vars.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
           command_timeout: 10m
           envs: IMAGE,PROJECT,HOST_DIR,GHCR_USER,GHCR_TOKEN
           script_stop: true
           script: |
             set -euo pipefail
             cd "$HOST_DIR"
+            export PROJECT   # compose interpolates ${PROJECT}-edge in compose.yaml
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 
             # Record the current image as the rollback target before changing it.

@@ -1,0 +1,37 @@
+# Shared ingress: ONE Caddy terminating TLS for both subdomains on the shared
+# :443 (a single host IP can't bind 443 twice). Deployed once at bootstrap:
+#   docker compose -p gong-edge up -d
+# Never touched by app deploys, so a staging deploy can't alter prod routing.
+# It joins BOTH per-env edge networks only to reach each stack's app container.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - staging
+      - production
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+networks:
+  staging:
+    external: true
+    name: gong-staging-edge
+  production:
+    external: true
+    name: gong-production-edge
+
+volumes:
+  caddy_data:
+  caddy_config:

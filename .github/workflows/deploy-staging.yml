@@ -31,5 +31,5 @@ jobs:
         ghcr.io/${{ github.repository }}:staging
       compose_project: gong-staging
       host_dir: /opt/gong/staging
-      smoke_url: ${{ vars.STAGING_URL }}/healthz
+      smoke_url: https://staging.campus-gong.dhamma.org/healthz
     secrets: inherit

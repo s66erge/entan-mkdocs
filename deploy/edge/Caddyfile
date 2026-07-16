@@ -1,0 +1,13 @@
+# Automatic HTTPS (Let's Encrypt). Site blocks are independent: if one app is
+# down/redeploying, only its domain 502s — the other keeps serving.
+# Upstreams are the compose-stable container names `gong-<env>-app-1`.
+
+campus-gong.dhamma.org {
+	encode zstd gzip
+	reverse_proxy gong-production-app-1:8000
+}
+
+staging.campus-gong.dhamma.org {
+	encode zstd gzip
+	reverse_proxy gong-staging-app-1:8000
+}
