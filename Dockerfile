@@ -1,6 +1,6 @@
 # ~/~ begin <<docs/setup-prod/railway.md#Dockerfile>>[init]
 
-FROM python:3.12.8-slim
+FROM python:3.14.6-slim
 # Install system dependencies from log
 RUN apt-get update && apt-get install -y \
     sqlite3 \
