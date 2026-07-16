@@ -6,13 +6,12 @@ on:
   push:
     branches: [master]
 
-concurrency:
-  group: deploy-staging
-  cancel-in-progress: false
-
 permissions:
   contents: read
   packages: write
+
+# Per-env serialization lives on the reusable deploy.yml job (a shared group name
+# here would deadlock that job against this run).
 
 jobs:
   checks:
