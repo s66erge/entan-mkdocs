@@ -32,4 +32,5 @@ jobs:
       compose_project: gong-staging
       host_dir: /opt/gong/staging
       smoke_url: https://staging.campus-gong.dhamma.org/healthz
-    secrets: inherit
+    secrets:
+      SSH_KEY: ${{ secrets.SSH_KEY }}

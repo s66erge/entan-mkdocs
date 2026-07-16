@@ -42,4 +42,5 @@ jobs:
       compose_project: gong-${{ inputs.environment }}
       host_dir: /opt/gong/${{ inputs.environment }}
       smoke_url: ${{ inputs.environment == 'production' && 'https://campus-gong.dhamma.org' || 'https://staging.campus-gong.dhamma.org' }}/healthz
-    secrets: inherit
+    secrets:
+      SSH_KEY: ${{ secrets.SSH_KEY }}
