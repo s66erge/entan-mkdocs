@@ -81,10 +81,14 @@ RUN useradd -u 10001 -m -s /bin/false appuser
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    DATA_DIR="/permanent/data"
 
 # Pre-built virtualenv from the builder stage
 COPY --from=builder /app/.venv /app/.venv
+
+# Create the directory and hand ownership to appuser (while still running as root)
+RUN mkdir -p "$DATA_DIR" && chown -R appuser:appuser "$DATA_DIR"
 
 # Application source (owned by the runtime user)
 COPY --chown=appuser:appuser . .
@@ -94,8 +98,8 @@ USER appuser
 EXPOSE 8000
 
 # Liveness probe baked into the image (hits the dependency-free /healthz route)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz').status==200 else 1)"
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+#     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz').status==200 else 1)"
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
