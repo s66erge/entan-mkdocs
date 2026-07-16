@@ -23,5 +23,5 @@
   },
 
   // Ensures dependent containers are fully up before VS Code connects
-  "forwardPorts": [8000, 5432, 9000, 9001]
+  "forwardPorts": [8000, 5432]
 }

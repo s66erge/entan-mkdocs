@@ -25,21 +25,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
-  # 3. MinIO (S3-compatible object storage) Container
-  minio:
-    image: quay.io/minio/minio
-    restart: unless-stopped
-    ports:
-      - "9000:9000" # API port for your app to connect to
-      - "9001:9001" # Web Console UI port
-    env_file:
-      - .env.vscodedev
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-
 volumes:
   postgres_data: # Persists your database tables even if the container restarts
-  minio_data:    # Persists your uploaded files/buckets
 
 # ~/~ end

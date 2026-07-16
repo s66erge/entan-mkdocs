@@ -33,8 +33,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      minio:
-        condition: service_healthy
     command: ["./.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
   # 2. PostgreSQL 18 Container
   db:
@@ -51,29 +49,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # 3. MinIO (S3-compatible object storage) Container
-  minio:
-    image: quay.io/minio/minio
-    restart: unless-stopped
-    ports:
-      - "9000:9000" # API port for your app to connect to
-      - "9001:9001" # Web Console UI port
-    env_file:
-      - .env.staging
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 volumes:
   appli_data:    # Persists application data
   postgres_data: # Persists your database tables even if the container restarts
-  minio_data:    # Persists your uploaded files/buckets
-
 
 ```
 

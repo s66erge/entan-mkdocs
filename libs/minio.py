@@ -31,6 +31,7 @@ def create_minio_client():
         access_key=access_key,
         secret_key=secret_key,
         secure=secure,
+        region="auto",
     )
 
 # ~/~ end
