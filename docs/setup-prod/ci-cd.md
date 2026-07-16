@@ -91,7 +91,7 @@ cd /opt/gong/edge && docker compose -p gong-edge up -d
 
 # firewall + DNS
 sudo ufw allow 22,80,443/tcp
-# A-records: campus-gong.dhamma.org AND staging.campus-gong.dhamma.org → this host
+# A-records: campus-gong.dhamma.org AND staging-campus-gong.dhamma.org → this host
 ```
 
 `compose.yaml` is copied to each env `host_dir` by CI on every deploy. The edge
@@ -127,7 +127,7 @@ those limits and add ~2 GB swap.
 
 ```bash
 curl -fsS https://campus-gong.dhamma.org/healthz          # prod: 200 {"status":"ok"}
-curl -fsS https://staging.campus-gong.dhamma.org/healthz  # staging: 200
+curl -fsS https://staging-campus-gong.dhamma.org/healthz  # staging: 200
 docker compose -p gong-production ps                       # app/db/minio healthy
 docker compose -p gong-edge ps                             # shared caddy healthy
 ```
