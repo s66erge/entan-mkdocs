@@ -83,11 +83,12 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH" \
     DATA_DIR="/permanent/data"
+# DATA_DIR is preexistant in RAILWAY
 
 # Pre-built virtualenv from the builder stage
 COPY --from=builder /app/.venv /app/.venv
 
-# Create the directory and hand ownership to appuser (while still running as root)
+# Create the RAILWAY NEEDED directory and hand ownership to appuser (while still running as root)
 RUN mkdir -p "$DATA_DIR" && chown -R appuser:appuser "$DATA_DIR"
 
 # Application source (owned by the runtime user)
