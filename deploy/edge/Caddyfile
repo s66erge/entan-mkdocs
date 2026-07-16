@@ -1,13 +1,17 @@
-# Automatic HTTPS (Let's Encrypt). Site blocks are independent: if one app is
-# down/redeploying, only its domain 502s — the other keeps serving.
-# Upstreams are the compose-stable container names `gong-<env>-app-1`.
+# Self-signed origin TLS (`tls internal`): public TLS is terminated by Cloudflare
+# (orange cloud) with SSL mode "Full", which connects to this origin over HTTPS and
+# accepts the self-signed cert. No ACME, so no dependency on the front HAProxy for
+# Let's Encrypt challenges. Site blocks are independent — one app down only 502s its
+# own domain. Upstreams are the compose-stable container names `gong-<env>-app-1`.
 
 campus-gong.dhamma.org {
+	tls internal
 	encode zstd gzip
 	reverse_proxy gong-production-app-1:8000
 }
 
 staging.campus-gong.dhamma.org {
+	tls internal
 	encode zstd gzip
 	reverse_proxy gong-staging-app-1:8000
 }
