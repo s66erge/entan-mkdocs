@@ -16,13 +16,12 @@ on:
         default: staging
         required: true
 
-concurrency:
-  group: deploy-${{ inputs.environment }}
-  cancel-in-progress: false
-
 permissions:
   contents: read
   packages: write
+
+# Per-env serialization lives on the reusable deploy.yml job (a shared group name
+# here would deadlock that job against this run).
 
 jobs:
   checks:
@@ -41,5 +40,5 @@ jobs:
         ghcr.io/${{ github.repository }}:${{ inputs.environment }}
       compose_project: gong-${{ inputs.environment }}
       host_dir: /opt/gong/${{ inputs.environment }}
-      smoke_url: ${{ inputs.environment == 'production' && vars.PRODUCTION_URL || vars.STAGING_URL }}/healthz
-    secrets: inherit
+    secrets:
+      SSH_KEY: ${{ secrets.SSH_KEY }}

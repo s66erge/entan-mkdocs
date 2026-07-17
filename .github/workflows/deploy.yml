@@ -25,16 +25,8 @@ on:
         description: Directory on the host holding compose.yaml + .env
         required: true
         type: string
-      smoke_url:
-        description: URL whose /healthz must return 200 after deploy
-        required: true
-        type: string
     secrets:
-      SSH_HOST:
-        required: true
-      SSH_USER:
-        required: true
-      SSH_PRIVATE_KEY:
+      SSH_KEY:
         required: true
 
 permissions:
@@ -67,6 +59,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile-nonRailway   # multi-stage self-host image (Dockerfile is Railway's)
           target: production
           push: true
           load: true
@@ -87,25 +80,30 @@ jobs:
       - name: Copy compose assets to host
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy/compose.yaml,deploy/Caddyfile"
+          host: ${{ vars.SSH_ADDRESS }}
+          username: ${{ vars.SSH_USER }}
+          port: ${{ vars.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "deploy/compose.yaml"
           target: ${{ inputs.host_dir }}
           strip_components: 1
 
       - name: Deploy over SSH (health-gated, auto-rollback)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ vars.SSH_ADDRESS }}
+          username: ${{ vars.SSH_USER }}
+          port: ${{ vars.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
           command_timeout: 10m
           envs: IMAGE,PROJECT,HOST_DIR,GHCR_USER,GHCR_TOKEN
           script_stop: true
           script: |
             set -euo pipefail
             cd "$HOST_DIR"
+            export PROJECT   # compose interpolates ${PROJECT}-edge in compose.yaml
+            # Self-heal: ensure the per-env edge network exists (external in compose).
+            docker network inspect "${PROJECT}-edge" >/dev/null 2>&1 || docker network create "${PROJECT}-edge"
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 
             # Record the current image as the rollback target before changing it.
@@ -116,6 +114,16 @@ jobs:
             docker compose -p "$PROJECT" pull
             if docker compose -p "$PROJECT" up -d --wait --wait-timeout 120; then
               echo "Deploy healthy: $IMAGE"
+              # Ingress wiring: if the shared edge is up, confirm it reaches this app.
+              # (Public HTTPS additionally depends on the front HAProxy routing the
+              # subdomain to this host — an infra concern, not per-deploy.)
+              if docker ps --format '{{.Names}}' | grep -qx gong-edge-caddy-1; then
+                docker exec gong-edge-caddy-1 wget -qO- --timeout=5 "http://${PROJECT}-app-1:8000/healthz" | grep -q '"status"' \
+                  && echo "Edge -> app: OK" \
+                  || { echo "::error::edge cannot reach ${PROJECT}-app-1"; exit 1; }
+              else
+                echo "::notice::edge stack not running; public ingress needs the edge + front proxy"
+              fi
             else
               echo "::error::Deploy unhealthy, rolling back"
               if [ -f .image_previous ]; then
@@ -133,14 +141,3 @@ jobs:
           HOST_DIR: ${{ inputs.host_dir }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Smoke test /healthz
-        run: |
-          for i in $(seq 1 10); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "${SMOKE_URL}" || true)
-            if [ "$code" = "200" ]; then echo "healthz OK"; exit 0; fi
-            echo "attempt $i: got $code, retrying..."; sleep 6
-          done
-          echo "::error::Smoke test failed for ${SMOKE_URL}"; exit 1
-        env:
-          SMOKE_URL: ${{ inputs.smoke_url }}

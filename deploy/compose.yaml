@@ -1,7 +1,8 @@
-# Server-side stack for one environment (staging or production).
+# Server-side stack for ONE environment (staging or production).
 # Deployed by CI: `docker compose -p <project> up -d --wait`.
-# Interpolated vars come from the shell (IMAGE) and the sibling .env file
-# (DATABASE_URL, MINIO_*, DOMAIN, POSTGRES_*, RESEND_API_KEY, DATA_DIR, ...).
+# TLS/ingress is handled by the shared edge Caddy (deploy/edge), not here — so
+# staging and prod stay independent (own project, volumes, db, minio, network).
+# Interpolated vars come from the shell (IMAGE, PROJECT) and the sibling .env.
 
 services:
   app:
@@ -17,8 +18,17 @@ services:
       # Persistent center databases live under DATA_DIR; mount there so config
       # and storage stay aligned. Seed template DBs once — see ci-cd.md.
       - app_data:${DATA_DIR:-/app/data}
+    networks:
+      - default   # reach db + minio
+      - edge      # reachable by the shared Caddy
     expose:
       - "8000"
+    # ponytail: tune if the app needs more headroom.
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
     # The image ships its own HEALTHCHECK (/healthz); `up --wait` waits on it.
 
   db:
@@ -33,6 +43,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 384M
 
   minio:
     image: quay.io/minio/minio
@@ -46,25 +61,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 384M
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    depends_on:
-      - app
-    environment:
-      DOMAIN: ${DOMAIN}
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+networks:
+  # Per-environment edge network so staging and prod share no network.
+  # Created once at bootstrap (docker network create gong-<env>-edge).
+  edge:
+    external: true
+    name: ${PROJECT:-gong}-edge
 
 volumes:
   app_data:
   postgres_data:
   minio_data:
-  caddy_data:
-  caddy_config:
