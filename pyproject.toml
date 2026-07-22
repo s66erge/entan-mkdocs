@@ -6,7 +6,7 @@ description = "Add your description here"
 requires-python = "~=3.13.0"
 dependencies = [
     "python-fasthtml==0.14.04",
-    "uvicorn==0.40.0",
+    "uvicorn==0.51.0",
     "fastsql==2.1.2",
     "psycopg2-binary==2.9.12",
     "curl-cffi==0.15.0",
