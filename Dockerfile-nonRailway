@@ -3,7 +3,7 @@
 # ==========================================
 # STAGE 1: Build (resolve locked dependencies)
 # ==========================================
-FROM python:3.13-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
@@ -18,7 +18,7 @@ RUN uv sync --locked --no-dev --no-editable
 # ==========================================
 # STAGE 2: Hardened production runtime
 # ==========================================
-FROM python:3.13-slim AS production
+FROM python:3.14-slim AS production
 
 # Runtime OS deps only (no build tools, no sudo)
 RUN apt-get update && apt-get install -y --no-install-recommends \
