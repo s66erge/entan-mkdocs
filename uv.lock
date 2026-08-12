@@ -447,7 +447,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "curl-cffi", specifier = "==0.15.0" },
-    { name = "fastparquet", specifier = "==2026.3.0" },
+    { name = "fastparquet", specifier = "==2026.5.0" },
     { name = "fastsql", specifier = "==2.1.2" },
     { name = "markdown2", specifier = "==2.5.4" },
     { name = "minio", specifier = "==7.2.20" },
@@ -548,7 +548,7 @@ wheels = [
 
 [[package]]
 name = "fastparquet"
-version = "2026.3.0"
+version = "2026.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cramjam" },
@@ -557,16 +557,17 @@ dependencies = [
     { name = "packaging" },
     { name = "pandas" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/1e/82/2de205357ce01bd86b9955910b7bf2bbcc29f7aa5cfbc1f0fadc299fc2b3/fastparquet-2026.5.0.tar.gz", hash = "sha256:12a813d1c91b9d316a8d43860074daf4566849f776f9cd549742aa71d907e4f6", size = 498405, upload-time = "2026-05-15T13:16:46.462Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/aa/3dbde9b0592a7aca0489edefa368b861a7d85df1ec51d7f5f05d83c4ad0f/fastparquet-2026.3.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:4e0f5464bc0661b345e26aa7feab34bd21c9ca2d3c4f411278f50c76e7adb7f2", size = 893670, upload-time = "2026-03-17T21:20:57.102Z" },
-    { url = "https://files.pythonhosted.org/packages/b5/f1/d81496c2887f166ea7222ef81d489dcc139ff3dc0f4b0393c0d201bdfb47/fastparquet-2026.3.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:97d48ea111b0cc09bf99b97c2218c5fd24abac8b53879b4ce73eea55d5484a55", size = 686022, upload-time = "2026-03-17T21:20:58.565Z" },
-    { url = "https://files.pythonhosted.org/packages/6d/1d/dba2033c57087d74ec463fbf9fc23b57a1bd731db38877f2b002d8b8c05b/fastparquet-2026.3.0-cp313-cp313-manylinux1_i686.manylinux_2_28_i686.manylinux_2_5_i686.whl", hash = "sha256:ab0c62c1890def8a40f3d878fc75fbf725a21df4e3676da74a56195346824bb0", size = 1754047, upload-time = "2026-03-17T21:20:59.856Z" },
-    { url = "https://files.pythonhosted.org/packages/6b/12/e36b589ed1187e62fdf7c0f3c705fc51b9ac0475296624fc25bc88a84314/fastparquet-2026.3.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:eb29af520483fff1597c599b3ba0f21c0a0b6fc4c68d26f6c9e7fd3f8f45da45", size = 1800244, upload-time = "2026-03-17T21:21:01.755Z" },
-    { url = "https://files.pythonhosted.org/packages/b8/a8/a2e57c71c81f8a16f48b7cceaf3959d2be4b5a4a204d11fca20f1ee79368/fastparquet-2026.3.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1de0478d23004402f201bb698742bbb733e796875674c2da080c65bd25b9408a", size = 1811742, upload-time = "2026-03-20T17:17:47.803Z" },
-    { url = "https://files.pythonhosted.org/packages/10/a9/dad23dbea15f8574f88f90966e9b77f20c3f6f1d46d9448664c2a511e802/fastparquet-2026.3.0-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:1ad09c6b7fc0ea117c1f8e9cb883fd8492801859253a96e31f00b84c3d7dacaa", size = 1775466, upload-time = "2026-03-17T21:21:03.124Z" },
-    { url = "https://files.pythonhosted.org/packages/41/07/f20d05c8fc5bf10385c7964a43debdf8b8c9cb77203a449560878fd8bf10/fastparquet-2026.3.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:088a717ca5fc7085666572fb0f2d02d88ee3736a7d5a1e01ddcc6fc91e5f13c9", size = 1810307, upload-time = "2026-03-20T17:17:49.424Z" },
-    { url = "https://files.pythonhosted.org/packages/90/b1/6f8aa8673544277aea88b0f4a151465edd326cfb2b9c1bf46cb270cd0c55/fastparquet-2026.3.0-cp313-cp313-win32.whl", hash = "sha256:e7e32640cd54b60c9e6897f81224099e7b5aa2e9752d99cdf98482a5b1057b42", size = 632464, upload-time = "2026-03-17T21:21:05.969Z" },
-    { url = "https://files.pythonhosted.org/packages/dc/73/2ec28c7668cd011bcf8e0b542aca9d325414a4ae14d3354624e94a815cdc/fastparquet-2026.3.0-cp313-cp313-win_amd64.whl", hash = "sha256:a55d5201eb3d513e181323a956d6b05ff51d17e07484f642e4bc728869d036f8", size = 667469, upload-time = "2026-03-17T21:21:04.497Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/4c/03beb96e7892d45dea6a917f7bdbd4f9164886233e4354cd5ed165136075/fastparquet-2026.5.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:8350fe64d45d56708e70312463732021349737ef0a586f602b643405798f5c15", size = 934610, upload-time = "2026-05-15T13:19:42.169Z" },
+    { url = "https://files.pythonhosted.org/packages/07/c6/8337b8bc002456aeb93285efff75c961aa88ff82eae4810f25961e28a20c/fastparquet-2026.5.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:89699ce83df1b6b560312eb79982f63d883b3b925c7ed871c9f3004a3a19a8f1", size = 715790, upload-time = "2026-05-15T13:19:43.352Z" },
+    { url = "https://files.pythonhosted.org/packages/65/be/30e945b52922271906b7c7c5562f31164870a29572f160aa7621fa911a7d/fastparquet-2026.5.0-cp313-cp313-manylinux1_i686.manylinux_2_28_i686.manylinux_2_5_i686.whl", hash = "sha256:3c32eb8562f7b16e4fe08584939f48c637080a2975714670d29550978f2f6d50", size = 1843794, upload-time = "2026-05-15T13:19:45.071Z" },
+    { url = "https://files.pythonhosted.org/packages/78/13/5206dbac9321b8abdbe75ad8fa3345751a781d3cd707534bd452734097b1/fastparquet-2026.5.0-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1f3ab24dbdab2d076dfdcc7f10ecd9ff0362444985c7ebccda9f241366f5d8c7", size = 1888482, upload-time = "2026-05-15T13:19:46.783Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/d8/449d988fd5288aab7e85fed428ed9cdbd337ee2e6fe6e37e2eb1a752d8df/fastparquet-2026.5.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cbe961d756022e56c71469f5c7da11c8bc09bd55602b1f7e4b701edebd9d2316", size = 1905474, upload-time = "2026-05-15T13:19:48.275Z" },
+    { url = "https://files.pythonhosted.org/packages/08/65/74970c3a5e315c5d6c40e032894e95ab71aac719e58ef56fc913222150aa/fastparquet-2026.5.0-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:57e5991c3917976c5d27035b93bb07536aa60bd6873c0230cbc72d18bc382098", size = 1867062, upload-time = "2026-05-15T13:19:49.791Z" },
+    { url = "https://files.pythonhosted.org/packages/51/4d/713bec28509a35182eeae38ae8bb1217a46ba42ed0d4fd05ad20ef7eef38/fastparquet-2026.5.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:308ef05c1613d65c01022b9e0a2d980dcd62f3f168ad57604df078ebdf977d1c", size = 1904280, upload-time = "2026-05-15T13:19:51.609Z" },
+    { url = "https://files.pythonhosted.org/packages/32/34/2e840a06c333644842cadf96185082e71e30e5bc84ece795a6fabad18747/fastparquet-2026.5.0-cp313-cp313-win32.whl", hash = "sha256:373f9e4beef62b3db436a62e9447467358a39dc697cd1566d42fc0a30aada758", size = 659437, upload-time = "2026-05-15T13:19:54.787Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/c8/e5675966e0909b37c499af9b6311daa4e1d558371af50d6b19f16b41932a/fastparquet-2026.5.0-cp313-cp313-win_amd64.whl", hash = "sha256:4c0b9fa15522c64b4518d673f7d6fc39d7b0f45e246d96923f51527714905ab7", size = 695248, upload-time = "2026-05-15T13:19:53.31Z" },
 ]
 
 [[package]]

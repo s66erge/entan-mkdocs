@@ -10,7 +10,7 @@ dependencies = [
     "fastsql==2.1.2",
     "psycopg2-binary==2.9.12",
     "curl-cffi==0.15.0",
-    "fastparquet==2026.3.0",
+    "fastparquet==2026.5.0",
     "markdown2==2.5.4",
     "minio==7.2.20",
     "openpyxl==3.1.5",
