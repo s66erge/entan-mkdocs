@@ -15,7 +15,7 @@ dependencies = [
     "minio==7.2.20",
     "openpyxl==3.1.5",
     "pandas==3.0.0",
-    "python-statemachine>=3.2.0",
+    "python-statemachine>=3.2.1",
     "resend==2.21.0",
     "python-dotenv>=1.2.2",
 ]
