@@ -3,7 +3,7 @@
 # ==========================================
 # STAGE 1: The Build & Development Stage
 # ==========================================
-FROM python:3.13-slim AS builder
+FROM python:3.14-slim AS builder
 
 # Install system dependencies needed for building/testing
 RUN apt-get update && apt-get install -y \
@@ -28,7 +28,7 @@ RUN uv sync --locked --no-dev --no-editable
 # ==========================================
 # STAGE 2: The Hardened Production Stage
 # ==========================================
-FROM python:3.13-slim AS production
+FROM python:3.14-slim AS production
 
 # Only install necessary runtime OS dependencies (No 'sudo', no build tools)
 RUN apt-get update && apt-get install -y \
